@@ -1,0 +1,223 @@
+.why-craly {
+  position: relative;
+  padding: 100px 24px 80px;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* ---------------- Header ---------------- */
+
+.why-craly__eyebrow {
+  font-family: var(--font-body);
+  color: #f5a623;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.why-craly__heading {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 5vw, 64px);
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.15;
+  margin-bottom: 35px;
+}
+
+/* ---------------- Stage ---------------- */
+
+.why-craly__stage {
+  position: relative;
+  width: 100%;
+  max-width: 1150px;
+  height: 680px;
+  margin: 0 auto;
+}
+
+/* ---------------- Helmet ---------------- */
+
+.why-craly__helmet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: auto;
+  z-index: 3;
+  animation: helmet-float 4s ease-in-out infinite;
+  filter: drop-shadow(0 30px 45px rgba(0,0,0,.18));
+}
+
+@keyframes helmet-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translateY(-14px);
+  }
+}
+
+/* ---------------- Glass Badges ---------------- */
+
+.why-craly__badge {
+
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 30px;
+  min-width: fit-content;
+  padding: 16px 28px;
+  height: 66px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 500;
+  color: #16A34A;
+  white-space: nowrap;
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow:
+      0 12px 40px rgba(0,0,0,.08),
+      inset 0 1px rgba(255,255,255,.6);
+  z-index: 20;
+  transition: all .3s ease;
+}
+
+.why-craly__badge:hover{
+    transform: translateY(-4px);
+    box-shadow:
+      0 18px 45px rgba(0,0,0,.12),
+      inset 0 1px rgba(255,255,255,.8);
+}
+
+.why-craly__check{
+    font-size:26px;
+    font-weight:700;
+    color:#16A34A;
+}
+
+/* ---------------- Positions ---------------- */
+
+.badge--top-left{
+
+    left:130px;
+    top:90px;
+
+}
+
+.badge--mid-left{
+
+    left:10px;
+    top:330px;
+
+}
+
+.badge--mid-right{
+
+    right:30px;
+    top:220px;
+
+}
+
+.badge--bottom-right{
+
+    right:70px;
+    bottom:100px;
+
+}
+
+/* ---------------- Responsive ---------------- */
+
+@media (max-width:1100px){
+
+    .why-craly__stage{
+
+        height:620px;
+
+    }
+
+    .why-craly__helmet{
+
+        width:430px;
+
+    }
+
+    .why-craly__badge{
+
+        min-width:260px;
+
+        font-size:16px;
+
+        height:58px;
+
+        padding:14px 24px;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    .why-craly{
+
+        padding:80px 20px;
+
+    }
+
+    .why-craly__heading{
+    font-size: clamp(38px, 4.8vw, 58px);
+}
+
+    .why-craly__stage{
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        gap:20px;
+
+        height:auto;
+
+    }
+
+    .why-craly__helmet{
+
+        position:static;
+
+        transform:none;
+
+        width:280px;
+
+        animation:none;
+
+        margin-bottom:20px;
+
+    }
+
+    .why-craly__badge{
+
+        position:static;
+
+        min-width:unset;
+
+        width:100%;
+
+        max-width:340px;
+
+        justify-content:center;
+
+    }
+
+}

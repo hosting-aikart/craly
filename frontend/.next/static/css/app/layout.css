@@ -1,0 +1,27 @@
+/*!*************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./app/globals.css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100vh;
+}
+
+:root {
+  --font-display: "Red Hat Display", sans-serif;
+  --font-heading: "Red Hat Display", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-button: "Poppins", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background: #000;
+}
+

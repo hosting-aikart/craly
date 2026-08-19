@@ -1,0 +1,1071 @@
+/*!*********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/BuiltFor.css ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************/
+.built-for {
+  padding: 80px 24px;
+  text-align: center;
+  background: #000;
+}
+
+.built-for__eyebrow {
+  font-family: var(--font-body);
+  color: #f5a623;
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-size: 16px; /* was 13px */
+  margin-bottom: 12px;
+}
+
+.built-for__heading {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 52px); /* was clamp(28px, 4vw, 40px) */
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 40px;
+}
+
+.built-for__carousel {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.built-for__image-wrap {
+  width: 100%;
+  height: 529px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.built-for__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: fade-in 0.5s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.built-for__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 24px;
+  text-align: left;
+}
+
+.built-for__caption {
+  animation: fade-in 0.5s ease;
+}
+
+.built-for__title {
+  font-family: var(--font-heading); /* Poppins */
+  font-size: 32px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.built-for__text {
+  font-family: var(--font-body); /* Inter */
+  font-size: 20px;
+  color: #a1a1aa;
+}
+
+.built-for__nav {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.built-for__nav button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  color: #fff;
+
+  /* glassmorphism */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 0.2s ease;
+}
+
+.built-for__nav button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 560px) {
+  .built-for__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+/*!****************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/FAQ.css ***!
+  \****************************************************************************************************************************************************************************************************************************************************************/
+.faq{
+    padding:110px 24px;
+    background:#f7f7f7;
+    text-align:center;
+}
+
+.faq__heading{
+    font-family:var(--font-display);
+    font-size:clamp(52px,5vw,68px);
+    font-weight:500;
+    line-height:1.1;
+    color:#111827;
+    margin-bottom:64px;
+}
+
+.faq__list{
+    width:100%;
+    max-width:1080px;
+    margin:auto;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:22px;
+}
+
+.faq-item{
+
+    overflow:hidden;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.82);
+
+    border:1px solid rgba(255,255,255,.95);
+
+    backdrop-filter:blur(22px);
+
+    -webkit-backdrop-filter:blur(22px);
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.05),
+        inset 0 1px rgba(255,255,255,.95);
+}
+
+.faq-item:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 18px 40px rgba(0,0,0,.08),
+        inset 0 1px rgba(255,255,255,1);
+}
+
+.faq-item__question{
+
+    width:100%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:26px 34px 26px 48px;
+
+    background:none;
+
+    border:none;
+
+    cursor:pointer;
+
+    font-family:var(--font-display);
+
+    font-size:20px;
+
+    font-weight:500;
+
+    color:#111827;
+
+    text-align:left;
+}
+
+.faq-item__chevron{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:34px;
+
+    font-weight:300;
+
+    color:#444;
+
+    transition:.35s ease;
+}
+
+.faq-item--open{
+
+    border-radius:32px;
+}
+
+.faq-item--open .faq-item__chevron{
+
+    transform:rotate(90deg);
+}
+
+.faq-item__answer{
+
+    padding:0 48px 28px;
+
+    font-size:16px;
+
+    line-height:1.8;
+
+    color:#6b7280;
+
+    text-align:left;
+}
+
+.faq-item__intro {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6b7280;
+  margin-bottom: 6px;
+  padding-left: 20px; /* aligns with the bullet list below */
+}
+
+.faq-item__bullets {
+  list-style: disc;
+  padding-left: 40px; /* one tab-width in from the question text */
+  margin: 0;
+}
+
+.faq-item__bullets li {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.8;
+  color: #6b7280;
+}
+
+@media (max-width:768px){
+
+.faq__heading{
+
+    font-size:40px;
+
+    margin-bottom:42px;
+}
+
+.faq-item__question{
+
+    font-size:17px;
+
+    padding:22px 22px;
+}
+
+.faq-item__answer{
+
+    padding:0 22px 22px;
+}
+
+}
+/*!*****************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/Foot.css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************/
+.footer {
+  background: #111827;
+  color: white;
+  padding: 90px 32px 40px;
+}
+
+.footer-container {
+  max-width: 1180px;
+  margin: auto;
+}
+
+/* -------------------- */
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 120px;
+}
+
+.footer__logo {
+  width: 52px;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.footer-brand {
+  max-width: 460px;
+}
+
+.footer-brand h2 {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.footer-brand p {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 14px;
+}
+
+.footer-brand span {
+  font-family: var(--font-body);
+  color: #9ca3af;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* -------------------- */
+
+.footer-links h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin-bottom: 24px;
+}
+
+.footer-links a {
+  display: block;
+  text-decoration: none;
+  color: #9ca3af;
+  margin-bottom: 18px;
+  font-family: var(--font-body);
+  transition: 0.25s;
+}
+
+.footer-links a:hover {
+  color: white;
+  transform: translateX(4px);
+}
+
+/* -------------------- */
+
+.footer-divider {
+  height: 1px;
+  background: #374151;
+  margin: 60px 0;
+}
+
+/* -------------------- */
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 80px;
+}
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.icon {
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.contact-item p {
+  color: #d1d5db;
+  font-family: var(--font-body);
+  line-height: 1.7;
+}
+
+/* -------------------- */
+
+.footer-social {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+}
+
+.footer-social a {
+  text-decoration: none;
+  color: #9ca3af;
+  font-family: var(--font-body);
+  transition: 0.25s;
+}
+
+.footer-social a:hover {
+  color: white;
+}
+
+/* -------------------- */
+
+.footer-copy {
+  text-align: center;
+  color: #9ca3af;
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* -------------------- */
+
+@media (max-width: 900px) {
+
+  .footer-top,
+  .footer-bottom {
+    flex-direction: column;
+    gap: 50px;
+  }
+
+  .footer-social {
+    justify-content: flex-start;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .footer {
+    padding: 70px 20px 35px;
+  }
+
+  .footer-brand h2 {
+    font-size: 34px;
+  }
+
+  .footer-brand p {
+    font-size: 24px;
+  }
+
+}
+/*!*****************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/Hero.css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************/
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-content {
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.hero-content--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-badges {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hero-badge {
+    font-family: var(--font-body);
+    padding: 10px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(0,0,0,.45);
+    -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+    gap: 18px;
+    position: relative;
+    top: -50px;
+    margin-bottom: 24px;
+    color: white;
+    font-size: 17px;      /* Bigger */
+    font-weight: 200;     /* Medium */
+    letter-spacing: .2px;
+}
+
+
+.hero-icon {
+  width: 72px;
+  height: auto;
+  margin-bottom: 18px;
+  position: relative;
+  top: -50px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.hero-headline {
+    font-family: var(--font-display);
+    color: white;
+    font-size: clamp(52px, 6vw, 76px);
+    font-weight: 300;      /* Medium instead of Bold */
+    line-height: 1;
+    position: relative;
+    top: -50px;
+    letter-spacing: -0.03em;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+.hero-accent {
+  color: #F5A623;
+}
+
+.shield-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #2563EB;
+  -webkit-mask-image: url('/assets/shield-icon.png');
+  mask-image: url('/assets/shield-icon.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+@media (max-width: 768px) {
+
+  .hero-badge {
+    width: auto;
+    min-width: -moz-fit-content;
+    min-width: fit-content;
+    white-space: nowrap;
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+
+}
+/*!***********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/HowItWorks.css ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************/
+.how-it-works {
+  background: #f4f4f5;
+}
+
+.how-it-works__intro {
+  padding: 80px 24px 0;
+  text-align: center;
+}
+
+.how-it-works__eyebrow {
+  font-family: var(--font-body);
+  color: #16a34a;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 16px; /* was 13px */
+  margin-bottom: 12px;
+}
+
+.how-it-works__heading {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 52px); /* was clamp(26px, 3.5vw, 34px) */
+  font-weight: 500;
+  color: #111827;
+}
+
+.how-it-works__scroll-track {
+  position: relative;
+}
+
+.how-it-works__sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.how-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.how-step__text {
+  flex: 1 1;
+  max-width: 340px;
+  animation: step-fade-in 0.4s ease;
+}
+
+.how-step__title {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  transition: color 0.3s ease;
+}
+
+.how-step__subtext {
+  font-family: var(--font-body);
+  font-size: 20px;
+  color: black;
+  line-height: 1.6;
+}
+
+.how-step__image-wrap {
+  flex-shrink: 0;
+  width: 420px;
+  height: 500px;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.how-step__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: step-fade-in 0.4s ease;
+}
+
+@keyframes step-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.how-it-works__progress {
+  display: flex;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+.how-it-works__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d1d5db;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.how-it-works__dot--active {
+  background: #111827;
+  transform: scale(1.3);
+}
+
+@media (max-width: 768px) {
+  .how-step {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
+  .how-step__text {
+    max-width: none;
+  }
+  .how-step__image-wrap {
+    width: 100%;
+    max-width: 340px;
+    height: 340px;
+  }
+}
+/*!**************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/ImageCarousel.css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************/
+.image-carousel {
+  width: 100%;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.carousel-window {
+  position: relative;
+  width: 100%;
+  height: 460px;
+  overflow: hidden;
+}
+.carousel-item {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  transition:
+    left 1s cubic-bezier(0.22, 1, 0.36, 1),
+    width 1s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Dark gradient for readable text */
+.carousel-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.45),
+    rgba(0, 0, 0, 0.05) 45%,
+    transparent
+  );
+}
+
+.overlay {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  z-index: 2;
+}
+
+.overlay h3 {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.carousel-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.carousel-nav button {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  color: #16a34a;
+  font-size: 24px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+}
+
+.carousel-nav button:hover {
+  transform: translateY(-2px);
+  background: #f8f8f8;
+}
+
+@media (max-width: 992px) {
+  .carousel-window {
+    height: 260px;
+  }
+
+  .overlay h3 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-window {
+    height: 220px;
+  }
+
+  .carousel-item {
+    border-radius: 16px;
+  }
+
+  .overlay {
+    left: 16px;
+    bottom: 16px;
+  }
+
+  .overlay h3 {
+    font-size: 14px;
+  }
+
+  .carousel-nav {
+    justify-content: center;
+  }
+}
+/*!*************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/TrustSection.css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************/
+.trust-section {
+  padding: 80px 24px;
+  text-align: center;
+  background: #f8fafc;
+  font-family: var(--font-body);
+}
+
+.trust-eyebrow {
+  color: #16a34a;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.trust-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  color: #0f172a;
+  max-width: 700px;
+  margin: 0 auto 40px;
+}
+/*!*********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./components/WhyCraly.css ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************/
+.why-craly {
+  position: relative;
+  padding: 100px 24px 80px;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* ---------------- Header ---------------- */
+
+.why-craly__eyebrow {
+  font-family: var(--font-body);
+  color: #f5a623;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.why-craly__heading {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 5vw, 64px);
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.15;
+  margin-bottom: 35px;
+}
+
+/* ---------------- Stage ---------------- */
+
+.why-craly__stage {
+  position: relative;
+  width: 100%;
+  max-width: 1150px;
+  height: 680px;
+  margin: 0 auto;
+}
+
+/* ---------------- Helmet ---------------- */
+
+.why-craly__helmet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: auto;
+  z-index: 3;
+  animation: helmet-float 4s ease-in-out infinite;
+  filter: drop-shadow(0 30px 45px rgba(0,0,0,.18));
+}
+
+@keyframes helmet-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translateY(-14px);
+  }
+}
+
+/* ---------------- Glass Badges ---------------- */
+
+.why-craly__badge {
+
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 30px;
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+  padding: 16px 28px;
+  height: 66px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 500;
+  color: #16A34A;
+  white-space: nowrap;
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow:
+      0 12px 40px rgba(0,0,0,.08),
+      inset 0 1px rgba(255,255,255,.6);
+  z-index: 20;
+  transition: all .3s ease;
+}
+
+.why-craly__badge:hover{
+    transform: translateY(-4px);
+    box-shadow:
+      0 18px 45px rgba(0,0,0,.12),
+      inset 0 1px rgba(255,255,255,.8);
+}
+
+.why-craly__check{
+    font-size:26px;
+    font-weight:700;
+    color:#16A34A;
+}
+
+/* ---------------- Positions ---------------- */
+
+.badge--top-left{
+
+    left:130px;
+    top:90px;
+
+}
+
+.badge--mid-left{
+
+    left:10px;
+    top:330px;
+
+}
+
+.badge--mid-right{
+
+    right:30px;
+    top:220px;
+
+}
+
+.badge--bottom-right{
+
+    right:70px;
+    bottom:100px;
+
+}
+
+/* ---------------- Responsive ---------------- */
+
+@media (max-width:1100px){
+
+    .why-craly__stage{
+
+        height:620px;
+
+    }
+
+    .why-craly__helmet{
+
+        width:430px;
+
+    }
+
+    .why-craly__badge{
+
+        min-width:260px;
+
+        font-size:16px;
+
+        height:58px;
+
+        padding:14px 24px;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    .why-craly{
+
+        padding:80px 20px;
+
+    }
+
+    .why-craly__heading{
+    font-size: clamp(38px, 4.8vw, 58px);
+}
+
+    .why-craly__stage{
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        gap:20px;
+
+        height:auto;
+
+    }
+
+    .why-craly__helmet{
+
+        position:static;
+
+        transform:none;
+
+        width:280px;
+
+        animation:none;
+
+        margin-bottom:20px;
+
+    }
+
+    .why-craly__badge{
+
+        position:static;
+
+        min-width:unset;
+
+        width:100%;
+
+        max-width:340px;
+
+        justify-content:center;
+
+    }
+
+}

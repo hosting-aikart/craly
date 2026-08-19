@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './Hero.css';
-import heroBg from '../assets/hero-bg.png';
-import helmetIcon from '../assets/helmet.png';
+const heroBg = '/assets/hero-bg.png';
+const helmetIcon = '/assets/helmet.png';
 
 export default function Hero() {
   const [visible, setVisible] = useState(false);
