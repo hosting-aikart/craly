@@ -3,12 +3,15 @@ import rateLimit from 'express-rate-limit';
 import { healthCheck } from '../controllers/healthController';
 import authRoutes from './authRoutes';
 import { submitContactForm } from '../controllers/contactController';
+import { getMyProfile, updateMyProfile } from '../controllers/profileController';
+import { listCategories } from '../controllers/categoryController';
 import {
   listContractors,
   getContractor,
-  createContractor,
   verifyContractor,
 } from '../controllers/contractorController';
+import { requireAuth } from '../middlewares/auth';
+import { requireRole } from '../middlewares/requireRole';
 
 const router = Router();
 
@@ -29,10 +32,16 @@ const contactRateLimit = rateLimit({
 });
 router.post('/contact', contactRateLimit, submitContactForm);
 
-// ── Contractors ───────────────────────────────────────────────────────────────
-router.get('/contractors',           listContractors);
-router.get('/contractors/:id',       getContractor);
-router.post('/contractors',          createContractor);
-router.post('/contractors/:id/verify', verifyContractor);
+// ── Profile (the logged-in user's own contractor/business profile) ─────────────
+router.get('/profile/me', requireAuth, getMyProfile);
+router.patch('/profile/me', requireAuth, updateMyProfile);
+
+// ── Categories ───────────────────────────────────────────────────────────────
+router.get('/categories', listCategories);
+
+// ── Contractors (public directory) ──────────────────────────────────────────────
+router.get('/contractors', listContractors);
+router.get('/contractors/:id', getContractor);
+router.post('/contractors/:id/verify', requireAuth, requireRole('admin'), verifyContractor);
 
 export default router;

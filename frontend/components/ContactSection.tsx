@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { apiPost } from '@/lib/api';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import './ContactSection.css';
 
 interface ContactFormData {
@@ -23,6 +24,7 @@ const initialForm: ContactFormData = {
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
 export default function ContactSection() {
+  const { t } = useLanguage();
   const [form, setForm] = useState<ContactFormData>(initialForm);
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -43,11 +45,7 @@ export default function ContactSection() {
       setForm(initialForm);
     } catch (err) {
       setStatus('error');
-      setErrorMsg(
-        err instanceof Error
-          ? err.message
-          : 'Something went wrong. Please try again later.',
-      );
+      setErrorMsg(err instanceof Error ? err.message : t.contact.genericError);
     }
   };
 
@@ -57,12 +55,8 @@ export default function ContactSection() {
       <div className="contact-section__glow contact-section__glow--b" />
 
       <div className="contact-section__intro">
-        <p className="contact-section__eyebrow">GET IN TOUCH</p>
-        <h2 className="contact-section__heading">Have a Question? Let&apos;s Talk.</h2>
-        <p className="contact-section__subtext">
-          Whether you&apos;re a business looking to hire or a contractor ready to get
-          verified — send us a message and our team will get back to you.
-        </p>
+        <p className="contact-section__eyebrow">{t.contact.eyebrow}</p>
+        <h2 className="contact-section__heading">{t.contact.heading}</h2>
       </div>
 
       <div className="contact-section__container">
@@ -71,28 +65,28 @@ export default function ContactSection() {
           {status === 'success' ? (
             <div className="contact-section__success">
               <span className="contact-section__success-icon">✓</span>
-              <h3>Thanks for reaching out!</h3>
-              <p>We&apos;ve received your message and will get back to you shortly.</p>
+              <h3>{t.contact.successTitle}</h3>
+              <p>{t.contact.successBody}</p>
               <button className="contact-section__submit" onClick={() => setStatus('idle')}>
-                Send another message
+                {t.contact.sendAnother}
               </button>
             </div>
           ) : (
             <form className="contact-section__form" onSubmit={handleSubmit}>
               <div className="contact-section__row">
                 <label className="contact-section__field">
-                  <span>Full Name*</span>
+                  <span>{t.contact.fieldName}</span>
                   <input
                     type="text"
                     required
                     value={form.name}
                     onChange={handleChange('name')}
-                    placeholder="Your name"
+                    placeholder={t.contact.placeholderName}
                   />
                 </label>
 
                 <label className="contact-section__field">
-                  <span>Email*</span>
+                  <span>{t.contact.fieldEmail}</span>
                   <input
                     type="email"
                     required
@@ -105,7 +99,7 @@ export default function ContactSection() {
 
               <div className="contact-section__row">
                 <label className="contact-section__field">
-                  <span>Phone</span>
+                  <span>{t.contact.fieldPhone}</span>
                   <input
                     type="tel"
                     value={form.phone}
@@ -115,24 +109,24 @@ export default function ContactSection() {
                 </label>
 
                 <label className="contact-section__field">
-                  <span>Company</span>
+                  <span>{t.contact.fieldCompany}</span>
                   <input
                     type="text"
                     value={form.company}
                     onChange={handleChange('company')}
-                    placeholder="Company name"
+                    placeholder={t.contact.placeholderCompany}
                   />
                 </label>
               </div>
 
               <label className="contact-section__field">
-                <span>Message*</span>
+                <span>{t.contact.fieldMessage}</span>
                 <textarea
                   required
                   rows={4}
                   value={form.message}
                   onChange={handleChange('message')}
-                  placeholder="How can we help?"
+                  placeholder={t.contact.placeholderMessage}
                 />
               </label>
 
@@ -145,7 +139,7 @@ export default function ContactSection() {
                 className="contact-section__submit"
                 disabled={status === 'submitting'}
               >
-                {status === 'submitting' ? 'Sending…' : 'Send Message'}
+                {status === 'submitting' ? t.contact.sending : t.contact.send}
               </button>
             </form>
           )}

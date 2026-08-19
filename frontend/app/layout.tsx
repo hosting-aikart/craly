@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { LanguageProvider } from '@/lib/i18n/LanguageContext';
+import Navbar from '@/components/Navbar';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -30,7 +32,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <LanguageProvider>
+          <Navbar />
+          {children}
+        </LanguageProvider>
+      </body>
     </html>
   );
 }

@@ -163,14 +163,45 @@
 
 @media (max-width: 900px) {
 
+  .footer {
+    padding: 56px 24px 32px;
+  }
+
   .footer-top,
   .footer-bottom {
     flex-direction: column;
-    gap: 50px;
+    gap: 32px;
+  }
+
+  /* Short single-word links — flow them side by side instead of one
+     per line, which was the biggest single contributor to the height. */
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+  }
+
+  .footer-links h3 {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  .footer-links a,
+  .footer-links__contact {
+    margin-bottom: 0;
+  }
+
+  .footer-divider {
+    margin: 28px 0;
+  }
+
+  .footer-contact {
+    gap: 14px;
   }
 
   .footer-social {
     justify-content: flex-start;
+    gap: 18px;
   }
 
 }
@@ -178,19 +209,28 @@
 @media (max-width: 600px) {
 
   .footer {
-    padding: 70px 20px 35px;
+    padding: 44px 20px 24px;
   }
 
   .footer-brand h2 {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .footer-brand p {
-    font-size: 24px;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .footer-brand span {
+    font-size: 14.5px;
   }
 
   .footer-divider {
-    margin: 36px 0;
+    margin: 22px 0;
+  }
+
+  .contact-item p {
+    font-size: 14px;
   }
 
 }

@@ -18,7 +18,7 @@
   height: 480px;
   top: -140px;
   left: -120px;
-  background: #6366f1;
+  background: #0f766e;
   animation: contact-glow-drift 12s ease-in-out infinite;
 }
 
@@ -139,7 +139,7 @@
 
 .contact-section__field input:focus,
 .contact-section__field textarea:focus {
-  border-color: #6366f1;
+  border-color: #0f766e;
   background: #ffffff;
 }
 
@@ -159,7 +159,7 @@
   font-size: 15px;
   font-weight: 600;
   color: white;
-  background: #6366f1;
+  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
   border: none;
   border-radius: 8px;
   padding: 14px 20px;
@@ -169,7 +169,7 @@
 }
 
 .contact-section__submit:hover:not(:disabled) {
-  background: #4f46e5;
+  background: linear-gradient(135deg, #0b5c56 0%, #0b3b38 100%);
   transform: translateY(-1px);
 }
 
@@ -244,7 +244,7 @@
   top: 50%;
   left: 50%;
   border-radius: 50%;
-  border: 1px solid rgba(99, 102, 241, 0.35);
+  border: 1px solid rgba(15, 118, 110, 0.35);
   transform: translate(-50%, -50%) scale(0.6);
   animation: contact-ring-pulse 3.6s ease-out infinite;
 }
@@ -285,7 +285,7 @@
   width: 88px;
   height: 88px;
   transform: translate(-50%, -50%);
-  filter: drop-shadow(0 12px 24px rgba(79, 70, 229, 0.45));
+  filter: drop-shadow(0 12px 24px rgba(11, 92, 86, 0.45));
   animation: contact-shield-float 4s ease-in-out infinite;
   z-index: 3;
 }
@@ -308,14 +308,14 @@
 }
 
 .contact-visual__path {
-  stroke: rgba(99, 102, 241, 0.45);
+  stroke: rgba(15, 118, 110, 0.45);
   stroke-width: 2;
   stroke-dasharray: 4 8;
 }
 
 .contact-visual__pulse-dot {
-  fill: #6366f1;
-  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.5));
+  fill: #0f766e;
+  filter: drop-shadow(0 0 6px rgba(15, 118, 110, 0.5));
 }
 
 .contact-visual__node {
@@ -371,9 +371,9 @@
 }
 
 .contact-visual__particle--1 { left: 20%; bottom: 10%; animation-delay: 0s; background: #f5a623; }
-.contact-visual__particle--2 { left: 75%; bottom: 15%; animation-delay: 1.4s; background: #6366f1; }
+.contact-visual__particle--2 { left: 75%; bottom: 15%; animation-delay: 1.4s; background: #0f766e; }
 .contact-visual__particle--3 { left: 55%; bottom: 5%; animation-delay: 2.8s; background: #34d399; }
-.contact-visual__particle--4 { left: 35%; bottom: 20%; animation-delay: 4s; background: #818cf8; }
+.contact-visual__particle--4 { left: 35%; bottom: 20%; animation-delay: 4s; background: #5eead4; }
 .contact-visual__particle--5 { left: 85%; bottom: 30%; animation-delay: 5s; background: #f5a623; }
 
 @keyframes contact-particle-rise {
@@ -408,6 +408,10 @@
 @media (max-width: 600px) {
   .contact-section {
     padding: 56px 20px;
+  }
+
+  .contact-section__heading {
+    font-size: clamp(26px, 6vw, 34px);
   }
 
   .contact-section__intro {

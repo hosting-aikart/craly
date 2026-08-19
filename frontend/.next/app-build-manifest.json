@@ -6,11 +6,46 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
+    "/signup/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/signup/page.js"
+    ],
+    "/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/login/page.css",
+      "static/chunks/app/login/page.js"
+    ],
     "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/page.css",
       "static/chunks/app/page.js"
+    ],
+    "/onboarding/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/onboarding/page.css",
+      "static/chunks/app/onboarding/page.js"
+    ],
+    "/contractors/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/contractors/page.css",
+      "static/chunks/app/contractors/page.js"
+    ],
+    "/contractor/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/contractor/dashboard/page.css",
+      "static/chunks/app/contractor/dashboard/page.js"
+    ],
+    "/business/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/business/dashboard/page.css",
+      "static/chunks/app/business/dashboard/page.js"
     ]
   }
 }

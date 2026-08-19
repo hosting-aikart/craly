@@ -1,10 +1,55 @@
 .how-it-works {
+  position: relative;
+  overflow: hidden;
   background: #f4f4f5;
+  padding: 80px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
+/* ---------------- Ambient glow (matches the Contact/FAQ visual language) ---------------- */
+
+.how-it-works__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  opacity: 0.14;
+}
+
+.how-it-works__glow--a {
+  width: 420px;
+  height: 420px;
+  top: -160px;
+  left: -100px;
+  background: #0f766e;
+  animation: how-glow-drift 13s ease-in-out infinite;
+}
+
+.how-it-works__glow--b {
+  width: 380px;
+  height: 380px;
+  bottom: -160px;
+  right: -100px;
+  background: #f5a623;
+  opacity: 0.1;
+  animation: how-glow-drift 15s ease-in-out infinite reverse;
+}
+
+@keyframes how-glow-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(24px, -18px) scale(1.06); }
+}
+
+/* ---------------- Intro ---------------- */
+
 .how-it-works__intro {
-  padding: 80px 24px 0;
+  position: relative;
+  z-index: 2;
   text-align: center;
+  margin-bottom: 56px;
 }
 
 .how-it-works__eyebrow {
@@ -12,124 +57,264 @@
   color: #16a34a;
   font-weight: 600;
   letter-spacing: 1px;
-  font-size: 16px; /* was 13px */
+  font-size: 16px;
   margin-bottom: 12px;
 }
 
 .how-it-works__heading {
   font-family: var(--font-display);
-  font-size: clamp(36px, 5vw, 52px); /* was clamp(26px, 3.5vw, 34px) */
+  font-size: clamp(36px, 5vw, 52px);
   font-weight: 500;
   color: #111827;
 }
 
-.how-it-works__scroll-track {
+/* ---------------- Grid + connecting flow line ---------------- */
+
+.how-grid {
   position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
 }
 
-.how-it-works__sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+/* top ≈ vertical middle of the card (icon + title + text), so the line
+   runs through the center of the cards rather than up near the icons. */
+.how-flow-line {
+  position: absolute;
+  z-index: 0;
+  top: 147px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #d4d4d8 0,
+    #d4d4d8 10px,
+    transparent 10px,
+    transparent 20px
+  );
 }
 
-.how-step {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 64px;
-  max-width: 900px;
-  width: 100%;
+/* Second row's line — only used in the phone-view 2×2 grid below. */
+.how-flow-line--row2 {
+  display: none;
 }
 
-.how-step__text {
-  flex: 1;
-  max-width: 340px;
-  animation: step-fade-in 0.4s ease;
-}
-
-.how-step__title {
-  font-family: var(--font-heading);
-  font-size: 36px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  transition: color 0.3s ease;
-}
-
-.how-step__subtext {
-  font-family: var(--font-body);
-  font-size: 20px;
-  color: black;
-  line-height: 1.6;
-}
-
-.how-step__image-wrap {
-  flex-shrink: 0;
-  width: 420px;
-  height: 500px;
-  border-radius: 24px;
-  overflow: hidden;
-}
-
-.how-step__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  animation: step-fade-in 0.4s ease;
-}
-
-@keyframes step-fade-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.how-it-works__progress {
-  display: flex;
-  gap: 8px;
-  margin-top: 40px;
-}
-
-.how-it-works__dot {
+.how-flow-line__pulse {
+  position: absolute;
+  top: -3px;
+  left: 0;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #d1d5db;
-  transition: background 0.3s ease, transform 0.3s ease;
+  background: #0f766e;
+  box-shadow: 0 0 10px 2px rgba(15, 118, 110, 0.6);
+  animation: how-flow-pulse 4s linear infinite;
 }
 
-.how-it-works__dot--active {
-  background: #111827;
-  transform: scale(1.3);
+@keyframes how-flow-pulse {
+  0% { left: 0%; opacity: 0; }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
 }
 
-@media (max-width: 768px) {
+/* ---------------- Card ---------------- */
+
+.how-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 20px;
+  padding: 44px 28px 36px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.05);
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.how-it-works--visible .how-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.how-card:hover {
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.09);
+  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, #e4e4e7);
+}
+
+/* ---------------- Icon ---------------- */
+
+.how-card__icon-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 24px;
+}
+
+.how-card__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  border: 1.5px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  animation: how-ring-pulse 3.2s ease-out infinite;
+}
+
+@keyframes how-ring-pulse {
+  0% { transform: scale(0.85); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.how-card__icon {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--accent);
+  background: #f4f4f5;
+  background: color-mix(in srgb, var(--accent) 12%, white);
+  transition: transform 0.3s ease;
+}
+
+.how-card:hover .how-card__icon {
+  transform: scale(1.06);
+}
+
+.how-card__icon svg {
+  width: 46px;
+  height: 46px;
+}
+
+.how-card__number {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-button);
+  font-size: 13px;
+  font-weight: 600;
+  border: 3px solid #ffffff;
+}
+
+/* ---------------- Text ---------------- */
+
+.how-card__title {
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.how-card__text {
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  color: #6b7280;
+  line-height: 1.65;
+}
+
+/* ---------------- Responsive ---------------- */
+
+/* ---------------- Phone view ----------------
+   2×2 grid instead of 1 column — half the scroll length for the same 4
+   cards. Two short flow lines (row1: steps 1-2, row2: steps 3-4) instead
+   of one line spanning all 4. Subtitle stays dropped, cards stay compact.
+   min-height:100vh stays dropped — forcing a full screen on top of stacked
+   cards was what made this so long in the first place. */
+@media (max-width: 900px) {
+  .how-it-works {
+    min-height: auto;
+    padding: 64px 20px;
+  }
+
   .how-it-works__intro {
-    padding: 56px 20px 0;
+    margin-bottom: 32px;
   }
 
-  .how-step {
-    flex-direction: column;
-    gap: 24px;
-    text-align: center;
+  .how-it-works__heading {
+    font-size: clamp(26px, 6vw, 34px);
   }
-  .how-step__text {
-    max-width: none;
+
+  .how-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 380px;
+    gap: 16px;
   }
-  .how-step__title {
-    font-size: 26px;
+
+  .how-card {
+    padding: 24px 16px;
   }
-  .how-step__subtext {
-    font-size: 16px;
+
+  .how-card__icon-wrap,
+  .how-card__icon {
+    width: 68px;
+    height: 68px;
   }
-  .how-step__image-wrap {
-    width: 100%;
-    max-width: 340px;
-    height: 300px;
+
+  .how-card__icon-wrap {
+    margin-bottom: 14px;
+  }
+
+  .how-card__icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .how-card__title {
+    font-size: 15px;
+    margin-bottom: 0;
+  }
+
+  .how-card__text {
+    display: none;
+  }
+
+  /* top values computed against the compact 2-col card size above (padding
+     + icon + gap) so each line runs through that row's icon centers;
+     left/right approximate the two column centers in a 2-col grid. */
+  .how-flow-line {
+    top: 58px;
+    left: 24%;
+    right: 24%;
+  }
+
+  .how-flow-line--row2 {
+    display: block;
+    top: 254px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how-it-works__glow,
+  .how-card__ring,
+  .how-flow-line__pulse {
+    animation: none !important;
+  }
+
+  .how-card {
+    transition: none;
+    opacity: 1;
+    transform: none;
   }
 }

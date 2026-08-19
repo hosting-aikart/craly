@@ -18,6 +18,10 @@ async function request<T>(
   const url = `${BASE_URL}/api${path}`;
 
   const res = await fetch(url, {
+    // Backend and frontend run on different ports in dev (and the auth
+    // cookie is httpOnly), so this has to be explicit or the browser won't
+    // send/receive it cross-origin.
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,

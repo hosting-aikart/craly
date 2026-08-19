@@ -1,6 +1,6 @@
 .why-craly {
   position: relative;
-  padding: 100px 24px 80px;
+  padding: 80px 24px;
   text-align: center;
   background-size: cover;
   background-position: center;
@@ -29,50 +29,56 @@
   margin-bottom: 35px;
 }
 
-/* ---------------- Stage ---------------- */
+/* ---------------- Stage ----------------
+   Fluid, aspect-ratio-locked box instead of fixed breakpoint heights — this
+   is what makes the badges' percentage-based positions below stay correct
+   at every viewport width instead of only at the two old breakpoints. It
+   also naturally grows on wide laptop/desktop screens instead of staying
+   capped at a small fixed size. */
 
 .why-craly__stage {
   position: relative;
-  width: 100%;
-  max-width: 1150px;
-  height: 680px;
+  width: min(96vw, 1400px);
+  aspect-ratio: 1150 / 680;
+  max-height: 820px;
   margin: 0 auto;
 }
 
 /* ---------------- Helmet ---------------- */
 
-.why-craly__helmet {
+.why-craly__helmet-wrap {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
-  width: 700px;
-  height: auto;
+  width: 61%;
   z-index: 3;
-  animation: helmet-float 4s ease-in-out infinite;
-  filter: drop-shadow(0 30px 45px rgba(0,0,0,.18));
+  will-change: transform;
+  transition: transform 0.12s linear;
 }
 
-@keyframes helmet-float {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateY(0);
-  }
-
-  50% {
-    transform: translate(-50%, -50%) translateY(-14px);
-  }
+.why-craly__helmet {
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: helmet-bob 4s ease-in-out infinite;
+  filter: drop-shadow(0 30px 45px rgba(0, 0, 0, 0.18));
 }
 
-/* ---------------- Glass Badges ---------------- */
+@keyframes helmet-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3%); }
+}
+
+/* ---------------- Glass Badges ----------------
+   Positioned as percentages of the stage box (not fixed px) so they track
+   the stage's fluid width/height at every viewport size — this is the fix
+   for the badges drifting/overflowing/getting clipped between breakpoints. */
 
 .why-craly__badge {
-
   position: absolute;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 30px;
   min-width: fit-content;
   padding: 16px 28px;
   height: 66px;
@@ -90,7 +96,7 @@
       0 12px 40px rgba(0,0,0,.08),
       inset 0 1px rgba(255,255,255,.6);
   z-index: 20;
-  transition: all .3s ease;
+  transition: transform .3s ease, box-shadow .3s ease;
 }
 
 .why-craly__badge:hover{
@@ -106,144 +112,119 @@
     color:#16A34A;
 }
 
-/* ---------------- Positions ---------------- */
+/* ---------------- Positions (% of stage box) ---------------- */
 
 .badge--top-left{
-
-    left:130px;
-    top:90px;
-
+    left: 11%;
+    top: 13%;
 }
 
 .badge--mid-left{
-
-    left:10px;
-    top:330px;
-
+    left: 1%;
+    top: 48%;
 }
 
 .badge--mid-right{
-
-    right:30px;
-    top:220px;
-
+    right: 3%;
+    top: 32%;
 }
 
 .badge--bottom-right{
-
-    right:70px;
-    bottom:100px;
-
+    right: 6%;
+    bottom: 15%;
 }
 
 /* ---------------- Responsive ---------------- */
 
-@media (max-width:1100px){
-
-    .why-craly__stage{
-
-        height:620px;
-
-    }
-
-    .why-craly__helmet{
-
-        width:430px;
-
-    }
-
+@media (max-width: 900px){
     .why-craly__badge{
-
-        min-width:260px;
-
-        font-size:16px;
-
-        height:58px;
-
-        padding:14px 24px;
-
+        font-size: 15px;
+        height: 56px;
+        padding: 12px 22px;
     }
-
 }
 
 @media (max-width:768px){
 
     .why-craly{
-
         padding:80px 20px;
-
     }
 
     .why-craly__heading{
-    font-size: clamp(38px, 4.8vw, 58px);
-}
+        font-size: clamp(26px, 6vw, 36px);
+    }
 
+    /* Badges stay absolutely positioned and overlap the helmet here instead
+       of stacking as full-width blocks below it — that stacking was what
+       made this section so tall on phones. */
     .why-craly__stage{
+        position: relative;
+        width: min(94vw, 420px);
+        aspect-ratio: 1150 / 950;
+        max-height: 480px;
+        margin: 0 auto;
+    }
 
-        display:flex;
-
-        flex-direction:column;
-
-        align-items:center;
-
-        gap:20px;
-
-        height:auto;
-
+    .why-craly__helmet-wrap{
+        position: absolute;
+        left: 20%;
+        right: 20%;
+        top: 4%;
+        width: auto;
+        transform: none !important;
+        transition: none;
     }
 
     .why-craly__helmet{
-
-        position:static;
-
-        transform:none;
-
-        width:280px;
-
         animation:none;
-
-        margin-bottom:20px;
-
     }
 
     .why-craly__badge{
-
-        position:static;
-
-        min-width:unset;
-
-        width:100%;
-
-        max-width:340px;
-
-        justify-content:center;
-
+        position: absolute;
+        min-width: unset;
+        width: auto;
+        max-width: 148px;
+        height: auto;
+        white-space: normal;
+        text-align: left;
+        font-size: 12.5px;
+        line-height: 1.3;
+        padding: 10px 14px;
+        border-radius: 16px;
+        gap: 8px;
     }
+
+    .why-craly__check{
+        font-size: 16px;
+    }
+
+    .badge--top-left{ left: 0%; top: 2%; }
+    .badge--mid-right{ right: 0%; top: 20%; }
+    .badge--mid-left{ left: 2%; top: 58%; }
+    .badge--bottom-right{ right: 2%; bottom: 2%; }
 
 }
 
 @media (max-width:420px){
 
     .why-craly{
-
         padding:60px 16px;
-
-    }
-
-    .why-craly__helmet{
-
-        width:200px;
-
     }
 
     .why-craly__badge{
-
-        font-size:14px;
-
-        height:auto;
-
-        padding:12px 20px;
-
+        font-size:11.5px;
+        max-width: 128px;
+        padding: 8px 12px;
     }
 
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-craly__helmet {
+    animation: none;
+  }
+
+  .why-craly__helmet-wrap {
+    transition: none;
+  }
 }

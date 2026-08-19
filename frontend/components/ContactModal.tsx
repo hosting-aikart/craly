@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { apiPost } from '@/lib/api';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import './ContactModal.css';
 
 interface ContactModalProps {
@@ -28,6 +29,7 @@ const initialForm: ContactFormData = {
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
 export default function ContactModal({ open, onClose }: ContactModalProps) {
+  const { t } = useLanguage();
   const [form, setForm] = useState<ContactFormData>(initialForm);
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -78,11 +80,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
       setStatus('success');
     } catch (err) {
       setStatus('error');
-      setErrorMsg(
-        err instanceof Error
-          ? err.message
-          : 'Something went wrong. Please try again later.',
-      );
+      setErrorMsg(err instanceof Error ? err.message : t.contact.genericError);
     }
   };
 
@@ -102,35 +100,33 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
           <div className="contact-modal__success">
             <span className="contact-modal__success-ring" />
             <span className="contact-modal__success-icon">✓</span>
-            <h3 id="contact-modal-title">Thanks for reaching out!</h3>
-            <p>We&apos;ve received your message and will get back to you shortly.</p>
+            <h3 id="contact-modal-title">{t.contact.successTitle}</h3>
+            <p>{t.contact.successBody}</p>
             <button className="contact-modal__submit" onClick={onClose}>
-              Close
+              {t.contact.close}
             </button>
           </div>
         ) : (
           <>
             <div className="contact-modal__badge">✉</div>
-            <h3 id="contact-modal-title">Contact Us</h3>
-            <p className="contact-modal__subtitle">
-              Have a question or want to get in touch? Fill out the form below.
-            </p>
+            <h3 id="contact-modal-title">{t.contact.modalTitle}</h3>
+            <p className="contact-modal__subtitle">{t.contact.modalSubtitle}</p>
 
             <form className="contact-modal__form" onSubmit={handleSubmit}>
               <div className="contact-modal__row">
                 <label className="contact-modal__field">
-                  <span>Full Name*</span>
+                  <span>{t.contact.fieldName}</span>
                   <input
                     type="text"
                     required
                     value={form.name}
                     onChange={handleChange('name')}
-                    placeholder="Your name"
+                    placeholder={t.contact.placeholderName}
                   />
                 </label>
 
                 <label className="contact-modal__field">
-                  <span>Email*</span>
+                  <span>{t.contact.fieldEmail}</span>
                   <input
                     type="email"
                     required
@@ -143,7 +139,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
 
               <div className="contact-modal__row">
                 <label className="contact-modal__field">
-                  <span>Phone</span>
+                  <span>{t.contact.fieldPhone}</span>
                   <input
                     type="tel"
                     value={form.phone}
@@ -153,24 +149,24 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                 </label>
 
                 <label className="contact-modal__field">
-                  <span>Company</span>
+                  <span>{t.contact.fieldCompany}</span>
                   <input
                     type="text"
                     value={form.company}
                     onChange={handleChange('company')}
-                    placeholder="Company name"
+                    placeholder={t.contact.placeholderCompany}
                   />
                 </label>
               </div>
 
               <label className="contact-modal__field">
-                <span>Message*</span>
+                <span>{t.contact.fieldMessage}</span>
                 <textarea
                   required
                   rows={4}
                   value={form.message}
                   onChange={handleChange('message')}
-                  placeholder="How can we help?"
+                  placeholder={t.contact.placeholderMessage}
                 />
               </label>
 
@@ -183,7 +179,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                 className="contact-modal__submit"
                 disabled={status === 'submitting'}
               >
-                {status === 'submitting' ? 'Sending…' : 'Send Message'}
+                {status === 'submitting' ? t.contact.sending : t.contact.send}
               </button>
             </form>
           </>

@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import ContactModal from './ContactModal';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import './Foot.css';
 
 const helmetLogo = '/assets/helmet.png';
 
 export default function Foot() {
+  const { t } = useLanguage();
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
@@ -17,18 +19,18 @@ export default function Foot() {
 
           <div className="footer-brand">
             <img src={helmetLogo} alt="Craly" className="footer__logo" />
-            <p>Building trust before the first phone call.</p>
-            <span>Verified contractor profiles for modern businesses.</span>
+            <p>{t.footer.tagline}</p>
+            <span>{t.footer.subtext}</span>
           </div>
 
           <div className="footer-links">
-            <h3>Navigation</h3>
-            <a href="#trust">Trust Section</a>
-            <a href="#why">Why Craly</a>
-            <a href="#how">How It Works</a>
-            <a href="#faq">FAQ</a>
+            <h3>{t.footer.navHeading}</h3>
+            <a href="#trust">{t.footer.navTrust}</a>
+            <a href="#why">{t.footer.navWhy}</a>
+            <a href="#how">{t.footer.navHow}</a>
+            <a href="#faq">{t.footer.navFaq}</a>
             <button className="footer-links__contact" onClick={() => setIsContactOpen(true)}>
-              Contact Us
+              {t.footer.navContact}
             </button>
           </div>
 
@@ -41,20 +43,17 @@ export default function Foot() {
           <div className="footer-contact">
             <div className="contact-item">
               <span className="icon">📍</span>
-              <p>
-                Badnera Rd, in front of Tapadia City Centre Mall,
-                Saturna, Amravati, Maharashtra 444607
-              </p>
+              <p>{t.footer.address}</p>
             </div>
 
             <div className="contact-item">
               <span className="icon">☎</span>
-              <p>+91 95032 52288</p>
+              <p>{t.footer.phone}</p>
             </div>
 
             <div className="contact-item">
               <span className="icon">✉</span>
-              <p>hello@craly.com</p>
+              <p>{t.footer.email}</p>
             </div>
           </div>
 
@@ -69,7 +68,7 @@ export default function Foot() {
         <div className="footer-divider" />
 
         <div className="footer-copy">
-          © 2026 Craly. All rights reserved.
+          {t.footer.copyright}
         </div>
 
       </div>

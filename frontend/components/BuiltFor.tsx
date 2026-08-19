@@ -1,68 +1,45 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import './BuiltFor.css';
 
-interface Slide {
-  img: string;
-  title: string;
-  text: string;
-}
-
-const slides: Slide[] = [
-  {
-    img:   '/assets/manufacturers.png',
-    title: 'Manufacturers',
-    text:  'Find reliable labour contractors for production and plant operations.',
-  },
-  {
-    img:   '/assets/audience2.png',
-    title: 'EPC & Engineering Companies',
-    text:  'Evaluate contractors before project execution.',
-  },
-  {
-    img:   '/assets/audience3.png',
-    title: 'Infrastructure & Construction',
-    text:  'Review contractor profiles before awarding work.',
-  },
-  {
-    img:   '/assets/audience4.png',
-    title: 'Labour Contractors',
-    text:  'Build trust, showcase experience, and grow your business.',
-  },
+const slideImages = [
+  '/assets/manufacturers.png',
+  '/assets/audience2.png',
+  '/assets/audience3.png',
+  '/assets/audience4.png',
 ];
 
 export default function BuiltFor() {
+  const { t } = useLanguage();
   const [index, setIndex] = useState(0);
 
   const go = (dir: number) =>
-    setIndex((prev) => (prev + dir + slides.length) % slides.length);
+    setIndex((prev) => (prev + dir + slideImages.length) % slideImages.length);
 
-  const current = slides[index];
+  const currentImg = slideImages[index];
+  const currentSlide = t.builtFor.slides[index];
 
   return (
     <section className="built-for">
-      <p className="built-for__eyebrow">BUILT FOR</p>
-      <h2 className="built-for__heading">
-        Designed for India&apos;s Industrial
-        <br />
-        Ecosystem
-      </h2>
+      <p className="built-for__eyebrow">{t.builtFor.eyebrow}</p>
+      <h2 className="built-for__heading">{t.builtFor.heading}</h2>
 
       <div className="built-for__carousel">
         <div className="built-for__image-wrap">
           <img
-            key={current.img}
-            src={current.img}
+            key={currentImg}
+            src={currentImg}
             alt=""
             className="built-for__image"
           />
         </div>
 
         <div className="built-for__footer">
-          <div className="built-for__caption" key={current.title}>
-            <h3 className="built-for__title">{current.title}</h3>
-            <p className="built-for__text">{current.text}</p>
+          <div className="built-for__caption" key={index}>
+            <h3 className="built-for__title">{currentSlide.title}</h3>
+            <p className="built-for__text">{currentSlide.text}</p>
           </div>
 
           <div className="built-for__nav">

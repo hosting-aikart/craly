@@ -1,3 +1,17 @@
+@import "tailwindcss";
+
+/* Registers the project's existing font variables as Tailwind theme
+   tokens too, so `font-display` / `font-heading` / `font-body` /
+   `font-button` work as utility classes (used by newer Tailwind-based
+   pages) while every existing plain-CSS file keeps using var(--font-*)
+   unchanged — same source of truth, two ways to reach it. */
+@theme {
+  --font-display: "Red Hat Display", sans-serif;
+  --font-heading: "Red Hat Display", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-button: "Poppins", sans-serif;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -20,4 +34,14 @@ body {
 body {
   font-family: var(--font-body);
   background: #000;
+}
+
+/* So #trust/#why/#how/#faq/#contact anchor jumps (navbar + footer links)
+   don't land content half-hidden under the sticky navbar. */
+#trust,
+#why,
+#how,
+#faq,
+#contact {
+  scroll-margin-top: 84px;
 }

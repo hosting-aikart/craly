@@ -1,4 +1,5 @@
 import Hero from '@/components/Hero';
+import RoleSelect from '@/components/RoleSelect';
 import TrustSection from '@/components/TrustSection';
 import WhyCraly from '@/components/WhyCraly';
 import HowItWorks from '@/components/HowItWorks';
@@ -11,6 +12,7 @@ export default function HomePage() {
   return (
     <main>
       <Hero />
+      <RoleSelect />
       <TrustSection />
       <WhyCraly />
       <HowItWorks />
