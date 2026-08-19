@@ -1,7 +1,7 @@
 .built-for {
   padding: 80px 24px;
   text-align: center;
-  background: #000;
+  background: linear-gradient(160deg, #111827 0%, #0b1120 55%, #0f172a 100%);
 }
 
 .built-for__eyebrow {
@@ -59,7 +59,7 @@
 }
 
 .built-for__title {
-  font-family: var(--font-heading); /* Poppins */
+  font-family: var(--font-heading); /* Red Hat Display */
   font-size: 32px;
   font-weight: 600;
   color: #fff;
@@ -98,7 +98,34 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-@media (max-width: 560px) {
+@media (max-width: 900px) {
+  .built-for__image-wrap {
+    height: 380px;
+  }
+}
+
+@media (max-width: 600px) {
+  .built-for {
+    padding: 56px 20px;
+  }
+
+  .built-for__heading {
+    margin-bottom: 28px;
+  }
+
+  .built-for__image-wrap {
+    height: 240px;
+    border-radius: 14px;
+  }
+
+  .built-for__title {
+    font-size: 22px;
+  }
+
+  .built-for__text {
+    font-size: 15px;
+  }
+
   .built-for__footer {
     flex-direction: column;
     align-items: flex-start;

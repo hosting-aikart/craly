@@ -11,6 +11,8 @@
 }
 
 .hero-content {
+  width: 100%;
+  padding: 0 20px;
   text-align: center;
   opacity: 0;
   transform: translateY(20px);
@@ -101,6 +103,49 @@
     white-space: nowrap;
     padding: 12px 18px;
     font-size: 14px;
+  }
+
+  .hero-headline {
+    top: -30px;
+    font-size: clamp(36px, 8vw, 52px);
+  }
+
+  .hero-icon {
+    top: -30px;
+    width: 56px;
+  }
+
+}
+
+/* Small phones — headline/badges need their own sizing, not just a
+   scaled-down desktop layout, or text wraps awkwardly / badges collide. */
+@media (max-width: 420px) {
+
+  .hero-content {
+    padding: 0 16px;
+  }
+
+  .hero-badges {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hero-badge {
+    top: -20px;
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .hero-headline {
+    top: -10px;
+    font-size: clamp(30px, 9vw, 40px);
+    line-height: 1.15;
+  }
+
+  .hero-icon {
+    top: -10px;
+    width: 48px;
   }
 
 }

@@ -109,6 +109,10 @@
 }
 
 @media (max-width: 768px) {
+  .how-it-works__intro {
+    padding: 56px 20px 0;
+  }
+
   .how-step {
     flex-direction: column;
     gap: 24px;
@@ -117,9 +121,15 @@
   .how-step__text {
     max-width: none;
   }
+  .how-step__title {
+    font-size: 26px;
+  }
+  .how-step__subtext {
+    font-size: 16px;
+  }
   .how-step__image-wrap {
     width: 100%;
     max-width: 340px;
-    height: 340px;
+    height: 300px;
   }
 }

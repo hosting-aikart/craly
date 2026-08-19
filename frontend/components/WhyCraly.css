@@ -221,3 +221,29 @@
     }
 
 }
+
+@media (max-width:420px){
+
+    .why-craly{
+
+        padding:60px 16px;
+
+    }
+
+    .why-craly__helmet{
+
+        width:200px;
+
+    }
+
+    .why-craly__badge{
+
+        font-size:14px;
+
+        height:auto;
+
+        padding:12px 20px;
+
+    }
+
+}

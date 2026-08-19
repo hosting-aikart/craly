@@ -45,6 +45,7 @@ export default function FAQ() {
 
   return (
     <section className="faq">
+      <div className="faq__glow" aria-hidden="true" />
       <h2 className="faq__heading">Frequently Asked Questions</h2>
 
       <div className="faq__list">

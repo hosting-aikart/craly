@@ -1,4 +1,4 @@
-// File: D:\Aikart\craly_dev\frontend\app\page.tsx
+// File: /run/media/vishal/ALPHA/Craly/craly_dev/frontend/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -1,8 +1,14 @@
+'use client';
+
+import { useState } from 'react';
+import ContactModal from './ContactModal';
 import './Foot.css';
 
 const helmetLogo = '/assets/helmet.png';
 
 export default function Foot() {
+  const [isContactOpen, setIsContactOpen] = useState(false);
+
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -21,6 +27,9 @@ export default function Foot() {
             <a href="#why">Why Craly</a>
             <a href="#how">How It Works</a>
             <a href="#faq">FAQ</a>
+            <button className="footer-links__contact" onClick={() => setIsContactOpen(true)}>
+              Contact Us
+            </button>
           </div>
 
         </div>
@@ -64,6 +73,8 @@ export default function Foot() {
         </div>
 
       </div>
+
+      <ContactModal open={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </footer>
   );
 }

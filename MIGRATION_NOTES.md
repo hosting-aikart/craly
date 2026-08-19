@@ -45,7 +45,7 @@ craly_dev/
 ### 1. Frontend environment
 The file `frontend/.env.local` is already created with:
 ```
-NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 Update this if your backend runs on a different port.
 
@@ -82,7 +82,7 @@ npm run dev
 ```bash
 cd backend
 npm run dev
-# → http://localhost:4000
+# → http://localhost:8080
 ```
 
 ---
@@ -144,7 +144,7 @@ Once both servers are running:
 
 ```bash
 # Check backend health
-curl http://localhost:4000/api/health
+curl http://localhost:8080/api/health
 
 # Expected response:
 # { "status": "ok", "timestamp": "...", "db": { "status": "ok" } }
