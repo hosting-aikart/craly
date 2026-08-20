@@ -7,10 +7,12 @@ import '@/components/AuthForm.css';
 import { useAuth } from '@/lib/auth/useAuth';
 import { getMyProfile, updateMyProfile, type Category } from '@/lib/api/profile';
 import { listCategories } from '@/lib/api/contractors';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -60,8 +62,7 @@ export default function OnboardingPage() {
           }
         }
       } catch {
-        // First-time onboarding — profile exists (created at signup) but
-        // may 404 on edge cases; the form just starts blank either way.
+        // First-time onboarding
       } finally {
         setLoading(false);
       }
@@ -95,16 +96,16 @@ export default function OnboardingPage() {
         router.push('/business/dashboard');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setError(err instanceof Error ? err.message : t.common.error);
       setSubmitting(false);
     }
   };
 
   if (authLoading || loading) {
     return (
-      <AuthCard icon="⏳" title="Loading…">
+      <AuthCard icon="⏳" title={t.common.loading}>
         <p style={{ color: '#9ca3af', fontFamily: 'var(--font-body)' }}>
-          Setting up your profile.
+          {t.onboarding.submitting}
         </p>
       </AuthCard>
     );
@@ -115,18 +116,14 @@ export default function OnboardingPage() {
   return (
     <AuthCard
       icon={isContractor ? '🦺' : '🏢'}
-      title="Complete Your Profile"
-      subtitle={
-        isContractor
-          ? 'A few details so businesses can find and trust your profile.'
-          : 'A few details to help us tailor your contractor search.'
-      }
+      title={t.onboarding.pageTitle}
+      subtitle={t.onboarding.pageSubtitle}
       wide
     >
       <form className="auth-form" onSubmit={handleSubmit}>
         {isContractor && (
           <label className="auth-field">
-            <span>About Your Business</span>
+            <span>{t.contractorDetail.companyInfoTitle}</span>
             <textarea
               rows={3}
               value={description}
@@ -150,7 +147,7 @@ export default function OnboardingPage() {
 
         <div className="auth-row">
           <label className="auth-field">
-            <span>City</span>
+            <span>{t.contractors.filterState}</span>
             <input
               type="text"
               value={city}
@@ -160,7 +157,7 @@ export default function OnboardingPage() {
           </label>
 
           <label className="auth-field">
-            <span>State</span>
+            <span>{t.contractors.filterState}</span>
             <input
               type="text"
               value={state}
@@ -174,7 +171,7 @@ export default function OnboardingPage() {
           <>
             <div className="auth-row">
               <label className="auth-field">
-                <span>Years of Experience</span>
+                <span>{t.contractors.experienceLabel}</span>
                 <input
                   type="number"
                   min={0}
@@ -185,7 +182,7 @@ export default function OnboardingPage() {
               </label>
 
               <label className="auth-field">
-                <span>Workforce Size</span>
+                <span>{t.contractors.workforceLabel}</span>
                 <input
                   type="number"
                   min={0}
@@ -197,7 +194,7 @@ export default function OnboardingPage() {
             </div>
 
             <label className="auth-field">
-              <span>Categories</span>
+              <span>{t.onboarding.categories}</span>
               <div className="auth-chip-group">
                 {categories.map((c) => (
                   <button
@@ -217,7 +214,7 @@ export default function OnboardingPage() {
         {error && <p className="auth-error">{error}</p>}
 
         <button type="submit" className="auth-submit" disabled={submitting}>
-          {submitting ? 'Saving…' : 'Finish Setup'}
+          {submitting ? t.onboarding.submitting : t.onboarding.completeSetup}
         </button>
       </form>
     </AuthCard>

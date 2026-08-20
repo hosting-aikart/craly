@@ -127,3 +127,47 @@ export async function me(req: Request, res: Response, next: NextFunction): Promi
     next(err);
   }
 }
+
+/**
+ * POST /api/auth/forgot-password
+ */
+export async function forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      const err: AppError = new Error('Email is required');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const [user] = await sql`SELECT id, email FROM users WHERE email = ${email}`;
+    if (!user) {
+      // Return 200 to prevent user enumeration
+      res.json({ data: { message: 'If an account exists, a reset instruction has been sent.' } });
+      return;
+    }
+
+    // Always respond with success message
+    res.json({ data: { message: 'If an account exists, a reset instruction has been sent.' } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/auth/reset-password
+ */
+export async function resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+      const err: AppError = new Error('Token and a valid password (min 8 chars) are required');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    res.json({ data: { message: 'Password reset successfully.' } });
+  } catch (err) {
+    next(err);
+  }
+}

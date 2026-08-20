@@ -2,10 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 500;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(248, 249, 246, 0.82);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+  border-bottom: 1px solid var(--craly-border);
 }
 
 .navbar__inner {
@@ -15,6 +15,7 @@
   height: 68px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 32px;
 }
 
@@ -37,7 +38,7 @@
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
-  color: #111827;
+  color: var(--craly-navy);
 }
 
 /* ---------------- Center links ---------------- */
@@ -53,14 +54,15 @@
   font-family: var(--font-body);
   font-size: 14.5px;
   font-weight: 500;
-  color: #111827;
+  color: var(--craly-text);
   text-decoration: none;
   transition: color 0.2s ease;
   white-space: nowrap;
 }
 
-.navbar__links a:hover {
-  color: #0f766e;
+.navbar__links a:hover,
+.navbar__links a.navbar__links-item--active {
+  color: var(--craly-teal-dark);
 }
 
 /* ---------------- Right cluster ---------------- */
@@ -76,19 +78,19 @@
   display: flex;
   gap: 2px;
   padding: 3px;
-  border-radius: 999px;
-  background: rgba(17, 24, 39, 0.04);
-  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: var(--radius-full);
+  background: var(--craly-white);
+  border: 1px solid var(--craly-border);
 }
 
 .navbar__lang-btn {
   font-family: var(--font-button);
   font-size: 12px;
   font-weight: 500;
-  color: #111827;
+  color: var(--craly-text);
   background: none;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   padding: 6px 11px;
   cursor: pointer;
   transition: 0.2s;
@@ -96,12 +98,12 @@
 }
 
 .navbar__lang-btn:hover {
-  color: #0b5c56;
+  color: var(--craly-teal-dark);
 }
 
 .navbar__lang-btn--active {
-  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
-  color: white;
+  background: var(--craly-teal);
+  color: var(--craly-white);
 }
 
 .navbar__auth {
@@ -115,32 +117,75 @@
   font-size: 14px;
   font-weight: 600;
   padding: 9px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   text-decoration: none;
   cursor: pointer;
   border: none;
   transition: 0.2s;
   white-space: nowrap;
+  display: inline-block;
 }
 
 .navbar__btn--ghost {
-  background: rgba(17, 24, 39, 0.04);
-  color: #374151;
-  border: 1px solid rgba(17, 24, 39, 0.1);
+  background: var(--craly-white);
+  color: var(--craly-navy);
+  border: 1px solid var(--craly-border-strong);
 }
 
 .navbar__btn--ghost:hover {
-  background: rgba(17, 24, 39, 0.08);
-  color: #111827;
+  border-color: var(--craly-teal);
+  color: var(--craly-teal-dark);
 }
 
 .navbar__btn--solid {
-  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
-  color: white;
+  background: var(--craly-teal);
+  color: var(--craly-white);
 }
 
 .navbar__btn--solid:hover {
-  background: linear-gradient(135deg, #0b5c56 0%, #0b3b38 100%);
+  background: var(--craly-teal-dark);
+}
+
+/* ---------------- Mobile menu toggle ---------------- */
+
+.navbar__menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 34px;
+  height: 34px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.navbar__menu-toggle span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--craly-navy);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.navbar__menu-toggle--open span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.navbar__menu-toggle--open span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar__menu-toggle--open span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* ---------------- Mobile panel ---------------- */
+
+.navbar__mobile {
+  display: none;
 }
 
 /* ---------------- Responsive ---------------- */
@@ -148,6 +193,104 @@
 @media (max-width: 900px) {
   .navbar__links {
     display: none;
+  }
+
+  .navbar__auth {
+    display: none;
+  }
+
+  .navbar__lang--desktop {
+    display: none;
+  }
+
+  .navbar__right {
+    margin-left: auto;
+  }
+
+  .navbar__menu-toggle {
+    display: flex;
+  }
+
+  .navbar__mobile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-4) 24px var(--space-5);
+    border-top: 1px solid var(--craly-border);
+    background: var(--craly-off-white);
+  }
+
+  .navbar__mobile-lang {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--craly-border);
+  }
+
+  .navbar__mobile-lang-title {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--craly-muted);
+  }
+
+  .navbar__mobile-lang-btns {
+    display: flex;
+    gap: 6px;
+    background: var(--craly-white);
+    padding: 4px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--craly-border);
+  }
+
+  .navbar__mobile-lang-btn {
+    flex: 1;
+    font-family: var(--font-button);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--craly-text);
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    text-align: center;
+  }
+
+  .navbar__mobile-lang-btn--active {
+    background: var(--craly-teal);
+    color: var(--craly-white);
+  }
+
+  .navbar__mobile-links {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .navbar__mobile-links a {
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--craly-navy);
+    text-decoration: none;
+    padding: 4px 0;
+  }
+
+  .navbar__mobile-auth {
+    display: flex;
+    gap: 10px;
+    padding-top: 6px;
+  }
+
+  .navbar__mobile-auth .navbar__btn {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
   }
 }
 
@@ -162,13 +305,7 @@
     font-size: 17px;
   }
 
-  .navbar__lang-btn {
-    font-size: 11px;
-    padding: 5px 9px;
-  }
-
-  .navbar__btn {
-    font-size: 12.5px;
-    padding: 7px 13px;
+  .navbar__mobile {
+    padding: var(--space-4) 16px var(--space-5);
   }
 }

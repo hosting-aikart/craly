@@ -8,10 +8,20 @@ import { listCategories } from '../controllers/categoryController';
 import {
   listContractors,
   getContractor,
-  verifyContractor,
 } from '../controllers/contractorController';
+import {
+  createEnquiry,
+  listEnquiries,
+  getEnquiry,
+  updateEnquiryStatus,
+} from '../controllers/enquiryController';
+import { createMessage, listMessages } from '../controllers/messageController';
+import {
+  listNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from '../controllers/notificationController';
 import { requireAuth } from '../middlewares/auth';
-import { requireRole } from '../middlewares/requireRole';
 
 const router = Router();
 
@@ -39,9 +49,28 @@ router.patch('/profile/me', requireAuth, updateMyProfile);
 // ── Categories ───────────────────────────────────────────────────────────────
 router.get('/categories', listCategories);
 
-// ── Contractors (public directory) ──────────────────────────────────────────────
+// ── Contractors (public directory — direct listing, no admin approval step) ─────
 router.get('/contractors', listContractors);
 router.get('/contractors/:id', getContractor);
-router.post('/contractors/:id/verify', requireAuth, requireRole('admin'), verifyContractor);
+
+// ── Enquiries (business → contractor contact, replaces exposing contact info) ───
+router.post('/enquiries', requireAuth, createEnquiry);
+router.get('/enquiries', requireAuth, listEnquiries);
+router.get('/enquiries/:id', requireAuth, getEnquiry);
+router.patch('/enquiries/:id/status', requireAuth, updateEnquiryStatus);
+
+// ── Messages (conversation within a single enquiry) ─────────────────────────────
+router.post('/enquiries/:id/messages', requireAuth, createMessage);
+router.get('/enquiries/:id/messages', requireAuth, listMessages);
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+router.get('/notifications', requireAuth, listNotifications);
+router.patch('/notifications/read-all', requireAuth, markAllNotificationsRead);
+router.patch('/notifications/:id/read', requireAuth, markNotificationRead);
+
+// ── Admin ──────────────────────────────────────────────────────────────────────
+import { listAdminContractors, updateContractorVerification } from '../controllers/adminController';
+router.get('/admin/contractors', requireAuth, listAdminContractors);
+router.patch('/admin/contractors/:id/verify', requireAuth, updateContractorVerification);
 
 export default router;

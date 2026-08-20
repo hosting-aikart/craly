@@ -3,20 +3,21 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
+import Link from 'next/link';
 import { getMyProfile, updateMyProfile, type ContractorProfile, type Category } from '@/lib/api/profile';
 import { listCategories } from '@/lib/api/contractors';
+import { listEnquiries, type Enquiry } from '@/lib/api/enquiries';
+import EnquiryListItem from '@/components/enquiries/EnquiryListItem';
+import EmptyState from '@/components/ui/EmptyState';
+import LoadingState from '@/components/ui/LoadingState';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import '@/components/AuthForm.css';
 import '../../dashboard.css';
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: 'Verification Pending',
-  verified: 'Verified',
-  rejected: 'Verification Rejected',
-};
 
 export default function ContractorDashboardPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<ContractorProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +26,9 @@ export default function ContractorDashboardPage() {
   const [error, setError] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // Edit form state
+  const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+  const [enquiriesLoading, setEnquiriesLoading] = useState(true);
+
   const [description, setDescription] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -46,6 +49,13 @@ export default function ContractorDashboardPage() {
       })
       .finally(() => setLoading(false));
   }, [authLoading, user, router]);
+
+  useEffect(() => {
+    listEnquiries()
+      .then(({ data }) => setEnquiries(data))
+      .catch(() => setEnquiries([]))
+      .finally(() => setEnquiriesLoading(false));
+  }, []);
 
   const startEditing = () => {
     if (!profile) return;
@@ -85,7 +95,7 @@ export default function ContractorDashboardPage() {
       if (data.role === 'contractor') setProfile(data);
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save your changes. Please try again.');
+      setError(err instanceof Error ? err.message : t.common.error);
     } finally {
       setSaving(false);
     }
@@ -108,7 +118,7 @@ export default function ContractorDashboardPage() {
   if (authLoading || loading || !profile) {
     return (
       <div className="dashboard-page">
-        <div className="dashboard"><p className="dashboard__status">Loading your dashboard…</p></div>
+        <div className="dashboard"><LoadingState label={t.common.loading} /></div>
       </div>
     );
   }
@@ -123,23 +133,31 @@ export default function ContractorDashboardPage() {
           <div className="dashboard__header-main">
             <div className="dashboard__avatar">{profile.company_name.charAt(0).toUpperCase()}</div>
             <div>
-              <p className="dashboard__eyebrow">CONTRACTOR DASHBOARD</p>
-              <h1 className="dashboard__heading">Welcome back, {profile.company_name}</h1>
+              <p className="dashboard__eyebrow">{t.nav.dashboard.toUpperCase()}</p>
+              <h1 className="dashboard__heading">{t.contractorDashboard.welcome}, {profile.company_name}</h1>
             </div>
           </div>
           <div className="dashboard__header-actions">
-            <span className={`dashboard__badge dashboard__badge--${profile.verification_status}`}>
-              {STATUS_LABEL[profile.verification_status]}
-            </span>
+            <span className="dashboard__badge dashboard__badge--verified">{t.contractorDashboard.verified}</span>
             {!editing && (
-              <button className="dashboard__edit-btn" onClick={startEditing}>Edit Profile</button>
+              <>
+                <a
+                  href={`/contractors/${profile.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="dashboard__cancel-btn"
+                >
+                  {t.contractors.viewProfile}
+                </a>
+                <button className="dashboard__edit-btn" onClick={startEditing}>{t.common.save}</button>
+              </>
             )}
           </div>
         </div>
 
         <div className="dashboard__completeness">
           <div className="dashboard__completeness-top">
-            <strong>Profile completeness</strong>
+            <strong>{t.contractorDashboard.completenessLabel}</strong>
             <span>{completeness.pct}%</span>
           </div>
           <div className="dashboard__completeness-bar">
@@ -152,23 +170,10 @@ export default function ContractorDashboardPage() {
           )}
         </div>
 
-        {profile.verification_status === 'pending' && (
-          <div className="dashboard__notice">
-            Your profile is under review. Once verified, you&apos;ll appear in the public contractor
-            directory and businesses will be able to find and contact you.
-          </div>
-        )}
-
-        {profile.verification_status === 'rejected' && profile.verification_note && (
-          <div className="dashboard__notice">
-            <strong>Verification note:</strong> {profile.verification_note}
-          </div>
-        )}
-
         {editing ? (
           <form className="auth-form dashboard__card" onSubmit={handleSave}>
             <label className="auth-field">
-              <span>About Your Business</span>
+              <span>{t.contractorDetail.companyInfoTitle}</span>
               <textarea
                 rows={3}
                 value={description}
@@ -179,28 +184,28 @@ export default function ContractorDashboardPage() {
 
             <div className="auth-row">
               <label className="auth-field">
-                <span>City</span>
+                <span>{t.contractors.filterState}</span>
                 <input type="text" value={city} onChange={(e) => setCity(e.target.value)} />
               </label>
               <label className="auth-field">
-                <span>State</span>
+                <span>{t.contractors.filterState}</span>
                 <input type="text" value={state} onChange={(e) => setState(e.target.value)} />
               </label>
             </div>
 
             <div className="auth-row">
               <label className="auth-field">
-                <span>Years of Experience</span>
+                <span>{t.contractors.experienceLabel}</span>
                 <input type="number" min={0} value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} />
               </label>
               <label className="auth-field">
-                <span>Workforce Size</span>
+                <span>{t.contractors.workforceLabel}</span>
                 <input type="number" min={0} value={workforceSize} onChange={(e) => setWorkforceSize(e.target.value)} />
               </label>
             </div>
 
             <label className="auth-field">
-              <span>Categories</span>
+              <span>{t.onboarding.categories}</span>
               <div className="auth-chip-group">
                 {categories.map((c) => (
                   <button
@@ -219,33 +224,33 @@ export default function ContractorDashboardPage() {
 
             <div className="dashboard__form-actions">
               <button type="submit" className="auth-submit" disabled={saving}>
-                {saving ? 'Saving…' : 'Save Changes'}
+                {saving ? t.common.loading : t.common.save}
               </button>
               <button type="button" className="dashboard__cancel-btn" onClick={() => setEditing(false)}>
-                Cancel
+                {t.common.cancel}
               </button>
             </div>
           </form>
         ) : (
           <div className="dashboard__grid">
             <div className="dashboard__card">
-              <h3>About</h3>
+              <h3>{t.contractorDetail.companyInfoTitle}</h3>
               <p className="dashboard__desc">
-                {profile.description || 'No description added yet — edit your profile to add one.'}
+                {profile.description || 'No description added yet.'}
               </p>
             </div>
 
             <div className="dashboard__card">
-              <h3>Details</h3>
+              <h3>{t.contractorDetail.companyInfoTitle}</h3>
               <ul className="dashboard__list">
-                <li><span>Location</span><span>{[profile.city, profile.state].filter(Boolean).join(', ') || '—'}</span></li>
-                <li><span>Experience</span><span>{profile.years_experience != null ? `${profile.years_experience} years` : '—'}</span></li>
-                <li><span>Workforce</span><span>{profile.workforce_size != null ? profile.workforce_size : '—'}</span></li>
+                <li><span className="dashboard__list-label">{t.contractorDetail.addressLabel}</span><span className="dashboard__list-value">{[profile.city, profile.state].filter(Boolean).join(', ') || '—'}</span></li>
+                <li><span className="dashboard__list-label">{t.contractors.experienceLabel}</span><span className="dashboard__list-value">{profile.years_experience != null ? `${profile.years_experience} years` : '—'}</span></li>
+                <li><span className="dashboard__list-label">{t.contractors.workforceLabel}</span><span className="dashboard__list-value">{profile.workforce_size != null ? profile.workforce_size : '—'}</span></li>
               </ul>
             </div>
 
             <div className="dashboard__card">
-              <h3>Categories</h3>
+              <h3>{t.onboarding.categories}</h3>
               {profile.categories.length > 0 ? (
                 <div className="dashboard__tags">
                   {profile.categories.map((c) => (
@@ -259,13 +264,31 @@ export default function ContractorDashboardPage() {
           </div>
         )}
 
-        <div className="dashboard__card dashboard__card--placeholder">
-          <h3>Inquiries</h3>
-          <p className="dashboard__desc">
-            Coming soon — businesses will be able to reach out to you directly from your profile,
-            and their messages will show up here.
-          </p>
+        <div className="dashboard__section-head">
+          <h2>{t.enquiries.pageTitle}</h2>
+          {enquiries.length > 0 && <Link href="/contractor/enquiries">{t.contractorDashboard.viewDetails} →</Link>}
         </div>
+        {enquiriesLoading ? (
+          <LoadingState label={t.common.loading} />
+        ) : enquiries.length === 0 ? (
+          <div className="dashboard__card dashboard__card--placeholder">
+            <EmptyState
+              title={t.enquiries.emptyEnquiries}
+              subtitle="When businesses contact you, their requirements will appear here."
+            />
+          </div>
+        ) : (
+          <div className="dashboard__list-preview">
+            {enquiries.slice(0, 3).map((enq) => (
+              <EnquiryListItem
+                key={enq.id}
+                enquiry={enq}
+                viewer="contractor"
+                href={`/contractor/enquiries/${enq.id}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,30 @@
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-button);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+.status-pill--new {
+  background: var(--craly-warning-bg);
+  color: var(--craly-warning);
+  border: 1px solid var(--craly-warning-border);
+}
+
+.status-pill--active {
+  background: var(--craly-mint);
+  color: var(--craly-teal-dark);
+  border: 1px solid #bfeae3;
+}
+
+.status-pill--closed {
+  background: var(--craly-off-white);
+  color: var(--craly-text-muted);
+  border: 1px solid var(--craly-border);
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
+import { AuthProvider } from '@/lib/auth/useAuth';
 import Navbar from '@/components/Navbar';
 import './globals.css';
 
@@ -33,10 +34,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <LanguageProvider>
-          <Navbar />
-          {children}
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <Navbar />
+            {children}
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );

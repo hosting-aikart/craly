@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { contractorProfileSchema, businessProfileSchema } from '../validators/profileValidators';
+import { sanitizeContactInfo } from '../utils/contactSanitizer';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -75,11 +76,13 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
       const { companyName, description, city, state, yearsExperience, workforceSize, categoryIds } =
         parsed.data;
 
+      const cleanDesc = description ? sanitizeContactInfo(description) : null;
+
       const profile = await sql.begin(async (tx) => {
         const [updated] = await tx`
           UPDATE contractor_profiles SET
             company_name = COALESCE(${companyName ?? null}, company_name),
-            description = COALESCE(${description ?? null}, description),
+            description = COALESCE(${cleanDesc}, description),
             city = COALESCE(${city ?? null}, city),
             state = COALESCE(${state ?? null}, state),
             years_experience = COALESCE(${yearsExperience ?? null}, years_experience),

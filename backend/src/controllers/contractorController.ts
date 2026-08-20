@@ -4,8 +4,9 @@ import type { AppError } from '../middlewares/errorHandler';
 
 /**
  * GET /api/contractors
- * Public directory listing — verified contractors only, with optional
- * category/city/search filters and pagination.
+ * Public directory listing — every contractor who has completed onboarding
+ * is listed directly, no admin approval step. Optional category/city/search/
+ * experience/workforce filters and pagination.
  */
 export async function listContractors(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -15,10 +16,12 @@ export async function listContractors(req: Request, res: Response, next: NextFun
     const city = typeof req.query.city === 'string' ? req.query.city : undefined;
     const category = typeof req.query.category === 'string' ? req.query.category : undefined;
     const q = typeof req.query.q === 'string' ? req.query.q : undefined;
+    const minExperience = parseInt(String(req.query.minExperience ?? ''), 10);
+    const minWorkforce = parseInt(String(req.query.minWorkforce ?? ''), 10);
 
     const rows = await sql`
       SELECT cp.id, cp.company_name, cp.description, cp.city, cp.state,
-             cp.years_experience, cp.workforce_size, cp.verification_status,
+             cp.years_experience, cp.workforce_size,
              COALESCE(
                (SELECT json_agg(json_build_object('id', sc.id, 'name', sc.name, 'slug', sc.slug))
                 FROM contractor_categories cc
@@ -27,7 +30,7 @@ export async function listContractors(req: Request, res: Response, next: NextFun
                '[]'
              ) AS categories
       FROM contractor_profiles cp
-      WHERE cp.verification_status = 'verified'
+      WHERE cp.onboarding_complete = true
         AND (${city ?? null}::text IS NULL OR cp.city ILIKE ${city ? `%${city}%` : null})
         AND (
           ${category ?? null}::text IS NULL OR EXISTS (
@@ -36,7 +39,20 @@ export async function listContractors(req: Request, res: Response, next: NextFun
             WHERE cc.contractor_id = cp.id AND sc.slug = ${category ?? null}
           )
         )
-        AND (${q ?? null}::text IS NULL OR cp.company_name ILIKE ${q ? `%${q}%` : null})
+        AND (
+          ${q ?? null}::text IS NULL OR
+          cp.company_name ILIKE ${q ? `%${q}%` : null} OR
+          cp.description ILIKE ${q ? `%${q}%` : null} OR
+          cp.city ILIKE ${q ? `%${q}%` : null} OR
+          cp.state ILIKE ${q ? `%${q}%` : null} OR
+          EXISTS (
+            SELECT 1 FROM contractor_categories cc
+            JOIN service_categories sc ON sc.id = cc.category_id
+            WHERE cc.contractor_id = cp.id AND sc.name ILIKE ${q ? `%${q}%` : null}
+          )
+        )
+        AND (${Number.isFinite(minExperience) ? minExperience : null}::int IS NULL OR cp.years_experience >= ${Number.isFinite(minExperience) ? minExperience : null})
+        AND (${Number.isFinite(minWorkforce) ? minWorkforce : null}::int IS NULL OR cp.workforce_size >= ${Number.isFinite(minWorkforce) ? minWorkforce : null})
       ORDER BY cp.created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
@@ -49,15 +65,16 @@ export async function listContractors(req: Request, res: Response, next: NextFun
 
 /**
  * GET /api/contractors/:id
- * Public single profile view.
+ * Public single profile view — same "listed directly, no approval" rule as
+ * the directory: only visible once the contractor has finished onboarding.
  */
 export async function getContractor(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
     const [row] = await sql`
       SELECT id, company_name, description, city, state, years_experience,
-             workforce_size, verification_status
-      FROM contractor_profiles WHERE id = ${id}
+             workforce_size
+      FROM contractor_profiles WHERE id = ${id} AND onboarding_complete = true
     `;
     if (!row) {
       const err: AppError = new Error('Contractor not found');
@@ -71,40 +88,6 @@ export async function getContractor(req: Request, res: Response, next: NextFunct
       WHERE cc.contractor_id = ${id}
     `;
     res.json({ data: { ...row, categories } });
-  } catch (err) {
-    next(err);
-  }
-}
-
-/**
- * POST /api/contractors/:id/verify
- * Admin only. Approves or rejects a contractor's verification.
- */
-export async function verifyContractor(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const { id } = req.params;
-    const { status, note } = req.body as { status?: string; note?: string };
-
-    if (status !== 'verified' && status !== 'rejected') {
-      const err: AppError = new Error("status must be 'verified' or 'rejected'");
-      err.statusCode = 400;
-      return next(err);
-    }
-
-    const [updated] = await sql`
-      UPDATE contractor_profiles
-      SET verification_status = ${status}, verification_note = ${note ?? null}, updated_at = now()
-      WHERE id = ${id}
-      RETURNING id, verification_status
-    `;
-
-    if (!updated) {
-      const err: AppError = new Error('Contractor not found');
-      err.statusCode = 404;
-      return next(err);
-    }
-
-    res.json({ data: updated });
   } catch (err) {
     next(err);
   }

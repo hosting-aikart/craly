@@ -1,5 +1,5 @@
-/* Shared field/button styling for login, signup, and onboarding forms —
-   same light theme as ContactSection's form (white cards, light inputs). */
+/* Shared field/button styling for login, signup, onboarding, and dashboard
+   edit forms — one input/button language across every authenticated form. */
 
 .auth-form {
   display: flex;
@@ -22,7 +22,7 @@
 
 .auth-field span {
   font-size: 13px;
-  color: #374151;
+  color: var(--craly-text-muted);
   font-weight: 500;
 }
 
@@ -31,10 +31,10 @@
 .auth-field select {
   font-family: var(--font-body);
   font-size: 15px;
-  color: #111827;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  color: var(--craly-text);
+  background: var(--craly-off-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-md);
   padding: 12px 14px;
   outline: none;
   transition: 0.2s;
@@ -44,19 +44,19 @@
 .auth-field input:focus,
 .auth-field textarea:focus,
 .auth-field select:focus {
-  border-color: #0f766e;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+  border-color: var(--craly-teal);
+  background: var(--craly-white);
+  box-shadow: 0 0 0 4px rgba(15, 139, 130, 0.12);
 }
 
 .auth-field input::placeholder,
 .auth-field textarea::placeholder {
-  color: #9ca3af;
+  color: var(--craly-text-faint);
 }
 
 .auth-field select option {
-  background: #ffffff;
-  color: #111827;
+  background: var(--craly-white);
+  color: var(--craly-text);
 }
 
 /* Role picker used on signup */
@@ -72,10 +72,10 @@
   align-items: center;
   gap: 6px;
   padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  color: #6b7280;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--craly-border);
+  background: var(--craly-off-white);
+  color: var(--craly-text-muted);
   cursor: pointer;
   transition: 0.2s;
   font-family: var(--font-body);
@@ -91,13 +91,13 @@
 }
 
 .auth-role-option:hover {
-  border-color: #99f6e4;
+  border-color: var(--craly-teal);
 }
 
 .auth-role-option--active {
-  border-color: #0f766e;
-  background: #ccfbf1;
-  color: #0b5c56;
+  border-color: var(--craly-teal);
+  background: var(--craly-mint);
+  color: var(--craly-teal-dark);
 }
 
 /* Category chips used on onboarding */
@@ -111,33 +111,33 @@
   font-family: var(--font-body);
   font-size: 13.5px;
   font-weight: 500;
-  color: #6b7280;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
+  color: var(--craly-text-muted);
+  background: var(--craly-off-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-full);
   padding: 8px 16px;
   cursor: pointer;
   transition: 0.2s;
 }
 
 .auth-chip:hover {
-  border-color: #99f6e4;
-  color: #0b5c56;
+  border-color: var(--craly-teal);
+  color: var(--craly-teal-dark);
 }
 
 .auth-chip--active {
-  background: #0f766e;
-  border-color: #0f766e;
-  color: white;
+  background: var(--craly-teal);
+  border-color: var(--craly-teal);
+  color: var(--craly-white);
 }
 
 .auth-error {
-  color: #dc2626;
+  color: var(--craly-danger);
   font-family: var(--font-body);
   font-size: 14px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
+  background: var(--craly-danger-bg);
+  border: 1px solid var(--craly-danger-border);
+  border-radius: var(--radius-sm);
   padding: 10px 14px;
 }
 
@@ -145,21 +145,20 @@
   font-family: var(--font-button);
   font-size: 15px;
   font-weight: 600;
-  color: white;
-  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
+  color: var(--craly-white);
+  background: var(--craly-teal);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 14px 20px;
   cursor: pointer;
   transition: 0.2s;
   margin-top: 4px;
-  box-shadow: 0 12px 24px rgba(15, 118, 110, 0.22);
+  box-shadow: var(--shadow-md);
 }
 
 .auth-submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0b5c56 0%, #0b3b38 100%);
+  background: var(--craly-teal-dark);
   transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(15, 118, 110, 0.3);
 }
 
 .auth-submit:disabled {
@@ -172,11 +171,11 @@
   text-align: center;
   font-family: var(--font-body);
   font-size: 14px;
-  color: #6b7280;
+  color: var(--craly-text-muted);
 }
 
 .auth-footer-link a {
-  color: #0f766e;
+  color: var(--craly-teal-dark);
   text-decoration: none;
   font-weight: 600;
 }

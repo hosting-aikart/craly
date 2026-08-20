@@ -99,6 +99,189 @@ export interface Translations {
     email: string;
     copyright: string;
   };
+  nav: {
+    home: string;
+    contractors: string;
+    whyCraly: string;
+    howItWorks: string;
+    faq: string;
+    dashboard: string;
+    login: string;
+    logout: string;
+    getStarted: string;
+  };
+  auth: {
+    networkEyebrow: string;
+    loginHeading: string;
+    signupHeading: string;
+    contractorRoleTitle: string;
+    contractorRoleDesc: string;
+    businessRoleTitle: string;
+    businessRoleDesc: string;
+    securityBadge: string;
+    welcomeBackEyebrow: string;
+    logInTitle: string;
+    createAccountEyebrow: string;
+    joinTitle: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    passwordLabel: string;
+    passwordPlaceholder: string;
+    confirmPasswordLabel: string;
+    confirmPasswordPlaceholder: string;
+    companyNameLabel: string;
+    companyNamePlaceholder: string;
+    forgotPassword: string;
+    loggingIn: string;
+    logInBtn: string;
+    creatingAccount: string;
+    createAccountBtn: string;
+    newToCraly: string;
+    alreadyHaveAccount: string;
+    joinAsContractor: string;
+    joinAsBusiness: string;
+    iamContractor: string;
+    iamBusiness: string;
+  };
+  contractors: {
+    pageTitle: string;
+    pageSubtitle: string;
+    searchPlaceholder: string;
+    filterTitle: string;
+    filterState: string;
+    allStates: string;
+    filterCategory: string;
+    allCategories: string;
+    minExperience: string;
+    minWorkforce: string;
+    anyExperience: string;
+    anyWorkforce: string;
+    applyFilters: string;
+    clearFilters: string;
+    foundCount: string;
+    noResultsTitle: string;
+    noResultsDesc: string;
+    viewProfile: string;
+    sendEnquiry: string;
+    verifiedBadge: string;
+    workforceLabel: string;
+    experienceLabel: string;
+    prevPage: string;
+    nextPage: string;
+    pageOf: string;
+  };
+  contractorDetail: {
+    backToDirectory: string;
+    tabOverview: string;
+    tabWorkforce: string;
+    tabLicenses: string;
+    tabProjects: string;
+    tabReviews: string;
+    contactBtn: string;
+    companyInfoTitle: string;
+    gstinLabel: string;
+    panLabel: string;
+    addressLabel: string;
+    statesLabel: string;
+    workforceTitle: string;
+    totalWorkers: string;
+    skilledWorkers: string;
+    unskilledWorkers: string;
+    licensesTitle: string;
+    licenseType: string;
+    licenseNumber: string;
+    validTill: string;
+    projectsTitle: string;
+    reviewsTitle: string;
+    contactModalTitle: string;
+    contactModalSub: string;
+    subjectLabel: string;
+    messageLabel: string;
+    sendBtn: string;
+    sendingBtn: string;
+    enquirySentSuccess: string;
+  };
+  businessDashboard: {
+    welcome: string;
+    subtitle: string;
+    statEnquiries: string;
+    statSaved: string;
+    statHired: string;
+    searchHeroTitle: string;
+    searchHeroSub: string;
+    recentEnquiriesTitle: string;
+    viewAllEnquiries: string;
+    contractorCol: string;
+    dateCol: string;
+    statusCol: string;
+    actionCol: string;
+    noEnquiries: string;
+  };
+  contractorDashboard: {
+    welcome: string;
+    subtitle: string;
+    profileStatusTitle: string;
+    verificationStatus: string;
+    verified: string;
+    pendingVerification: string;
+    incomplete: string;
+    completenessLabel: string;
+    completeOnboardingBtn: string;
+    statEnquiriesReceived: string;
+    statProfileViews: string;
+    recentEnquiriesTitle: string;
+    viewDetails: string;
+  };
+  enquiries: {
+    pageTitle: string;
+    pageSubtitle: string;
+    allTab: string;
+    pendingTab: string;
+    respondedTab: string;
+    closedTab: string;
+    statusPending: string;
+    statusResponded: string;
+    statusClosed: string;
+    subject: string;
+    date: string;
+    messageHistory: string;
+    typeReplyPlaceholder: string;
+    sendReplyBtn: string;
+    sendingReply: string;
+    updateStatusBtn: string;
+    emptyEnquiries: string;
+  };
+  onboarding: {
+    pageTitle: string;
+    pageSubtitle: string;
+    stepCompany: string;
+    stepDetails: string;
+    stepDocs: string;
+    companyName: string;
+    stateOfOperation: string;
+    gstin: string;
+    pan: string;
+    workforceCapacity: string;
+    categories: string;
+    saveAndContinue: string;
+    submitting: string;
+    completeSetup: string;
+  };
+  notifications: {
+    pageTitle: string;
+    markAllRead: string;
+    emptyState: string;
+    newEnquiry: string;
+  };
+  common: {
+    loading: string;
+    error: string;
+    tryAgain: string;
+    back: string;
+    save: string;
+    cancel: string;
+    close: string;
+  };
 }
 
 const en: Translations = {
@@ -253,6 +436,189 @@ const en: Translations = {
     phone: '+91 95032 52288',
     email: 'hello@craly.com',
     copyright: '© 2026 Craly. All rights reserved.',
+  },
+  nav: {
+    home: 'Home',
+    contractors: 'Contractors',
+    whyCraly: 'Why Craly',
+    howItWorks: 'How It Works',
+    faq: 'FAQ',
+    dashboard: 'Dashboard',
+    login: 'Log In',
+    logout: 'Log Out',
+    getStarted: 'Get Started',
+  },
+  auth: {
+    networkEyebrow: 'ONE VERIFIED NETWORK',
+    loginHeading: 'Continue building trust, right where you left off.',
+    signupHeading: 'Get discovered — or find who you need.',
+    contractorRoleTitle: 'Contractor',
+    contractorRoleDesc: 'Build a verified profile & get hired',
+    businessRoleTitle: 'Business',
+    businessRoleDesc: 'Find and hire with confidence',
+    securityBadge: 'Your account and business details stay protected.',
+    welcomeBackEyebrow: 'WELCOME BACK',
+    logInTitle: 'Log In',
+    createAccountEyebrow: 'CREATE ACCOUNT',
+    joinTitle: 'Join Craly',
+    emailLabel: 'Email',
+    emailPlaceholder: 'you@company.com',
+    passwordLabel: 'Password',
+    passwordPlaceholder: '••••••••',
+    confirmPasswordLabel: 'Confirm Password',
+    confirmPasswordPlaceholder: '••••••••',
+    companyNameLabel: 'Company Name',
+    companyNamePlaceholder: 'Acme Pvt Ltd',
+    forgotPassword: 'Forgot password?',
+    loggingIn: 'Logging in…',
+    logInBtn: 'Log In',
+    creatingAccount: 'Creating account…',
+    createAccountBtn: 'Create Account',
+    newToCraly: 'New to Craly?',
+    alreadyHaveAccount: 'Already have an account?',
+    joinAsContractor: 'Join as Contractor',
+    joinAsBusiness: 'Join as Business',
+    iamContractor: "I'm a Contractor",
+    iamBusiness: "I'm a Business",
+  },
+  contractors: {
+    pageTitle: 'Discover Labour Contractors',
+    pageSubtitle: 'Search verified contractors across India for manufacturing, construction, and plant operations.',
+    searchPlaceholder: 'Search contractors by name, city, or service...',
+    filterTitle: 'Filter Contractors',
+    filterState: 'State',
+    allStates: 'All States',
+    filterCategory: 'Category',
+    allCategories: 'All Categories',
+    minExperience: 'Min Experience (Years)',
+    minWorkforce: 'Min Workforce Capacity',
+    anyExperience: 'Any Experience',
+    anyWorkforce: 'Any Capacity',
+    applyFilters: 'Apply Filters',
+    clearFilters: 'Clear Filters',
+    foundCount: 'contractors found',
+    noResultsTitle: 'No contractors found',
+    noResultsDesc: 'Try adjusting your search criteria or clearing filters.',
+    viewProfile: 'View Profile',
+    sendEnquiry: 'Send Enquiry',
+    verifiedBadge: 'Verified',
+    workforceLabel: 'Workforce',
+    experienceLabel: 'Experience',
+    prevPage: 'Previous',
+    nextPage: 'Next',
+    pageOf: 'Page',
+  },
+  contractorDetail: {
+    backToDirectory: '← Back to Contractors',
+    tabOverview: 'Overview',
+    tabWorkforce: 'Workforce',
+    tabLicenses: 'Licenses & Compliance',
+    tabProjects: 'Projects & Experience',
+    tabReviews: 'Reviews & Ratings',
+    contactBtn: 'Contact Contractor',
+    companyInfoTitle: 'Company Overview',
+    gstinLabel: 'GSTIN',
+    panLabel: 'PAN',
+    addressLabel: 'Address',
+    statesLabel: 'Operating States',
+    workforceTitle: 'Workforce Capacity',
+    totalWorkers: 'Total Workforce',
+    skilledWorkers: 'Skilled Workers',
+    unskilledWorkers: 'Unskilled Workers',
+    licensesTitle: 'Compliance & Registrations',
+    licenseType: 'Document / License',
+    licenseNumber: 'License Number',
+    validTill: 'Valid Till',
+    projectsTitle: 'Past Projects & History',
+    reviewsTitle: 'Business Ratings & Feedback',
+    contactModalTitle: 'Send Enquiry',
+    contactModalSub: 'Reach out directly to discuss project workforce requirements.',
+    subjectLabel: 'Subject',
+    messageLabel: 'Message & Project Requirements',
+    sendBtn: 'Send Message',
+    sendingBtn: 'Sending…',
+    enquirySentSuccess: 'Enquiry sent successfully!',
+  },
+  businessDashboard: {
+    welcome: 'Welcome back',
+    subtitle: 'Manage your contractor enquiries and discover verified teams.',
+    statEnquiries: 'Total Enquiries',
+    statSaved: 'Saved Profiles',
+    statHired: 'Active Contracts',
+    searchHeroTitle: 'Need Labour Contractors?',
+    searchHeroSub: 'Find verified contractors for your plant, factory, or project execution.',
+    recentEnquiriesTitle: 'Recent Enquiries',
+    viewAllEnquiries: 'View All Enquiries',
+    contractorCol: 'Contractor',
+    dateCol: 'Date',
+    statusCol: 'Status',
+    actionCol: 'Action',
+    noEnquiries: 'No enquiries sent yet. Start searching to contact contractors!',
+  },
+  contractorDashboard: {
+    welcome: 'Welcome back',
+    subtitle: 'Manage your verified business profile and customer enquiries.',
+    profileStatusTitle: 'Profile Status',
+    verificationStatus: 'Verification Status',
+    verified: 'Verified Profile',
+    pendingVerification: 'Verification Pending',
+    incomplete: 'Incomplete Profile',
+    completenessLabel: 'Profile Completeness',
+    completeOnboardingBtn: 'Complete Onboarding Profile',
+    statEnquiriesReceived: 'Enquiries Received',
+    statProfileViews: 'Profile Views',
+    recentEnquiriesTitle: 'Received Enquiries',
+    viewDetails: 'View Details',
+  },
+  enquiries: {
+    pageTitle: 'Enquiries',
+    pageSubtitle: 'Track messages and communication between businesses and contractors.',
+    allTab: 'All Enquiries',
+    pendingTab: 'Pending',
+    respondedTab: 'Responded',
+    closedTab: 'Closed',
+    statusPending: 'Pending',
+    statusResponded: 'Responded',
+    statusClosed: 'Closed',
+    subject: 'Subject',
+    date: 'Date',
+    messageHistory: 'Message History',
+    typeReplyPlaceholder: 'Type your message reply here...',
+    sendReplyBtn: 'Send Reply',
+    sendingReply: 'Sending...',
+    updateStatusBtn: 'Update Status',
+    emptyEnquiries: 'No enquiries found in this category.',
+  },
+  onboarding: {
+    pageTitle: 'Complete Your Business Profile',
+    pageSubtitle: 'Provide official business details to get your verified badge on Craly.',
+    stepCompany: 'Business Info',
+    stepDetails: 'Workforce & Capacity',
+    stepDocs: 'Documents & Verification',
+    companyName: 'Company / Business Name',
+    stateOfOperation: 'States of Operation',
+    gstin: 'GSTIN Registration Number',
+    pan: 'PAN Number',
+    workforceCapacity: 'Total Workforce Capacity',
+    categories: 'Categories & Services',
+    saveAndContinue: 'Save & Continue',
+    submitting: 'Saving...',
+    completeSetup: 'Complete Setup',
+  },
+  notifications: {
+    pageTitle: 'Notifications',
+    markAllRead: 'Mark all as read',
+    emptyState: 'No notifications at this time.',
+    newEnquiry: 'New enquiry received',
+  },
+  common: {
+    loading: 'Loading...',
+    error: 'Something went wrong',
+    tryAgain: 'Try Again',
+    back: 'Back',
+    save: 'Save',
+    cancel: 'Cancel',
+    close: 'Close',
   },
 };
 
@@ -409,6 +775,189 @@ const hi: Translations = {
     email: 'hello@craly.com',
     copyright: '© 2026 क्रैली. सर्वाधिकार सुरक्षित.',
   },
+  nav: {
+    home: 'होम',
+    contractors: 'ठेकेदार',
+    whyCraly: 'क्रैली क्यों',
+    howItWorks: 'यह कैसे काम करता है',
+    faq: 'सामान्य प्रश्न',
+    dashboard: 'डैशबोर्ड',
+    login: 'लॉग इन',
+    logout: 'लॉग आउट',
+    getStarted: 'शुरू करें',
+  },
+  auth: {
+    networkEyebrow: 'एक सत्यापित नेटवर्क',
+    loginHeading: 'भरोसा बनाना जारी रखें, वहीं से जहां आपने छोड़ा था।',
+    signupHeading: 'खोजे जाएं — या जिन्हें आपकी ज़रूरत है उन्हें खोजें।',
+    contractorRoleTitle: 'ठेकेदार',
+    contractorRoleDesc: 'सत्यापित प्रोफ़ाइल बनाएं और काम पाएं',
+    businessRoleTitle: 'व्यवसाय',
+    businessRoleDesc: 'आत्मविश्वास से खोजें और नियुक्त करें',
+    securityBadge: 'आपका खाता और व्यावसायिक विवरण सुरक्षित रहते हैं।',
+    welcomeBackEyebrow: 'वापसी पर स्वागत है',
+    logInTitle: 'लॉग इन करें',
+    createAccountEyebrow: 'खाता बनाएं',
+    joinTitle: 'क्रैली में शामिल हों',
+    emailLabel: 'ईमेल',
+    emailPlaceholder: 'you@company.com',
+    passwordLabel: 'पासवर्ड',
+    passwordPlaceholder: '••••••••',
+    confirmPasswordLabel: 'पासवर्ड की पुष्टि करें',
+    confirmPasswordPlaceholder: '••••••••',
+    companyNameLabel: 'कंपनी का नाम',
+    companyNamePlaceholder: 'एक्मे प्राइवेट लिमिटेड',
+    forgotPassword: 'पासवर्ड भूल गए?',
+    loggingIn: 'लॉग इन हो रहा है…',
+    logInBtn: 'लॉग इन करें',
+    creatingAccount: 'खाता बनाया जा रहा है…',
+    createAccountBtn: 'खाता बनाएं',
+    newToCraly: 'क्रैली पर नए हैं?',
+    alreadyHaveAccount: 'पहले से ही एक खाता है?',
+    joinAsContractor: 'ठेकेदार के रूप में जुड़ें',
+    joinAsBusiness: 'व्यवसाय के रूप में जुड़ें',
+    iamContractor: 'मैं एक ठेकेदार हूं',
+    iamBusiness: 'मैं एक व्यवसाय हूं',
+  },
+  contractors: {
+    pageTitle: 'श्रम ठेकेदारों को खोजें',
+    pageSubtitle: 'निर्माण, मैन्युफैक्चरिंग और प्लांट संचालन के लिए भारत भर में सत्यापित ठेकेदारों की खोज करें।',
+    searchPlaceholder: 'नाम, शहर या सेवा द्वारा ठेकेदारों की खोज करें...',
+    filterTitle: 'ठेकेदारों को फ़िल्टर करें',
+    filterState: 'राज्य',
+    allStates: 'सभी राज्य',
+    filterCategory: 'श्रेणी',
+    allCategories: 'सभी श्रेणियां',
+    minExperience: 'न्यूनतम अनुभव (वर्ष)',
+    minWorkforce: 'न्यूनतम कार्यबल क्षमता',
+    anyExperience: 'कोई भी अनुभव',
+    anyWorkforce: 'कोई भी क्षमता',
+    applyFilters: 'फ़िल्टर लागू करें',
+    clearFilters: 'फ़िल्टर हटाएं',
+    foundCount: 'ठेकेदार मिले',
+    noResultsTitle: 'कोई ठेकेदार नहीं मिला',
+    noResultsDesc: 'कृपया अपने खोज मापदंड बदलें या फ़िल्टर साफ़ करें।',
+    viewProfile: 'प्रोफ़ाइल देखें',
+    sendEnquiry: 'पूछताछ भेजें',
+    verifiedBadge: 'सत्यापित',
+    workforceLabel: 'कार्यबल',
+    experienceLabel: 'अनुभव',
+    prevPage: 'पिछला',
+    nextPage: 'अगला',
+    pageOf: 'पृष्ठ',
+  },
+  contractorDetail: {
+    backToDirectory: '← ठेकेदारों की सूची पर वापस जाएं',
+    tabOverview: 'अवलोकन',
+    tabWorkforce: 'कार्यबल',
+    tabLicenses: 'लाइसेंस और अनुपालन',
+    tabProjects: 'परियोजनाएं और अनुभव',
+    tabReviews: 'समीक्षाएं और रेटिंग',
+    contactBtn: 'ठेकेदार से संपर्क करें',
+    companyInfoTitle: 'कंपनी अवलोकन',
+    gstinLabel: 'जीएसटीआयएन (GSTIN)',
+    panLabel: 'पैन (PAN)',
+    addressLabel: 'पता',
+    statesLabel: 'संचालन के राज्य',
+    workforceTitle: 'कार्यबल क्षमता',
+    totalWorkers: 'कुल कार्यबल',
+    skilledWorkers: 'कुशल श्रमिक',
+    unskilledWorkers: 'अकुशल श्रमिक',
+    licensesTitle: 'अनुपालन और पंजीकरण',
+    licenseType: 'दस्तावेज़ / लाइसेंस',
+    licenseNumber: 'लाइसेंस नंबर',
+    validTill: 'कब तक वैध',
+    projectsTitle: 'पिछली परियोजनाएं और इतिहास',
+    reviewsTitle: 'व्यावसायिक रेटिंग और प्रतिक्रिया',
+    contactModalTitle: 'पूछताछ भेजें',
+    contactModalSub: 'परियोजना कार्यबल की आवश्यकताओं पर चर्चा करने के लिए सीधे संपर्क करें।',
+    subjectLabel: 'विषय',
+    messageLabel: 'संदेश और परियोजना आवश्यकताएं',
+    sendBtn: 'संदेश भेजें',
+    sendingBtn: 'भेजा जा रहा है…',
+    enquirySentSuccess: 'पूछताछ सफलतापूर्वक भेजी गई!',
+  },
+  businessDashboard: {
+    welcome: 'वापसी पर स्वागत है',
+    subtitle: 'अपनी ठेकेदार पूछताछ प्रबंधित करें और सत्यापित टीमों की खोज करें।',
+    statEnquiries: 'कुल पूछताछ',
+    statSaved: 'सहेजी गई प्रोफ़ाइल',
+    statHired: 'सक्रिय अनुबंध',
+    searchHeroTitle: 'श्रम ठेकेदारों की आवश्यकता है?',
+    searchHeroSub: 'अपने प्लांट, फ़ैक्टरी या प्रोजेक्ट निष्पादन के लिए सत्यापित ठेकेदार खोजें।',
+    recentEnquiriesTitle: 'हाल की पूछताछ',
+    viewAllEnquiries: 'सभी पूछताछ देखें',
+    contractorCol: 'ठेकेदार',
+    dateCol: 'दिनांक',
+    statusCol: 'स्थिति',
+    actionCol: 'कार्रवाई',
+    noEnquiries: 'अभी तक कोई पूछताछ नहीं भेजी गई। ठेकेदारों से संपर्क करने के लिए खोजना शुरू करें!',
+  },
+  contractorDashboard: {
+    welcome: 'वापसी पर स्वागत है',
+    subtitle: 'अपनी सत्यापित व्यावसायिक प्रोफ़ाइल और ग्राहक पूछताछ प्रबंधित करें।',
+    profileStatusTitle: 'प्रोफ़ाइल स्थिति',
+    verificationStatus: 'सत्यापन स्थिति',
+    verified: 'सत्यापित प्रोफ़ाइल',
+    pendingVerification: 'सत्यापन लंबित',
+    incomplete: 'अपूर्ण प्रोफ़ाइल',
+    completenessLabel: 'प्रोफ़ाइल पूर्णता',
+    completeOnboardingBtn: 'ऑनबोर्डिंग प्रोफ़ाइल पूरी करें',
+    statEnquiriesReceived: 'प्राप्त पूछताछ',
+    statProfileViews: 'प्रोफ़ाइल व्यूज',
+    recentEnquiriesTitle: 'प्राप्त पूछताछ',
+    viewDetails: 'विवरण देखें',
+  },
+  enquiries: {
+    pageTitle: 'पूछताछ',
+    pageSubtitle: 'व्यवसायों और ठेकेदारों के बीच संदेशों और संचार को ट्रैक करें।',
+    allTab: 'सभी पूछताछ',
+    pendingTab: 'लंबित',
+    respondedTab: 'उत्तर दिया गया',
+    closedTab: 'बंद',
+    statusPending: 'लंबित',
+    statusResponded: 'उत्तर दिया गया',
+    statusClosed: 'बंद',
+    subject: 'विषय',
+    date: 'दिनांक',
+    messageHistory: 'संदेश इतिहास',
+    typeReplyPlaceholder: 'अपना जवाब यहां लिखें...',
+    sendReplyBtn: 'जवाब भेजें',
+    sendingReply: 'भेजा जा रहा है...',
+    updateStatusBtn: 'स्थिति अपडेट करें',
+    emptyEnquiries: 'इस श्रेणी में कोई पूछताछ नहीं मिली।',
+  },
+  onboarding: {
+    pageTitle: 'अपनी व्यावसायिक प्रोफ़ाइल पूरी करें',
+    pageSubtitle: 'क्रैली पर अपना सत्यापित बैज प्राप्त करने के लिए आधिकारिक व्यावसायिक विवरण प्रदान करें।',
+    stepCompany: 'व्यावसायिक जानकारी',
+    stepDetails: 'कार्यबल और क्षमता',
+    stepDocs: 'दस्तावेज़ और सत्यापन',
+    companyName: 'कंपनी / व्यवसाय का नाम',
+    stateOfOperation: 'संचालन के राज्य',
+    gstin: 'जीएसटीआयएन पंजीकरण संख्या',
+    pan: 'पैन संख्या',
+    workforceCapacity: 'कुल कार्यबल क्षमता',
+    categories: 'श्रेणियां और सेवाएं',
+    saveAndContinue: 'सहेजें और जारी रखें',
+    submitting: 'सहेजा जा रहा है...',
+    completeSetup: 'सेटअप पूरा करें',
+  },
+  notifications: {
+    pageTitle: 'सूचनाएं',
+    markAllRead: 'सभी को पढ़ा हुआ चिन्हित करें',
+    emptyState: 'इस समय कोई सूचना नहीं है।',
+    newEnquiry: 'नई पूछताछ प्राप्त हुई',
+  },
+  common: {
+    loading: 'लोड हो रहा है...',
+    error: 'कुछ गलत हो गया',
+    tryAgain: 'पुनः प्रयास करें',
+    back: 'वापस',
+    save: 'सहेजें',
+    cancel: 'रद्द करें',
+    close: 'बंद करें',
+  },
 };
 
 const mr: Translations = {
@@ -563,6 +1112,189 @@ const mr: Translations = {
     phone: '+91 95032 52288',
     email: 'hello@craly.com',
     copyright: '© 2026 क्रैली. सर्व हक्क राखीव.',
+  },
+  nav: {
+    home: 'होम',
+    contractors: 'ठेकेदार',
+    whyCraly: 'क्रैली का',
+    howItWorks: 'हे कसे कार्य करते',
+    faq: 'सामान्य प्रश्न',
+    dashboard: 'डॅशबोर्ड',
+    login: 'लॉग इन',
+    logout: 'लॉग आउट',
+    getStarted: 'सुरुवात करा',
+  },
+  auth: {
+    networkEyebrow: 'एक सत्यापित नेटवर्क',
+    loginHeading: 'विश्वास निर्माण करणे सुरू ठेवा, जिथून तुम्ही सोडले होते.',
+    signupHeading: 'शोधले जा — किंवा तुम्हाला हवे असलेले शोधा.',
+    contractorRoleTitle: 'ठेकेदार',
+    contractorRoleDesc: 'सत्यापित प्रोफाइल तयार करा आणि काम मिळवा',
+    businessRoleTitle: 'व्यवसाय',
+    businessRoleDesc: 'आत्मविश्वासाने शोधा आणि नियुक्त करा',
+    securityBadge: 'तुमचे खाते आणि व्यवसाय तपशील सुरक्षित राहतात.',
+    welcomeBackEyebrow: 'पुन्हा स्वागत आहे',
+    logInTitle: 'लॉग इन करा',
+    createAccountEyebrow: 'खाते तयार करा',
+    joinTitle: 'क्रैलीमध्ये सामील व्हा',
+    emailLabel: 'ईमेल',
+    emailPlaceholder: 'you@company.com',
+    passwordLabel: 'पासवर्ड',
+    passwordPlaceholder: '••••••••',
+    confirmPasswordLabel: 'पासवर्डची पुष्टी करा',
+    confirmPasswordPlaceholder: '••••••••',
+    companyNameLabel: 'कंपनीचे नाव',
+    companyNamePlaceholder: 'अॅक्मे प्रायव्हेट लिमिटेड',
+    forgotPassword: 'पासवर्ड विसरलात?',
+    loggingIn: 'लॉग इन होत आहे…',
+    logInBtn: 'लॉग इन करा',
+    creatingAccount: 'खाते तयार होत आहे…',
+    createAccountBtn: 'खाते तयार करा',
+    newToCraly: 'क्रैलीवर नवीन आहात?',
+    alreadyHaveAccount: 'आधीच खाते आहे का?',
+    joinAsContractor: 'ठेकेदार म्हणून सामील व्हा',
+    joinAsBusiness: 'व्यवसाय म्हणून सामील व्हा',
+    iamContractor: 'मी एक ठेकेदार आहे',
+    iamBusiness: 'मी एक व्यवसाय आहे',
+  },
+  contractors: {
+    pageTitle: 'कामगार ठेकेदार शोधा',
+    pageSubtitle: 'बांधकाम, उत्पादन आणि प्लांट कामकाजासाठी संपूर्ण भारतातील सत्यापित ठेकेदार शोधा.',
+    searchPlaceholder: 'नाव, शहर किंवा सेवेनुसार ठेकेदार शोधा...',
+    filterTitle: 'ठेकेदार फिल्टर करा',
+    filterState: 'राज्य',
+    allStates: 'सर्व राज्ये',
+    filterCategory: 'श्रेणी',
+    allCategories: 'सर्व श्रेणी',
+    minExperience: 'किमान अनुभव (वर्षे)',
+    minWorkforce: 'किमान कामगार क्षमता',
+    anyExperience: 'कोणताही अनुभव',
+    anyWorkforce: 'कोणतीही क्षमता',
+    applyFilters: 'फिल्टर लागू करा',
+    clearFilters: 'फिल्टर साफ करा',
+    foundCount: 'ठेकेदार सापडले',
+    noResultsTitle: 'कोणतेही ठेकेदार सापडले नाहीत',
+    noResultsDesc: 'कृपया तुमचे शोध निकष बदला किंवा फिल्टर साफ करा.',
+    viewProfile: 'प्रोफाइल पहा',
+    sendEnquiry: 'चौकशी पाठवा',
+    verifiedBadge: 'सत्यापित',
+    workforceLabel: 'कामगार',
+    experienceLabel: 'अनुभव',
+    prevPage: 'मागील',
+    nextPage: 'पुढील',
+    pageOf: 'पृष्ठ',
+  },
+  contractorDetail: {
+    backToDirectory: '← ठेकेदारांच्या यादीवर परत जा',
+    tabOverview: 'आढावा',
+    tabWorkforce: 'कामगार क्षमता',
+    tabLicenses: 'परवाने आणि अनुपालन',
+    tabProjects: 'प्रकल्प आणि अनुभव',
+    tabReviews: 'पुनरावलोकने आणि रेटिंग',
+    contactBtn: 'ठेकेदाराशी संपर्क साधा',
+    companyInfoTitle: 'कंपनीचा आढावा',
+    gstinLabel: 'जीएसटीआयएन (GSTIN)',
+    panLabel: 'पॅन (PAN)',
+    addressLabel: 'पत्ता',
+    statesLabel: 'कामकाजाची राज्ये',
+    workforceTitle: 'कामगार क्षमता',
+    totalWorkers: 'एकूण कामगार',
+    skilledWorkers: 'कुशल कामगार',
+    unskilledWorkers: 'अकुशल कामगार',
+    licensesTitle: 'अनुपालन आणि नोंदणी',
+    licenseType: 'कागदपत्र / परवाना',
+    licenseNumber: 'परवाना क्रमांक',
+    validTill: 'पर्यंत वैध',
+    projectsTitle: 'मागील प्रकल्प आणि इतिहास',
+    reviewsTitle: 'व्यवसाय रेटिंग आणि अभिप्राय',
+    contactModalTitle: 'चौकशी पाठवा',
+    contactModalSub: 'प्रकल्प कामगारांच्या गरजांवर चर्चा करण्यासाठी थेट संपर्क साधा.',
+    subjectLabel: 'विषय',
+    messageLabel: 'संदेश आणि प्रकल्प गरजा',
+    sendBtn: 'संदेश पाठवा',
+    sendingBtn: 'पाठवत आहे…',
+    enquirySentSuccess: 'चौकशी यशस्वीरित्या पाठवली!',
+  },
+  businessDashboard: {
+    welcome: 'पुन्हा स्वागत आहे',
+    subtitle: 'तुमच्या ठेकेदार चौकशा व्यवस्थापित करा आणि सत्यापित टीम्स शोधा.',
+    statEnquiries: 'एकूण चौकशा',
+    statSaved: 'जतन केलेले प्रोफाइल',
+    statHired: 'सक्रिय कंत्राट',
+    searchHeroTitle: 'कामगार ठेकेदारांची गरज आहेका?',
+    searchHeroSub: 'तुमच्या प्लांट, कारखान्यासाठी किंवा प्रकल्पासाठी सत्यापित ठेकेदार शोधा.',
+    recentEnquiriesTitle: 'अलीकडील चौकशा',
+    viewAllEnquiries: 'सर्व चौकशा पहा',
+    contractorCol: 'ठेकेदार',
+    dateCol: 'तारीख',
+    statusCol: 'स्थिती',
+    actionCol: 'कृती',
+    noEnquiries: 'अद्याप कोणतीही चौकशी पाठवली नाही. ठेकेदारांशी संपर्क साधण्यासाठी शोध सुरू करा!',
+  },
+  contractorDashboard: {
+    welcome: 'पुन्हा स्वागत आहे',
+    subtitle: 'तुमचे सत्यापित व्यवसाय प्रोफाइल आणि ग्राहक चौकशा व्यवस्थापित करा.',
+    profileStatusTitle: 'प्रोफाइल स्थिती',
+    verificationStatus: 'सत्यापन स्थिती',
+    verified: 'सत्यापित प्रोफाइल',
+    pendingVerification: 'सत्यापन प्रलंबित',
+    incomplete: 'अपूर्ण प्रोफाइल',
+    completenessLabel: 'प्रोफाइल पूर्णता',
+    completeOnboardingBtn: 'ऑनबोर्डिंग प्रोफाइल पूर्ण करा',
+    statEnquiriesReceived: 'मिळालेल्या चौकशा',
+    statProfileViews: 'प्रोफाइल व्ह्यूज',
+    recentEnquiriesTitle: 'प्राप्त चौकशा',
+    viewDetails: 'तपशील पहा',
+  },
+  enquiries: {
+    pageTitle: 'चौकशा',
+    pageSubtitle: 'व्यवसाय आणि ठेकेदारांमधील संदेश आणि संवाद ट्रॅक करा.',
+    allTab: 'सर्व चौकशा',
+    pendingTab: 'प्रलंबित',
+    respondedTab: 'उत्तर दिलेले',
+    closedTab: 'बंद',
+    statusPending: 'प्रलंबित',
+    statusResponded: 'उत्तर दिलेले',
+    statusClosed: 'बंद',
+    subject: 'विषय',
+    date: 'तारीख',
+    messageHistory: 'संदेश इतिहास',
+    typeReplyPlaceholder: 'तुमचे उत्तर येथे लिहा...',
+    sendReplyBtn: 'उत्तर पाठवा',
+    sendingReply: 'पाठवत आहे...',
+    updateStatusBtn: 'स्थिती अपडेट करा',
+    emptyEnquiries: 'या प्रकारात कोणतीही चौकशी सापडली नाही.',
+  },
+  onboarding: {
+    pageTitle: 'तुमचे व्यवसाय प्रोफाइल पूर्ण करा',
+    pageSubtitle: 'क्रैलीवर तुमचे सत्यापित बॅज मिळवण्यासाठी अधिकृत व्यवसाय तपशील प्रदान करा.',
+    stepCompany: 'व्यवसाय माहिती',
+    stepDetails: 'कामगार आणि क्षमता',
+    stepDocs: 'कागदपत्रे आणि पडताळणी',
+    companyName: 'कंपनी / व्यवसायाचे नाव',
+    stateOfOperation: 'कामकाजाची राज्ये',
+    gstin: 'जीएसटीआयएन नोंदणी क्रमांक',
+    pan: 'पॅन क्रमांक',
+    workforceCapacity: 'एकूण कामगार क्षमता',
+    categories: 'श्रेणी आणि सेवा',
+    saveAndContinue: 'जतन करा आणि पुढे जा',
+    submitting: 'जतन करत आहे...',
+    completeSetup: 'सेटअप पूर्ण करा',
+  },
+  notifications: {
+    pageTitle: 'सूचना',
+    markAllRead: 'सर्व वाचलेले म्हणून चिन्हांकित करा',
+    emptyState: 'यावेळी कोणतीही सूचना नाही.',
+    newEnquiry: 'नवीन चौकशी प्राप्त झाली',
+  },
+  common: {
+    loading: 'लोड होत आहे...',
+    error: 'काहीतरी चुकले',
+    tryAgain: 'पुन्हा प्रयत्न करा',
+    back: 'मागे',
+    save: 'जतन करा',
+    cancel: 'रद्द करा',
+    close: 'बंद करा',
   },
 };
 

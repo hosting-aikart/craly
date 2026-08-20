@@ -9,9 +9,10 @@ export interface ContractorListing {
   state: string | null;
   years_experience: number | null;
   workforce_size: number | null;
-  verification_status: 'pending' | 'verified' | 'rejected';
   categories: Category[];
 }
+
+export type ContractorDetail = ContractorListing;
 
 export interface ContractorListParams {
   page?: number;
@@ -19,6 +20,8 @@ export interface ContractorListParams {
   city?: string;
   category?: string;
   q?: string;
+  minExperience?: number;
+  minWorkforce?: number;
 }
 
 export function listContractors(params: ContractorListParams = {}) {
@@ -28,11 +31,15 @@ export function listContractors(params: ContractorListParams = {}) {
   if (params.city) search.set('city', params.city);
   if (params.category) search.set('category', params.category);
   if (params.q) search.set('q', params.q);
+  if (params.minExperience) search.set('minExperience', String(params.minExperience));
+  if (params.minWorkforce) search.set('minWorkforce', String(params.minWorkforce));
 
   const qs = search.toString();
   return apiGet<{ data: ContractorListing[]; page: number; limit: number }>(
     `/contractors${qs ? `?${qs}` : ''}`,
   );
 }
+
+export const getContractor = (id: string) => apiGet<{ data: ContractorDetail }>(`/contractors/${id}`);
 
 export const listCategories = () => apiGet<{ data: Category[] }>('/categories');

@@ -1,21 +1,46 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { listContractors, listCategories, type ContractorListing } from '@/lib/api/contractors';
 import type { Category } from '@/lib/api/profile';
+import SearchBar from '@/components/SearchBar';
+import FilterPanel from '@/components/FilterPanel';
+import ContractorCard from '@/components/ContractorCard';
+import EmptyState from '@/components/ui/EmptyState';
+import LoadingState from '@/components/ui/LoadingState';
+import Button from '@/components/ui/Button';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import './contractors.css';
 
 export default function ContractorsPage() {
+  const { t } = useLanguage();
+  return (
+    <Suspense fallback={<div className="directory"><LoadingState cards={6} label={t.common.loading} /></div>}>
+      <ContractorsPageInner />
+    </Suspense>
+  );
+}
+
+function ContractorsPageInner() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') ?? '';
+  const { t } = useLanguage();
+
   const [contractors, setContractors] = useState<ContractorListing[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState(initialQuery);
   const [city, setCity] = useState('');
   const [category, setCategory] = useState('');
+  const [minExperience, setMinExperience] = useState('');
+  const [minWorkforce, setMinWorkforce] = useState('');
   const [page, setPage] = useState(1);
   const limit = 12;
+
+  const hasActiveFilters = Boolean(city || category || minExperience || minWorkforce);
 
   useEffect(() => {
     listCategories()
@@ -27,94 +52,84 @@ export default function ContractorsPage() {
     setLoading(true);
     setError('');
 
-    listContractors({ q: q || undefined, city: city || undefined, category: category || undefined, page, limit })
+    listContractors({
+      q: q || undefined,
+      city: city || undefined,
+      category: category || undefined,
+      minExperience: minExperience ? Number(minExperience) : undefined,
+      minWorkforce: minWorkforce ? Number(minWorkforce) : undefined,
+      page,
+      limit,
+    })
       .then(({ data }) => setContractors(data))
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load contractors.'))
+      .catch((err) => setError(err instanceof Error ? err.message : t.common.error))
       .finally(() => setLoading(false));
-  }, [q, city, category, page]);
+  }, [q, city, category, minExperience, minWorkforce, page, t.common.error]);
+
+  const clearFilters = () => {
+    setCity('');
+    setCategory('');
+    setMinExperience('');
+    setMinWorkforce('');
+    setPage(1);
+  };
 
   return (
     <div className="directory">
       <div className="directory__header">
-        <p className="directory__eyebrow">CONTRACTOR DIRECTORY</p>
-        <h1 className="directory__heading">Find the Right Verified Contractor</h1>
+        <p className="directory__eyebrow">{t.nav.contractors.toUpperCase()}</p>
+        <h1 className="directory__heading">{t.contractors.pageTitle}</h1>
         <p className="directory__subtext">
-          Every profile below has been verified by Craly — browse, filter, and reach out with confidence.
+          {t.contractors.pageSubtitle}
         </p>
       </div>
 
-      <div className="directory__filters">
-        <input
-          type="text"
-          className="directory__search"
-          placeholder="Search by company name…"
+      <div className="directory__controls">
+        <SearchBar
           value={q}
-          onChange={(e) => { setPage(1); setQ(e.target.value); }}
+          onChange={(v) => { setPage(1); setQ(v); }}
+          placeholder={t.contractors.searchPlaceholder}
         />
-        <input
-          type="text"
-          className="directory__city"
-          placeholder="City"
-          value={city}
-          onChange={(e) => { setPage(1); setCity(e.target.value); }}
+        <FilterPanel
+          city={city}
+          onCityChange={(v) => { setPage(1); setCity(v); }}
+          category={category}
+          onCategoryChange={(v) => { setPage(1); setCategory(v); }}
+          categories={categories}
+          minExperience={minExperience}
+          onMinExperienceChange={(v) => { setPage(1); setMinExperience(v); }}
+          minWorkforce={minWorkforce}
+          onMinWorkforceChange={(v) => { setPage(1); setMinWorkforce(v); }}
+          onClear={clearFilters}
+          hasActiveFilters={hasActiveFilters}
         />
-        <select
-          className="directory__category"
-          value={category}
-          onChange={(e) => { setPage(1); setCategory(e.target.value); }}
-        >
-          <option value="">All Categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.slug}>{c.name}</option>
-          ))}
-        </select>
       </div>
 
       {loading ? (
-        <p className="directory__status">Loading contractors…</p>
+        <LoadingState cards={limit > 6 ? 6 : limit} label={t.common.loading} />
       ) : error ? (
-        <p className="directory__status directory__status--error">{error}</p>
+        <EmptyState title={t.common.error} subtitle={error} />
       ) : contractors.length === 0 ? (
-        <p className="directory__status">No verified contractors match those filters yet.</p>
+        <EmptyState
+          title={t.contractors.noResultsTitle}
+          subtitle={t.contractors.noResultsDesc}
+          action={hasActiveFilters ? <Button variant="secondary" size="sm" onClick={clearFilters}>{t.contractors.clearFilters}</Button> : undefined}
+        />
       ) : (
         <div className="directory__grid">
           {contractors.map((c) => (
-            <div className="contractor-card" key={c.id}>
-              <div className="contractor-card__top">
-                <h3>{c.company_name}</h3>
-                <span className="contractor-card__verified">✓ Verified</span>
-              </div>
-
-              {(c.city || c.state) && (
-                <p className="contractor-card__location">
-                  📍 {[c.city, c.state].filter(Boolean).join(', ')}
-                </p>
-              )}
-
-              {c.description && <p className="contractor-card__desc">{c.description}</p>}
-
-              <div className="contractor-card__stats">
-                {c.years_experience != null && <span>{c.years_experience}+ yrs experience</span>}
-                {c.workforce_size != null && <span>{c.workforce_size} workforce</span>}
-              </div>
-
-              {c.categories.length > 0 && (
-                <div className="contractor-card__tags">
-                  {c.categories.map((cat) => (
-                    <span key={cat.id} className="contractor-card__tag">{cat.name}</span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ContractorCard key={c.id} contractor={c} />
           ))}
         </div>
       )}
 
-      <div className="directory__pagination">
-        <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>‹ Previous</button>
-        <span>Page {page}</span>
-        <button disabled={contractors.length < limit} onClick={() => setPage((p) => p + 1)}>Next ›</button>
-      </div>
+      {!loading && !error && contractors.length > 0 && (
+        <div className="directory__pagination">
+          <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>‹ {t.contractors.prevPage}</button>
+          <span>{t.contractors.pageOf} {page}</span>
+          <button disabled={contractors.length < limit} onClick={() => setPage((p) => p + 1)}>{t.contractors.nextPage} ›</button>
+        </div>
+      )}
     </div>
   );
 }
