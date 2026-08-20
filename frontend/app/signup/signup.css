@@ -1,7 +1,4 @@
-/*!*****************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./app/login/login.css ***!
-  \*****************************************************************************************************************************************************************************************************************************************************************/
-.login-page {
+.signup-page {
   min-height: calc(100vh - 68px);
   display: flex;
   align-items: center;
@@ -10,7 +7,7 @@
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
-.login-page__wrap {
+.signup-page__wrap {
   max-width: 980px;
   width: 100%;
   display: flex;
@@ -21,7 +18,7 @@
 
 /* ---------------- Left: dark brand panel ---------------- */
 
-.login-panel {
+.signup-panel {
   flex: 1 1 380px;
   background: linear-gradient(160deg, #0f766e 0%, #0b3b38 55%, #0f172a 100%);
   padding: 48px 40px;
@@ -31,25 +28,25 @@
   color: #ffffff;
 }
 
-.login-panel__brand {
+.signup-panel__brand {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 48px;
 }
 
-.login-panel__brand img {
+.signup-panel__brand img {
   width: 26px;
   height: auto;
 }
 
-.login-panel__brand span {
+.signup-panel__brand span {
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
 }
 
-.login-panel__eyebrow {
+.signup-panel__eyebrow {
   color: #5eead4;
   font-family: var(--font-body);
   font-weight: 600;
@@ -59,7 +56,7 @@
   margin: 0 0 16px;
 }
 
-.login-panel__heading {
+.signup-panel__heading {
   font-family: var(--font-display);
   font-size: 32px;
   font-weight: 600;
@@ -67,14 +64,13 @@
   margin: 0 0 40px;
 }
 
-.login-panel__roles {
+.signup-panel__roles {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-gap: 14px;
   gap: 14px;
 }
 
-.login-panel__role-card {
+.signup-panel__role-card {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
@@ -82,18 +78,18 @@
   color: #ffffff;
 }
 
-.login-panel__role-card svg {
+.signup-panel__role-card svg {
   margin-bottom: 10px;
 }
 
-.login-panel__role-card h4 {
+.signup-panel__role-card h4 {
   font-family: var(--font-display);
   font-size: 14.5px;
   font-weight: 600;
   margin: 0 0 4px;
 }
 
-.login-panel__role-card p {
+.signup-panel__role-card p {
   font-family: var(--font-body);
   font-size: 12.5px;
   color: rgba(255, 255, 255, 0.65);
@@ -101,7 +97,7 @@
   margin: 0;
 }
 
-.login-panel__security {
+.signup-panel__security {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -110,19 +106,19 @@
   font-size: 13px;
 }
 
-.login-panel__security svg {
+.signup-panel__security svg {
   flex-shrink: 0;
 }
 
 /* ---------------- Right: white form panel ---------------- */
 
-.login-form-panel {
+.signup-form-panel {
   flex: 1 1 420px;
   background: #ffffff;
   padding: 48px 40px;
 }
 
-.login-form-panel__eyebrow {
+.signup-form-panel__eyebrow {
   color: #0f766e;
   font-family: var(--font-body);
   font-weight: 600;
@@ -132,7 +128,7 @@
   margin: 0 0 10px;
 }
 
-.login-form-panel__heading {
+.signup-form-panel__heading {
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: 700;
@@ -140,26 +136,68 @@
   margin: 0 0 28px;
 }
 
-.login-fields {
+.signup-fields {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.login-field {
+/* ---------------- Role picker ---------------- */
+
+.signup-role-picker {
+  display: flex;
+  gap: 12px;
+}
+
+.signup-role-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: var(--font-body);
+}
+
+.signup-role-option span:first-child {
+  font-size: 22px;
+}
+
+.signup-role-option span:last-child {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.signup-role-option:hover {
+  border-color: #99f6e4;
+}
+
+.signup-role-option--active {
+  border-color: #0f766e;
+  background: #ccfbf1;
+  color: #0b5c56;
+}
+
+.signup-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.login-field span {
+.signup-field span {
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 500;
   color: #374151;
 }
 
-.login-field__input {
+.signup-field__input {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -171,18 +209,18 @@
   transition: 0.2s;
 }
 
-.login-field__input:focus-within {
+.signup-field__input:focus-within {
   border-color: #0f766e;
   background: #ffffff;
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
 }
 
-.login-field__input svg {
+.signup-field__input svg {
   flex-shrink: 0;
 }
 
-.login-field__input input {
-  flex: 1 1;
+.signup-field__input input {
+  flex: 1;
   border: none;
   outline: none;
   background: none;
@@ -191,24 +229,11 @@
   color: #111827;
 }
 
-.login-field__input input::placeholder {
+.signup-field__input input::placeholder {
   color: #9ca3af;
 }
 
-.login-forgot {
-  align-self: flex-end;
-  font-family: var(--font-body);
-  font-size: 13.5px;
-  color: #0f766e;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.login-forgot:hover {
-  text-decoration: underline;
-}
-
-.login-error {
+.signup-error {
   color: #dc2626;
   font-family: var(--font-body);
   font-size: 14px;
@@ -219,7 +244,7 @@
   margin: 0;
 }
 
-.login-submit {
+.signup-submit {
   padding: 15px;
   border-radius: 10px;
   background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
@@ -234,89 +259,57 @@
   box-shadow: 0 14px 28px rgba(15, 118, 110, 0.28);
 }
 
-.login-submit:hover:not(:disabled) {
+.signup-submit:hover:not(:disabled) {
   background: linear-gradient(135deg, #0b5c56 0%, #0b3b38 100%);
 }
 
-.login-submit:disabled {
+.signup-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.login-new {
-  margin-top: 28px;
-  padding: 18px;
-  border-radius: 14px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
-.login-new p {
+.signup-footer-link {
+  margin-top: 22px;
+  text-align: center;
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 12px;
+  font-size: 14px;
+  color: #6b7280;
 }
 
-.login-new__grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 10px;
-  gap: 10px;
-}
-
-.login-new__chip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
+.signup-footer-link a {
+  color: #0f766e;
   text-decoration: none;
-  transition: 0.2s;
+  font-weight: 600;
 }
 
-.login-new__chip svg {
-  color: #0f766e;
-  flex-shrink: 0;
-}
-
-.login-new__chip:hover {
-  border-color: #0f766e;
-  color: #0f766e;
+.signup-footer-link a:hover {
+  text-decoration: underline;
 }
 
 /* ---------------- Responsive ---------------- */
 
 @media (max-width: 900px) {
-  .login-page__wrap {
+  .signup-page__wrap {
     flex-direction: column;
     border-radius: 20px;
   }
 
-  .login-panel__roles {
+  .signup-panel__roles {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 600px) {
-  .login-page {
+  .signup-page {
     padding: 32px 16px;
   }
 
-  .login-panel,
-  .login-form-panel {
+  .signup-panel,
+  .signup-form-panel {
     padding: 32px 24px;
   }
 
-  .login-new__grid {
-    grid-template-columns: 1fr;
+  .signup-role-picker {
+    flex-direction: column;
   }
 }
-
