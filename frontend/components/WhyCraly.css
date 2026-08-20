@@ -167,10 +167,11 @@
 
     .why-craly__helmet-wrap{
         position: absolute;
-        left: 20%;
-        right: 20%;
-        top: 4%;
-        width: auto;
+        left: 8%;
+        right: 8%;
+        top: 2%;
+        width: 84%;
+        margin: 0 auto;
         transform: none !important;
         transition: none;
     }

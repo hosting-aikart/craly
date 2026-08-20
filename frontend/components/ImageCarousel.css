@@ -77,27 +77,32 @@
 
 .carousel-nav {
   display: flex;
-  justify-content: flex-end;
-  gap: 14px;
-  margin-top: 24px;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
 }
 
 .carousel-nav button {
   width: 48px;
   height: 48px;
-  border: none;
+  border: 1px solid rgba(45, 212, 191, 0.4);
   border-radius: 50%;
-  background: white;
-  color: #16a34a;
-  font-size: 24px;
+  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: 0.2s;
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.35);
 }
 
 .carousel-nav button:hover {
-  transform: translateY(-2px);
-  background: #f8f8f8;
+  transform: translateY(-3px) scale(1.06);
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  box-shadow: 0 12px 28px rgba(15, 118, 110, 0.5);
 }
 
 @media (max-width: 992px) {

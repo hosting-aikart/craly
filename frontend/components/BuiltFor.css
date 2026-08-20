@@ -56,6 +56,7 @@
 
 .built-for__caption {
   animation: fade-in 0.5s ease;
+  text-align: left;
 }
 
 .built-for__title {
@@ -74,28 +75,34 @@
 
 .built-for__nav {
   display: flex;
-  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 0;
   flex-shrink: 0;
 }
 
 .built-for__nav button {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 22px;
+  font-weight: 600;
   cursor: pointer;
-  color: #fff;
-
-  /* glassmorphism */
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: background 0.2s ease;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.35);
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .built-for__nav button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px) scale(1.06);
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  box-shadow: 0 12px 28px rgba(15, 118, 110, 0.5);
 }
 
 @media (max-width: 900px) {
@@ -130,6 +137,12 @@
   .built-for__footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 20px;
+    text-align: left;
+  }
+
+  .built-for__nav {
+    justify-content: center;
+    width: 100%;
   }
 }
