@@ -37,6 +37,11 @@ export default function OnboardingPage() {
       return;
     }
 
+    if (user.role === 'staff' || user.role === 'admin' || user.role === 'ops_head' || user.role === 'field_staff') {
+      router.replace(user.role === 'admin' ? '/admin/dashboard' : '/staff/dashboard');
+      return;
+    }
+
     (async () => {
       try {
         if (user.role === 'contractor') {

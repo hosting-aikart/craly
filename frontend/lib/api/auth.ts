@@ -2,7 +2,7 @@ import { apiGet, apiPost } from '@/lib/api';
 
 // 'contractor' stays in the union for legacy account records/typing, even
 // though it's no longer a signup-able role — see docs/open-decisions.md.
-export type UserRole = 'contractor' | 'business' | 'admin' | 'ops_head' | 'field_staff';
+export type UserRole = 'contractor' | 'business' | 'admin' | 'ops_head' | 'field_staff' | 'staff';
 
 export interface AuthUser {
   id: string;

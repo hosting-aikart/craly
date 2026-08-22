@@ -92,7 +92,11 @@ export default function NotificationBell() {
       setUnreadCount((c) => Math.max(0, c - 1));
     }
     if (n.reference_id) {
-      router.push(user.role === 'contractor' ? `/contractor/enquiries/${n.reference_id}` : `/business/enquiries/${n.reference_id}`);
+      if (user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff') {
+        router.push('/staff/engagements');
+      } else {
+        router.push(user.role === 'contractor' ? `/contractor/enquiries/${n.reference_id}` : `/business/enquiries/${n.reference_id}`);
+      }
     }
   };
 
@@ -101,6 +105,15 @@ export default function NotificationBell() {
     setUnreadCount(0);
     await markAllNotificationsRead().catch(() => {});
   };
+
+  const notifViewAllHref =
+    user.role === 'admin'
+      ? '/admin/notifications'
+      : user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff'
+        ? '/staff/notifications'
+        : user.role === 'contractor'
+          ? '/contractor-portal/dashboard'
+          : '/business/notifications';
 
   return (
     <div className="notif-bell" ref={rootRef}>
@@ -153,7 +166,7 @@ export default function NotificationBell() {
           )}
 
           <Link
-            href={user.role === 'admin' ? '/admin/notifications' : user.role === 'contractor' ? '/contractor/notifications' : '/business/notifications'}
+            href={notifViewAllHref}
             className="notif-bell__view-all"
             onClick={() => setOpen(false)}
           >

@@ -1,0 +1,151 @@
+.staff-engagements-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 0;
+}
+
+.engagements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.engagement-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.engagement-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.engagement-requirement-loc {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+
+.engagement-requirement-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.engagement-status-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.engagement-status--selected {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.engagement-status--contacting {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.engagement-status--discussion {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.engagement-status--confirmed {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.engagement-status--closed {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.engagement-status--default {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.status-dropdown {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.engagement-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  background: #f8fafc;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+.engagement-party-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.party-lbl {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.party-name {
+  font-size: 15px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.party-sub {
+  font-size: 12px;
+  color: #475569;
+}
+
+.engagement-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .engagement-card__header {
+    flex-direction: column;
+  }
+
+  .engagement-status-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
