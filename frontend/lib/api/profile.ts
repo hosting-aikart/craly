@@ -10,11 +10,13 @@ export interface ContractorProfile {
   role: 'contractor';
   id: string;
   company_name: string;
+  phone?: string | null;
   description: string | null;
   city: string | null;
   state: string | null;
   years_experience: number | null;
   workforce_size: number | null;
+  availability?: string | null;
   verification_status: 'pending' | 'verified' | 'rejected';
   verification_note: string | null;
   onboarding_complete: boolean;

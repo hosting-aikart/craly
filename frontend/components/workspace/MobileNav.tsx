@@ -11,7 +11,7 @@ import './MobileNav.css';
 const helmetLogo = '/assets/helmet.png';
 
 interface MobileNavProps {
-  role: 'business' | 'contractor' | 'admin';
+  role: 'business' | 'contractor' | 'admin' | 'contractor-portal';
   companyName: string;
   isOpen?: boolean;
   onClose?: () => void;
@@ -37,11 +37,15 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
 
-  // Contractors have no login in Phase 1 (see docs/open-decisions.md) — the
-  // 'contractor' role value here means Ops Head / Field Staff acting on a
-  // contractor's behalf, so it only points at what still exists.
   const isStaff = role === 'contractor';
-  const dashboardPath = role === 'business' ? '/business/dashboard' : role === 'admin' ? '/admin/dashboard' : '/contractor/dashboard';
+  const dashboardPath =
+    role === 'business'
+      ? '/business/dashboard'
+      : role === 'admin'
+        ? '/admin/dashboard'
+        : role === 'contractor-portal'
+          ? '/contractor-portal/dashboard'
+          : '/contractor/dashboard';
   const enquiriesPath = role === 'business' ? '/business/enquiries' : '/contractor/enquiries';
   const inboxPath = role === 'business' ? '/business/inbox' : '/contractor/inbox';
   const notificationsPath = role === 'business' ? '/business/notifications' : '/notifications';

@@ -1,0 +1,134 @@
+.contractor-profile-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.contractor-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.contractor-profile-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.contractor-profile-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.contractor-profile-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.contractor-profile-alert--success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.contractor-profile-alert--error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.contractor-profile-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.contractor-profile-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.contractor-profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.contractor-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contractor-profile-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.contractor-profile-field input,
+.contractor-profile-field textarea {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.contractor-profile-field input:focus,
+.contractor-profile-field textarea:focus {
+  border-color: #2563eb;
+}
+
+.contractor-profile-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.contractor-profile-save-btn {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.contractor-profile-save-btn:hover {
+  background: #1e293b;
+}
+
+.contractor-profile-save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .contractor-profile-page {
+    padding: 16px;
+  }
+  
+  .contractor-profile-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

@@ -10,7 +10,19 @@ export interface AuthUser {
   role: UserRole;
 }
 
-export const signup = (input: { email: string; password: string; role: 'business'; companyName: string }) =>
+export interface SignupInput {
+  email: string;
+  password: string;
+  role: 'business' | 'contractor';
+  companyName: string;
+  mobile?: string;
+  city?: string;
+  state?: string;
+  workforceSize?: number;
+  yearsExperience?: number;
+}
+
+export const signup = (input: SignupInput) =>
   apiPost<{ data: AuthUser }>('/auth/signup', input);
 
 export const login = (input: { email: string; password: string }) =>

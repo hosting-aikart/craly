@@ -11,7 +11,7 @@ import { listNotifications } from '@/lib/api/notifications';
 import './Sidebar.css';
 
 interface SidebarProps {
-  role: 'business' | 'contractor';
+  role: 'business' | 'contractor' | 'contractor-portal';
   companyName: string;
 }
 
@@ -114,15 +114,7 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     },
   ];
 
-  // Contractors have no login (Phase 1 — see docs/open-decisions.md); this
-  // nav is now Ops Head / Field Staff acting on a contractor's behalf. The
-  // primary sections are the Field Staff workspace (Dashboard, Contractor
-  // Requests, Contractors, My Activity, Profile, Settings); Enquiries/Inbox
-  // stay in a secondary group since that brokerage feature already existed
-  // and isn't part of the field-staff-module exclusion list. No links here
-  // ever point at manufacturer/revenue/subscription/verification-approval/
-  // admin-settings screens — those live only under /admin.
-  const contractorNav: NavGroup[] = [
+  const contractorStaffNav: NavGroup[] = [
     {
       group: t.sidebarGroups.main,
       items: [
@@ -148,11 +140,46 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     },
   ];
 
-  const navGroups = role === 'business' ? businessNav : contractorNav;
+  const contractorPortalNav: NavGroup[] = [
+    {
+      group: t.sidebarGroups.main,
+      items: [
+        { label: t.nav.dashboard, href: '/contractor-portal/dashboard', icon: '📊' },
+        { label: 'Opportunities', href: '/contractor-portal/opportunities', icon: '🎯' },
+        { label: 'My Applications', href: '/contractor-portal/applications', icon: '📥' },
+      ],
+    },
+    {
+      group: t.sidebarGroups.account,
+      items: [
+        { label: t.nav.companyProfile, href: '/contractor-portal/profile', icon: '🏢' },
+        { label: t.nav.settings, href: '/contractor-portal/settings', icon: '⚙️' },
+      ],
+    },
+  ];
+
+  const navGroups =
+    role === 'business'
+      ? businessNav
+      : role === 'contractor-portal'
+        ? contractorPortalNav
+        : contractorStaffNav;
 
   const handleLogout = async () => {
     await logout();
     router.push('/login');
+  };
+
+  const getBadgeLabel = () => {
+    if (role === 'business') return 'MANUFACTURER';
+    if (role === 'contractor-portal') return 'CONTRACTOR';
+    return 'STAFF';
+  };
+
+  const getRoleUserText = () => {
+    if (role === 'business') return 'Manufacturer Account';
+    if (role === 'contractor-portal') return 'Contractor Account';
+    return 'Internal Staff';
   };
 
   return (
@@ -161,7 +188,7 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
         <Link href="/" className="workspace-sidebar__logo">
           <img src={helmetLogo} alt="Craly" className="workspace-sidebar__logo-img" />
           <span className="workspace-sidebar__logo-craly">Craly</span>
-          <span className="workspace-sidebar__logo-badge">{role === 'business' ? 'MANUFACTURER' : 'STAFF'}</span>
+          <span className="workspace-sidebar__logo-badge">{getBadgeLabel()}</span>
         </Link>
       </div>
 
@@ -199,7 +226,7 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
           </div>
           <div className="workspace-sidebar__user-info">
             <strong className="workspace-sidebar__user-name">{companyName}</strong>
-            <span className="workspace-sidebar__user-role">{role === 'business' ? 'Manufacturer Account' : 'Internal Staff'}</span>
+            <span className="workspace-sidebar__user-role">{getRoleUserText()}</span>
           </div>
         </div>
         <button

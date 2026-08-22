@@ -13,7 +13,7 @@ import './WorkspaceHeader.css';
 interface WorkspaceHeaderProps {
   title?: string;
   subtitle?: string;
-  userRole: 'business' | 'contractor';
+  userRole: 'business' | 'contractor' | 'contractor-portal';
   companyName: string;
   onMobileMenuToggle?: () => void;
   action?: React.ReactNode;
@@ -66,6 +66,12 @@ export default function WorkspaceHeader({
     router.push('/login');
   };
 
+  const getRoleLabel = () => {
+    if (userRole === 'business') return 'Manufacturer Account';
+    if (userRole === 'contractor-portal') return 'Contractor Account';
+    return 'Internal Staff';
+  };
+
   return (
     <header className="workspace-header">
       <div className="workspace-header__left">
@@ -99,9 +105,7 @@ export default function WorkspaceHeader({
             </div>
             <div className="workspace-header__user-meta">
               <strong className="workspace-header__company">{companyName}</strong>
-              <span className="workspace-header__role-tag">
-                {userRole === 'contractor' ? 'Internal Staff' : 'Manufacturer Account'}
-              </span>
+              <span className="workspace-header__role-tag">{getRoleLabel()}</span>
             </div>
             <span className="workspace-header__caret">▾</span>
           </button>
@@ -114,16 +118,41 @@ export default function WorkspaceHeader({
                 </div>
                 <div className="workspace-header__dropdown-meta">
                   <strong>{companyName}</strong>
-                  <span>
-                    {userRole === 'contractor' ? 'Internal Staff' : 'Manufacturer Account'}
-                  </span>
+                  <span>{getRoleLabel()}</span>
                 </div>
               </div>
 
               <div className="workspace-header__dropdown-divider" />
 
               <div className="workspace-header__dropdown-menu">
-                {userRole === 'contractor' ? (
+                {userRole === 'contractor-portal' ? (
+                  <>
+                    <Link
+                      href="/contractor-portal/profile"
+                      className="workspace-header__dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <span className="workspace-header__dropdown-icon">🏢</span>
+                      <span>{t.nav.companyProfile || 'Company Profile'}</span>
+                    </Link>
+                    <Link
+                      href="/contractor-portal/settings"
+                      className="workspace-header__dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <span className="workspace-header__dropdown-icon">⚙️</span>
+                      <span>{t.nav.settings || 'Settings'}</span>
+                    </Link>
+                    <Link
+                      href="/contractor-portal/dashboard"
+                      className="workspace-header__dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <span className="workspace-header__dropdown-icon">📊</span>
+                      <span>{t.nav.dashboard || 'Dashboard'}</span>
+                    </Link>
+                  </>
+                ) : userRole === 'contractor' ? (
                   <Link
                     href="/contractor/enquiries"
                     className="workspace-header__dropdown-item"

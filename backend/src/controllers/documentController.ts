@@ -74,7 +74,7 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
         uploaded_by, issue_date, expiry_date, certification_assessment_id, status
       ) VALUES (
         ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
-        ${validation.mimeType}, ${req.file.size}, ${req.user!.sub},
+        ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
         ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending'
       )
       RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at

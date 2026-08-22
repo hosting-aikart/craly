@@ -28,6 +28,8 @@ export default function LoginPage() {
         router.replace('/admin/dashboard');
       } else if (user.role === 'business') {
         router.replace('/business/dashboard');
+      } else if (user.role === 'contractor') {
+        router.replace('/contractor-portal/dashboard');
       } else {
         router.replace('/contractor/dashboard');
       }
@@ -45,6 +47,11 @@ export default function LoginPage() {
 
       if (user.role === 'admin') {
         router.push('/admin/dashboard');
+        return;
+      }
+
+      if (user.role === 'contractor') {
+        router.push('/contractor-portal/dashboard');
         return;
       }
 

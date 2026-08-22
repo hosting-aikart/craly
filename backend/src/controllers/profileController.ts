@@ -15,8 +15,8 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
 
     if (role === 'contractor') {
       const [profile] = await sql`
-        SELECT id, company_name, description, city, state, years_experience,
-               workforce_size, verification_status, verification_note,
+        SELECT id, company_name, phone, description, city, state, years_experience,
+               workforce_size, availability, verification_status, verification_note,
                onboarding_complete
         FROM contractor_profiles WHERE user_id = ${userId}
       `;

@@ -6,8 +6,13 @@ import { z } from 'zod';
 export const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(['business']),
+  role: z.enum(['business', 'contractor']),
   companyName: z.string().min(1, 'Company name is required'),
+  mobile: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
+  yearsExperience: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
 });
 export type SignupInput = z.infer<typeof signupSchema>;
 

@@ -20,9 +20,8 @@ function setAuthCookie(res: Response, token: string): void {
 
 /**
  * POST /api/auth/signup
- * Creates a manufacturer (business) user plus their business_profiles row
- * in a single transaction, then logs them in. Contractors are no longer a
- * public signup path — see authValidators.ts.
+ * Creates a business or contractor user plus their profile row and organization membership
+ * in a single transaction, then logs them in.
  */
 export async function signup(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -32,7 +31,7 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
       err.statusCode = 400;
       return next(err);
     }
-    const { email, password, role, companyName } = parsed.data;
+    const { email, password, role, companyName, mobile, city, state, workforceSize, yearsExperience } = parsed.data;
 
     const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
     if (existing.length > 0) {
@@ -45,15 +44,41 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
 
     const user = await sql.begin(async (tx) => {
       const [newUser] = await tx`
-        INSERT INTO users (email, password_hash, role)
-        VALUES (${email}, ${passwordHash}, ${role})
+        INSERT INTO users (email, password_hash, role, is_active)
+        VALUES (${email}, ${passwordHash}, ${role}, true)
         RETURNING id, email, role
       `;
 
-      await tx`
-        INSERT INTO business_profiles (user_id, company_name)
-        VALUES (${newUser.id}, ${companyName})
-      `;
+      if (role === 'contractor') {
+        const [cProfile] = await tx`
+          INSERT INTO contractor_profiles (
+            user_id, company_name, phone, city, state, workforce_size, years_experience, verification_status
+          )
+          VALUES (
+            ${newUser.id}, ${companyName}, ${mobile ?? null}, ${city ?? null}, ${state ?? null},
+            ${workforceSize ?? null}, ${yearsExperience ?? null}, 'pending'
+          )
+          RETURNING id
+        `;
+
+        await tx`
+          INSERT INTO organization_members (user_id, contractor_profile_id, org_role, status)
+          VALUES (${newUser.id}, ${cProfile.id}, 'admin', 'active')
+          ON CONFLICT DO NOTHING
+        `;
+      } else {
+        const [bProfile] = await tx`
+          INSERT INTO business_profiles (user_id, company_name, city, state)
+          VALUES (${newUser.id}, ${companyName}, ${city ?? null}, ${state ?? null})
+          RETURNING id
+        `;
+
+        await tx`
+          INSERT INTO organization_members (user_id, business_profile_id, org_role, status)
+          VALUES (${newUser.id}, ${bProfile.id}, 'admin', 'active')
+          ON CONFLICT DO NOTHING
+        `;
+      }
 
       return newUser;
     });

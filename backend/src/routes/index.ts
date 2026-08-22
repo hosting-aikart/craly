@@ -112,4 +112,9 @@ import fieldStaffRoutes from './fieldStaffRoutes';
 // ── Field Staff workspace: dashboard + activity log ──────────────────────────
 router.use('/field-staff', fieldStaffRoutes);
 
+import contractorPortalRoutes from './contractorPortalRoutes';
+
+// ── Contractor Portal: opportunities, applications, contractor workspace ──────
+router.use('/contractor-portal', contractorPortalRoutes);
+
 export default router;
