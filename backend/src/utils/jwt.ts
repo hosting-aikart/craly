@@ -5,7 +5,7 @@ import config from '../config/index';
 // (see docs/open-decisions.md) — added alongside the existing values rather
 // than replacing them, since 'contractor'/'business' still back the
 // self-service login flow elsewhere in the app.
-export type UserRole = 'contractor' | 'business' | 'admin' | 'ops_head' | 'field_staff';
+export type UserRole = 'contractor' | 'business' | 'admin' | 'ops_head' | 'field_staff' | 'staff';
 
 export interface AuthTokenPayload {
   sub: string; // user id

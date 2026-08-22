@@ -117,4 +117,9 @@ import contractorPortalRoutes from './contractorPortalRoutes';
 // ── Contractor Portal: opportunities, applications, contractor workspace ──────
 router.use('/contractor-portal', contractorPortalRoutes);
 
+import staffRoutes from './staffRoutes';
+
+// ── Craly Staff Workspace: contractors, engagements, notifications ──────────
+router.use('/staff', staffRoutes);
+
 export default router;

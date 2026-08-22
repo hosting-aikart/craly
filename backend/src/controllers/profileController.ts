@@ -54,16 +54,16 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    // Field Staff / Ops Head have no company profile — the Profile page
-    // just shows their internal account info (spec §1 "Profile" section).
-    if (role === 'field_staff' || role === 'ops_head') {
+    // Field Staff / Staff / Ops Head have no business profile — their profile
+    // response returns internal account info with onboarding_complete: true.
+    if (role === 'staff' || role === 'field_staff' || role === 'ops_head') {
       const [account] = await sql`SELECT id, email, created_at FROM users WHERE id = ${userId}`;
       if (!account) {
         const err: AppError = new Error('Account not found');
         err.statusCode = 404;
         return next(err);
       }
-      res.json({ data: { role, id: account.id, email: account.email, created_at: account.created_at, onboarding_complete: true } });
+      res.json({ data: { role, id: account.id, email: account.email, company_name: 'Craly Operations', created_at: account.created_at, onboarding_complete: true } });
       return;
     }
 

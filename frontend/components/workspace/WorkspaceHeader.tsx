@@ -13,7 +13,7 @@ import './WorkspaceHeader.css';
 interface WorkspaceHeaderProps {
   title?: string;
   subtitle?: string;
-  userRole: 'business' | 'contractor' | 'contractor-portal';
+  userRole: 'business' | 'contractor' | 'contractor-portal' | 'staff';
   companyName: string;
   onMobileMenuToggle?: () => void;
   action?: React.ReactNode;

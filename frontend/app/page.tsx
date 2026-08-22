@@ -23,8 +23,12 @@ export default function HomePage() {
     if (user) {
       if (user.role === 'admin') {
         router.replace('/admin/dashboard');
+      } else if (user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff') {
+        router.replace('/staff/dashboard');
       } else if (user.role === 'business') {
         router.replace('/business/dashboard');
+      } else if (user.role === 'contractor') {
+        router.replace('/contractor-portal/dashboard');
       } else {
         router.replace('/contractor/dashboard');
       }

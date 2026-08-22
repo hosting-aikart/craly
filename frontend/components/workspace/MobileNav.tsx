@@ -11,7 +11,7 @@ import './MobileNav.css';
 const helmetLogo = '/assets/helmet.png';
 
 interface MobileNavProps {
-  role: 'business' | 'contractor' | 'admin' | 'contractor-portal';
+  role: 'business' | 'contractor' | 'admin' | 'contractor-portal' | 'staff';
   companyName: string;
   isOpen?: boolean;
   onClose?: () => void;
@@ -43,9 +43,11 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
       ? '/business/dashboard'
       : role === 'admin'
         ? '/admin/dashboard'
-        : role === 'contractor-portal'
-          ? '/contractor-portal/dashboard'
-          : '/contractor/dashboard';
+        : role === 'staff'
+          ? '/staff/dashboard'
+          : role === 'contractor-portal'
+            ? '/contractor-portal/dashboard'
+            : '/contractor/dashboard';
   const enquiriesPath = role === 'business' ? '/business/enquiries' : '/contractor/enquiries';
   const inboxPath = role === 'business' ? '/business/inbox' : '/contractor/inbox';
   const notificationsPath = role === 'business' ? '/business/notifications' : '/notifications';

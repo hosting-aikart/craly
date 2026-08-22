@@ -11,7 +11,7 @@ import { listNotifications } from '@/lib/api/notifications';
 import './Sidebar.css';
 
 interface SidebarProps {
-  role: 'business' | 'contractor' | 'contractor-portal';
+  role: 'business' | 'contractor' | 'contractor-portal' | 'staff';
   companyName: string;
 }
 
@@ -158,12 +158,27 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     },
   ];
 
+  const staffNav: NavGroup[] = [
+    {
+      group: t.sidebarGroups.main,
+      items: [
+        { label: t.nav.dashboard, href: '/staff/dashboard', icon: '📊' },
+        { label: 'Contractors', href: '/staff/contractors', icon: '🏢' },
+        { label: '+ Add Contractor', href: '/staff/contractors/new', icon: '➕' },
+        { label: 'Engagements', href: '/staff/engagements', icon: '🤝' },
+        { label: 'Notifications', href: '/staff/notifications', icon: '🔔' },
+      ],
+    },
+  ];
+
   const navGroups =
     role === 'business'
       ? businessNav
       : role === 'contractor-portal'
         ? contractorPortalNav
-        : contractorStaffNav;
+        : role === 'staff'
+          ? staffNav
+          : contractorStaffNav;
 
   const handleLogout = async () => {
     await logout();
@@ -173,7 +188,8 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
   const getBadgeLabel = () => {
     if (role === 'business') return 'MANUFACTURER';
     if (role === 'contractor-portal') return 'CONTRACTOR';
-    return 'STAFF';
+    if (role === 'staff') return 'CRALY STAFF';
+    return 'CRALY STAFF';
   };
 
   const getRoleUserText = () => {
