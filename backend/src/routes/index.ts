@@ -117,5 +117,16 @@ import contractorPortalRoutes from './contractorPortalRoutes';
 // ── Contractor Portal: opportunities, applications, contractor workspace ──────
 router.use('/contractor-portal', contractorPortalRoutes);
 
+import businessPortalRoutes from './businessPortalRoutes';
+
+// ── Business/Manufacturer Portal: requirements, applications, dashboard ────────
+router.use('/business-portal', businessPortalRoutes);
+
+import staffRoutes from './staffRoutes';
+
+// ── Staff Workspace: engagements, contractors, dashboard ────────────────────────
+router.use('/staff', staffRoutes);
+
 export default router;
+
 
