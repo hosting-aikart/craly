@@ -8,6 +8,8 @@ import WorkspaceHeader from '@/components/workspace/WorkspaceHeader';
 import MobileNav from '@/components/workspace/MobileNav';
 import LoadingState from '@/components/ui/LoadingState';
 
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
+
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -23,13 +25,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
 
     const isStaffRole = ['staff', 'admin', 'ops_head', 'field_staff'].includes(user.role);
     if (!isStaffRole) {
-      if (user.role === 'business') {
-        router.replace('/business/dashboard');
-      } else if (user.role === 'contractor') {
-        router.replace('/contractor-portal/dashboard');
-      } else {
-        router.replace('/login');
-      }
+      router.replace(getRoleDefaultDashboard(user.role));
     }
   }, [user, loading, router]);
 

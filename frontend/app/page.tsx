@@ -14,6 +14,8 @@ import FAQ from '@/components/FAQ';
 import Foot from '@/components/Foot';
 import LoadingState from '@/components/ui/LoadingState';
 
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
+
 export default function HomePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -21,17 +23,7 @@ export default function HomePage() {
   useEffect(() => {
     if (loading) return;
     if (user) {
-      if (user.role === 'admin') {
-        router.replace('/admin/dashboard');
-      } else if (user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff') {
-        router.replace('/staff/dashboard');
-      } else if (user.role === 'business') {
-        router.replace('/business/dashboard');
-      } else if (user.role === 'contractor') {
-        router.replace('/contractor-portal/dashboard');
-      } else {
-        router.replace('/contractor/dashboard');
-      }
+      router.replace(getRoleDefaultDashboard(user.role));
     }
   }, [user, loading, router]);
 

@@ -10,6 +10,8 @@ import LoadingState from '@/components/ui/LoadingState';
 import { WorkspaceHeaderProvider } from '@/components/workspace/WorkspaceHeaderContext';
 import '@/components/workspace/WorkspaceLayout.css';
 
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
+
 export default function AdminWorkspaceLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -23,7 +25,7 @@ export default function AdminWorkspaceLayout({ children }: { children: React.Rea
     }
 
     if (user.role !== 'admin') {
-      router.push(user.role === 'business' ? '/business/dashboard' : '/contractor/dashboard');
+      router.push(getRoleDefaultDashboard(user.role));
     }
   }, [authLoading, user, router]);
 

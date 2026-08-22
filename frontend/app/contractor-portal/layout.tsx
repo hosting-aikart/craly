@@ -11,6 +11,8 @@ import LoadingState from '@/components/ui/LoadingState';
 import { WorkspaceHeaderProvider } from '@/components/workspace/WorkspaceHeaderContext';
 import '@/components/workspace/WorkspaceLayout.css';
 
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
+
 export default function ContractorPortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -26,13 +28,7 @@ export default function ContractorPortalLayout({ children }: { children: React.R
     }
 
     if (user.role !== 'contractor') {
-      if (user.role === 'business') {
-        router.push('/business/dashboard');
-      } else if (user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/contractor/dashboard');
-      }
+      router.push(getRoleDefaultDashboard(user.role));
       return;
     }
 

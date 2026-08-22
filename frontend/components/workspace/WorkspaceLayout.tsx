@@ -10,6 +10,8 @@ import MobileNav from './MobileNav';
 import LoadingState from '@/components/ui/LoadingState';
 import './WorkspaceLayout.css';
 
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
+
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
   title: string;
@@ -39,7 +41,7 @@ export default function WorkspaceLayout({
     }
 
     if (requiredRole && user.role !== requiredRole) {
-      router.push(user.role === 'business' ? '/business/dashboard' : '/contractor/dashboard');
+      router.push(getRoleDefaultDashboard(user.role));
       return;
     }
 

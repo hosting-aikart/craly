@@ -18,6 +18,8 @@ import '@/components/workspace/WorkspaceLayout.css';
  * leftover from before the pivot; those components render "Internal Staff"
  * copy for it, not a contractor identity.
  */
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
+
 export default function ContractorWorkspaceLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -31,7 +33,7 @@ export default function ContractorWorkspaceLayout({ children }: { children: Reac
     }
 
     if (user.role !== 'ops_head' && user.role !== 'field_staff') {
-      router.push(user.role === 'business' ? '/business/dashboard' : '/admin/dashboard');
+      router.push(getRoleDefaultDashboard(user.role));
     }
   }, [authLoading, user, router]);
 
