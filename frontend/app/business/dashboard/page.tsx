@@ -1,125 +1,176 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
-import { listContractors, type ContractorListing } from '@/lib/api/contractors';
-import { listEnquiries, type Enquiry } from '@/lib/api/enquiries';
-import SearchBar from '@/components/SearchBar';
-import ContractorCard from '@/components/ContractorCard';
-import StatusPill from '@/components/enquiries/StatusPill';
-import EmptyState from '@/components/ui/EmptyState';
+import { getBusinessDashboardStats, type BusinessDashboardStats } from '@/lib/api/businessPortal';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
-import { useLanguage } from '@/lib/i18n/LanguageContext';
+import EmptyState from '@/components/ui/EmptyState';
 import '@/components/AuthForm.css';
 import '../../dashboard.css';
 
 export default function BusinessDashboardPage() {
   const router = useRouter();
-  const { t } = useLanguage();
-  const [heroQuery, setHeroQuery] = useState('');
-
-  const [recent, setRecent] = useState<ContractorListing[]>([]);
-  const [recentLoading, setRecentLoading] = useState(true);
-
-  const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
-  const [enquiriesLoading, setEnquiriesLoading] = useState(true);
+  const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    listContractors({ limit: 3 })
-      .then(({ data }) => setRecent(data))
-      .catch(() => setRecent([]))
-      .finally(() => setRecentLoading(false));
-
-    listEnquiries()
-      .then(({ data }) => setEnquiries(data))
-      .catch(() => setEnquiries([]))
-      .finally(() => setEnquiriesLoading(false));
+    getBusinessDashboardStats()
+      .then(({ data }) => setStats(data))
+      .catch((err) => setError(err.message || 'Failed to load dashboard metrics'))
+      .finally(() => setLoading(false));
   }, []);
-
-  const handleSearchSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    router.push(heroQuery ? `/business/contractors?q=${encodeURIComponent(heroQuery)}` : '/business/contractors');
-  };
-
-  const pendingCount = enquiries.filter((e) => ['NEW', 'UNDER_REVIEW'].includes(String(e.status).toUpperCase())).length;
-  const acceptedCount = enquiries.filter((e) => ['BROKERING', 'CONTACTED', 'IN_PROGRESS'].includes(String(e.status).toUpperCase())).length;
-  const unreadCount = enquiries.filter((e) => e.has_unread).length;
 
   return (
     <>
       <WorkspacePageHeader
-        title={t.nav.dashboard}
-        subtitle={t.businessDashboard.subtitle}
+        title="Manufacturer Dashboard"
+        subtitle="Manage workforce requirements and review contractor applications."
       />
 
-      <div className="dashboard-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
-        <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>{t.businessDashboard.statEnquiries.toUpperCase()}</span>
-          <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{enquiries.length}</strong>
-          <span style={{ fontSize: '12px', color: 'var(--craly-teal)' }}>{acceptedCount} {t.enquiries.statusAccepted.toLowerCase()} • {pendingCount} {t.enquiries.statusPending.toLowerCase()}</span>
-        </div>
-
-        <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>{t.nav.inbox.toUpperCase()}</span>
-          <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{unreadCount}</strong>
-          <Link href="/business/inbox" style={{ fontSize: '12px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>{t.nav.inbox} →</Link>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+        <Button
+          variant="primary"
+          onClick={() => router.push('/business/requirements/new')}
+          style={{ padding: '10px 20px', fontSize: '15px', fontWeight: 600 }}
+        >
+          + Create Requirement
+        </Button>
       </div>
 
-      {/* Quick Search */}
-      <div className="dashboard__search-hero" style={{ marginBottom: '32px' }}>
-        <h2>{t.businessDashboard.searchHeroTitle}</h2>
-        <form className="dashboard__search-form" onSubmit={handleSearchSubmit}>
-          <SearchBar value={heroQuery} onChange={setHeroQuery} placeholder={t.contractors.searchPlaceholder} />
-          <Button type="submit" variant="primary">{t.businessDashboard.searchHeroSub || t.nav.findContractors}</Button>
-        </form>
-      </div>
-
-      {/* Recent Enquiries summary */}
-      <div className="dashboard__card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ margin: 0 }}>{t.businessDashboard.recentEnquiriesTitle}</h3>
-          <Link href="/business/enquiries" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>{t.businessDashboard.viewAllEnquiries} →</Link>
+      {loading ? (
+        <LoadingState label="Loading Dashboard Metrics…" />
+      ) : error ? (
+        <div style={{ color: '#ef4444', padding: '16px', background: '#fef2f2', borderRadius: '8px' }}>
+          {error}
         </div>
+      ) : (
+        <>
+          {/* Summary Metric Cards */}
+          <div
+            className="dashboard-summary-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '16px',
+              marginBottom: '28px',
+            }}
+          >
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                ACTIVE REQUIREMENTS
+              </span>
+              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>
+                {stats?.activeRequirements ?? 0}
+              </strong>
+              <Link href="/business/requirements" style={{ fontSize: '12px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
+                View Requirements →
+              </Link>
+            </div>
 
-        {enquiriesLoading ? (
-          <LoadingState label={t.common.loading} />
-        ) : enquiries.length === 0 ? (
-          <EmptyState title={t.businessDashboard.noEnquiries} subtitle="" />
-        ) : (
-          <ul className="dashboard__list">
-            {enquiries.slice(0, 4).map((enq) => (
-              <li key={enq.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--craly-border)' }}>
-                <div>
-                  <strong style={{ display: 'block', color: 'var(--craly-navy)' }}>{enq.other_party_name}</strong>
-                  <span style={{ fontSize: '12px', color: 'var(--craly-muted)' }}>{enq.category_name || 'Labour Supply'} {enq.workers_required ? `• ${enq.workers_required} workers` : ''}</span>
-                </div>
-                <StatusPill status={enq.status} viewer="business" />
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                APPLICATIONS RECEIVED
+              </span>
+              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>
+                {stats?.applicationsReceived ?? 0}
+              </strong>
+              <Link href="/business/applications" style={{ fontSize: '12px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
+                Review Applications →
+              </Link>
+            </div>
 
-      {/* Recommended Contractors Section */}
-      <div style={{ marginTop: '36px' }}>
-        <div className="dashboard__section-head">
-          <h2>{t.contractors.verifiedBadge}</h2>
-          <Link href="/business/contractors">{t.nav.findContractors} →</Link>
-        </div>
-        {recentLoading ? (
-          <LoadingState cards={3} label={t.common.loading} />
-        ) : (
-          <div className="dashboard__recommend-grid">
-            {recent.map((c) => (
-              <ContractorCard key={c.id} contractor={c} basePath="/business/contractors" />
-            ))}
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                SELECTED CONTRACTORS
+              </span>
+              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>
+                {stats?.selectedContractors ?? 0}
+              </strong>
+              <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
+                Craly Staff Coordinated
+              </span>
+            </div>
+
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                QUICK ACTIONS
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                <Link href="/business/requirements/new" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
+                  + Post New Requirement
+                </Link>
+                <Link href="/business/applications" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
+                  🔍 Compare Proposals
+                </Link>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Recent Activity Card */}
+          <div className="dashboard__card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0 }}>Recent Activity</h3>
+              <Link href="/business/requirements" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
+                All Requirements →
+              </Link>
+            </div>
+
+            {(!stats?.recentActivity || stats.recentActivity.length === 0) ? (
+              <EmptyState
+                title="No recent requirements yet"
+                subtitle="Click '+ Create Requirement' to publish your first manpower request."
+              />
+            ) : (
+              <ul className="dashboard__list">
+                {stats.recentActivity.map((item) => (
+                  <li
+                    key={item.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '14px 0',
+                      borderBottom: '1px solid var(--craly-border)',
+                    }}
+                  >
+                    <div>
+                      <strong style={{ display: 'block', color: 'var(--craly-navy)', fontSize: '15px' }}>
+                        {item.title}
+                      </strong>
+                      <span style={{ fontSize: '12px', color: 'var(--craly-muted)' }}>
+                        Created on {new Date(item.timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span
+                        className={`status-badge status-badge--${item.status.toLowerCase()}`}
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '4px 10px',
+                          borderRadius: '9999px',
+                        }}
+                      >
+                        {item.status.replace('_', ' ')}
+                      </span>
+                      <Link
+                        href={`/business/requirements/${item.id}`}
+                        style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}
+                      >
+                        View →
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 }

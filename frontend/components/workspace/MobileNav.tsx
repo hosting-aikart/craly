@@ -68,52 +68,22 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
         </Link>
 
         {role === 'business' && (
-          <Link
-            href="/business/contractors"
-            className={`mobile-nav__item ${isActive('/business/contractors') ? 'mobile-nav__item--active' : ''}`}
-          >
-            <span className="mobile-nav__icon">🔍</span>
-            <span className="mobile-nav__label">{t.nav.findContractors}</span>
-          </Link>
-        )}
-
-        {isStaff && (
           <>
             <Link
-              href="/contractor/requests"
-              className={`mobile-nav__item ${isActive('/contractor/requests') ? 'mobile-nav__item--active' : ''}`}
+              href="/business/requirements"
+              className={`mobile-nav__item ${isActive('/business/requirements') ? 'mobile-nav__item--active' : ''}`}
             >
               <span className="mobile-nav__icon">📝</span>
-              <span className="mobile-nav__label">{t.fieldStaff.nav.requests}</span>
+              <span className="mobile-nav__label">Requirements</span>
             </Link>
             <Link
-              href="/contractor/contractors"
-              className={`mobile-nav__item ${isActive('/contractor/contractors') ? 'mobile-nav__item--active' : ''}`}
+              href="/business/applications"
+              className={`mobile-nav__item ${isActive('/business/applications') ? 'mobile-nav__item--active' : ''}`}
             >
-              <span className="mobile-nav__icon">🛠️</span>
-              <span className="mobile-nav__label">{t.fieldStaff.nav.contractors}</span>
+              <span className="mobile-nav__icon">📥</span>
+              <span className="mobile-nav__label">Applications</span>
             </Link>
           </>
-        )}
-
-        {role === 'business' && (
-          <Link
-            href={enquiriesPath}
-            className={`mobile-nav__item ${isActive(enquiriesPath) ? 'mobile-nav__item--active' : ''}`}
-          >
-            <span className="mobile-nav__icon">📋</span>
-            <span className="mobile-nav__label">{t.nav.enquiries}</span>
-          </Link>
-        )}
-
-        {role === 'business' && (
-          <Link
-            href={inboxPath}
-            className={`mobile-nav__item ${isActive(inboxPath) ? 'mobile-nav__item--active' : ''}`}
-          >
-            <span className="mobile-nav__icon">💬</span>
-            <span className="mobile-nav__label">{t.nav.inbox}</span>
-          </Link>
         )}
 
         <button
@@ -156,57 +126,20 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
               </Link>
 
               {role === 'business' && (
-                <Link
-                  href="/business/contractors"
-                  className={`mobile-drawer__link ${isActive('/business/contractors') ? 'mobile-drawer__link--active' : ''}`}
-                  onClick={closeDrawer}
-                >
-                  🔍 {t.nav.findContractors}
-                </Link>
-              )}
-
-              {isStaff && (
                 <>
                   <Link
-                    href="/contractor/requests"
-                    className={`mobile-drawer__link ${isActive('/contractor/requests') ? 'mobile-drawer__link--active' : ''}`}
+                    href="/business/requirements"
+                    className={`mobile-drawer__link ${isActive('/business/requirements') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    📝 {t.fieldStaff.nav.requests}
+                    📝 Requirements
                   </Link>
                   <Link
-                    href="/contractor/contractors"
-                    className={`mobile-drawer__link ${isActive('/contractor/contractors') ? 'mobile-drawer__link--active' : ''}`}
+                    href="/business/applications"
+                    className={`mobile-drawer__link ${isActive('/business/applications') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    🛠️ {t.fieldStaff.nav.contractors}
-                  </Link>
-                  <Link
-                    href="/contractor/activity"
-                    className={`mobile-drawer__link ${isActive('/contractor/activity') ? 'mobile-drawer__link--active' : ''}`}
-                    onClick={closeDrawer}
-                  >
-                    🕒 {t.fieldStaff.nav.activity}
-                  </Link>
-                </>
-              )}
-
-              {role === 'business' && (
-                <>
-                  <Link
-                    href={enquiriesPath}
-                    className={`mobile-drawer__link ${isActive(enquiriesPath) ? 'mobile-drawer__link--active' : ''}`}
-                    onClick={closeDrawer}
-                  >
-                    📋 {t.nav.enquiries}
-                  </Link>
-
-                  <Link
-                    href={inboxPath}
-                    className={`mobile-drawer__link ${isActive(inboxPath) ? 'mobile-drawer__link--active' : ''}`}
-                    onClick={closeDrawer}
-                  >
-                    💬 {t.nav.inbox}
+                    📥 Applications
                   </Link>
                 </>
               )}

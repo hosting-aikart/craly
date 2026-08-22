@@ -64,3 +64,14 @@
   background: var(--craly-mint);
   color: var(--craly-teal-dark);
 }
+
+.craly-btn--outline {
+  background: var(--craly-white);
+  color: var(--craly-navy);
+  border-color: var(--craly-border-strong, #cbd5e1);
+}
+
+.craly-btn--outline:hover:not(:disabled) {
+  border-color: var(--craly-teal);
+  color: var(--craly-teal-dark);
+}

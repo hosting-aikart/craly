@@ -94,14 +94,13 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
       group: t.sidebarGroups.main,
       items: [
         { label: t.nav.dashboard, href: '/business/dashboard', icon: '📊' },
-        { label: t.nav.findContractors, href: '/business/contractors', icon: '🔍' },
+        { label: 'Requirements', href: '/business/requirements', icon: '📝' },
+        { label: 'Applications', href: '/business/applications', icon: '📥' },
       ],
     },
     {
       group: t.sidebarGroups.work,
       items: [
-        { label: t.nav.enquiries, href: '/business/enquiries', icon: '📋', badge: pendingEnquiryCount },
-        { label: t.nav.inbox, href: '/business/inbox', icon: '💬', badge: unreadMessageCount },
         { label: t.notifications.pageTitle, href: '/business/notifications', icon: '🔔', badge: unreadNotificationCount },
       ],
     },

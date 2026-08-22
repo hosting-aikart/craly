@@ -41,7 +41,11 @@ export default function BusinessNotificationsPage() {
       setUnreadCount((c) => Math.max(0, c - 1));
     }
     if (n.reference_id && user) {
-      router.push(`/business/enquiries/${n.reference_id}`);
+      if (n.type === 'APPLICATION_SUBMITTED' || n.type === 'CONTRACTOR_SELECTED') {
+        router.push('/business/applications');
+      } else {
+        router.push('/business/applications');
+      }
     }
   };
 

@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode } from 'reac
 import Link from 'next/link';
 import './Button.css';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline';
 type Size = 'md' | 'sm';
 
 interface SharedProps {
