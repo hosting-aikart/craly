@@ -1,6 +1,6 @@
 import { apiGet, apiPatch } from '@/lib/api';
 
-export type NotificationType = 'enquiry_received' | 'enquiry_message';
+export type NotificationType = string;
 
 export interface AppNotification {
   id: string;

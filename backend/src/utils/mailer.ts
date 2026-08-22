@@ -111,6 +111,36 @@ export async function sendEnquiryReplyEmail(input: EnquiryReplyEmailInput): Prom
   }
 }
 
+export interface EnquiryAcceptedEmailInput {
+  to: string;
+  businessName: string;
+  contractorName: string;
+  conversationUrl: string;
+}
+
+/** Sent to the business when a contractor accepts their project enquiry. */
+export async function sendEnquiryAcceptedEmail(input: EnquiryAcceptedEmailInput): Promise<void> {
+  if (!resend) {
+    throw new Error('Email is not configured (RESEND_API_KEY is missing)');
+  }
+
+  const { error } = await resend.emails.send({
+    from: config.contactEmailFrom,
+    to: input.to,
+    subject: 'Your Craly enquiry was accepted',
+    html: `
+      <p>Hi ${escapeHtml(input.businessName)},</p>
+      <p><strong>${escapeHtml(input.contractorName)}</strong> has accepted your project enquiry.</p>
+      <p>You can now chat in realtime and discuss your project requirements.</p>
+      <p><a href="${input.conversationUrl}">Open Conversation</a></p>
+    `,
+  });
+
+  if (error) {
+    throw new Error(`Resend failed to send email: ${error.message}`);
+  }
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')

@@ -1,7 +1,11 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/index';
 
-export type UserRole = 'contractor' | 'business' | 'admin';
+// 'ops_head' and 'field_staff' are Prima Facie's internal operations roles
+// (see docs/open-decisions.md) — added alongside the existing values rather
+// than replacing them, since 'contractor'/'business' still back the
+// self-service login flow elsewhere in the app.
+export type UserRole = 'contractor' | 'business' | 'admin' | 'ops_head' | 'field_staff';
 
 export interface AuthTokenPayload {
   sub: string; // user id

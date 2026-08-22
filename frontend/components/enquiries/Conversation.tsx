@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { listMessages, sendMessage, type EnquiryMessage, type EnquiryStatus } from '@/lib/api/enquiries';
 import { relativeTime } from '@/lib/util/relativeTime';
+import { useSocket } from '@/lib/socket/SocketContext';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -16,7 +17,6 @@ interface ConversationProps {
   businessName: string;
   contractorName: string;
   status: EnquiryStatus;
-  /** Called after a message is sent, so the parent can refresh the enquiry's status pill. */
   onMessageSent?: () => void;
 }
 
@@ -31,11 +31,13 @@ export default function Conversation({
   onMessageSent,
 }: ConversationProps) {
   const { t } = useLanguage();
+  const { socket } = useSocket();
   const [messages, setMessages] = useState<EnquiryMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [contactBlockedError, setContactBlockedError] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   const loadMessages = () => {
@@ -51,6 +53,34 @@ export default function Conversation({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enquiryId]);
 
+  // Join Socket.IO enquiry room & listen for realtime messages
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.emit('join_enquiry_room', { enquiryId });
+
+    const handleNewMessage = (newMsg: EnquiryMessage) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === newMsg.id)) return prev;
+        return [...prev, newMsg];
+      });
+      onMessageSent?.();
+    };
+
+    const handleMeetingCreated = () => {
+      loadMessages();
+    };
+
+    socket.on('message:new', handleNewMessage);
+    socket.on('meeting:created', handleMeetingCreated);
+
+    return () => {
+      socket.emit('leave_enquiry_room', { enquiryId });
+      socket.off('message:new', handleNewMessage);
+      socket.off('meeting:created', handleMeetingCreated);
+    };
+  }, [socket, enquiryId]);
+
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages]);
@@ -60,14 +90,19 @@ export default function Conversation({
     if (!draft.trim()) return;
     setSending(true);
     setError('');
+    setContactBlockedError(false);
 
     try {
-      await sendMessage(enquiryId, draft.trim());
+      const { data: savedMsg } = await sendMessage(enquiryId, draft.trim());
       setDraft('');
-      loadMessages();
+      setMessages((prev) => [...prev, savedMsg]);
       onMessageSent?.();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.common.error);
+    } catch (err: any) {
+      const errMsg = err?.message || t.common.error;
+      setError(errMsg);
+      if (errMsg.includes('safety and privacy')) {
+        setContactBlockedError(true);
+      }
     } finally {
       setSending(false);
     }
@@ -75,18 +110,41 @@ export default function Conversation({
 
   const labelFor = (senderId: string) => (senderId === businessUserId ? businessName : contractorName);
 
+  const uniqueMessages = useMemo(() => {
+    const seen = new Set<string>();
+    return messages.filter((m, idx) => {
+      const key = m.id || `msg-${idx}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [messages]);
+
   return (
     <div className="conversation">
       <div className="conversation__thread" ref={listRef}>
         {loading ? (
           <LoadingState label={t.common.loading} />
-        ) : messages.length === 0 ? (
-          <p className="conversation__empty">{t.enquiries.emptyEnquiries}</p>
+        ) : uniqueMessages.length === 0 ? (
+          <p className="conversation__empty">No messages yet. Start discussing your project requirements below.</p>
         ) : (
-          messages.map((m) => {
+          uniqueMessages.map((m, idx) => {
             const mine = m.sender_id === viewerUserId;
+            const isSystemMessage = m.message.startsWith('[System]');
+
+            if (isSystemMessage) {
+              return (
+                <div key={m.id || `sys-${idx}`} style={{ margin: '16px 0', padding: '14px 18px', background: 'var(--craly-mint)', border: '1px solid var(--craly-teal)', borderRadius: '12px', textAlign: 'center' }}>
+                  <p style={{ margin: 0, fontWeight: 600, color: 'var(--craly-teal-dark)', fontSize: '14px' }}>
+                    {m.message}
+                  </p>
+                  <div style={{ fontSize: '11px', color: 'var(--craly-muted)', marginTop: '4px' }}>{relativeTime(m.created_at)}</div>
+                </div>
+              );
+            }
+
             return (
-              <div key={m.id} className={`conversation__message ${mine ? 'conversation__message--mine' : ''}`}>
+              <div key={m.id || `msg-${idx}`} className={`conversation__message ${mine ? 'conversation__message--mine' : ''}`}>
                 <div className="conversation__message-meta">
                   <span>{labelFor(m.sender_id)}</span>
                   <span>{relativeTime(m.created_at)}</span>
@@ -98,7 +156,7 @@ export default function Conversation({
         )}
       </div>
 
-      {status === 'closed' ? (
+      {['CLOSED_EXPIRED', 'DECLINED', 'COMPLETED', 'WON', 'LOST'].includes(status) ? (
         <p className="conversation__closed-note">{t.enquiries.statusClosed}</p>
       ) : (
         <form className="conversation__composer" onSubmit={handleSend}>
@@ -106,20 +164,27 @@ export default function Conversation({
             rows={2}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={t.enquiries.typeReplyPlaceholder}
+            placeholder="Type your message here..."
             maxLength={4000}
           />
           <Button type="submit" variant="primary" disabled={sending || !draft.trim()}>
-            {sending ? t.enquiries.sendingReply : t.enquiries.sendReplyBtn}
+            {sending ? t.enquiries.sendingReply : 'Send Message'}
           </Button>
         </form>
       )}
 
-      <p className="conversation__closed-note" style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '8px' }}>
-        🔒 Privacy Guard: Phone numbers, emails, and web links are automatically hidden for trust & platform safety. Keep all discussions on Craly.
-      </p>
+      {contactBlockedError && (
+        <div style={{ marginTop: '12px', padding: '14px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', color: '#991b1b', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <strong>⚠️ Contact Details Blocked</strong>
+          <span>{error}</span>
+        </div>
+      )}
 
-      {error && <p className="conversation__error">{error}</p>}
+      {!contactBlockedError && error && <p className="conversation__error">{error}</p>}
+
+      <p className="conversation__closed-note" style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '8px' }}>
+        🔒 Privacy Guard: Direct contact info is restricted. Craly staff will coordinate calls and meetings on your behalf.
+      </p>
     </div>
   );
 }

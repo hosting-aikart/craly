@@ -1,5 +1,6 @@
 import { apiGet } from '@/lib/api';
 import type { Category } from './profile';
+export type { Category };
 
 export interface ContractorListing {
   id: string;
@@ -18,10 +19,12 @@ export interface ContractorListParams {
   page?: number;
   limit?: number;
   city?: string;
+  state?: string;
   category?: string;
   q?: string;
   minExperience?: number;
   minWorkforce?: number;
+  minWorkers?: number;
 }
 
 export function listContractors(params: ContractorListParams = {}) {
@@ -29,10 +32,11 @@ export function listContractors(params: ContractorListParams = {}) {
   if (params.page) search.set('page', String(params.page));
   if (params.limit) search.set('limit', String(params.limit));
   if (params.city) search.set('city', params.city);
+  if (params.state) search.set('state', params.state);
   if (params.category) search.set('category', params.category);
   if (params.q) search.set('q', params.q);
   if (params.minExperience) search.set('minExperience', String(params.minExperience));
-  if (params.minWorkforce) search.set('minWorkforce', String(params.minWorkforce));
+  if (params.minWorkforce || params.minWorkers) search.set('minWorkforce', String(params.minWorkforce || params.minWorkers));
 
   const qs = search.toString();
   return apiGet<{ data: ContractorListing[]; page: number; limit: number }>(

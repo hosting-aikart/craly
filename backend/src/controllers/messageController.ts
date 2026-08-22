@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
-import config from '../config/index';
 import { createMessageSchema } from '../validators/enquiryValidators';
 import { createNotification } from '../utils/notifications';
-import { sendEnquiryReplyEmail } from '../utils/mailer';
 import { sanitizeContactInfo } from '../utils/contactSanitizer';
+import { emitToUser, emitToEnquiryRoom } from '../socket/emitter';
 import type { AppError } from '../middlewares/errorHandler';
 
 function forbidden(message: string): AppError {
@@ -42,14 +41,25 @@ async function loadEnquiryForMessaging(id: string) {
 
 /**
  * POST /api/enquiries/:id/messages
- * Replying moves the enquiry through its workflow automatically: a
- * contractor's first reply marks it 'responded'; anything after that is
- * 'in_discussion'. Clients never set status directly.
+ * Sends a message once the enquiry is being actively brokered.
+ *
+ * Contractors have no login, so this is now business <-> internal staff,
+ * with staff relaying on the contractor's behalf — not a direct
+ * business<->contractor channel (that stays Phase 2, per scope). A
+ * business-sent message has no contractor user to receive it, so
+ * `receiver_id` is null in that case; staff pick it up via the enquiry
+ * queue rather than a personal notification.
+ *
+ * Strict rules:
+ * 1. Enquiry must be past NEW/UNDER_REVIEW (staff have engaged it).
+ * 2. Contact details (phone numbers, emails, WhatsApp links) are blocked.
+ * 3. Saves to PostgreSQL first, then emits Socket.IO event to enquiry room & receiver.
  */
 export async function createMessage(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
     const userId = req.user!.sub;
+    const isStaff = req.user!.role === 'ops_head' || req.user!.role === 'field_staff' || req.user!.role === 'admin';
 
     const parsed = createMessageSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -62,57 +72,63 @@ export async function createMessage(req: Request, res: Response, next: NextFunct
     if (!enquiry) return next(notFound('Enquiry not found'));
 
     const isBusinessParty = enquiry.business_user_id === userId;
-    const isContractorParty = enquiry.contractor_user_id === userId;
-    if (!isBusinessParty && !isContractorParty) {
+    if (!isBusinessParty && !isStaff) {
       return next(forbidden('You do not have access to this enquiry'));
     }
 
-    if (enquiry.status === 'closed') {
-      const err: AppError = new Error('This enquiry is closed');
+    if (['NEW', 'UNDER_REVIEW', 'DECLINED', 'LOST', 'CLOSED_EXPIRED'].includes(enquiry.status)) {
+      const err: AppError = new Error('This enquiry is not open for messages yet, or has been closed.');
       err.statusCode = 400;
       return next(err);
     }
 
-    const receiverId = isContractorParty ? enquiry.business_user_id : enquiry.contractor_user_id;
-    const cleanMessage = sanitizeContactInfo(parsed.data.message);
+    // Staff act for the contractor -> message goes to the business. A
+    // business message has no contractor user to notify directly.
+    const receiverId = isStaff ? enquiry.business_user_id : null;
 
+    // Contact privacy filter check
+    const rawMessage = parsed.data.message;
+    const cleanMessage = sanitizeContactInfo(rawMessage);
+
+    // If contact info was detected and redacted, or if user attempted direct contact link
+    if (cleanMessage !== rawMessage && cleanMessage.includes('[Contact Info Hidden by Craly')) {
+      const err: AppError = new Error(
+        "For safety and privacy, phone numbers, email addresses and external contact details cannot be shared in Craly chat."
+      );
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    // Database is the source of truth: Insert message into PostgreSQL first
     const [savedMessage] = await sql`
       INSERT INTO inquiry_messages (inquiry_id, sender_id, receiver_id, message)
       VALUES (${id}, ${userId}, ${receiverId}, ${cleanMessage})
       RETURNING *
     `;
 
-    const isFirstContractorReply = isContractorParty && (enquiry.status === 'new' || enquiry.status === 'viewed');
-    const nextStatus = isFirstContractorReply ? 'responded' : enquiry.status === 'responded' ? 'in_discussion' : enquiry.status;
-    await sql`UPDATE inquiries SET status = ${nextStatus}, updated_at = now() WHERE id = ${id}`;
+    // Update enquiry timestamp
+    await sql`UPDATE inquiries SET updated_at = now() WHERE id = ${id}`;
 
-    await createNotification({
-      userId: receiverId,
-      type: 'enquiry_message',
-      title: isContractorParty ? 'Contractor Replied' : 'New Message',
-      message: isContractorParty
-        ? `${enquiry.contractor_name} replied to your enquiry.`
-        : `${enquiry.business_name} sent a new message.`,
-      referenceId: id,
-    });
+    emitToEnquiryRoom(id, 'message:new', savedMessage);
 
-    // Only the contractor's *first* reply sends an email — every later
-    // back-and-forth message stays in-app only, per the "don't spam email"
-    // rule. In-app notifications above still fire for every message.
-    if (isFirstContractorReply) {
-      try {
-        const [businessUser] = await sql`SELECT email FROM users WHERE id = ${enquiry.business_user_id}`;
-        if (businessUser) {
-          await sendEnquiryReplyEmail({
-            to: businessUser.email,
-            businessName: enquiry.business_name,
-            contractorName: enquiry.contractor_name,
-            conversationUrl: `${config.frontendUrl}/business/enquiries/${id}`,
-          });
-        }
-      } catch (err) {
-        console.error('[mailer] enquiry-reply email failed:', err);
-      }
+    // Only the business side has a real account to notify right now.
+    if (receiverId) {
+      const notifTitle = 'New Message';
+      const notifText = `${enquiry.contractor_name} sent a new message.`;
+
+      await createNotification({
+        userId: receiverId,
+        type: 'NEW_MESSAGE',
+        title: notifTitle,
+        message: notifText,
+        referenceId: id,
+      });
+
+      emitToUser(receiverId, 'notification:new', {
+        title: notifTitle,
+        message: notifText,
+        referenceId: id,
+      });
     }
 
     res.status(201).json({ data: savedMessage });
@@ -129,13 +145,15 @@ export async function listMessages(req: Request, res: Response, next: NextFuncti
   try {
     const { id } = req.params;
     const userId = req.user!.sub;
+    const isStaff = req.user!.role === 'ops_head' || req.user!.role === 'field_staff' || req.user!.role === 'admin';
 
     const enquiry = await loadEnquiryForMessaging(id);
     if (!enquiry) return next(notFound('Enquiry not found'));
-    if (enquiry.business_user_id !== userId && enquiry.contractor_user_id !== userId) {
+    if (enquiry.business_user_id !== userId && !isStaff) {
       return next(forbidden('You do not have access to this enquiry'));
     }
 
+    // Unlocks chat list only if ACCEPTED or if fetching history
     await sql`
       UPDATE inquiry_messages SET is_read = true
       WHERE inquiry_id = ${id} AND receiver_id = ${userId} AND is_read = false

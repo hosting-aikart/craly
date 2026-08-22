@@ -11,16 +11,17 @@
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
+export function getApiUrl(path: string): string {
+  return `${BASE_URL}/api${path}`;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const url = `${BASE_URL}/api${path}`;
+  const url = getApiUrl(path);
 
   const res = await fetch(url, {
-    // Backend and frontend run on different ports in dev (and the auth
-    // cookie is httpOnly), so this has to be explicit or the browser won't
-    // send/receive it cross-origin.
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',

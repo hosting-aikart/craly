@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/useAuth';
+import { useSocket } from '@/lib/socket/SocketContext';
 import {
   listNotifications,
   markNotificationRead,
@@ -15,6 +16,7 @@ import './NotificationBell.css';
 
 export default function NotificationBell() {
   const { user } = useAuth();
+  const { socket } = useSocket();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -38,6 +40,33 @@ export default function NotificationBell() {
     if (user) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  // Realtime Socket.IO listener for instant notification badge update
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewNotification = (data: { title: string; message: string; referenceId?: string }) => {
+      setUnreadCount((prev) => prev + 1);
+      setNotifications((prev) => [
+        {
+          id: String(Date.now()),
+          user_id: user?.id || '',
+          type: 'SOCKET_NOTIF',
+          title: data.title,
+          message: data.message,
+          reference_id: data.referenceId ?? null,
+          is_read: false,
+          created_at: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+    };
+
+    socket.on('notification:new', handleNewNotification);
+    return () => {
+      socket.off('notification:new', handleNewNotification);
+    };
+  }, [socket, user?.id]);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -123,7 +152,11 @@ export default function NotificationBell() {
             </div>
           )}
 
-          <Link href="/notifications" className="notif-bell__view-all" onClick={() => setOpen(false)}>
+          <Link
+            href={user.role === 'admin' ? '/admin/notifications' : user.role === 'contractor' ? '/contractor/notifications' : '/business/notifications'}
+            className="notif-bell__view-all"
+            onClick={() => setOpen(false)}
+          >
             View all notifications →
           </Link>
         </div>

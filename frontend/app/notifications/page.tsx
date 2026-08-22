@@ -28,12 +28,13 @@ export default function NotificationsPage() {
     if (authLoading) return;
     if (!user) { router.push('/login'); return; }
 
-    listNotifications()
-      .then(({ data, unreadCount: count }) => {
-        setNotifications(data);
-        setUnreadCount(count);
-      })
-      .finally(() => setLoading(false));
+    const targetRoute = user.role === 'admin'
+      ? '/admin/notifications'
+      : user.role === 'contractor'
+      ? '/contractor/notifications'
+      : '/business/notifications';
+
+    router.replace(targetRoute);
   }, [authLoading, user, router]);
 
   const handleClick = (n: AppNotification) => {

@@ -6,6 +6,13 @@ import './ContractorCard.css';
 
 interface ContractorCardProps {
   contractor: ContractorListing;
+  /**
+   * Route prefix the card links into. Defaults to the public directory
+   * (`/contractors`); pass `/business/contractors` when rendering inside the
+   * manufacturer workspace so the profile link lands on the authenticated
+   * route instead of bouncing through the public one.
+   */
+  basePath?: string;
 }
 
 /**
@@ -13,12 +20,12 @@ interface ContractorCardProps {
  * else contractors get listed (dashboards, saved lists) so the card never
  * has to be rebuilt per page.
  */
-export default function ContractorCard({ contractor: c }: ContractorCardProps) {
+export default function ContractorCard({ contractor: c, basePath = '/contractors' }: ContractorCardProps) {
   const { t } = useLanguage();
   const location = [c.city, c.state].filter(Boolean).join(', ');
 
   return (
-    <Link href={`/contractors/${c.id}`} className="contractor-card">
+    <Link href={`${basePath}/${c.id}`} className="contractor-card">
       <ListedBadge compact />
 
       <h3 className="contractor-card__name">{c.company_name}</h3>

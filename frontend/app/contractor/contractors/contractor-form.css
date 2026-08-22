@@ -1,0 +1,252 @@
+/* Mobile-first contractor data-collection form (spec §5/§6). Single column,
+   large touch targets, step-grouped sections, sticky bottom action bar.
+   Verified conceptually at 360/390/430/768/1280px. */
+
+.pf-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.pf-form-resumed {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--craly-teal-dark);
+  background: var(--craly-mint);
+  border: 1px solid #bfeae3;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: var(--space-4);
+}
+
+/* ---------------- Step indicator ---------------- */
+
+.pf-steps {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--space-5);
+}
+
+.pf-step-dot {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--craly-border);
+}
+
+.pf-step-dot--done, .pf-step-dot--active {
+  background: var(--craly-teal);
+}
+
+.pf-step-label {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--craly-navy);
+  margin-bottom: var(--space-4);
+}
+
+/* ---------------- Fields ---------------- */
+
+.pf-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: 100px; /* clears the sticky footer */
+}
+
+.pf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pf-field label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--craly-text-muted);
+}
+
+.pf-field input[type="text"],
+.pf-field input[type="tel"],
+.pf-field input[type="number"],
+.pf-field select,
+.pf-field textarea {
+  min-height: 48px;
+  font-size: 16px; /* prevents iOS zoom-on-focus */
+  padding: 0 14px;
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  color: var(--craly-text);
+  background: var(--craly-white);
+  width: 100%;
+}
+
+.pf-field textarea {
+  min-height: 88px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.pf-field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235b6b6a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.pf-field__hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--craly-text-faint);
+}
+
+.pf-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+}
+
+.pf-checkbox-row input {
+  width: 22px;
+  height: 22px;
+}
+
+.pf-checkbox-row label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--craly-text);
+}
+
+/* ---------------- Tag input (service areas) ---------------- */
+
+.pf-tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-md);
+  background: var(--craly-white);
+}
+
+.pf-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--craly-mint);
+  color: var(--craly-teal-dark);
+  border-radius: var(--radius-full);
+  padding: 6px 8px 6px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pf-tag button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+}
+
+.pf-tag-input input {
+  flex: 1;
+  min-width: 120px;
+  min-height: 40px;
+  border: none;
+  font-size: 16px;
+  font-family: var(--font-body);
+  outline: none;
+}
+
+/* ---------------- Category chips ---------------- */
+
+.pf-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pf-chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--craly-border);
+  background: var(--craly-white);
+  color: var(--craly-text);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pf-chip--active {
+  background: var(--craly-navy);
+  border-color: var(--craly-navy);
+  color: var(--craly-white);
+}
+
+/* ---------------- Sticky footer ---------------- */
+
+.pf-sticky-footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--craly-white);
+  border-top: 1px solid var(--craly-border);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  margin: 0 calc(-1 * var(--space-4));
+  box-shadow: 0 -4px 16px rgba(16, 42, 42, 0.06);
+  z-index: 5;
+}
+
+.pf-sticky-footer__nav {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.pf-sticky-footer .craly-btn {
+  min-height: 48px;
+  flex: 1;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .pf-field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .pf-field--full {
+    grid-column: 1 / -1;
+  }
+  .pf-sticky-footer {
+    margin: 0;
+    border-radius: var(--radius-lg);
+    position: static;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--craly-border);
+    margin-top: var(--space-4);
+  }
+  .pf-sticky-footer__nav, .pf-sticky-footer .craly-btn {
+    flex: initial;
+  }
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { AuthProvider } from '@/lib/auth/useAuth';
+import { SocketProvider } from '@/lib/socket/SocketContext';
 import Navbar from '@/components/Navbar';
 import './globals.css';
 
@@ -35,10 +36,12 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
-          <LanguageProvider>
-            <Navbar />
-            {children}
-          </LanguageProvider>
+          <SocketProvider>
+            <LanguageProvider>
+              <Navbar />
+              {children}
+            </LanguageProvider>
+          </SocketProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,0 +1,40 @@
+.workspace-container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--craly-off-white);
+}
+
+.workspace-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--craly-off-white);
+}
+
+.workspace-main {
+  flex: 1;
+  margin-left: 260px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.workspace-content {
+  flex: 1;
+  padding: 32px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 991px) {
+  .workspace-main {
+    margin-left: 0;
+    padding-bottom: 70px;
+  }
+
+  .workspace-content {
+    padding: 20px 16px;
+  }
+}

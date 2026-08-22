@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
+import { PUBLICLY_DISCOVERABLE_CONDITION } from '../utils/contractorVisibility';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
  * GET /api/contractors
  * Public directory listing — every contractor who has completed onboarding
- * is listed directly, no admin approval step. Optional category/city/search/
- * experience/workforce filters and pagination.
+ * and is not SUSPENDED is listed directly, no admin approval step. Optional
+ * category/city/search/experience/workforce filters and pagination.
  */
 export async function listContractors(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -30,7 +31,7 @@ export async function listContractors(req: Request, res: Response, next: NextFun
                '[]'
              ) AS categories
       FROM contractor_profiles cp
-      WHERE cp.onboarding_complete = true
+      WHERE ${PUBLICLY_DISCOVERABLE_CONDITION}
         AND (${city ?? null}::text IS NULL OR cp.city ILIKE ${city ? `%${city}%` : null})
         AND (
           ${category ?? null}::text IS NULL OR EXISTS (
@@ -65,16 +66,17 @@ export async function listContractors(req: Request, res: Response, next: NextFun
 
 /**
  * GET /api/contractors/:id
- * Public single profile view — same "listed directly, no approval" rule as
- * the directory: only visible once the contractor has finished onboarding.
+ * Public single profile view — same visibility rule as the directory: only
+ * reachable once the contractor has finished onboarding and is not
+ * SUSPENDED. This also closes the "guess/bookmark the direct URL" bypass.
  */
 export async function getContractor(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
     const [row] = await sql`
-      SELECT id, company_name, description, city, state, years_experience,
-             workforce_size
-      FROM contractor_profiles WHERE id = ${id} AND onboarding_complete = true
+      SELECT cp.id, cp.company_name, cp.description, cp.city, cp.state,
+             cp.years_experience, cp.workforce_size
+      FROM contractor_profiles cp WHERE cp.id = ${id} AND ${PUBLICLY_DISCOVERABLE_CONDITION}
     `;
     if (!row) {
       const err: AppError = new Error('Contractor not found');

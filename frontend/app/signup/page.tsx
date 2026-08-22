@@ -1,25 +1,41 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './signup.css';
 import { signup } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import LoadingState from '@/components/ui/LoadingState';
 
 const helmetLogo = '/assets/helmet.png';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { refresh } = useAuth();
+  const { user, loading: authLoading, refresh } = useAuth();
   const { t } = useLanguage();
-  const [role, setRole] = useState<'contractor' | 'business'>('contractor');
+  // Contractors no longer self-register — Craly's internal team lists them
+  // directly (see docs/open-decisions.md). Business is the only public role.
+  const role = 'business' as const;
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (user) {
+      if (user.role === 'admin') {
+        router.replace('/admin/dashboard');
+      } else if (user.role === 'business') {
+        router.replace('/business/dashboard');
+      } else {
+        router.replace('/contractor/dashboard');
+      }
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -35,6 +51,14 @@ export default function SignupPage() {
       setSubmitting(false);
     }
   };
+
+  if (authLoading || user) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState label="Redirecting to workspace…" />
+      </div>
+    );
+  }
 
   return (
     <div className="signup-page">
@@ -54,22 +78,22 @@ export default function SignupPage() {
             <div className="signup-panel__roles">
               <div className="signup-panel__role-card">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 18a7 7 0 0 1 14 0" />
-                  <path d="M9 18v-2" />
-                  <path d="M12 6v2" />
-                  <rect x="2" y="17" width="20" height="3" rx="1" />
-                </svg>
-                <h4>{t.auth.contractorRoleTitle}</h4>
-                <p>{t.auth.contractorRoleDesc}</p>
-              </div>
-              <div className="signup-panel__role-card">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="4" y="3" width="16" height="18" rx="1" />
                   <path d="M9 8h1M14 8h1M9 12h1M14 12h1" />
                   <path d="M10 21v-4h4v4" />
                 </svg>
                 <h4>{t.auth.businessRoleTitle}</h4>
                 <p>{t.auth.businessRoleDesc}</p>
+              </div>
+              <div className="signup-panel__role-card">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 18a7 7 0 0 1 14 0" />
+                  <path d="M9 18v-2" />
+                  <path d="M12 6v2" />
+                  <rect x="2" y="17" width="20" height="3" rx="1" />
+                </svg>
+                <h4>{t.auth.contractorRoleTitle}</h4>
+                <p>Craly's team lists contractors directly — <Link href="/#contact" style={{ color: 'inherit', textDecoration: 'underline' }}>get in touch</Link> to be added.</p>
               </div>
             </div>
           </div>
@@ -85,29 +109,14 @@ export default function SignupPage() {
 
         {/* ── Right: white form panel ───────────────────────────────── */}
         <div className="signup-form-panel">
+          <div className="signup-mobile-brand">
+            <img src={helmetLogo} alt="Craly" />
+            <span>Craly</span>
+          </div>
           <p className="signup-form-panel__eyebrow">{t.auth.createAccountEyebrow}</p>
           <h1 className="signup-form-panel__heading">{t.auth.joinTitle}</h1>
 
           <form className="signup-fields" onSubmit={handleSubmit}>
-            <div className="signup-role-picker">
-              <button
-                type="button"
-                className={`signup-role-option ${role === 'contractor' ? 'signup-role-option--active' : ''}`}
-                onClick={() => setRole('contractor')}
-              >
-                <span>🦺</span>
-                <span>{t.auth.iamContractor}</span>
-              </button>
-              <button
-                type="button"
-                className={`signup-role-option ${role === 'business' ? 'signup-role-option--active' : ''}`}
-                onClick={() => setRole('business')}
-              >
-                <span>🏢</span>
-                <span>{t.auth.iamBusiness}</span>
-              </button>
-            </div>
-
             <label className="signup-field">
               <span>{t.auth.companyNameLabel}</span>
               <div className="signup-field__input">

@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth/useAuth';
-import { getMyProfile, updateMyProfile, type BusinessProfile } from '@/lib/api/profile';
+import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import { listContractors, type ContractorListing } from '@/lib/api/contractors';
 import { listEnquiries, type Enquiry } from '@/lib/api/enquiries';
 import SearchBar from '@/components/SearchBar';
@@ -19,11 +18,7 @@ import '../../dashboard.css';
 
 export default function BusinessDashboardPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
   const { t } = useLanguage();
-  const [profile, setProfile] = useState<BusinessProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const [heroQuery, setHeroQuery] = useState('');
 
   const [recent, setRecent] = useState<ContractorListing[]>([]);
@@ -32,231 +27,99 @@ export default function BusinessDashboardPage() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [enquiriesLoading, setEnquiriesLoading] = useState(true);
 
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const [industry, setIndustry] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) { router.push('/login'); return; }
-    if (user.role !== 'business') { router.push('/contractor/dashboard'); return; }
-
-    getMyProfile()
-      .then(({ data }) => {
-        if (data.role !== 'business') return;
-        if (!data.onboarding_complete) { router.push('/onboarding'); return; }
-        setProfile(data);
-      })
-      .finally(() => setLoading(false));
-  }, [authLoading, user, router]);
-
   useEffect(() => {
     listContractors({ limit: 3 })
       .then(({ data }) => setRecent(data))
       .catch(() => setRecent([]))
       .finally(() => setRecentLoading(false));
-  }, []);
 
-  useEffect(() => {
     listEnquiries()
       .then(({ data }) => setEnquiries(data))
       .catch(() => setEnquiries([]))
       .finally(() => setEnquiriesLoading(false));
   }, []);
 
-  const handleHeroSearch = (e: FormEvent) => {
+  const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault();
-    router.push(heroQuery ? `/contractors?q=${encodeURIComponent(heroQuery)}` : '/contractors');
+    router.push(heroQuery ? `/business/contractors?q=${encodeURIComponent(heroQuery)}` : '/business/contractors');
   };
 
-  const startEditing = () => {
-    if (!profile) return;
-    setIndustry(profile.industry ?? '');
-    setCity(profile.city ?? '');
-    setState(profile.state ?? '');
-    setError('');
-    setEditing(true);
-  };
-
-  const handleSave = async (e: FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError('');
-
-    try {
-      await updateMyProfile({ industry, city, state });
-      const { data } = await getMyProfile();
-      if (data.role === 'business') setProfile(data);
-      setEditing(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.common.error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const completeness = useMemo(() => {
-    if (!profile) return { pct: 0, missing: [] as string[] };
-    const checks: [boolean, string][] = [
-      [!!profile.industry, 'Industry'],
-      [!!profile.city, 'City'],
-      [!!profile.state, 'State'],
-    ];
-    const done = checks.filter(([ok]) => ok).length;
-    return { pct: Math.round((done / checks.length) * 100), missing: checks.filter(([ok]) => !ok).map(([, label]) => label) };
-  }, [profile]);
-
-  if (authLoading || loading || !profile) {
-    return (
-      <div className="dashboard-page">
-        <div className="dashboard"><LoadingState label={t.common.loading} /></div>
-      </div>
-    );
-  }
+  const pendingCount = enquiries.filter((e) => ['NEW', 'UNDER_REVIEW'].includes(String(e.status).toUpperCase())).length;
+  const acceptedCount = enquiries.filter((e) => ['BROKERING', 'CONTACTED', 'IN_PROGRESS'].includes(String(e.status).toUpperCase())).length;
+  const unreadCount = enquiries.filter((e) => e.has_unread).length;
 
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-page__glow dashboard-page__glow--a" aria-hidden="true" />
-      <div className="dashboard-page__glow dashboard-page__glow--b" aria-hidden="true" />
+    <>
+      <WorkspacePageHeader
+        title={t.nav.dashboard}
+        subtitle={t.businessDashboard.subtitle}
+      />
 
-      <div className="dashboard">
-        <div className="dashboard__header">
-          <div className="dashboard__header-main">
-            <div className="dashboard__avatar">{profile.company_name.charAt(0).toUpperCase()}</div>
-            <div>
-              <p className="dashboard__eyebrow">{t.nav.dashboard.toUpperCase()}</p>
-              <h1 className="dashboard__heading">{t.businessDashboard.welcome}, {profile.company_name}</h1>
-            </div>
-          </div>
-          <div className="dashboard__header-actions">
-            {!editing && (
-              <button className="dashboard__edit-btn" onClick={startEditing}>{t.common.save}</button>
-            )}
-          </div>
+      <div className="dashboard-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+        <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>{t.businessDashboard.statEnquiries.toUpperCase()}</span>
+          <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{enquiries.length}</strong>
+          <span style={{ fontSize: '12px', color: 'var(--craly-teal)' }}>{acceptedCount} {t.enquiries.statusAccepted.toLowerCase()} • {pendingCount} {t.enquiries.statusPending.toLowerCase()}</span>
         </div>
 
-        {!editing && (
-          <div className="dashboard__search-hero">
-            <h2>{t.businessDashboard.searchHeroTitle}</h2>
-            <form className="dashboard__search-form" onSubmit={handleHeroSearch}>
-              <SearchBar value={heroQuery} onChange={setHeroQuery} placeholder={t.contractors.searchPlaceholder} />
-              <Button type="submit" variant="primary">{t.contractors.applyFilters}</Button>
-            </form>
-          </div>
-        )}
+        <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>{t.nav.inbox.toUpperCase()}</span>
+          <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{unreadCount}</strong>
+          <Link href="/business/inbox" style={{ fontSize: '12px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>{t.nav.inbox} →</Link>
+        </div>
+      </div>
 
-        {!editing && (
-          <>
-            <div className="dashboard__section-head">
-              <h2>{t.businessDashboard.recentEnquiriesTitle}</h2>
-              <Link href="/contractors">{t.businessDashboard.viewAllEnquiries} →</Link>
-            </div>
-            {recentLoading ? (
-              <LoadingState cards={3} label={t.common.loading} />
-            ) : recent.length === 0 ? (
-              <EmptyState
-                title={t.contractors.noResultsTitle}
-                subtitle={t.businessDashboard.noEnquiries}
-              />
-            ) : (
-              <div className="dashboard__recommend-grid">
-                {recent.map((c) => (
-                  <ContractorCard key={c.id} contractor={c} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
+      {/* Quick Search */}
+      <div className="dashboard__search-hero" style={{ marginBottom: '32px' }}>
+        <h2>{t.businessDashboard.searchHeroTitle}</h2>
+        <form className="dashboard__search-form" onSubmit={handleSearchSubmit}>
+          <SearchBar value={heroQuery} onChange={setHeroQuery} placeholder={t.contractors.searchPlaceholder} />
+          <Button type="submit" variant="primary">{t.businessDashboard.searchHeroSub || t.nav.findContractors}</Button>
+        </form>
+      </div>
 
-        <div className="dashboard__completeness">
-          <div className="dashboard__completeness-top">
-            <strong>{t.contractorDashboard.completenessLabel}</strong>
-            <span>{completeness.pct}%</span>
-          </div>
-          <div className="dashboard__completeness-bar">
-            <div className="dashboard__completeness-fill" style={{ width: `${completeness.pct}%` }} />
-          </div>
-          {completeness.missing.length > 0 && (
-            <div className="dashboard__completeness-missing">
-              {completeness.missing.map((m) => <span key={m}>+ {m}</span>)}
-            </div>
-          )}
+      {/* Recent Enquiries summary */}
+      <div className="dashboard__card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3 style={{ margin: 0 }}>{t.businessDashboard.recentEnquiriesTitle}</h3>
+          <Link href="/business/enquiries" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>{t.businessDashboard.viewAllEnquiries} →</Link>
         </div>
 
-        {editing ? (
-          <form className="auth-form dashboard__card" onSubmit={handleSave}>
-            <label className="auth-field">
-              <span>Industry</span>
-              <input
-                type="text"
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                placeholder="e.g. Manufacturing, Construction, Logistics"
-              />
-            </label>
-
-            <div className="auth-row">
-              <label className="auth-field">
-                <span>{t.contractors.filterState}</span>
-                <input type="text" value={city} onChange={(e) => setCity(e.target.value)} />
-              </label>
-              <label className="auth-field">
-                <span>{t.contractors.filterState}</span>
-                <input type="text" value={state} onChange={(e) => setState(e.target.value)} />
-              </label>
-            </div>
-
-            {error && <p className="auth-error">{error}</p>}
-
-            <div className="dashboard__form-actions">
-              <button type="submit" className="auth-submit" disabled={saving}>
-                {saving ? t.common.loading : t.common.save}
-              </button>
-              <button type="button" className="dashboard__cancel-btn" onClick={() => setEditing(false)}>
-                {t.common.cancel}
-              </button>
-            </div>
-          </form>
+        {enquiriesLoading ? (
+          <LoadingState label={t.common.loading} />
+        ) : enquiries.length === 0 ? (
+          <EmptyState title={t.businessDashboard.noEnquiries} subtitle="" />
         ) : (
-          <div className="dashboard__grid dashboard__grid--two">
-            <div className="dashboard__card">
-              <h3>{t.contractorDetail.companyInfoTitle}</h3>
-              <ul className="dashboard__list">
-                <li><span className="dashboard__list-label">Industry</span><span className="dashboard__list-value">{profile.industry || '—'}</span></li>
-                <li><span className="dashboard__list-label">{t.contractorDetail.addressLabel}</span><span className="dashboard__list-value">{[profile.city, profile.state].filter(Boolean).join(', ') || '—'}</span></li>
-              </ul>
-            </div>
+          <ul className="dashboard__list">
+            {enquiries.slice(0, 4).map((enq) => (
+              <li key={enq.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--craly-border)' }}>
+                <div>
+                  <strong style={{ display: 'block', color: 'var(--craly-navy)' }}>{enq.other_party_name}</strong>
+                  <span style={{ fontSize: '12px', color: 'var(--craly-muted)' }}>{enq.category_name || 'Labour Supply'} {enq.workers_required ? `• ${enq.workers_required} workers` : ''}</span>
+                </div>
+                <StatusPill status={enq.status} viewer="business" />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
-            <div className="dashboard__card">
-              <h3>{t.businessDashboard.recentEnquiriesTitle}</h3>
-              {enquiriesLoading ? (
-                <LoadingState label={t.common.loading} />
-              ) : enquiries.length === 0 ? (
-                <EmptyState
-                  title={t.enquiries.emptyEnquiries}
-                  subtitle={t.businessDashboard.noEnquiries}
-                />
-              ) : (
-                <>
-                  <ul className="dashboard__list">
-                    {enquiries.slice(0, 3).map((enq) => (
-                      <li key={enq.id}>
-                        <span className="dashboard__list-value">{enq.other_party_name}</span>
-                        <StatusPill status={enq.status} viewer="business" />
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/business/enquiries" className="dashboard__card-link">{t.businessDashboard.viewAllEnquiries} →</Link>
-                </>
-              )}
-            </div>
+      {/* Recommended Contractors Section */}
+      <div style={{ marginTop: '36px' }}>
+        <div className="dashboard__section-head">
+          <h2>{t.contractors.verifiedBadge}</h2>
+          <Link href="/business/contractors">{t.nav.findContractors} →</Link>
+        </div>
+        {recentLoading ? (
+          <LoadingState cards={3} label={t.common.loading} />
+        ) : (
+          <div className="dashboard__recommend-grid">
+            {recent.map((c) => (
+              <ContractorCard key={c.id} contractor={c} basePath="/business/contractors" />
+            ))}
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

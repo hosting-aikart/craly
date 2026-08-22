@@ -31,7 +31,17 @@ export interface BusinessProfile {
   onboarding_complete: boolean;
 }
 
-export type MyProfile = ContractorProfile | BusinessProfile;
+// Field Staff / Ops Head — no company profile, just internal account info
+// (spec §1 "Profile" section). Read-only in Phase 1.
+export interface StaffProfile {
+  role: 'field_staff' | 'ops_head';
+  id: string;
+  email: string;
+  created_at: string;
+  onboarding_complete: true;
+}
+
+export type MyProfile = ContractorProfile | BusinessProfile | StaffProfile;
 
 export const getMyProfile = () => apiGet<{ data: MyProfile }>('/profile/me');
 

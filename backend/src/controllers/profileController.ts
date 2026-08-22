@@ -49,7 +49,25 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    const err: AppError = new Error('Admins do not have a profile');
+    if (role === 'admin') {
+      res.json({ data: { role: 'admin', id: userId, company_name: 'Craly Admin', onboarding_complete: true } });
+      return;
+    }
+
+    // Field Staff / Ops Head have no company profile — the Profile page
+    // just shows their internal account info (spec §1 "Profile" section).
+    if (role === 'field_staff' || role === 'ops_head') {
+      const [account] = await sql`SELECT id, email, created_at FROM users WHERE id = ${userId}`;
+      if (!account) {
+        const err: AppError = new Error('Account not found');
+        err.statusCode = 404;
+        return next(err);
+      }
+      res.json({ data: { role, id: account.id, email: account.email, created_at: account.created_at, onboarding_complete: true } });
+      return;
+    }
+
+    const err: AppError = new Error('Invalid user role');
     err.statusCode = 400;
     next(err);
   } catch (err) {
@@ -146,6 +164,12 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
 
       res.json({ data: { id: updated.id } });
       return;
+    }
+
+    if (role === 'field_staff' || role === 'ops_head') {
+      const err: AppError = new Error('Staff profile fields are not editable in Phase 1');
+      err.statusCode = 400;
+      return next(err);
     }
 
     const err: AppError = new Error('Admins do not have a profile');

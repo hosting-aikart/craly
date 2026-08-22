@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './login.css';
@@ -8,17 +8,31 @@ import { login } from '@/lib/api/auth';
 import { getMyProfile } from '@/lib/api/profile';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import LoadingState from '@/components/ui/LoadingState';
 
 const helmetLogo = '/assets/helmet.png';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { refresh } = useAuth();
+  const { user, loading: authLoading, refresh } = useAuth();
   const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (user) {
+      if (user.role === 'admin') {
+        router.replace('/admin/dashboard');
+      } else if (user.role === 'business') {
+        router.replace('/business/dashboard');
+      } else {
+        router.replace('/contractor/dashboard');
+      }
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,6 +42,11 @@ export default function LoginPage() {
     try {
       const { data: user } = await login({ email, password });
       await refresh();
+
+      if (user.role === 'admin') {
+        router.push('/admin/dashboard');
+        return;
+      }
 
       try {
         const { data: profile } = await getMyProfile();
@@ -43,9 +62,16 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t.contact.genericError);
-      setSubmitting(false);
     }
   };
+
+  if (authLoading || user) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <LoadingState label="Redirecting to workspace…" />
+      </div>
+    );
+  }
 
   return (
     <div className="login-page">
@@ -96,6 +122,10 @@ export default function LoginPage() {
 
         {/* ── Right: white form panel ───────────────────────────────── */}
         <div className="login-form-panel">
+          <div className="login-mobile-brand">
+            <img src={helmetLogo} alt="Craly" />
+            <span>Craly</span>
+          </div>
           <p className="login-form-panel__eyebrow">{t.auth.welcomeBackEyebrow}</p>
           <h1 className="login-form-panel__heading">{t.auth.logInTitle}</h1>
 

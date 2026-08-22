@@ -286,6 +286,25 @@
   text-decoration: underline;
 }
 
+.signup-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.signup-mobile-brand img {
+  width: 28px;
+  height: auto;
+}
+
+.signup-mobile-brand span {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f766e;
+}
+
 /* ---------------- Responsive ---------------- */
 
 @media (max-width: 900px) {
@@ -299,14 +318,44 @@
   }
 }
 
-@media (max-width: 600px) {
-  .signup-page {
-    padding: 32px 16px;
+@media (max-width: 768px) {
+  .signup-panel {
+    display: none !important;
   }
 
-  .signup-panel,
+  .signup-mobile-brand {
+    display: flex;
+  }
+
+  .signup-page {
+    padding: 24px 16px;
+    align-items: center;
+  }
+
+  .signup-page__wrap {
+    max-width: 480px;
+    border-radius: 20px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  }
+
   .signup-form-panel {
-    padding: 32px 24px;
+    padding: 28px 20px;
+    width: 100%;
+    border-radius: 20px;
+  }
+
+  .signup-role-picker {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 600px) {
+  .signup-page {
+    padding: 20px 12px;
+  }
+
+  .signup-form-panel {
+    padding: 24px 16px;
   }
 
   .signup-role-picker {

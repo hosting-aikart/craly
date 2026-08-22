@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyAuthToken } from '../utils/jwt';
+import { verifyAuthToken, type UserRole } from '../utils/jwt';
 import type { AppError } from './errorHandler';
 
 const COOKIE_NAME = 'craly_token';
@@ -30,4 +30,34 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction): v
     err.statusCode = 401;
     next(err);
   }
+}
+
+/**
+ * Enforces admin role access. Rejects non-admin users with 403 Forbidden.
+ */
+export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  requireAuth(req, res, () => {
+    if (req.user?.role !== 'admin') {
+      const err: AppError = new Error('Forbidden: Admin access required');
+      err.statusCode = 403;
+      return next(err);
+    }
+    next();
+  });
+}
+
+/**
+ * Restricts a route to one or more roles. Must run after requireAuth.
+ * Used for the Prima Facie internal-ops split — e.g.
+ * requireRole('ops_head') vs requireRole('ops_head', 'field_staff').
+ */
+export function requireRole(...roles: UserRole[]) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      const err: AppError = new Error('You do not have permission to perform this action');
+      err.statusCode = 403;
+      return next(err);
+    }
+    next();
+  };
 }

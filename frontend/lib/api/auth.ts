@@ -1,6 +1,8 @@
 import { apiGet, apiPost } from '@/lib/api';
 
-export type UserRole = 'contractor' | 'business' | 'admin';
+// 'contractor' stays in the union for legacy account records/typing, even
+// though it's no longer a signup-able role — see docs/open-decisions.md.
+export type UserRole = 'contractor' | 'business' | 'admin' | 'ops_head' | 'field_staff';
 
 export interface AuthUser {
   id: string;
@@ -8,7 +10,7 @@ export interface AuthUser {
   role: UserRole;
 }
 
-export const signup = (input: { email: string; password: string; role: 'contractor' | 'business'; companyName: string }) =>
+export const signup = (input: { email: string; password: string; role: 'business'; companyName: string }) =>
   apiPost<{ data: AuthUser }>('/auth/signup', input);
 
 export const login = (input: { email: string; password: string }) =>

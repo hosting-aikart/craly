@@ -2,21 +2,24 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { LANGUAGES } from '@/lib/i18n/translations';
 import { useAuth } from '@/lib/auth/useAuth';
-import NotificationBell from '@/components/NotificationBell';
 import './Navbar.css';
 
 const helmetLogo = '/assets/helmet.png';
 
 export default function Navbar() {
   const { language, setLanguage, t } = useLanguage();
-  const { user, loading, logout } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Public navbar belongs ONLY to the marketing site and should NEVER be shown for authenticated users or on workspace pages
+  if (user || pathname.startsWith('/business') || pathname.startsWith('/contractor') || pathname.startsWith('/admin')) {
+    return null;
+  }
 
   const navLinks = [
     { href: '/', label: t.nav.home },
@@ -25,14 +28,6 @@ export default function Navbar() {
     { href: '/#how', label: t.nav.howItWorks },
     { href: '/#faq', label: t.nav.faq },
   ];
-
-  const dashboardHref = user?.role === 'business' ? '/business/dashboard' : '/contractor/dashboard';
-
-  const handleLogout = async () => {
-    setMenuOpen(false);
-    await logout();
-    router.push('/');
-  };
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -70,26 +65,17 @@ export default function Navbar() {
             ))}
           </div>
 
-          {!loading && user ? (
-            <div className="navbar__auth">
-              <NotificationBell />
-              <Link href={dashboardHref} className="navbar__btn navbar__btn--ghost">
-                {t.nav.dashboard}
-              </Link>
-              <button className="navbar__btn navbar__btn--ghost" onClick={handleLogout}>
-                {t.nav.logout}
-              </button>
-            </div>
-          ) : (
-            <div className="navbar__auth">
-              <Link href="/login" className="navbar__btn navbar__btn--ghost">
-                {t.nav.login}
-              </Link>
-              <Link href="/signup" className="navbar__btn navbar__btn--solid">
-                {t.nav.getStarted}
-              </Link>
-            </div>
-          )}
+          <div className="navbar__auth">
+            <Link href="/list-your-company" className="navbar__btn navbar__btn--ghost">
+              {t.nav.listYourCompany}
+            </Link>
+            <Link href="/login" className="navbar__btn navbar__btn--ghost">
+              {t.nav.login}
+            </Link>
+            <Link href="/signup" className="navbar__btn navbar__btn--solid">
+              {t.nav.getStarted}
+            </Link>
+          </div>
 
           <button
             className={`navbar__menu-toggle ${menuOpen ? 'navbar__menu-toggle--open' : ''}`}
@@ -130,26 +116,17 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {!loading && user ? (
-            <div className="navbar__mobile-auth">
-              <NotificationBell />
-              <Link href={dashboardHref} className="navbar__btn navbar__btn--ghost" onClick={closeMenu}>
-                {t.nav.dashboard}
-              </Link>
-              <button className="navbar__btn navbar__btn--ghost" onClick={handleLogout}>
-                {t.nav.logout}
-              </button>
-            </div>
-          ) : (
-            <div className="navbar__mobile-auth">
-              <Link href="/login" className="navbar__btn navbar__btn--ghost" onClick={closeMenu}>
-                {t.nav.login}
-              </Link>
-              <Link href="/signup" className="navbar__btn navbar__btn--solid" onClick={closeMenu}>
-                {t.nav.getStarted}
-              </Link>
-            </div>
-          )}
+          <div className="navbar__mobile-auth">
+            <Link href="/list-your-company" className="navbar__btn navbar__btn--ghost" onClick={closeMenu}>
+              {t.nav.listYourCompany}
+            </Link>
+            <Link href="/login" className="navbar__btn navbar__btn--ghost" onClick={closeMenu}>
+              {t.nav.login}
+            </Link>
+            <Link href="/signup" className="navbar__btn navbar__btn--solid" onClick={closeMenu}>
+              {t.nav.getStarted}
+            </Link>
+          </div>
         </div>
       )}
     </header>

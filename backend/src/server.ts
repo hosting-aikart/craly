@@ -1,9 +1,11 @@
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import config from './config/index';
 import apiRouter from './routes/index';
 import { errorHandler } from './middlewares/errorHandler';
+import { initSocketServer } from './socket/index';
 
 const app = express();
 
@@ -61,9 +63,14 @@ app.use((_req, res) => {
 
 app.use(errorHandler);
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+// ── HTTP & Socket.IO Server Start ──────────────────────────────────────────────
 
-const server = app.listen(config.port, () => {
+const server = http.createServer(app);
+
+// Attach Socket.IO to the HTTP server
+initSocketServer(server);
+
+server.listen(config.port, () => {
   console.log(`[server] Craly API running on http://localhost:${config.port}`);
   console.log(`[server] Environment: ${config.nodeEnv}`);
   console.log(`[server] Allowed origins: ${config.allowedOrigins.join(', ')}`);

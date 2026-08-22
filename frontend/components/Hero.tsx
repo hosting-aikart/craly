@@ -37,7 +37,7 @@ export default function Hero() {
           <Link href="/contractors" className="hero-cta__btn hero-cta__btn--solid">
             {t.hero.ctaFind}
           </Link>
-          <Link href="/signup" className="hero-cta__btn hero-cta__btn--outline">
+          <Link href="/list-your-company" className="hero-cta__btn hero-cta__btn--outline">
             {t.hero.ctaJoin}
           </Link>
         </div>

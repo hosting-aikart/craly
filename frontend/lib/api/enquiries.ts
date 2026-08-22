@@ -1,6 +1,19 @@
 import { apiGet, apiPatch, apiPost } from '@/lib/api';
 
-export type EnquiryStatus = 'new' | 'viewed' | 'responded' | 'in_discussion' | 'closed';
+// Settled onto one lifecycle during the contractor-architecture
+// reconciliation — see docs/open-decisions.md. Matches the DB check
+// constraint on inquiries.status exactly.
+export type EnquiryStatus =
+  | 'NEW'
+  | 'UNDER_REVIEW'
+  | 'BROKERING'
+  | 'CONTACTED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'WON'
+  | 'LOST'
+  | 'CLOSED_EXPIRED'
+  | 'DECLINED';
 
 export interface Enquiry {
   id: string;
@@ -14,6 +27,7 @@ export interface Enquiry {
   duration: string | null;
   message: string;
   status: EnquiryStatus;
+  status_reason?: string | null;
   /** The other party's company name — present on list rows. */
   other_party_name?: string;
   has_unread?: boolean;
@@ -57,8 +71,14 @@ export const listEnquiries = () => apiGet<{ data: Enquiry[] }>('/enquiries');
 
 export const getEnquiry = (id: string) => apiGet<{ data: EnquiryDetail }>(`/enquiries/${id}`);
 
+export const acceptEnquiry = (id: string) =>
+  apiPatch<{ data: EnquiryDetail }>(`/enquiries/${id}/accept`, {});
+
+export const declineEnquiry = (id: string, reason?: string) =>
+  apiPatch<{ data: EnquiryDetail }>(`/enquiries/${id}/decline`, { reason });
+
 export const closeEnquiry = (id: string) =>
-  apiPatch<{ data: { id: string; status: EnquiryStatus } }>(`/enquiries/${id}/status`, { status: 'closed' });
+  apiPatch<{ data: { id: string; status: EnquiryStatus } }>(`/enquiries/${id}/status`, { status: 'CLOSED_EXPIRED' });
 
 export const listMessages = (id: string) => apiGet<{ data: EnquiryMessage[] }>(`/enquiries/${id}/messages`);
 

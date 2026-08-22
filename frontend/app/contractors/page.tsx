@@ -1,9 +1,10 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { listContractors, listCategories, type ContractorListing } from '@/lib/api/contractors';
 import type { Category } from '@/lib/api/profile';
+import { useAuth } from '@/lib/auth/useAuth';
 import SearchBar from '@/components/SearchBar';
 import FilterPanel from '@/components/FilterPanel';
 import ContractorCard from '@/components/ContractorCard';
@@ -23,9 +24,24 @@ export default function ContractorsPage() {
 }
 
 function ContractorsPageInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') ?? '';
   const { t } = useLanguage();
+  const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (user) {
+      if (user.role === 'business') {
+        router.replace('/business/contractors');
+      } else if (user.role === 'admin') {
+        router.replace('/admin/dashboard');
+      } else {
+        router.replace('/contractor/dashboard');
+      }
+    }
+  }, [user, authLoading, router]);
 
   const [contractors, setContractors] = useState<ContractorListing[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);

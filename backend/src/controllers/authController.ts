@@ -20,8 +20,9 @@ function setAuthCookie(res: Response, token: string): void {
 
 /**
  * POST /api/auth/signup
- * Creates a user plus their role-specific profile row (contractor or
- * business) in a single transaction, then logs them in.
+ * Creates a manufacturer (business) user plus their business_profiles row
+ * in a single transaction, then logs them in. Contractors are no longer a
+ * public signup path — see authValidators.ts.
  */
 export async function signup(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -49,17 +50,10 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
         RETURNING id, email, role
       `;
 
-      if (role === 'contractor') {
-        await tx`
-          INSERT INTO contractor_profiles (user_id, company_name)
-          VALUES (${newUser.id}, ${companyName})
-        `;
-      } else {
-        await tx`
-          INSERT INTO business_profiles (user_id, company_name)
-          VALUES (${newUser.id}, ${companyName})
-        `;
-      }
+      await tx`
+        INSERT INTO business_profiles (user_id, company_name)
+        VALUES (${newUser.id}, ${companyName})
+      `;
 
       return newUser;
     });
@@ -86,10 +80,18 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     }
     const { email, password } = parsed.data;
 
-    const [user] = await sql`SELECT id, email, role, password_hash FROM users WHERE email = ${email}`;
+    const [user] = await sql`SELECT id, email, role, password_hash, is_active FROM users WHERE email = ${email}`;
     if (!user || !(await comparePassword(password, user.password_hash))) {
       const err: AppError = new Error('Invalid email or password');
       err.statusCode = 401;
+      return next(err);
+    }
+
+    if (!user.is_active) {
+      // Legacy contractor logins fall here — their profile still exists as
+      // a staff-managed record, but the account itself no longer signs in.
+      const err: AppError = new Error('This account has been disabled. Contact Craly support if you believe this is a mistake.');
+      err.statusCode = 403;
       return next(err);
     }
 
@@ -116,13 +118,20 @@ export function logout(_req: Request, res: Response): void {
  */
 export async function me(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const [user] = await sql`SELECT id, email, role FROM users WHERE id = ${req.user!.sub}`;
+    const [user] = await sql`SELECT id, email, role, is_active FROM users WHERE id = ${req.user!.sub}`;
     if (!user) {
       const err: AppError = new Error('User not found');
       err.statusCode = 404;
       return next(err);
     }
-    res.json({ data: user });
+    // Catches a JWT issued before an account was disabled (e.g. the legacy
+    // contractor logins) — session check fails even if the cookie is still valid.
+    if (!user.is_active) {
+      const err: AppError = new Error('This account has been disabled');
+      err.statusCode = 401;
+      return next(err);
+    }
+    res.json({ data: { id: user.id, email: user.email, role: user.role } });
   } catch (err) {
     next(err);
   }

@@ -10,6 +10,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import '@/components/AuthForm.css';
 import './contact.css';
 
@@ -103,7 +104,7 @@ export default function ContactContractorPage() {
           </p>
           <div className="contact-success__actions">
             <Button href="/business/enquiries" variant="primary">{t.businessDashboard.viewAllEnquiries}</Button>
-            <Button href={`/contractors/${contractor.id}`} variant="secondary">{t.contractors.viewProfile}</Button>
+            <Button href={`/business/contractors/${contractor.id}`} variant="secondary">{t.contractors.viewProfile}</Button>
           </div>
         </div>
       </div>
@@ -112,8 +113,9 @@ export default function ContactContractorPage() {
 
   return (
     <div className="contact-page">
+      <WorkspacePageHeader title="Submit Project Enquiry" subtitle={`Contact ${contractor.company_name}`} />
       <div className="contact-page__inner">
-        <Link href={`/contractors/${contractor.id}`} className="contact-page__back">
+        <Link href={`/business/contractors/${contractor.id}`} className="contact-page__back">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5" />
             <path d="M11 18l-6-6 6-6" />

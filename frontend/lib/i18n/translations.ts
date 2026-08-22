@@ -109,6 +109,134 @@ export interface Translations {
     login: string;
     logout: string;
     getStarted: string;
+    listYourCompany: string;
+    findContractors: string;
+    enquiries: string;
+    inbox: string;
+    meetings: string;
+    profile: string;
+    companyProfile: string;
+    verification: string;
+    settings: string;
+    analytics: string;
+    users: string;
+    reports: string;
+    auditLogs: string;
+  };
+  sidebarGroups: {
+    main: string;
+    work: string;
+    account: string;
+    profile: string;
+    overview: string;
+    platform: string;
+    trustSafety: string;
+    system: string;
+  };
+  fieldStaff: {
+    nav: {
+      dashboard: string;
+      requests: string;
+      contractors: string;
+      activity: string;
+      profile: string;
+      settings: string;
+    };
+    dashboard: {
+      title: string;
+      subtitle: string;
+      newRequests: string;
+      myPendingRequests: string;
+      profilesBeingCompleted: string;
+      profilesSubmittedForReview: string;
+      recentActivity: string;
+      noActivity: string;
+    };
+    requests: {
+      title: string;
+      subtitle: string;
+      all: string;
+      assignedTo: string;
+      unassigned: string;
+      noRequests: string;
+      noneInFilter: string;
+    };
+    requestDetail: {
+      backToQueue: string;
+      source: string;
+      sourceValue: string;
+      contactPerson: string;
+      industry: string;
+      location: string;
+      leadNotes: string;
+      activityHistory: string;
+      noActivity: string;
+      markContacted: string;
+      startProfile: string;
+      continueProfile: string;
+      submitForReview: string;
+      submitBlocked: string;
+      alreadySubmitted: string;
+      statusLabel: string;
+    };
+    profileForm: {
+      sectionBasic: string;
+      sectionBusiness: string;
+      sectionCategories: string;
+      sectionAvailability: string;
+      companyName: string;
+      phone: string;
+      city: string;
+      yearsInBusiness: string;
+      workforceCount: string;
+      serviceAreas: string;
+      serviceAreasHint: string;
+      overseasInterest: string;
+      categories: string;
+      availability: string;
+      notes: string;
+      notesHint: string;
+      description: string;
+      saveDraft: string;
+      next: string;
+      back: string;
+      submitForReview: string;
+      completion: string;
+      missingFields: string;
+      verificationStatus: string;
+      publicationStatus: string;
+      notPublished: string;
+      published: string;
+      resumedDraft: string;
+    };
+    sync: {
+      saved: string;
+      saving: string;
+      savedOffline: string;
+      syncing: string;
+      synced: string;
+      syncFailed: string;
+      retry: string;
+    };
+    activity: {
+      title: string;
+      subtitle: string;
+      noActivity: string;
+    };
+    profile: {
+      title: string;
+      roleLabel: string;
+      memberSince: string;
+    };
+    settings: {
+      title: string;
+      languageSection: string;
+      accountSection: string;
+    };
+    common: {
+      newContractor: string;
+      noContractors: string;
+    };
   };
   auth: {
     networkEyebrow: string;
@@ -235,13 +363,26 @@ export interface Translations {
   enquiries: {
     pageTitle: string;
     pageSubtitle: string;
+    contractorSubtitle: string;
+    businessSubtitle: string;
     allTab: string;
     pendingTab: string;
+    acceptedTab: string;
+    declinedTab: string;
     respondedTab: string;
     closedTab: string;
     statusPending: string;
+    statusAccepted: string;
+    statusDeclined: string;
     statusResponded: string;
     statusClosed: string;
+    tabs: {
+      all: string;
+      pending: string;
+      accepted: string;
+      declined: string;
+      closed: string;
+    };
     subject: string;
     date: string;
     messageHistory: string;
@@ -293,7 +434,7 @@ const en: Translations = {
     headlineSuffix: ' Labour Contractors',
     subtext: 'Verified contractor profiles for modern businesses. Build trust before the first phone call.',
     ctaFind: 'Find a Contractor',
-    ctaJoin: 'Join as Contractor',
+    ctaJoin: 'List Your Company',
   },
   trust: {
     eyebrow: 'TRUSTED INFORMATION',
@@ -302,10 +443,10 @@ const en: Translations = {
   roleSelect: {
     eyebrow: 'GET STARTED',
     heading: 'Which side are you on?',
-    contractorTitle: "I'm a Contractor",
-    contractorDesc: 'Build a verified profile and get discovered by businesses looking to hire.',
-    contractorAction: 'Create contractor profile',
-    businessTitle: "I'm a Business",
+    contractorTitle: 'Are you a contractor?',
+    contractorDesc: 'Get discovered by manufacturers looking for verified workforce partners. Submit your details and our team will contact you for verification and onboarding.',
+    contractorAction: 'List Your Company',
+    businessTitle: "I'm a Manufacturer",
     businessDesc: 'Search and hire verified, trustworthy contractors with confidence.',
     businessAction: 'Browse contractors',
   },
@@ -446,17 +587,145 @@ const en: Translations = {
     dashboard: 'Dashboard',
     login: 'Log In',
     logout: 'Log Out',
-    getStarted: 'Get Started',
+    getStarted: 'Manufacturer Sign Up',
+    listYourCompany: 'List Your Company',
+    findContractors: 'Find Contractors',
+    enquiries: 'Enquiries',
+    inbox: 'Inbox',
+    meetings: 'Meetings',
+    profile: 'My Profile',
+    companyProfile: 'Company Profile',
+    verification: 'Verification',
+    settings: 'Settings',
+    analytics: 'Analytics',
+    users: 'Users',
+    reports: 'Reports & Moderation',
+    auditLogs: 'Audit Logs',
+  },
+  sidebarGroups: {
+    main: 'MAIN',
+    work: 'WORK',
+    account: 'ACCOUNT',
+    profile: 'PROFILE',
+    overview: 'OVERVIEW',
+    platform: 'PLATFORM',
+    trustSafety: 'TRUST & SAFETY',
+    system: 'SYSTEM',
+  },
+  fieldStaff: {
+    nav: {
+      dashboard: 'Dashboard',
+      requests: 'Contractor Requests',
+      contractors: 'Contractors',
+      activity: 'My Activity',
+      profile: 'Profile',
+      settings: 'Settings',
+    },
+    dashboard: {
+      title: 'Dashboard',
+      subtitle: 'Your field intelligence work at a glance.',
+      newRequests: 'New Requests',
+      myPendingRequests: 'My Pending Requests',
+      profilesBeingCompleted: 'Profiles Being Completed',
+      profilesSubmittedForReview: 'Submitted for Review',
+      recentActivity: 'Recently Completed Activities',
+      noActivity: 'No activity yet — actions you take will show up here.',
+    },
+    requests: {
+      title: 'Contractor Requests',
+      subtitle: 'Leads submitted through List Your Company — review, contact, and start their profile.',
+      all: 'All',
+      assignedTo: 'Assigned to',
+      unassigned: 'Unassigned',
+      noRequests: 'No onboarding requests yet.',
+      noneInFilter: 'Nothing here. No requests match this filter.',
+    },
+    requestDetail: {
+      backToQueue: 'Back to queue',
+      source: 'Source',
+      sourceValue: 'List Your Company (public web form)',
+      contactPerson: 'Contact Person',
+      industry: 'Industry',
+      location: 'Location',
+      leadNotes: 'Notes',
+      activityHistory: 'Activity History',
+      noActivity: 'No activity recorded yet.',
+      markContacted: 'Mark Contacted',
+      startProfile: 'Start Profile',
+      continueProfile: 'Continue Profile',
+      submitForReview: 'Submit for Operations Review',
+      submitBlocked: 'Complete the profile before submitting for review.',
+      alreadySubmitted: 'Ready for Review — awaiting Operations Head.',
+      statusLabel: 'Status',
+    },
+    profileForm: {
+      sectionBasic: 'Basic Info',
+      sectionBusiness: 'Business Details',
+      sectionCategories: 'Skill Categories',
+      sectionAvailability: 'Availability & Notes',
+      companyName: 'Contractor / Company Name',
+      phone: 'Phone Number',
+      city: 'City',
+      yearsInBusiness: 'Years in Business',
+      workforceCount: 'Worker Count',
+      serviceAreas: 'Service Areas',
+      serviceAreasHint: 'Add each area and press Enter',
+      overseasInterest: 'Interested in overseas projects',
+      categories: 'Skill Categories',
+      availability: 'Availability',
+      notes: 'Internal Notes',
+      notesHint: 'Visible to staff only — not shown publicly.',
+      description: 'Public Description',
+      saveDraft: 'Save Draft',
+      next: 'Next',
+      back: 'Back',
+      submitForReview: 'Submit for Operations Review',
+      completion: 'Profile completion',
+      missingFields: 'Missing',
+      verificationStatus: 'Verification',
+      publicationStatus: 'Publication',
+      notPublished: 'Not published',
+      published: 'Published',
+      resumedDraft: 'Resumed an unsaved draft from this device.',
+    },
+    sync: {
+      saved: 'Saved',
+      saving: 'Saving…',
+      savedOffline: 'Saved offline',
+      syncing: 'Syncing…',
+      synced: 'Synced',
+      syncFailed: 'Sync failed',
+      retry: 'Retry',
+    },
+    activity: {
+      title: 'My Activity',
+      subtitle: 'A record of everything you’ve done in the field workspace.',
+      noActivity: 'No activity recorded yet.',
+    },
+    profile: {
+      title: 'Profile',
+      roleLabel: 'Role',
+      memberSince: 'Member since',
+    },
+    settings: {
+      title: 'Settings',
+      languageSection: 'Language',
+      accountSection: 'Account',
+    },
+    common: {
+      newContractor: '+ New Contractor',
+      noContractors: 'No contractors yet.',
+    },
   },
   auth: {
     networkEyebrow: 'ONE VERIFIED NETWORK',
     loginHeading: 'Continue building trust, right where you left off.',
     signupHeading: 'Get discovered — or find who you need.',
     contractorRoleTitle: 'Contractor',
-    contractorRoleDesc: 'Build a verified profile & get hired',
-    businessRoleTitle: 'Business',
+    contractorRoleDesc: "Craly's team lists contractors directly — get in touch to be added",
+    businessRoleTitle: 'Manufacturer',
     businessRoleDesc: 'Find and hire with confidence',
-    securityBadge: 'Your account and business details stay protected.',
+    securityBadge: 'Your account and company details stay protected.',
     welcomeBackEyebrow: 'WELCOME BACK',
     logInTitle: 'Log In',
     createAccountEyebrow: 'CREATE ACCOUNT',
@@ -476,10 +745,10 @@ const en: Translations = {
     createAccountBtn: 'Create Account',
     newToCraly: 'New to Craly?',
     alreadyHaveAccount: 'Already have an account?',
-    joinAsContractor: 'Join as Contractor',
-    joinAsBusiness: 'Join as Business',
+    joinAsContractor: 'List Your Company',
+    joinAsBusiness: 'Join as Manufacturer',
     iamContractor: "I'm a Contractor",
-    iamBusiness: "I'm a Business",
+    iamBusiness: "I'm a Manufacturer",
   },
   contractors: {
     pageTitle: 'Discover Labour Contractors',
@@ -573,13 +842,26 @@ const en: Translations = {
   enquiries: {
     pageTitle: 'Enquiries',
     pageSubtitle: 'Track messages and communication between businesses and contractors.',
+    contractorSubtitle: 'Review and respond to project requests from businesses.',
+    businessSubtitle: 'Manage and track enquiries sent to labour contractors.',
     allTab: 'All Enquiries',
     pendingTab: 'Pending',
+    acceptedTab: 'Accepted',
+    declinedTab: 'Declined',
     respondedTab: 'Responded',
     closedTab: 'Closed',
     statusPending: 'Pending',
+    statusAccepted: 'Accepted',
+    statusDeclined: 'Declined',
     statusResponded: 'Responded',
     statusClosed: 'Closed',
+    tabs: {
+      all: 'All',
+      pending: 'Pending',
+      accepted: 'Accepted',
+      declined: 'Declined',
+      closed: 'Closed',
+    },
     subject: 'Subject',
     date: 'Date',
     messageHistory: 'Message History',
@@ -784,7 +1066,135 @@ const hi: Translations = {
     dashboard: 'डैशबोर्ड',
     login: 'लॉग इन',
     logout: 'लॉग आउट',
-    getStarted: 'शुरू करें',
+    getStarted: 'निर्माता साइन अप',
+    listYourCompany: 'अपनी कंपनी सूचीबद्ध करें',
+    findContractors: 'ठेकेदार खोजें',
+    enquiries: 'पूछताछ',
+    inbox: 'इनबॉक्स',
+    meetings: 'मीटिंग्स',
+    profile: 'मेरी प्रोफ़ाइल',
+    companyProfile: 'कंपनी प्रोफ़ाइल',
+    verification: 'सत्यापन',
+    settings: 'सेटिंग्स',
+    analytics: 'विश्लेषण',
+    users: 'उपयोगकर्ता',
+    reports: 'रिपोर्ट और मॉडरेशन',
+    auditLogs: 'ऑडिट लॉग',
+  },
+  sidebarGroups: {
+    main: 'मुख्य',
+    work: 'कार्य',
+    account: 'खाता',
+    profile: 'प्रोफ़ाइल',
+    overview: 'अवलोकन',
+    platform: 'प्लेटफ़ॉर्म',
+    trustSafety: 'विश्वास और सुरक्षा',
+    system: 'सिस्टम',
+  },
+  fieldStaff: {
+    nav: {
+      dashboard: 'डैशबोर्ड',
+      requests: 'ठेकेदार अनुरोध',
+      contractors: 'ठेकेदार',
+      activity: 'मेरी गतिविधि',
+      profile: 'प्रोफ़ाइल',
+      settings: 'सेटिंग्स',
+    },
+    dashboard: {
+      title: 'डैशबोर्ड',
+      subtitle: 'आपके फील्ड कार्य का सारांश।',
+      newRequests: 'नए अनुरोध',
+      myPendingRequests: 'मेरे लंबित अनुरोध',
+      profilesBeingCompleted: 'पूर्ण हो रहीं प्रोफ़ाइलें',
+      profilesSubmittedForReview: 'समीक्षा हेतु सबमिट',
+      recentActivity: 'हाल की पूर्ण गतिविधियाँ',
+      noActivity: 'अभी तक कोई गतिविधि नहीं — आपकी कार्रवाइयाँ यहाँ दिखेंगी।',
+    },
+    requests: {
+      title: 'ठेकेदार अनुरोध',
+      subtitle: '"अपनी कंपनी सूचीबद्ध करें" से आए लीड — समीक्षा करें, संपर्क करें और प्रोफ़ाइल शुरू करें।',
+      all: 'सभी',
+      assignedTo: 'सौंपा गया',
+      unassigned: 'असाइन नहीं किया गया',
+      noRequests: 'अभी तक कोई अनुरोध नहीं है।',
+      noneInFilter: 'यहाँ कुछ नहीं है। इस फ़िल्टर से कोई अनुरोध मेल नहीं खाता।',
+    },
+    requestDetail: {
+      backToQueue: 'सूची पर वापस जाएं',
+      source: 'स्रोत',
+      sourceValue: 'अपनी कंपनी सूचीबद्ध करें (सार्वजनिक फॉर्म)',
+      contactPerson: 'संपर्क व्यक्ति',
+      industry: 'उद्योग',
+      location: 'स्थान',
+      leadNotes: 'नोट्स',
+      activityHistory: 'गतिविधि इतिहास',
+      noActivity: 'अभी तक कोई गतिविधि दर्ज नहीं है।',
+      markContacted: 'संपर्क किया गया चिह्नित करें',
+      startProfile: 'प्रोफ़ाइल शुरू करें',
+      continueProfile: 'प्रोफ़ाइल जारी रखें',
+      submitForReview: 'ऑपरेशंस समीक्षा हेतु सबमिट करें',
+      submitBlocked: 'सबमिट करने से पहले प्रोफ़ाइल पूरी करें।',
+      alreadySubmitted: 'समीक्षा हेतु तैयार — ऑपरेशंस हेड की प्रतीक्षा में।',
+      statusLabel: 'स्थिति',
+    },
+    profileForm: {
+      sectionBasic: 'बुनियादी जानकारी',
+      sectionBusiness: 'व्यवसाय विवरण',
+      sectionCategories: 'कौशल श्रेणियाँ',
+      sectionAvailability: 'उपलब्धता और नोट्स',
+      companyName: 'ठेकेदार / कंपनी का नाम',
+      phone: 'फ़ोन नंबर',
+      city: 'शहर',
+      yearsInBusiness: 'व्यवसाय में वर्ष',
+      workforceCount: 'कर्मचारियों की संख्या',
+      serviceAreas: 'सेवा क्षेत्र',
+      serviceAreasHint: 'प्रत्येक क्षेत्र जोड़ें और Enter दबाएं',
+      overseasInterest: 'विदेशी परियोजनाओं में रुचि',
+      categories: 'कौशल श्रेणियाँ',
+      availability: 'उपलब्धता',
+      notes: 'आंतरिक नोट्स',
+      notesHint: 'केवल स्टाफ को दिखाई देता है — सार्वजनिक रूप से नहीं।',
+      description: 'सार्वजनिक विवरण',
+      saveDraft: 'ड्राफ्ट सहेजें',
+      next: 'आगे',
+      back: 'पीछे',
+      submitForReview: 'ऑपरेशंस समीक्षा हेतु सबमिट करें',
+      completion: 'प्रोफ़ाइल पूर्णता',
+      missingFields: 'शेष',
+      verificationStatus: 'सत्यापन',
+      publicationStatus: 'प्रकाशन',
+      notPublished: 'अप्रकाशित',
+      published: 'प्रकाशित',
+      resumedDraft: 'इस डिवाइस से एक असहेजा ड्राफ्ट पुनः लोड किया गया।',
+    },
+    sync: {
+      saved: 'सहेजा गया',
+      saving: 'सहेजा जा रहा है…',
+      savedOffline: 'ऑफ़लाइन सहेजा गया',
+      syncing: 'सिंक हो रहा है…',
+      synced: 'सिंक हो गया',
+      syncFailed: 'सिंक विफल',
+      retry: 'पुनः प्रयास करें',
+    },
+    activity: {
+      title: 'मेरी गतिविधि',
+      subtitle: 'फील्ड वर्कस्पेस में आपके द्वारा की गई हर कार्रवाई का रिकॉर्ड।',
+      noActivity: 'अभी तक कोई गतिविधि दर्ज नहीं है।',
+    },
+    profile: {
+      title: 'प्रोफ़ाइल',
+      roleLabel: 'भूमिका',
+      memberSince: 'सदस्य बने',
+    },
+    settings: {
+      title: 'सेटिंग्स',
+      languageSection: 'भाषा',
+      accountSection: 'खाता',
+    },
+    common: {
+      newContractor: '+ नया ठेकेदार',
+      noContractors: 'अभी तक कोई ठेकेदार नहीं है।',
+    },
   },
   auth: {
     networkEyebrow: 'एक सत्यापित नेटवर्क',
@@ -911,13 +1321,26 @@ const hi: Translations = {
   enquiries: {
     pageTitle: 'पूछताछ',
     pageSubtitle: 'व्यवसायों और ठेकेदारों के बीच संदेशों और संचार को ट्रैक करें।',
+    contractorSubtitle: 'व्यवसायों से प्राप्त परियोजना अनुरोधों की समीक्षा करें और उत्तर दें।',
+    businessSubtitle: 'श्रमिक ठेकेदारों को भेजी गई पूछताछ को प्रबंधित और ट्रैक करें।',
     allTab: 'सभी पूछताछ',
     pendingTab: 'लंबित',
+    acceptedTab: 'स्वीकृत',
+    declinedTab: 'अस्वीकृत',
     respondedTab: 'उत्तर दिया गया',
     closedTab: 'बंद',
     statusPending: 'लंबित',
+    statusAccepted: 'स्वीकृत',
+    statusDeclined: 'अस्वीकृत',
     statusResponded: 'उत्तर दिया गया',
     statusClosed: 'बंद',
+    tabs: {
+      all: 'सभी',
+      pending: 'लंबित',
+      accepted: 'स्वीकृत',
+      declined: 'अस्वीकृत',
+      closed: 'बंद',
+    },
     subject: 'विषय',
     date: 'दिनांक',
     messageHistory: 'संदेश इतिहास',
@@ -1122,7 +1545,135 @@ const mr: Translations = {
     dashboard: 'डॅशबोर्ड',
     login: 'लॉग इन',
     logout: 'लॉग आउट',
-    getStarted: 'सुरुवात करा',
+    getStarted: 'उत्पादक साइन अप',
+    listYourCompany: 'तुमची कंपनी सूचीबद्ध करा',
+    findContractors: 'ठेकेदार शोधा',
+    enquiries: 'चौकशी',
+    inbox: 'इनबॉक्स',
+    meetings: 'मीटिंग्ज',
+    profile: 'माझे प्रोफाइल',
+    companyProfile: 'कंपनी प्रोफाइल',
+    verification: 'पडताळणी',
+    settings: 'सेटिंग्ज',
+    analytics: 'विश्लेषण',
+    users: 'वापरकर्ते',
+    reports: 'अहवाल आणि नियंत्रण',
+    auditLogs: 'ऑडिट लॉग',
+  },
+  sidebarGroups: {
+    main: 'मुख्य',
+    work: 'काम',
+    account: 'खाते',
+    profile: 'प्रोफाइल',
+    overview: 'आढावा',
+    platform: 'प्लॅटफॉर्म',
+    trustSafety: 'विश्वास आणि सुरक्षितता',
+    system: 'सिस्टम',
+  },
+  fieldStaff: {
+    nav: {
+      dashboard: 'डॅशबोर्ड',
+      requests: 'ठेकेदार विनंत्या',
+      contractors: 'ठेकेदार',
+      activity: 'माझी क्रियाकलाप',
+      profile: 'प्रोफाइल',
+      settings: 'सेटिंग्ज',
+    },
+    dashboard: {
+      title: 'डॅशबोर्ड',
+      subtitle: 'तुमच्या फील्ड कामाचा आढावा.',
+      newRequests: 'नवीन विनंत्या',
+      myPendingRequests: 'माझ्या प्रलंबित विनंत्या',
+      profilesBeingCompleted: 'पूर्ण होत असलेल्या प्रोफाइल्स',
+      profilesSubmittedForReview: 'पुनरावलोकनासाठी सादर',
+      recentActivity: 'अलीकडील पूर्ण क्रियाकलाप',
+      noActivity: 'अद्याप कोणतीही क्रियाकलाप नाही — तुमच्या कृती इथे दिसतील.',
+    },
+    requests: {
+      title: 'ठेकेदार विनंत्या',
+      subtitle: '"तुमची कंपनी सूचीबद्ध करा" द्वारे आलेले लीड — पुनरावलोकन करा, संपर्क करा आणि प्रोफाइल सुरू करा.',
+      all: 'सर्व',
+      assignedTo: 'नेमून दिले',
+      unassigned: 'नियुक्त नाही',
+      noRequests: 'अद्याप कोणत्याही विनंत्या नाहीत.',
+      noneInFilter: 'इथे काही नाही. या फिल्टरशी कोणतीही विनंती जुळत नाही.',
+    },
+    requestDetail: {
+      backToQueue: 'यादीकडे परत जा',
+      source: 'स्रोत',
+      sourceValue: 'तुमची कंपनी सूचीबद्ध करा (सार्वजनिक फॉर्म)',
+      contactPerson: 'संपर्क व्यक्ती',
+      industry: 'उद्योग',
+      location: 'स्थान',
+      leadNotes: 'नोट्स',
+      activityHistory: 'क्रियाकलाप इतिहास',
+      noActivity: 'अद्याप कोणतीही क्रियाकलाप नोंदवलेली नाही.',
+      markContacted: 'संपर्क केले असे चिन्हांकित करा',
+      startProfile: 'प्रोफाइल सुरू करा',
+      continueProfile: 'प्रोफाइल सुरू ठेवा',
+      submitForReview: 'ऑपरेशन्स पुनरावलोकनासाठी सादर करा',
+      submitBlocked: 'सादर करण्यापूर्वी प्रोफाइल पूर्ण करा.',
+      alreadySubmitted: 'पुनरावलोकनासाठी तयार — ऑपरेशन्स हेडची प्रतीक्षा आहे.',
+      statusLabel: 'स्थिती',
+    },
+    profileForm: {
+      sectionBasic: 'मूलभूत माहिती',
+      sectionBusiness: 'व्यवसाय तपशील',
+      sectionCategories: 'कौशल्य श्रेणी',
+      sectionAvailability: 'उपलब्धता आणि नोट्स',
+      companyName: 'ठेकेदार / कंपनीचे नाव',
+      phone: 'फोन नंबर',
+      city: 'शहर',
+      yearsInBusiness: 'व्यवसायातील वर्षे',
+      workforceCount: 'कामगार संख्या',
+      serviceAreas: 'सेवा क्षेत्रे',
+      serviceAreasHint: 'प्रत्येक क्षेत्र जोडा आणि Enter दाबा',
+      overseasInterest: 'परदेशी प्रकल्पांमध्ये स्वारस्य',
+      categories: 'कौशल्य श्रेणी',
+      availability: 'उपलब्धता',
+      notes: 'अंतर्गत नोट्स',
+      notesHint: 'फक्त स्टाफला दिसते — सार्वजनिकरित्या नाही.',
+      description: 'सार्वजनिक वर्णन',
+      saveDraft: 'ड्राफ्ट जतन करा',
+      next: 'पुढे',
+      back: 'मागे',
+      submitForReview: 'ऑपरेशन्स पुनरावलोकनासाठी सादर करा',
+      completion: 'प्रोफाइल पूर्णता',
+      missingFields: 'शिल्लक',
+      verificationStatus: 'पडताळणी',
+      publicationStatus: 'प्रकाशन',
+      notPublished: 'अप्रकाशित',
+      published: 'प्रकाशित',
+      resumedDraft: 'या डिव्हाइसवरून जतन न केलेला ड्राफ्ट पुन्हा लोड केला.',
+    },
+    sync: {
+      saved: 'जतन केले',
+      saving: 'जतन करत आहे…',
+      savedOffline: 'ऑफलाइन जतन केले',
+      syncing: 'सिंक करत आहे…',
+      synced: 'सिंक झाले',
+      syncFailed: 'सिंक अयशस्वी',
+      retry: 'पुन्हा प्रयत्न करा',
+    },
+    activity: {
+      title: 'माझी क्रियाकलाप',
+      subtitle: 'फील्ड वर्कस्पेसमध्ये तुम्ही केलेल्या प्रत्येक कृतीची नोंद.',
+      noActivity: 'अद्याप कोणतीही क्रियाकलाप नोंदवलेली नाही.',
+    },
+    profile: {
+      title: 'प्रोफाइल',
+      roleLabel: 'भूमिका',
+      memberSince: 'सदस्य झाल्याची तारीख',
+    },
+    settings: {
+      title: 'सेटिंग्ज',
+      languageSection: 'भाषा',
+      accountSection: 'खाते',
+    },
+    common: {
+      newContractor: '+ नवीन ठेकेदार',
+      noContractors: 'अद्याप कोणतेही ठेकेदार नाहीत.',
+    },
   },
   auth: {
     networkEyebrow: 'एक सत्यापित नेटवर्क',
@@ -1249,13 +1800,26 @@ const mr: Translations = {
   enquiries: {
     pageTitle: 'चौकशा',
     pageSubtitle: 'व्यवसाय आणि ठेकेदारांमधील संदेश आणि संवाद ट्रॅक करा.',
+    contractorSubtitle: 'व्यवसायकांकडून आलेल्या प्रोजेक्ट चौकशांचे पुनरावलोकन करा आणि उत्तर द्या.',
+    businessSubtitle: 'मजूर ठेकेदारांना पाठवलेल्या चौकशांचे व्यवस्थापन आणि मागोवा घ्या.',
     allTab: 'सर्व चौकशा',
     pendingTab: 'प्रलंबित',
+    acceptedTab: 'स्वीकारलेले',
+    declinedTab: 'नाकारलेले',
     respondedTab: 'उत्तर दिलेले',
     closedTab: 'बंद',
     statusPending: 'प्रलंबित',
+    statusAccepted: 'स्वीकारलेले',
+    statusDeclined: 'नाकारलेले',
     statusResponded: 'उत्तर दिलेले',
     statusClosed: 'बंद',
+    tabs: {
+      all: 'सर्व',
+      pending: 'प्रलंबित',
+      accepted: 'स्वीकारलेले',
+      declined: 'नाकारलेले',
+      closed: 'बंद',
+    },
     subject: 'विषय',
     date: 'तारीख',
     messageHistory: 'संदेश इतिहास',
