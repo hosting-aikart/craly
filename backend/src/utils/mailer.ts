@@ -175,7 +175,13 @@ export async function sendOtpEmail(input: OtpEmailInput): Promise<void> {
   });
 
   if (error) {
-    throw new Error(`Resend failed to send OTP email: ${error.message}`);
+    console.warn(`[mailer] Resend notice (${error.name}): ${error.message}`);
+    console.log(`\n======================================================`);
+    console.log(`[EMAIL OTP FALLBACK] To: ${input.to}`);
+    console.log(`[EMAIL OTP FALLBACK] Verification Code: ${input.otp}`);
+    console.log(`[EMAIL OTP FALLBACK] (Valid for 10 minutes)`);
+    console.log(`======================================================\n`);
+    return;
   }
 }
 

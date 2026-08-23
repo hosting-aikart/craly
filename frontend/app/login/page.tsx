@@ -200,15 +200,15 @@ export default function LoginPage() {
           <div className="login-new">
             <p>{t.auth.newToCraly}</p>
             <div className="login-new__grid">
-              <Link href="/signup" className="login-new__chip">
-                {t.auth.joinAsContractor}
+              <Link href="/signup?role=business" className="login-new__chip">
+                {t.auth.joinAsBusiness}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" />
                   <path d="M13 6l6 6-6 6" />
                 </svg>
               </Link>
-              <Link href="/signup" className="login-new__chip">
-                {t.auth.joinAsBusiness}
+              <Link href="/signup?role=contractor" className="login-new__chip">
+                {t.auth.joinAsContractor}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" />
                   <path d="M13 6l6 6-6 6" />

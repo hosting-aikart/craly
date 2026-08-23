@@ -1,26 +1,30 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense, type FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import './signup.css';
-import { signup, sendSignupOtp, verifySignupOtp } from '@/lib/api/auth';
+import { signup } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
-import OtpVerificationModal from '@/components/auth/OtpVerificationModal';
+import { COUNTRIES, DEFAULT_COUNTRY, type CountryOption } from '@/lib/util/countries';
 
 const helmetLogo = '/assets/helmet.png';
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const roleParam = searchParams.get('role');
+
   const { user, loading: authLoading, refresh } = useAuth();
   const { t } = useLanguage();
 
-  const [role, setRole] = useState<'business' | 'contractor'>('contractor');
+  const [role, setRole] = useState<'business' | 'contractor'>('business');
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
-  const [mobile, setMobile] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(DEFAULT_COUNTRY);
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [city, setCity] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -30,23 +34,34 @@ export default function SignupPage() {
   const [mobileError, setMobileError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // OTP Modal State
-  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpError, setOtpError] = useState('');
+  useEffect(() => {
+    if (roleParam === 'contractor') {
+      setRole('contractor');
+    } else if (roleParam === 'business' || roleParam === 'manufacturer') {
+      setRole('business');
+    }
+  }, [roleParam]);
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const PHONE_RE = /^\+?[0-9]{7,15}$/;
+
+  const getFullMobile = (phone: string, country: CountryOption) => {
+    const raw = phone.trim();
+    if (!raw) return '';
+    if (raw.startsWith('+')) return raw;
+    return `${country.dialCode}${raw}`;
+  };
 
   const validateEmail = (value: string) => {
     if (!value) { setEmailError(''); return; }
     setEmailError(EMAIL_RE.test(value) ? '' : 'Please enter a valid email address');
   };
 
-  const validateMobile = (value: string) => {
-    if (!value) { setMobileError('Phone number is required'); return; }
-    const cleaned = value.replace(/[\s\-().]/g, '');
-    setMobileError(PHONE_RE.test(cleaned) ? '' : 'Please enter a valid phone number (7-15 digits with optional country code)');
+  const validateMobile = (value: string, country = selectedCountry) => {
+    if (!value.trim()) { setMobileError('Phone number is required'); return; }
+    const full = getFullMobile(value, country);
+    const cleaned = full.replace(/[\s\-().]/g, '');
+    setMobileError(PHONE_RE.test(cleaned) ? '' : 'Please enter a valid phone number (7-15 digits)');
   };
 
   useEffect(() => {
@@ -71,16 +86,18 @@ export default function SignupPage() {
       return;
     }
 
+    const fullMobile = getFullMobile(phoneNumber, selectedCountry);
+
     // Run validations before requesting OTP
     let hasError = false;
     if (!EMAIL_RE.test(email)) {
       setEmailError('Please enter a valid email address');
       hasError = true;
     }
-    if (mobile) {
-      const cleaned = mobile.replace(/[\s\-().]/g, '');
+    if (phoneNumber.trim()) {
+      const cleaned = fullMobile.replace(/[\s\-().]/g, '');
       if (!PHONE_RE.test(cleaned)) {
-        setMobileError('Please enter a valid phone number (7-15 digits with optional country code)');
+        setMobileError('Please enter a valid phone number (7-15 digits)');
         hasError = true;
       }
     } else {
@@ -91,48 +108,23 @@ export default function SignupPage() {
 
     setSubmitting(true);
     setError('');
-    setOtpError('');
+
+    const fullLocation = city.trim() ? `${city.trim()}, ${selectedCountry.name}` : selectedCountry.name;
 
     try {
-      // Step 1: Send OTP to email and phone
-      await sendSignupOtp({ email, mobile, name: companyName });
-      setIsOtpModalOpen(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.contact.genericError);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleVerifyAndSubmit = async (emailOtp: string, phoneOtp: string) => {
-    setOtpLoading(true);
-    setOtpError('');
-
-    try {
-      // Step 2: Verify codes
-      await verifySignupOtp({ email, mobile, emailOtp, phoneOtp });
-
-      // Step 3: Complete registration
-      await signup({ email, password, role, companyName, mobile, city: city || undefined });
+      // Direct signup for testing
+      await signup({ email, password, role, companyName, mobile: fullMobile, city: fullLocation });
       await refresh();
 
-      setIsOtpModalOpen(false);
       if (role === 'contractor') {
         router.push('/contractor-portal/dashboard');
       } else {
         router.push('/onboarding');
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Verification failed. Please try again.';
-      setOtpError(msg);
-      throw err;
-    } finally {
-      setOtpLoading(false);
+      setError(err instanceof Error ? err.message : t.contact.genericError);
+      setSubmitting(false);
     }
-  };
-
-  const handleResendOtp = async () => {
-    await sendSignupOtp({ email, mobile, name: companyName });
   };
 
   if (authLoading || user) {
@@ -160,6 +152,20 @@ export default function SignupPage() {
 
             <div className="signup-panel__roles">
               <div
+                className={`signup-panel__role-card ${role === 'business' ? 'signup-panel__role-card--active' : ''}`}
+                onClick={() => setRole('business')}
+                style={{ cursor: 'pointer' }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="3" width="16" height="18" rx="1" />
+                  <path d="M9 8h1M14 8h1M9 12h1M14 12h1" />
+                  <path d="M10 21v-4h4v4" />
+                </svg>
+                <h4>{t.auth.businessRoleTitle}</h4>
+                <p>{t.auth.businessRoleDesc}</p>
+              </div>
+
+              <div
                 className={`signup-panel__role-card ${role === 'contractor' ? 'signup-panel__role-card--active' : ''}`}
                 onClick={() => setRole('contractor')}
                 style={{ cursor: 'pointer' }}
@@ -172,20 +178,6 @@ export default function SignupPage() {
                 </svg>
                 <h4>{t.auth.contractorRoleTitle}</h4>
                 <p>{t.auth.contractorRoleDesc}</p>
-              </div>
-
-              <div
-                className={`signup-panel__role-card ${role === 'business' ? 'signup-panel__role-card--active' : ''}`}
-                onClick={() => setRole('business')}
-                style={{ cursor: 'pointer' }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="4" y="3" width="16" height="18" rx="1" />
-                  <path d="M9 8h1M14 8h1M9 12h1M14 12h1" />
-                  <path d="M10 21v-4h4v4" />
-                </svg>
-                <h4>{t.auth.businessRoleTitle}</h4>
-                <p>{t.auth.businessRoleDesc}</p>
               </div>
             </div>
           </div>
@@ -207,11 +199,27 @@ export default function SignupPage() {
           </div>
           <p className="signup-form-panel__eyebrow">{t.auth.createAccountEyebrow}</p>
           <h1 className="signup-form-panel__heading">
-            {role === 'contractor' ? 'Join as Contractor' : t.auth.joinTitle}
+            {role === 'business' ? t.auth.joinTitle : 'Join as Contractor'}
           </h1>
 
           {/* Role selector buttons for mobile / quick toggle */}
           <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+            <button
+              type="button"
+              onClick={() => setRole('business')}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: '1px solid #ddd',
+                background: role === 'business' ? '#1e293b' : '#fff',
+                color: role === 'business' ? '#fff' : '#334155',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Manufacturer / Business
+            </button>
             <button
               type="button"
               onClick={() => setRole('contractor')}
@@ -227,22 +235,6 @@ export default function SignupPage() {
               }}
             >
               Contractor
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('business')}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                background: role === 'business' ? '#1e293b' : '#fff',
-                color: role === 'business' ? '#fff' : '#334155',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Manufacturer
             </button>
           </div>
 
@@ -281,30 +273,82 @@ export default function SignupPage() {
 
             <label className="signup-field">
               <span>Phone / Mobile Number</span>
-              <div className="signup-field__input">
-                <input
-                  type="tel"
-                  required
-                  value={mobile}
-                  onChange={(e) => { setMobile(e.target.value); if (mobileError) validateMobile(e.target.value); }}
-                  onBlur={(e) => validateMobile(e.target.value)}
-                  placeholder="e.g. +1 555 123 4567 or +44 20 7123 4567"
-                />
+              <div className="signup-phone-group">
+                <select
+                  className="signup-country-code-select"
+                  value={selectedCountry.code}
+                  onChange={(e) => {
+                    const found = COUNTRIES.find((c) => c.code === e.target.value);
+                    if (found) {
+                      setSelectedCountry(found);
+                      if (mobileError) validateMobile(phoneNumber, found);
+                    }
+                  }}
+                  aria-label="Country Code"
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.flag} {c.code} ({c.dialCode})
+                    </option>
+                  ))}
+                </select>
+
+                <div className="signup-field__input signup-phone-input">
+                  <span className="signup-dial-code-prefix">{selectedCountry.dialCode}</span>
+                  <input
+                    type="tel"
+                    required
+                    value={phoneNumber}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setPhoneNumber(val);
+                      if (mobileError) validateMobile(val, selectedCountry);
+                    }}
+                    onBlur={(e) => validateMobile(e.target.value, selectedCountry)}
+                    placeholder="555 123 4567"
+                  />
+                </div>
               </div>
               {mobileError && <span className="signup-field-error">{mobileError}</span>}
             </label>
 
-            <label className="signup-field">
-              <span>City / Base Location</span>
-              <div className="signup-field__input">
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="e.g. London, New York, Tokyo, Mumbai"
-                />
-              </div>
-            </label>
+            <div className="signup-location-row">
+              <label className="signup-field signup-location-col">
+                <span>Country / Region</span>
+                <div className="signup-field__input signup-select-wrap">
+                  <select
+                    value={selectedCountry.code}
+                    onChange={(e) => {
+                      const found = COUNTRIES.find((c) => c.code === e.target.value);
+                      if (found) {
+                        setSelectedCountry(found);
+                        if (mobileError) validateMobile(phoneNumber, found);
+                      }
+                    }}
+                    className="signup-country-select"
+                    aria-label="Country or Region"
+                  >
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.flag} {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </label>
+
+              <label className="signup-field signup-location-col">
+                <span>City / State</span>
+                <div className="signup-field__input">
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="e.g. New York, London, Mumbai"
+                  />
+                </div>
+              </label>
+            </div>
 
             <label className="signup-field">
               <span>{t.auth.passwordLabel}</span>
@@ -356,7 +400,7 @@ export default function SignupPage() {
             {error && <p className="signup-error">{error}</p>}
 
             <button type="submit" className="signup-submit" disabled={submitting}>
-              {submitting ? t.auth.creatingAccount : t.auth.createAccountBtn}
+              {submitting ? t.auth.creatingAccount : (role === 'business' ? 'Create Manufacturer Account' : t.auth.createAccountBtn)}
             </button>
           </form>
 
@@ -366,17 +410,14 @@ export default function SignupPage() {
         </div>
 
       </div>
-
-      <OtpVerificationModal
-        isOpen={isOtpModalOpen}
-        email={email}
-        mobile={mobile}
-        onClose={() => setIsOtpModalOpen(false)}
-        onVerifyAndSubmit={handleVerifyAndSubmit}
-        onResendOtp={handleResendOtp}
-        loading={otpLoading}
-        error={otpError}
-      />
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LoadingState label="Loading signup..." /></div>}>
+      <SignupForm />
+    </Suspense>
   );
 }

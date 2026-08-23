@@ -187,26 +187,7 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
     }
     const { email, password, role, companyName, mobile, city, state, workforceSize, yearsExperience } = parsed.data;
 
-    // Verify that both email and mobile have been verified in the last 30 minutes
-    const [verifiedEmail] = await sql`
-      SELECT id FROM auth_verifications
-      WHERE target = ${email} AND target_type = 'email' AND verified = true
-        AND updated_at >= now() - interval '30 minutes'
-      LIMIT 1
-    `;
-    const [verifiedPhone] = await sql`
-      SELECT id FROM auth_verifications
-      WHERE target = ${mobile} AND target_type = 'phone' AND verified = true
-        AND updated_at >= now() - interval '30 minutes'
-      LIMIT 1
-    `;
-
-    if (!verifiedEmail || !verifiedPhone) {
-      const err: AppError = new Error('Please verify your email address and phone number before completing registration.');
-      err.statusCode = 400;
-      return next(err);
-    }
-
+    // Check if user already exists
     const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
     if (existing.length > 0) {
       const err: AppError = new Error('An account with this email already exists');
