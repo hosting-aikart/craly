@@ -4,11 +4,18 @@ import { z } from 'zod';
 // contractor_profiles directly — see docs/open-decisions.md). Only
 // 'business' remains a public signup path.
 export const signupSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.enum(['business', 'contractor']),
   companyName: z.string().min(1, 'Company name is required'),
-  mobile: z.string().optional(),
+  mobile: z
+    .string()
+    .optional()
+    .transform((v) => v?.replace(/[\s\-()]/g, '') || undefined)
+    .refine(
+      (v) => !v || /^(\+91)?[6-9]\d{9}$/.test(v),
+      { message: 'Please enter a valid 10-digit Indian mobile number' },
+    ),
   city: z.string().optional(),
   state: z.string().optional(),
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),

@@ -25,7 +25,23 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [consent, setConsent] = useState(true);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [mobileError, setMobileError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const PHONE_RE = /^(\+91)?[6-9]\d{9}$/;
+
+  const validateEmail = (value: string) => {
+    if (!value) { setEmailError(''); return; }
+    setEmailError(EMAIL_RE.test(value) ? '' : 'Please enter a valid email address');
+  };
+
+  const validateMobile = (value: string) => {
+    if (!value) { setMobileError(''); return; }
+    const cleaned = value.replace(/[\s\-()]/g, '');
+    setMobileError(PHONE_RE.test(cleaned) ? '' : 'Please enter a valid 10-digit Indian mobile number');
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -48,6 +64,22 @@ export default function SignupPage() {
       setError('You must agree to the Terms of Service & Privacy Policy.');
       return;
     }
+
+    // Run validations before submitting
+    let hasError = false;
+    if (!EMAIL_RE.test(email)) {
+      setEmailError('Please enter a valid email address');
+      hasError = true;
+    }
+    if (mobile) {
+      const cleaned = mobile.replace(/[\s\-()]/g, '');
+      if (!PHONE_RE.test(cleaned)) {
+        setMobileError('Please enter a valid 10-digit Indian mobile number');
+        hasError = true;
+      }
+    }
+    if (hasError) return;
+
     setSubmitting(true);
     setError('');
 
@@ -201,10 +233,12 @@ export default function SignupPage() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); if (emailError) validateEmail(e.target.value); }}
+                  onBlur={(e) => validateEmail(e.target.value)}
                   placeholder={t.auth.emailPlaceholder}
                 />
               </div>
+              {emailError && <span className="signup-field-error">{emailError}</span>}
             </label>
 
             <label className="signup-field">
@@ -213,10 +247,12 @@ export default function SignupPage() {
                 <input
                   type="tel"
                   value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
+                  onChange={(e) => { setMobile(e.target.value); if (mobileError) validateMobile(e.target.value); }}
+                  onBlur={(e) => validateMobile(e.target.value)}
                   placeholder="+91 98765 43210"
                 />
               </div>
+              {mobileError && <span className="signup-field-error">{mobileError}</span>}
             </label>
 
             <label className="signup-field">
