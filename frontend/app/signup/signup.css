@@ -233,6 +233,24 @@
   color: #9ca3af;
 }
 
+.signup-field__input .password-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: #9ca3af;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.signup-field__input .password-toggle:hover {
+  color: #0f766e;
+}
+
 .signup-error {
   color: #dc2626;
   font-family: var(--font-body);

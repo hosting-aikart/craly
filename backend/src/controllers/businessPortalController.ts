@@ -342,6 +342,32 @@ export async function publishRequirement(req: Request, res: Response, next: Next
 }
 
 /**
+ * DELETE /api/business-portal/requirements/:id
+ */
+export async function deleteRequirement(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const manufacturer = await getManufacturerProfile(req.user!.sub);
+
+    const [deleted] = await sql`
+      DELETE FROM manpower_requirements
+      WHERE id = ${id} AND manufacturer_id = ${manufacturer.id}
+      RETURNING id
+    `;
+
+    if (!deleted) {
+      const err: AppError = new Error('Requirement not found');
+      err.statusCode = 404;
+      return next(err);
+    }
+
+    res.json({ message: 'Requirement deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * GET /api/business-portal/requirements/:id/applications
  */
 export async function getRequirementApplications(req: Request, res: Response, next: NextFunction): Promise<void> {

@@ -4,7 +4,12 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
-import { getBusinessRequirements, type RequirementItem } from '@/lib/api/businessPortal';
+import {
+  getBusinessRequirements,
+  publishBusinessRequirement,
+  deleteBusinessRequirement,
+  type RequirementItem,
+} from '@/lib/api/businessPortal';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
@@ -22,6 +27,7 @@ export default function BusinessRequirementsListPage() {
   const [requirements, setRequirements] = useState<RequirementItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStatus, setActiveStatus] = useState('');
+  const [actionId, setActionId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   const fetchRequirements = (statusFilter: string) => {
@@ -35,6 +41,31 @@ export default function BusinessRequirementsListPage() {
   useEffect(() => {
     fetchRequirements(activeStatus);
   }, [activeStatus]);
+
+  const handlePublishDraft = async (id: string) => {
+    setActionId(id);
+    try {
+      await publishBusinessRequirement(id);
+      fetchRequirements(activeStatus);
+    } catch (err: any) {
+      setError(err.message || 'Failed to publish requirement');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleDeleteDraft = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this draft requirement?')) return;
+    setActionId(id);
+    try {
+      await deleteBusinessRequirement(id);
+      setRequirements((prev) => prev.filter((r) => r.id !== id));
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete draft');
+    } finally {
+      setActionId(null);
+    }
+  };
 
   return (
     <>
@@ -168,7 +199,47 @@ export default function BusinessRequirementsListPage() {
                   📥 {req.applications_count} {req.applications_count === 1 ? 'Application' : 'Applications'} Received
                 </span>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  {req.status === 'DRAFT' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handlePublishDraft(req.id)}
+                        disabled={actionId === req.id}
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#ffffff',
+                          background: 'var(--craly-teal)',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {actionId === req.id ? 'Publishing…' : 'Publish Now'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDraft(req.id)}
+                        disabled={actionId === req.id}
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#dc2626',
+                          background: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Delete Draft
+                      </button>
+                    </>
+                  )}
+
                   <Link
                     href={`/business/requirements/${req.id}`}
                     style={{
@@ -190,7 +261,7 @@ export default function BusinessRequirementsListPage() {
                       fontSize: '13px',
                       fontWeight: 600,
                       color: '#ffffff',
-                      background: 'var(--craly-teal)',
+                      background: req.status === 'DRAFT' ? 'var(--craly-navy)' : 'var(--craly-teal)',
                       textDecoration: 'none',
                       padding: '6px 12px',
                       borderRadius: '6px',

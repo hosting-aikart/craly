@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch } from '@/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/api';
 
 export interface RequirementItem {
   id: string;
@@ -93,6 +93,9 @@ export const updateBusinessRequirement = (id: string, input: Partial<CreateRequi
 
 export const publishBusinessRequirement = (id: string) =>
   apiPost<{ data: RequirementItem; message: string }>(`/business-portal/requirements/${id}/publish`, {});
+
+export const deleteBusinessRequirement = (id: string) =>
+  apiDelete<{ message: string }>(`/business-portal/requirements/${id}`);
 
 export const getRequirementApplications = (requirementId: string) =>
   apiGet<{ data: ApplicationReceived[] }>(`/business-portal/requirements/${requirementId}/applications`);

@@ -3,12 +3,14 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
-import { createBusinessRequirement, type CreateRequirementInput } from '@/lib/api/businessPortal';
+import { createBusinessRequirement, updateBusinessRequirement, type CreateRequirementInput } from '@/lib/api/businessPortal';
 import Button from '@/components/ui/Button';
 import '@/components/AuthForm.css';
 
 export default function CreateRequirementPage() {
   const router = useRouter();
+
+  const [draftId, setDraftId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CreateRequirementInput>({
     title: '',
@@ -58,11 +60,22 @@ export default function CreateRequirementPage() {
 
     setSubmitting(true);
     try {
-      const res = await createBusinessRequirement({
-        ...formData,
-        action,
-      });
-      router.push(`/business/requirements/${res.data.id}`);
+      if (draftId) {
+        const res = await updateBusinessRequirement(draftId, {
+          ...formData,
+          action,
+        });
+        router.push(`/business/requirements/${res.data.id}`);
+      } else {
+        const res = await createBusinessRequirement({
+          ...formData,
+          action,
+        });
+        if (action === 'draft') {
+          setDraftId(res.data.id);
+        }
+        router.push(`/business/requirements/${res.data.id}`);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to save requirement');
     } finally {

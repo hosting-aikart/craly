@@ -7,6 +7,7 @@ import {
   createRequirement,
   updateRequirement,
   publishRequirement,
+  deleteRequirement,
   getRequirementApplications,
   getAllApplications,
   getApplicationById,
@@ -27,6 +28,7 @@ router.post('/requirements', createRequirement);
 router.get('/requirements/:id', getRequirementById);
 router.patch('/requirements/:id', updateRequirement);
 router.post('/requirements/:id/publish', publishRequirement);
+router.delete('/requirements/:id', deleteRequirement);
 router.get('/requirements/:id/applications', getRequirementApplications);
 
 // Applications review

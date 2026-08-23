@@ -7,6 +7,7 @@ import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderConte
 import {
   getBusinessRequirementById,
   publishBusinessRequirement,
+  deleteBusinessRequirement,
   type RequirementItem,
 } from '@/lib/api/businessPortal';
 import LoadingState from '@/components/ui/LoadingState';
@@ -19,6 +20,7 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
   const [requirement, setRequirement] = useState<RequirementItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -45,6 +47,19 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
       setError(err.message || 'Failed to publish requirement');
     } finally {
       setPublishing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this draft requirement?')) return;
+    setDeleting(true);
+    setError('');
+    try {
+      await deleteBusinessRequirement(id);
+      router.push('/business/requirements');
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete requirement');
+      setDeleting(false);
     }
   };
 
@@ -111,13 +126,33 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
 
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {isDraft && (
-                <Button
-                  variant="primary"
-                  onClick={handlePublish}
-                  disabled={publishing}
-                >
-                  {publishing ? 'Publishing…' : 'Publish Requirement'}
-                </Button>
+                <>
+                  <Button
+                    variant="primary"
+                    onClick={handlePublish}
+                    disabled={publishing || deleting}
+                  >
+                    {publishing ? 'Publishing…' : 'Publish Requirement'}
+                  </Button>
+
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={publishing || deleting}
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: '#dc2626',
+                      background: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      padding: '10px 18px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {deleting ? 'Deleting…' : 'Delete Draft'}
+                  </button>
+                </>
               )}
 
               <Link
