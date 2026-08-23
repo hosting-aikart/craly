@@ -9,11 +9,11 @@ export const signupSchema = z.object({
   role: z.enum(['business', 'contractor']),
   companyName: z.string().min(1, 'Company name is required'),
   mobile: z
-    .string()
-    .optional()
-    .transform((v) => v?.replace(/[\s\-()]/g, '') || undefined)
+    .string({ required_error: 'Mobile number is required' })
+    .min(1, 'Mobile number is required')
+    .transform((v) => v.replace(/[\s\-()]/g, ''))
     .refine(
-      (v) => !v || /^(\+91)?[6-9]\d{9}$/.test(v),
+      (v) => /^(\+91)?[6-9]\d{9}$/.test(v),
       { message: 'Please enter a valid 10-digit Indian mobile number' },
     ),
   city: z.string().optional(),

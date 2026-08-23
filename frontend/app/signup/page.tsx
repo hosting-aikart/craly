@@ -38,7 +38,7 @@ export default function SignupPage() {
   };
 
   const validateMobile = (value: string) => {
-    if (!value) { setMobileError(''); return; }
+    if (!value) { setMobileError('Mobile number is required'); return; }
     const cleaned = value.replace(/[\s\-()]/g, '');
     setMobileError(PHONE_RE.test(cleaned) ? '' : 'Please enter a valid 10-digit Indian mobile number');
   };
@@ -77,6 +77,9 @@ export default function SignupPage() {
         setMobileError('Please enter a valid 10-digit Indian mobile number');
         hasError = true;
       }
+    } else {
+      setMobileError('Mobile number is required');
+      hasError = true;
     }
     if (hasError) return;
 
@@ -84,7 +87,7 @@ export default function SignupPage() {
     setError('');
 
     try {
-      await signup({ email, password, role, companyName, mobile: mobile || undefined, city: city || undefined });
+      await signup({ email, password, role, companyName, mobile, city: city || undefined });
       await refresh();
       if (role === 'contractor') {
         router.push('/contractor-portal/dashboard');
@@ -246,6 +249,7 @@ export default function SignupPage() {
               <div className="signup-field__input">
                 <input
                   type="tel"
+                  required
                   value={mobile}
                   onChange={(e) => { setMobile(e.target.value); if (mobileError) validateMobile(e.target.value); }}
                   onBlur={(e) => validateMobile(e.target.value)}
