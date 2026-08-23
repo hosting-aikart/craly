@@ -17,6 +17,9 @@ export interface Opportunity {
   created_at: string;
   published_at: string | null;
   has_applied: boolean;
+  match_score?: number;
+  match_level?: 'HIGH' | 'MEDIUM' | 'LOW';
+  match_reasons?: string[];
   my_application_id?: string | null;
   my_application_status?: string | null;
   my_application_submitted_at?: string | null;

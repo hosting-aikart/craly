@@ -27,13 +27,80 @@ async function getContractorProfileId(userId: string): Promise<string> {
 }
 
 /**
+ * Helper to compute personalized match score and reasons for a contractor
+ */
+function calculateOpportunityMatch(op: any, contractor: any) {
+  let score = 45; // baseline open opportunity score
+  const reasons: string[] = [];
+
+  // 1. Location match
+  if (contractor?.city && op.location) {
+    const opLoc = op.location.toLowerCase();
+    const cCity = contractor.city.toLowerCase();
+    const cState = (contractor.state || '').toLowerCase();
+    if (opLoc.includes(cCity) || cCity.includes(opLoc)) {
+      score += 25;
+      reasons.push(`Location match (${contractor.city})`);
+    } else if (cState && opLoc.includes(cState)) {
+      score += 15;
+      reasons.push(`Regional state match (${contractor.state})`);
+    }
+  }
+
+  // 2. Workforce capacity match
+  if (contractor?.workforce_size && op.workers_required) {
+    if (contractor.workforce_size >= op.workers_required) {
+      score += 20;
+      reasons.push(`Capacity match (${contractor.workforce_size} workers available vs ${op.workers_required} needed)`);
+    } else if (contractor.workforce_size >= Math.ceil(op.workers_required * 0.5)) {
+      score += 10;
+      reasons.push(`Partial capacity match (${contractor.workforce_size} workers)`);
+    }
+  }
+
+  // 3. Experience match
+  if (contractor?.years_experience !== null && contractor?.years_experience !== undefined && op.experience_required) {
+    if (contractor.years_experience >= op.experience_required) {
+      score += 15;
+      reasons.push(`Experience qualified (${contractor.years_experience}+ years)`);
+    }
+  } else if (contractor?.years_experience && contractor.years_experience >= 2) {
+    score += 8;
+  }
+
+  score = Math.min(score, 98);
+  const match_level: 'HIGH' | 'MEDIUM' | 'LOW' = score >= 75 ? 'HIGH' : score >= 55 ? 'MEDIUM' : 'LOW';
+
+  return {
+    match_score: score,
+    match_level,
+    match_reasons: reasons,
+  };
+}
+
+/**
  * GET /api/contractor-portal/opportunities
- * Returns all published/open manpower requirements.
- * Includes `has_applied` boolean and `application_status` for the caller.
+ * Returns published/open manpower requirements scored and personalized for the caller contractor.
  */
 export async function getOpportunities(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const contractorId = await getContractorProfileId(req.user!.sub);
+    const [contractor] = await sql`
+      SELECT 
+        cp.id,
+        cp.company_name,
+        cp.city,
+        cp.state,
+        cp.workforce_size,
+        cp.years_experience
+      FROM contractor_profiles cp
+      WHERE cp.user_id = ${req.user!.sub}
+    `;
+
+    if (!contractor) {
+      const err: AppError = new Error('Contractor profile not found for this user');
+      err.statusCode = 404;
+      return next(err);
+    }
 
     const opportunities = await sql`
       SELECT 
@@ -56,15 +123,23 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
         app.status AS my_application_status
       FROM manpower_requirements mr
       LEFT JOIN applications app 
-        ON app.requirement_id = mr.id AND app.contractor_id = ${contractorId}
+        ON app.requirement_id = mr.id AND app.contractor_id = ${contractor.id}
       WHERE mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
       ORDER BY mr.published_at DESC NULLS LAST, mr.created_at DESC
     `;
 
-    const data = opportunities.map((op) => ({
-      ...op,
-      has_applied: !!op.my_application_id,
-    }));
+    const data = opportunities
+      .map((op) => {
+        const match = calculateOpportunityMatch(op, contractor);
+        return {
+          ...op,
+          has_applied: !!op.my_application_id,
+          match_score: match.match_score,
+          match_level: match.match_level,
+          match_reasons: match.match_reasons,
+        };
+      })
+      .sort((a, b) => b.match_score - a.match_score);
 
     res.json({ data });
   } catch (err) {
@@ -119,10 +194,27 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
       return next(err);
     }
 
+    const [contractor] = await sql`
+      SELECT 
+        cp.id,
+        cp.company_name,
+        cp.city,
+        cp.state,
+        cp.workforce_size,
+        cp.years_experience
+      FROM contractor_profiles cp
+      WHERE cp.user_id = ${req.user!.sub}
+    `;
+
+    const match = calculateOpportunityMatch(opportunity, contractor);
+
     res.json({
       data: {
         ...opportunity,
         has_applied: !!opportunity.my_application_id,
+        match_score: match.match_score,
+        match_level: match.match_level,
+        match_reasons: match.match_reasons,
       },
     });
   } catch (err) {

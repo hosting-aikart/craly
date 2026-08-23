@@ -129,6 +129,56 @@ export default function OpportunityDetailPage({ params }: { params: Promise<{ id
         )}
       </div>
 
+      {/* Personalized Match Banner */}
+      {opportunity.match_score && (
+        <div
+          style={{
+            background: '#f0fdfa',
+            border: '1px solid #ccfbf1',
+            borderRadius: '10px',
+            padding: '14px 18px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '18px' }}>🎯</span>
+              <strong style={{ color: '#0f766e', fontSize: '15px' }}>
+                {opportunity.match_score}% Personalized Match for Your Company
+              </strong>
+            </div>
+            {opportunity.match_reasons && opportunity.match_reasons.length > 0 && (
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                {opportunity.match_reasons.map((r, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: '12px',
+                      background: '#fff',
+                      color: '#047857',
+                      border: '1px solid #a7f3d0',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    ✓ {r}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <span style={{ fontSize: '12px', color: '#0d9488', fontWeight: 600 }}>
+            Matched based on your company location, capacity & experience
+          </span>
+        </div>
+      )}
+
       {/* Overview Grid */}
       <div className="opportunity-detail-grid">
         <div className="opportunity-main-card">

@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getMyProfile, type MyProfile } from '@/lib/api/profile';
-import { getDashboardStats, type ContractorDashboardStats } from '@/lib/api/contractorPortal';
+import { getDashboardStats, getOpportunities, type ContractorDashboardStats, type Opportunity } from '@/lib/api/contractorPortal';
 import LoadingState from '@/components/ui/LoadingState';
 import ListedBadge from '@/components/ui/ListedBadge';
 import './contractor-dashboard.css';
 
 export default function ContractorDashboardPage() {
   const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [stats, setStats] = useState<ContractorDashboardStats>({
     opportunitiesCount: 0,
     activeApplicationsCount: 0,
@@ -21,6 +22,7 @@ export default function ContractorDashboardPage() {
     Promise.all([
       getMyProfile().then(({ data }) => setProfile(data)),
       getDashboardStats().then(({ data }) => setStats(data)),
+      getOpportunities().then(({ data }) => setOpportunities(data)),
     ])
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -33,6 +35,7 @@ export default function ContractorDashboardPage() {
   const p = profile as any;
   const companyName = p.company_name || 'Contractor';
   const verificationStatus = p.verification_status || 'pending';
+  const topPersonalized = opportunities.slice(0, 3);
 
   return (
     <div className="contractor-dashboard">
@@ -45,12 +48,12 @@ export default function ContractorDashboardPage() {
           </div>
           <h1 className="contractor-dashboard__title">Welcome back, {companyName}</h1>
           <p className="contractor-dashboard__subtitle">
-            Browse published manpower opportunities and manage your submitted applications.
+            Browse personalized manpower opportunities matched to your workforce capacity and experience.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <Link href="/contractor-portal/opportunities" className="contractor-dashboard__edit-btn">
-            View Opportunities 🎯
+            View All Opportunities 🎯
           </Link>
           <Link
             href="/contractor-portal/profile"
@@ -70,7 +73,7 @@ export default function ContractorDashboardPage() {
           </div>
           <div className="contractor-dashboard__metric-data">
             <span className="contractor-dashboard__metric-val">{stats.opportunitiesCount}</span>
-            <span className="contractor-dashboard__metric-lbl">Open Opportunities</span>
+            <span className="contractor-dashboard__metric-lbl">Matched Opportunities</span>
           </div>
         </Link>
 
@@ -94,6 +97,101 @@ export default function ContractorDashboardPage() {
           </div>
         </Link>
       </div>
+
+      {/* ── Personalized Opportunities Section ──────────────────────── */}
+      {topPersonalized.length > 0 && (
+        <section className="contractor-dashboard__opps-section">
+          <div className="contractor-dashboard__opps-header">
+            <div className="contractor-dashboard__opps-header-title">
+              <span style={{ fontSize: '20px' }}>🎯</span>
+              <h2>Personalized Opportunities For You</h2>
+              <span className="contractor-dashboard__opps-badge">AI Matched</span>
+            </div>
+            <Link href="/contractor-portal/opportunities" className="contractor-dashboard__view-all-link">
+              View all ({opportunities.length}) →
+            </Link>
+          </div>
+
+          <div className="contractor-dashboard__opps-grid">
+            {topPersonalized.map((op) => {
+              const matchScore = op.match_score || 70;
+              const matchPillClass =
+                matchScore >= 75
+                  ? 'contractor-match-pill--high'
+                  : matchScore >= 55
+                  ? 'contractor-match-pill--medium'
+                  : 'contractor-match-pill--low';
+
+              return (
+                <div key={op.id} className="contractor-opp-card">
+                  <div>
+                    <div className="contractor-opp-card__top">
+                      <div>
+                        <h3 className="contractor-opp-card__title">{op.title}</h3>
+                        <div className="contractor-opp-card__meta">
+                          {op.industry && (
+                            <span className="contractor-opp-card__tag contractor-opp-card__tag--ind">
+                              {op.industry}
+                            </span>
+                          )}
+                          <span className="contractor-opp-card__tag">📍 {op.location}</span>
+                        </div>
+                      </div>
+
+                      <div className={`contractor-match-pill ${matchPillClass}`}>
+                        {matchScore >= 75 ? '🎯' : '✨'} {matchScore}% Match
+                      </div>
+                    </div>
+
+                    {op.match_reasons && op.match_reasons.length > 0 && (
+                      <div className="contractor-opp-card__reasons" style={{ marginTop: '10px' }}>
+                        {op.match_reasons.map((reason, idx) => (
+                          <span key={idx} className="contractor-opp-reason-tag">
+                            ✓ {reason}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="contractor-opp-card__specs">
+                    <div className="contractor-opp-spec">
+                      <span className="contractor-opp-spec-lbl">Workers</span>
+                      <strong className="contractor-opp-spec-val">{op.workers_required}</strong>
+                    </div>
+                    <div className="contractor-opp-spec">
+                      <span className="contractor-opp-spec-lbl">Start</span>
+                      <strong className="contractor-opp-spec-val">
+                        {new Date(op.start_date).toLocaleDateString()}
+                      </strong>
+                    </div>
+                    <div className="contractor-opp-spec">
+                      <span className="contractor-opp-spec-lbl">Duration</span>
+                      <strong className="contractor-opp-spec-val">{op.duration}</strong>
+                    </div>
+                  </div>
+
+                  <div className="contractor-opp-card__bottom">
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                      {op.has_applied ? (
+                        <span style={{ color: '#047857', fontWeight: 600 }}>✓ Applied</span>
+                      ) : (
+                        `Posted ${new Date(op.published_at || op.created_at).toLocaleDateString()}`
+                      )}
+                    </span>
+                    <Link
+                      href={`/contractor-portal/opportunities/${op.id}`}
+                      className="contractor-opp-card__btn"
+                    >
+                      {op.has_applied ? 'View Application' : 'Apply Now →'}
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── Company Summary Grid ────────────────────────────────────────── */}
       <div className="contractor-dashboard__grid">
