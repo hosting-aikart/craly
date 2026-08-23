@@ -4,10 +4,11 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './signup.css';
-import { signup } from '@/lib/api/auth';
+import { signup, sendSignupOtp, verifySignupOtp } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
+import OtpVerificationModal from '@/components/auth/OtpVerificationModal';
 
 const helmetLogo = '/assets/helmet.png';
 
@@ -29,8 +30,13 @@ export default function SignupPage() {
   const [mobileError, setMobileError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // OTP Modal State
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  const PHONE_RE = /^(\+91)?[6-9]\d{9}$/;
+  const PHONE_RE = /^\+?[0-9]{7,15}$/;
 
   const validateEmail = (value: string) => {
     if (!value) { setEmailError(''); return; }
@@ -38,9 +44,9 @@ export default function SignupPage() {
   };
 
   const validateMobile = (value: string) => {
-    if (!value) { setMobileError('Mobile number is required'); return; }
-    const cleaned = value.replace(/[\s\-()]/g, '');
-    setMobileError(PHONE_RE.test(cleaned) ? '' : 'Please enter a valid 10-digit Indian mobile number');
+    if (!value) { setMobileError('Phone number is required'); return; }
+    const cleaned = value.replace(/[\s\-().]/g, '');
+    setMobileError(PHONE_RE.test(cleaned) ? '' : 'Please enter a valid phone number (7-15 digits with optional country code)');
   };
 
   useEffect(() => {
@@ -65,39 +71,68 @@ export default function SignupPage() {
       return;
     }
 
-    // Run validations before submitting
+    // Run validations before requesting OTP
     let hasError = false;
     if (!EMAIL_RE.test(email)) {
       setEmailError('Please enter a valid email address');
       hasError = true;
     }
     if (mobile) {
-      const cleaned = mobile.replace(/[\s\-()]/g, '');
+      const cleaned = mobile.replace(/[\s\-().]/g, '');
       if (!PHONE_RE.test(cleaned)) {
-        setMobileError('Please enter a valid 10-digit Indian mobile number');
+        setMobileError('Please enter a valid phone number (7-15 digits with optional country code)');
         hasError = true;
       }
     } else {
-      setMobileError('Mobile number is required');
+      setMobileError('Phone number is required');
       hasError = true;
     }
     if (hasError) return;
 
     setSubmitting(true);
     setError('');
+    setOtpError('');
 
     try {
+      // Step 1: Send OTP to email and phone
+      await sendSignupOtp({ email, mobile, name: companyName });
+      setIsOtpModalOpen(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.contact.genericError);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVerifyAndSubmit = async (emailOtp: string, phoneOtp: string) => {
+    setOtpLoading(true);
+    setOtpError('');
+
+    try {
+      // Step 2: Verify codes
+      await verifySignupOtp({ email, mobile, emailOtp, phoneOtp });
+
+      // Step 3: Complete registration
       await signup({ email, password, role, companyName, mobile, city: city || undefined });
       await refresh();
+
+      setIsOtpModalOpen(false);
       if (role === 'contractor') {
         router.push('/contractor-portal/dashboard');
       } else {
         router.push('/onboarding');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.contact.genericError);
-      setSubmitting(false);
+      const msg = err instanceof Error ? err.message : 'Verification failed. Please try again.';
+      setOtpError(msg);
+      throw err;
+    } finally {
+      setOtpLoading(false);
     }
+  };
+
+  const handleResendOtp = async () => {
+    await sendSignupOtp({ email, mobile, name: companyName });
   };
 
   if (authLoading || user) {
@@ -245,7 +280,7 @@ export default function SignupPage() {
             </label>
 
             <label className="signup-field">
-              <span>Mobile / Phone Number</span>
+              <span>Phone / Mobile Number</span>
               <div className="signup-field__input">
                 <input
                   type="tel"
@@ -253,7 +288,7 @@ export default function SignupPage() {
                   value={mobile}
                   onChange={(e) => { setMobile(e.target.value); if (mobileError) validateMobile(e.target.value); }}
                   onBlur={(e) => validateMobile(e.target.value)}
-                  placeholder="+91 98765 43210"
+                  placeholder="e.g. +1 555 123 4567 or +44 20 7123 4567"
                 />
               </div>
               {mobileError && <span className="signup-field-error">{mobileError}</span>}
@@ -266,7 +301,7 @@ export default function SignupPage() {
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  placeholder="e.g. Pune, Maharashtra"
+                  placeholder="e.g. London, New York, Tokyo, Mumbai"
                 />
               </div>
             </label>
@@ -331,6 +366,17 @@ export default function SignupPage() {
         </div>
 
       </div>
+
+      <OtpVerificationModal
+        isOpen={isOtpModalOpen}
+        email={email}
+        mobile={mobile}
+        onClose={() => setIsOtpModalOpen(false)}
+        onVerifyAndSubmit={handleVerifyAndSubmit}
+        onResendOtp={handleResendOtp}
+        loading={otpLoading}
+        error={otpError}
+      />
     </div>
   );
 }

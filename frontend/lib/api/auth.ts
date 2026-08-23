@@ -25,9 +25,16 @@ export interface SignupInput {
 export const signup = (input: SignupInput) =>
   apiPost<{ data: AuthUser }>('/auth/signup', input);
 
+export const sendSignupOtp = (input: { email: string; mobile: string; name?: string }) =>
+  apiPost<{ data: { success: boolean; message: string; expiresInSeconds: number } }>('/auth/send-otp', input);
+
+export const verifySignupOtp = (input: { email: string; mobile: string; emailOtp: string; phoneOtp: string }) =>
+  apiPost<{ data: { success: boolean; verified: boolean; message: string } }>('/auth/verify-otp', input);
+
 export const login = (input: { email: string; password: string }) =>
   apiPost<{ data: AuthUser }>('/auth/login', input);
 
 export const logout = () => apiPost<{ data: { success: true } }>('/auth/logout', {});
 
 export const me = () => apiGet<{ data: AuthUser }>('/auth/me');
+

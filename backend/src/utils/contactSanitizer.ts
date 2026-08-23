@@ -8,7 +8,8 @@ const REDACTED_PLACEHOLDER = '[Contact Info Hidden by Craly - Use Craly Platform
 // Email addresses (standard and obfuscated like user[at]gmail)
 const EMAIL_REGEX = /\b[A-Za-z0-9._%+-]+(?:\s*\[at\]\s*|\s*@\s*)[A-Za-z0-9.-]+(?:\s*\[dot\]\s*|\s*\.\s*)[A-Za-z]{2,}\b/gi;
 
-// Phone numbers (Indian mobile formats: +91 9876543210, 98765-43210, 09876543210, 9876 543 210, etc.)
+// Phone numbers (International and standard formats)
+const PHONE_INTL_REGEX = /\b(?:\+\d{1,4}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}\b/g;
 const PHONE_10_REGEX = /\b(?:\+?91[\s.-]?)?[6-9]\d{4}[\s.-]?\d{5}\b/g;
 const PHONE_GENERIC_REGEX = /\b(?:\+?91[\s.-]?)?[6-9]\d{2}[\s.-]?\d{3}[\s.-]?\d{4}\b/g;
 
@@ -43,7 +44,8 @@ export function sanitizeContactInfo(input: string | null | undefined): string {
   // Redact phone keyword patterns
   result = result.replace(PHONE_KEYWORD_REGEX, REDACTED_PLACEHOLDER);
 
-  // Redact standard Indian 10-digit phone numbers
+  // Redact phone numbers (international and domestic formats)
+  result = result.replace(PHONE_INTL_REGEX, REDACTED_PLACEHOLDER);
   result = result.replace(PHONE_10_REGEX, REDACTED_PLACEHOLDER);
   result = result.replace(PHONE_GENERIC_REGEX, REDACTED_PLACEHOLDER);
 

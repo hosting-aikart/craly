@@ -3,7 +3,10 @@ import sql from '../db/index';
 import config from '../config/index';
 import { hashPassword, comparePassword } from '../utils/password';
 import { signAuthToken } from '../utils/jwt';
-import { signupSchema, loginSchema } from '../validators/authValidators';
+import { signupSchema, loginSchema, sendOtpSchema, verifyOtpSchema } from '../validators/authValidators';
+import { generateNumericOtp, hashOtp, verifyOtpHash } from '../utils/otp';
+import { sendOtpEmail } from '../utils/mailer';
+import { sendOtpSms } from '../utils/sms';
 import { AUTH_COOKIE_NAME } from '../middlewares/auth';
 import type { AppError } from '../middlewares/errorHandler';
 
@@ -19,9 +22,160 @@ function setAuthCookie(res: Response, token: string): void {
 }
 
 /**
+ * POST /api/auth/send-otp
+ * Generates and sends 6-digit OTP codes to the user's email and phone number.
+ */
+export async function sendSignupOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const parsed = sendOtpSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid input');
+      err.statusCode = 400;
+      return next(err);
+    }
+    const { email, mobile, name } = parsed.data;
+
+    // Check if email already exists
+    const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
+    if (existing.length > 0) {
+      const err: AppError = new Error('An account with this email already exists. Please log in instead.');
+      err.statusCode = 409;
+      return next(err);
+    }
+
+    // Generate 6-digit OTPs
+    const emailOtp = generateNumericOtp(6);
+    const phoneOtp = generateNumericOtp(6);
+
+    const emailOtpHash = hashOtp(email, emailOtp);
+    const phoneOtpHash = hashOtp(mobile, phoneOtp);
+
+    // Store in auth_verifications with 10-minute expiry
+    await sql.begin(async (tx) => {
+      // Invalidate existing pending OTPs for this target
+      await tx`DELETE FROM auth_verifications WHERE target IN (${email}, ${mobile})`;
+
+      await tx`
+        INSERT INTO auth_verifications (target, target_type, otp_hash, expires_at)
+        VALUES 
+          (${email}, 'email', ${emailOtpHash}, now() + interval '10 minutes'),
+          (${mobile}, 'phone', ${phoneOtpHash}, now() + interval '10 minutes')
+      `;
+    });
+
+    // Dispatch OTP email (via Resend)
+    await sendOtpEmail({ to: email, otp: emailOtp, name });
+
+    // Dispatch OTP SMS (via SMS gateway or logged in dev)
+    await sendOtpSms({ phone: mobile, otp: phoneOtp });
+
+    res.json({
+      data: {
+        success: true,
+        message: 'Verification codes sent to your email and phone number',
+        expiresInSeconds: 600,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/auth/verify-otp
+ * Validates the 6-digit email and phone OTPs submitted by the user.
+ */
+export async function verifySignupOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const parsed = verifyOtpSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid input');
+      err.statusCode = 400;
+      return next(err);
+    }
+    const { email, mobile, emailOtp, phoneOtp } = parsed.data;
+
+    // Check email OTP
+    const [emailRecord] = await sql`
+      SELECT id, otp_hash, attempts, expires_at, verified
+      FROM auth_verifications
+      WHERE target = ${email} AND target_type = 'email'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    if (!emailRecord || new Date() > new Date(emailRecord.expires_at)) {
+      const err: AppError = new Error('Email verification code has expired. Please request a new code.');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    if (emailRecord.attempts >= 5) {
+      const err: AppError = new Error('Too many incorrect email code attempts. Please request a new code.');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const isEmailValid = verifyOtpHash(email, emailOtp, emailRecord.otp_hash);
+    if (!isEmailValid) {
+      await sql`UPDATE auth_verifications SET attempts = attempts + 1 WHERE id = ${emailRecord.id}`;
+      const err: AppError = new Error('Invalid email verification code. Please check and try again.');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    // Check phone OTP
+    const [phoneRecord] = await sql`
+      SELECT id, otp_hash, attempts, expires_at, verified
+      FROM auth_verifications
+      WHERE target = ${mobile} AND target_type = 'phone'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    if (!phoneRecord || new Date() > new Date(phoneRecord.expires_at)) {
+      const err: AppError = new Error('Phone verification code has expired. Please request a new code.');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    if (phoneRecord.attempts >= 5) {
+      const err: AppError = new Error('Too many incorrect phone code attempts. Please request a new code.');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const isPhoneValid = verifyOtpHash(mobile, phoneOtp, phoneRecord.otp_hash);
+    if (!isPhoneValid) {
+      await sql`UPDATE auth_verifications SET attempts = attempts + 1 WHERE id = ${phoneRecord.id}`;
+      const err: AppError = new Error('Invalid phone verification code. Please check and try again.');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    // Mark both verified
+    await sql`
+      UPDATE auth_verifications
+      SET verified = true, updated_at = now()
+      WHERE id IN (${emailRecord.id}, ${phoneRecord.id})
+    `;
+
+    res.json({
+      data: {
+        success: true,
+        verified: true,
+        message: 'Email and phone number verified successfully.',
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * POST /api/auth/signup
  * Creates a business or contractor user plus their profile row and organization membership
- * in a single transaction, then logs them in.
+ * in a single transaction, after verifying email and phone ownership.
  */
 export async function signup(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -32,6 +186,26 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
       return next(err);
     }
     const { email, password, role, companyName, mobile, city, state, workforceSize, yearsExperience } = parsed.data;
+
+    // Verify that both email and mobile have been verified in the last 30 minutes
+    const [verifiedEmail] = await sql`
+      SELECT id FROM auth_verifications
+      WHERE target = ${email} AND target_type = 'email' AND verified = true
+        AND updated_at >= now() - interval '30 minutes'
+      LIMIT 1
+    `;
+    const [verifiedPhone] = await sql`
+      SELECT id FROM auth_verifications
+      WHERE target = ${mobile} AND target_type = 'phone' AND verified = true
+        AND updated_at >= now() - interval '30 minutes'
+      LIMIT 1
+    `;
+
+    if (!verifiedEmail || !verifiedPhone) {
+      const err: AppError = new Error('Please verify your email address and phone number before completing registration.');
+      err.statusCode = 400;
+      return next(err);
+    }
 
     const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
     if (existing.length > 0) {
@@ -44,8 +218,8 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
 
     const user = await sql.begin(async (tx) => {
       const [newUser] = await tx`
-        INSERT INTO users (email, password_hash, role, is_active)
-        VALUES (${email}, ${passwordHash}, ${role}, true)
+        INSERT INTO users (email, password_hash, role, is_active, is_email_verified, is_phone_verified)
+        VALUES (${email}, ${passwordHash}, ${role}, true, true, true)
         RETURNING id, email, role
       `;
 
@@ -79,6 +253,9 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
           ON CONFLICT DO NOTHING
         `;
       }
+
+      // Cleanup used verification records
+      await tx`DELETE FROM auth_verifications WHERE target IN (${email}, ${mobile})`;
 
       return newUser;
     });

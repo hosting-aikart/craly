@@ -141,6 +141,44 @@ export async function sendEnquiryAcceptedEmail(input: EnquiryAcceptedEmailInput)
   }
 }
 
+export interface OtpEmailInput {
+  to: string;
+  otp: string;
+  name?: string;
+}
+
+/** Sent to user during signup/verification containing their 6-digit code. */
+export async function sendOtpEmail(input: OtpEmailInput): Promise<void> {
+  if (!resend) {
+    throw new Error('Email service is not configured (RESEND_API_KEY is missing)');
+  }
+
+  const greeting = input.name ? `Hi ${escapeHtml(input.name)},` : 'Hello,';
+
+  const { error } = await resend.emails.send({
+    from: config.contactEmailFrom,
+    to: input.to,
+    subject: `Your Craly verification code is ${input.otp}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+        <h2 style="color: #0f766e; margin-top: 0; font-size: 22px;">Verify your Craly account</h2>
+        <p style="color: #475569; font-size: 15px; line-height: 1.5;">${greeting}</p>
+        <p style="color: #475569; font-size: 15px; line-height: 1.5;">Please use the following 6-digit verification code to confirm your email address. This code expires in <strong>10 minutes</strong>.</p>
+        <div style="margin: 28px 0; text-align: center;">
+          <span style="display: inline-block; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #0f766e; background: #f0fdfa; padding: 14px 28px; border-radius: 8px; border: 1px solid #99f6e4;">
+            ${input.otp}
+          </span>
+        </div>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 0;">If you did not request this code, you can safely ignore this email.</p>
+      </div>
+    `,
+  });
+
+  if (error) {
+    throw new Error(`Resend failed to send OTP email: ${error.message}`);
+  }
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -149,3 +187,4 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
