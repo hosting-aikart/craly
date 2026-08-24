@@ -1,7 +1,10 @@
 export const getApiUrl = (path: string) => {
-  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+  let base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api').replace(/\/$/, '');
+  if (!base.endsWith('/api')) {
+    base = `${base}/api`;
+  }
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${base.replace(/\/$/, '')}${cleanPath}`;
+  return `${base}${cleanPath}`;
 };
 
 function parseErrorMessage(errorBody: any, fallback: string): string {
