@@ -17,9 +17,30 @@ app.set('trust proxy', 1);
 
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const cleanOrigin = origin.trim().replace(/\/$/, '');
+      if (cleanOrigin.endsWith('craly.co') || cleanOrigin.endsWith('.craly.co')) return callback(null, true);
+
+      const isAllowed = config.allowedOrigins.some((allowed) => {
+        const cleanAllowed = allowed.trim().replace(/\/$/, '');
+        if (cleanOrigin === cleanAllowed) return true;
+        // Allow Vercel preview deployment URLs if vercel.app domain is configured
+        if (cleanAllowed.includes('vercel.app') && cleanOrigin.endsWith('.vercel.app')) return true;
+        return false;
+      });
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`[cors] Blocked origin: ${origin}`);
+        callback(null, false);
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     credentials: true,
   }),
 );
