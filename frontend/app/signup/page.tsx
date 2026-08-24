@@ -9,10 +9,16 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
 import { COUNTRIES, DEFAULT_COUNTRY, type CountryOption } from '@/lib/util/countries';
-import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 
 const helmetLogo = '/assets/helmet.png';
 
+/**
+ * Manufacturer + Contractor sign-up. Contractors self-register, complete
+ * their own profile in /contractor-portal (gated behind a mandatory
+ * completion modal — see contractor-portal/layout.tsx), and stay
+ * unpublished (verification_status = 'pending') until Ops Head approves —
+ * that gate is unchanged regardless of who filled the profile in.
+ */
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -70,12 +76,10 @@ function SignupForm() {
     if (user) {
       if (user.role === 'admin') {
         router.replace('/admin/dashboard');
-      } else if (user.role === 'business') {
-        router.replace('/business/dashboard');
       } else if (user.role === 'contractor') {
         router.replace('/contractor-portal/dashboard');
       } else {
-        router.replace(getRoleDefaultDashboard(user.role));
+        router.replace('/business/dashboard');
       }
     }
   }, [user, authLoading, router]);
@@ -89,7 +93,6 @@ function SignupForm() {
 
     const fullMobile = getFullMobile(phoneNumber, selectedCountry);
 
-    // Run validations before requesting OTP
     let hasError = false;
     if (!EMAIL_RE.test(email)) {
       setEmailError('Please enter a valid email address');
@@ -113,15 +116,9 @@ function SignupForm() {
     const fullLocation = city.trim() ? `${city.trim()}, ${selectedCountry.name}` : selectedCountry.name;
 
     try {
-      // Direct signup for testing
       await signup({ email, password, role, companyName, mobile: fullMobile, city: fullLocation });
       await refresh();
-
-      if (role === 'contractor') {
-        router.push('/contractor-portal/dashboard');
-      } else {
-        router.push('/onboarding');
-      }
+      router.push(role === 'contractor' ? '/contractor-portal/dashboard' : '/onboarding');
     } catch (err) {
       setError(err instanceof Error ? err.message : t.contact.genericError);
       setSubmitting(false);
@@ -152,10 +149,10 @@ function SignupForm() {
             <h2 className="signup-panel__heading">{t.auth.signupHeading}</h2>
 
             <div className="signup-panel__roles">
-              <div
+              <button
+                type="button"
                 className={`signup-panel__role-card ${role === 'business' ? 'signup-panel__role-card--active' : ''}`}
                 onClick={() => setRole('business')}
-                style={{ cursor: 'pointer' }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="4" y="3" width="16" height="18" rx="1" />
@@ -164,12 +161,12 @@ function SignupForm() {
                 </svg>
                 <h4>{t.auth.businessRoleTitle}</h4>
                 <p>{t.auth.businessRoleDesc}</p>
-              </div>
+              </button>
 
-              <div
+              <button
+                type="button"
                 className={`signup-panel__role-card ${role === 'contractor' ? 'signup-panel__role-card--active' : ''}`}
                 onClick={() => setRole('contractor')}
-                style={{ cursor: 'pointer' }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 18a7 7 0 0 1 14 0" />
@@ -179,7 +176,7 @@ function SignupForm() {
                 </svg>
                 <h4>{t.auth.contractorRoleTitle}</h4>
                 <p>{t.auth.contractorRoleDesc}</p>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -200,42 +197,28 @@ function SignupForm() {
           </div>
           <p className="signup-form-panel__eyebrow">{t.auth.createAccountEyebrow}</p>
           <h1 className="signup-form-panel__heading">
-            {role === 'business' ? t.auth.joinTitle : 'Join as Contractor'}
+            {role === 'business' ? t.auth.joinTitle : t.auth.contractorRoleTitle}
           </h1>
 
-          {/* Role selector buttons for mobile / quick toggle */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          {/* Role toggle — mirrors the left panel's cards, for mobile / quick switching */}
+          <div className="signup-role-toggle" role="tablist" aria-label="Account type">
             <button
               type="button"
+              role="tab"
+              aria-selected={role === 'business'}
               onClick={() => setRole('business')}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                background: role === 'business' ? '#1e293b' : '#fff',
-                color: role === 'business' ? '#fff' : '#334155',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className={`signup-role-toggle__btn ${role === 'business' ? 'signup-role-toggle__btn--active' : ''}`}
             >
-              Manufacturer / Business
+              {t.auth.businessRoleTitle}
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={role === 'contractor'}
               onClick={() => setRole('contractor')}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: '6px',
-                border: '1px solid #ddd',
-                background: role === 'contractor' ? '#1e293b' : '#fff',
-                color: role === 'contractor' ? '#fff' : '#334155',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className={`signup-role-toggle__btn ${role === 'contractor' ? 'signup-role-toggle__btn--active' : ''}`}
             >
-              Contractor
+              {t.auth.contractorRoleTitle}
             </button>
           </div>
 
@@ -389,7 +372,7 @@ function SignupForm() {
               </div>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b' }}>
+            <label className="signup-consent">
               <input
                 type="checkbox"
                 checked={consent}

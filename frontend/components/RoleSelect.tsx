@@ -25,7 +25,7 @@ export default function RoleSelect() {
           </div>
           <h3>{t.roleSelect.contractorTitle}</h3>
           <p>{t.roleSelect.contractorDesc}</p>
-          <Link href="/list-your-company" className="role-card__action">
+          <Link href="/signup?role=contractor" className="role-card__action">
             {t.roleSelect.contractorAction}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" />

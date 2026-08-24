@@ -78,9 +78,12 @@ export interface StaffEngagementItem {
   requirement_workers_required: number;
   manufacturer_name: string;
   manufacturer_city: string | null;
+  manufacturer_phone: string | null;
+  manufacturer_email: string | null;
   contractor_id: string;
   contractor_name: string;
   contractor_phone: string | null;
+  contractor_email: string | null;
 }
 
 export interface StaffVerificationContractorItem {

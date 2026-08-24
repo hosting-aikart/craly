@@ -52,6 +52,12 @@ export interface ApplicationReceived {
   contractor_state?: string | null;
   contractor_services?: string[] | null;
   contractor_experience_years?: number | null;
+  // Comparison-only fields — never contractor phone/email. See the
+  // backend's businessPortalController.ts comparison-fields comment.
+  contractor_industry?: string | null;
+  contractor_workforce_size?: number | null;
+  contractor_availability?: string | null;
+  contractor_service_areas?: string[] | null;
   requirement_title?: string;
   requirement_location?: string;
   requirement_workers_required?: number;

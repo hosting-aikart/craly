@@ -16,6 +16,7 @@ export default function BusinessProfilePage() {
   const [industry, setIndustry] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [phone, setPhone] = useState('');
 
   useEffect(() => {
     getMyProfile()
@@ -25,6 +26,7 @@ export default function BusinessProfilePage() {
           setIndustry(data.industry ?? '');
           setCity(data.city ?? '');
           setState(data.state ?? '');
+          setPhone(data.phone ?? '');
         }
       })
       .finally(() => setLoading(false));
@@ -37,7 +39,7 @@ export default function BusinessProfilePage() {
     setSuccess('');
 
     try {
-      await updateMyProfile({ industry, city, state });
+      await updateMyProfile({ industry, city, state, phone });
       setSuccess('Profile details saved successfully!');
     } catch (err: any) {
       setError(err.message || 'Failed to update profile');
@@ -103,6 +105,20 @@ export default function BusinessProfilePage() {
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--craly-border)', fontSize: '14px' }}
                 />
               </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--craly-navy)', marginBottom: '6px' }}>Contact Phone</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. +91 9876543210"
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--craly-border)', fontSize: '14px' }}
+              />
+              <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--craly-muted)' }}>
+                Only shared with Craly Staff after you select a contractor — never with the contractor directly.
+              </p>
             </div>
 
             <div style={{ marginTop: '12px' }}>

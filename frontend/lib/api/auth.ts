@@ -13,6 +13,10 @@ export interface AuthUser {
 export interface SignupInput {
   email: string;
   password: string;
+  // Kept as a union — the backend still accepts 'contractor' (a separate,
+  // actively developed effort depends on it: see authController.signup).
+  // Only the public UI paths into a contractor signup were removed (this
+  // page never sends 'contractor'); see docs/open-decisions.md.
   role: 'business' | 'contractor';
   companyName: string;
   mobile?: string;

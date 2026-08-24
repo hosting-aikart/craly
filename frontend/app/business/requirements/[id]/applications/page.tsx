@@ -148,7 +148,10 @@ export default function RequirementApplicationsPage({ params }: { params: Promis
                       </h3>
                       <div style={{ fontSize: '13px', color: 'var(--craly-muted)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                         <span>📍 {app.contractor_city || 'City N/A'}</span>
-                        {app.contractor_experience_years && <span>⭐ {app.contractor_experience_years} Yrs Exp</span>}
+                        {app.contractor_industry && <span>🏭 {app.contractor_industry}</span>}
+                        {app.contractor_experience_years != null && <span>⭐ {app.contractor_experience_years} Yrs Exp</span>}
+                        {app.contractor_workforce_size != null && <span>👥 {app.contractor_workforce_size} Total Workforce</span>}
+                        {app.contractor_availability && <span>🟢 {app.contractor_availability.replace(/_/g, ' ')}</span>}
                         <span>📅 Submitted {new Date(app.submitted_at).toLocaleDateString()}</span>
                       </div>
                     </div>

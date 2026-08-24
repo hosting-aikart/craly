@@ -5,6 +5,7 @@ import { createNotification } from '../utils/notifications';
 import { sanitizeContactInfo } from '../utils/contactSanitizer';
 import { emitToUser, emitToEnquiryRoom } from '../socket/emitter';
 import type { AppError } from '../middlewares/errorHandler';
+import { getOwnContractorProfile } from '../utils/actorProfile';
 
 function forbidden(message: string): AppError {
   const err: AppError = new Error(message);
@@ -19,7 +20,7 @@ function notFound(message: string): AppError {
 
 async function loadEnquiryForMessaging(id: string) {
   const [row] = await sql`
-    SELECT i.id, i.status,
+    SELECT i.id, i.status, i.contractor_id,
            bp.user_id AS business_user_id, bp.company_name AS business_name,
            cp.user_id AS contractor_user_id, cp.company_name AS contractor_name
     FROM inquiries i
@@ -31,9 +32,10 @@ async function loadEnquiryForMessaging(id: string) {
     | {
         id: string;
         status: string;
+        contractor_id: string;
         business_user_id: string;
         business_name: string;
-        contractor_user_id: string;
+        contractor_user_id: string | null;
         contractor_name: string;
       }
     | undefined;
@@ -43,12 +45,7 @@ async function loadEnquiryForMessaging(id: string) {
  * POST /api/enquiries/:id/messages
  * Sends a message once the enquiry is being actively brokered.
  *
- * Contractors have no login, so this is now business <-> internal staff,
- * with staff relaying on the contractor's behalf — not a direct
- * business<->contractor channel (that stays Phase 2, per scope). A
- * business-sent message has no contractor user to receive it, so
- * `receiver_id` is null in that case; staff pick it up via the enquiry
- * queue rather than a personal notification.
+ * Direct business <-> contractor or business <-> internal staff messaging within a brokered enquiry.
  *
  * Strict rules:
  * 1. Enquiry must be past NEW/UNDER_REVIEW (staff have engaged it).
@@ -72,7 +69,15 @@ export async function createMessage(req: Request, res: Response, next: NextFunct
     if (!enquiry) return next(notFound('Enquiry not found'));
 
     const isBusinessParty = enquiry.business_user_id === userId;
-    if (!isBusinessParty && !isStaff) {
+    let isContractorParty = enquiry.contractor_user_id === userId;
+    if (!isContractorParty && req.user!.role === 'contractor') {
+      const contractor = await getOwnContractorProfile(userId);
+      if (contractor && contractor.id === enquiry.contractor_id) {
+        isContractorParty = true;
+      }
+    }
+
+    if (!isBusinessParty && !isContractorParty && !isStaff) {
       return next(forbidden('You do not have access to this enquiry'));
     }
 
@@ -82,9 +87,11 @@ export async function createMessage(req: Request, res: Response, next: NextFunct
       return next(err);
     }
 
-    // Staff act for the contractor -> message goes to the business. A
-    // business message has no contractor user to notify directly.
-    const receiverId = isStaff ? enquiry.business_user_id : null;
+    const receiverId = isStaff
+      ? enquiry.business_user_id
+      : (isBusinessParty
+          ? (enquiry.contractor_user_id || null)
+          : enquiry.business_user_id);
 
     // Contact privacy filter check
     const rawMessage = parsed.data.message;
@@ -111,10 +118,12 @@ export async function createMessage(req: Request, res: Response, next: NextFunct
 
     emitToEnquiryRoom(id, 'message:new', savedMessage);
 
-    // Only the business side has a real account to notify right now.
     if (receiverId) {
       const notifTitle = 'New Message';
-      const notifText = `${enquiry.contractor_name} sent a new message.`;
+      const senderName = isStaff
+        ? enquiry.contractor_name
+        : (isBusinessParty ? enquiry.business_name : enquiry.contractor_name);
+      const notifText = `${senderName} sent a new message.`;
 
       await createNotification({
         userId: receiverId,
@@ -149,7 +158,17 @@ export async function listMessages(req: Request, res: Response, next: NextFuncti
 
     const enquiry = await loadEnquiryForMessaging(id);
     if (!enquiry) return next(notFound('Enquiry not found'));
-    if (enquiry.business_user_id !== userId && !isStaff) {
+
+    const isBusinessParty = enquiry.business_user_id === userId;
+    let isContractorParty = enquiry.contractor_user_id === userId;
+    if (!isContractorParty && req.user!.role === 'contractor') {
+      const contractor = await getOwnContractorProfile(userId);
+      if (contractor && contractor.id === enquiry.contractor_id) {
+        isContractorParty = true;
+      }
+    }
+
+    if (!isBusinessParty && !isContractorParty && !isStaff) {
       return next(forbidden('You do not have access to this enquiry'));
     }
 

@@ -36,6 +36,7 @@ export interface BusinessProfile {
   industry: string | null;
   city: string | null;
   state: string | null;
+  phone: string | null;
   onboarding_complete: boolean;
 }
 
@@ -74,7 +75,9 @@ export interface BusinessProfileUpdate {
   industry?: string;
   city?: string;
   state?: string;
+  phone?: string;
 }
 
 export const updateMyProfile = (input: ContractorProfileUpdate | BusinessProfileUpdate) =>
   apiPatch<{ data: { id: string } }>('/profile/me', input);
+

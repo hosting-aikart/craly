@@ -310,27 +310,40 @@ export async function updateContractor(req: Request, res: Response, next: NextFu
  */
 export async function getStaffEngagements(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    // Only applications the manufacturer has actually SELECTED (or that are
+    // already further along in staff coordination) become an "engagement" —
+    // a merely-submitted application isn't Staff's concern yet. This is
+    // also the one query in the app authorized to return both parties'
+    // contact details together: manufacturer phone/email and contractor
+    // phone/email, joined via users for email. Never reuse this join
+    // pattern in a manufacturer- or contractor-facing endpoint.
     const engagements = await sql`
-      SELECT 
+      SELECT
         app.id AS application_id,
         app.status AS application_status,
         app.proposed_workforce,
         app.availability_date,
         app.proposed_rate,
-        app.created_at AS selection_date,
+        app.updated_at AS selection_date,
         mr.id AS requirement_id,
         mr.title AS requirement_title,
         mr.location AS requirement_location,
         mr.workers_required AS requirement_workers_required,
         bp.company_name AS manufacturer_name,
         bp.city AS manufacturer_city,
+        bp.phone AS manufacturer_phone,
+        bu.email AS manufacturer_email,
         cp.id AS contractor_id,
         cp.company_name AS contractor_name,
-        cp.phone AS contractor_phone
+        cp.phone AS contractor_phone,
+        cu.email AS contractor_email
       FROM applications app
       JOIN manpower_requirements mr ON mr.id = app.requirement_id
       JOIN business_profiles bp ON bp.id = mr.manufacturer_id
+      LEFT JOIN users bu ON bu.id = bp.user_id
       JOIN contractor_profiles cp ON cp.id = app.contractor_id
+      LEFT JOIN users cu ON cu.id = cp.user_id
+      WHERE app.status IN ('SELECTED', 'CONTACTING', 'IN_DISCUSSION', 'CONFIRMED', 'CLOSED')
       ORDER BY app.updated_at DESC
     `;
 
@@ -344,6 +357,8 @@ export async function getStaffEngagements(req: Request, res: Response, next: Nex
  * PATCH /api/staff/engagements/:id/status
  * Update engagement status (e.g. CONTACTING, IN_DISCUSSION, CONFIRMED, CLOSED).
  */
+const ENGAGEMENT_STATUSES = ['SELECTED', 'CONTACTING', 'IN_DISCUSSION', 'CONFIRMED', 'CLOSED'];
+
 export async function updateEngagementStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
@@ -356,6 +371,23 @@ export async function updateEngagementStatus(req: Request, res: Response, next: 
 
     const { status } = parsed.data;
 
+    // An engagement only exists once the manufacturer has already SELECTED
+    // a contractor — this guards against fast-forwarding a merely-submitted
+    // application straight to CONFIRMED without that step happening first.
+    const [existing] = await sql`
+      SELECT id, status, requirement_id, contractor_id FROM applications WHERE id = ${id}
+    `;
+    if (!existing) {
+      const err: AppError = new Error('Engagement/Application not found');
+      err.statusCode = 404;
+      return next(err);
+    }
+    if (!ENGAGEMENT_STATUSES.includes(existing.status)) {
+      const err: AppError = new Error('This application has not been selected by the manufacturer yet — nothing for Staff to coordinate.');
+      err.statusCode = 400;
+      return next(err);
+    }
+
     const [updated] = await sql`
       UPDATE applications
       SET status = ${status}, updated_at = NOW()
@@ -363,10 +395,20 @@ export async function updateEngagementStatus(req: Request, res: Response, next: 
       RETURNING id, status, updated_at
     `;
 
-    if (!updated) {
-      const err: AppError = new Error('Engagement/Application not found');
-      err.statusCode = 404;
-      return next(err);
+    // Deal confirmed is a real milestone for the contractor — worth a
+    // notification. The intermediate CONTACTING/IN_DISCUSSION steps are
+    // Staff's own working states and don't need to ping either party.
+    if (status === 'CONFIRMED') {
+      const [contractor] = await sql`SELECT user_id FROM contractor_profiles WHERE id = ${existing.contractor_id}`;
+      if (contractor?.user_id) {
+        await createNotification({
+          userId: contractor.user_id,
+          type: 'ENGAGEMENT_CONFIRMED',
+          title: 'Deal confirmed',
+          message: 'Craly Staff has confirmed your engagement. They will be in touch to finalize the details.',
+          referenceId: id,
+        });
+      }
     }
 
     res.json({

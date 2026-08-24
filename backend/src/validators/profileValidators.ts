@@ -27,5 +27,6 @@ export const businessProfileSchema = z.object({
   industry: z.string().max(150).optional(),
   city: z.string().max(100).optional(),
   state: z.string().max(100).optional(),
+  phone: z.string().max(50).optional(),
 });
 export type BusinessProfileInput = z.infer<typeof businessProfileSchema>;

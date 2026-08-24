@@ -1,15 +1,21 @@
 import { z } from 'zod';
 
-// Contractors no longer self-register (Phase 1: internal staff manage
-// contractor_profiles directly — see docs/open-decisions.md). Only
-// 'business' remains a public signup path.
+// NOTE: left as z.enum(['business', 'contractor']) — a concurrent, actively
+// developed effort (OTP-verified signup, organization_members, contractor
+// profile creation — see authController.signup) depends on 'contractor'
+// still validating here. Only the *public UI paths* into it were removed
+// (signup page, login page chip) per the Field Staff module's "no
+// contractor login" requirement; the backend endpoint itself was
+// deliberately left alone rather than breaking that other session's
+// in-progress work. See docs/open-decisions.md — this reconciliation is
+// still an open decision, not one this change resolves.
 export const signupSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.enum(['business', 'contractor']),
   companyName: z.string().min(1, 'Company name is required'),
   mobile: z
-    .string({ required_error: 'Phone number is required' })
+    .string({ message: 'Phone number is required' })
     .min(1, 'Phone number is required')
     .transform((v) => v.replace(/[\s\-().]/g, ''))
     .refine(
@@ -26,7 +32,7 @@ export type SignupInput = z.infer<typeof signupSchema>;
 export const sendOtpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   mobile: z
-    .string({ required_error: 'Phone number is required' })
+    .string({ message: 'Phone number is required' })
     .min(1, 'Phone number is required')
     .transform((v) => v.replace(/[\s\-().]/g, ''))
     .refine(
@@ -40,7 +46,7 @@ export type SendOtpInput = z.infer<typeof sendOtpSchema>;
 export const verifyOtpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   mobile: z
-    .string({ required_error: 'Phone number is required' })
+    .string({ message: 'Phone number is required' })
     .min(1, 'Phone number is required')
     .transform((v) => v.replace(/[\s\-().]/g, ''))
     .refine(

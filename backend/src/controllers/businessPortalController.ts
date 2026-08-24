@@ -401,7 +401,15 @@ export async function getRequirementApplications(req: Request, res: Response, ne
         app.updated_at AS last_updated_at,
         cp.company_name AS contractor_name,
         cp.city AS contractor_city,
-        cp.state AS contractor_state
+        cp.state AS contractor_state,
+        -- Comparison fields only — deliberately no cp.phone and no contractor
+        -- users.email here. Manufacturer never receives contractor contact
+        -- details before Craly Staff coordinates the deal.
+        cp.industry AS contractor_industry,
+        cp.workforce_size AS contractor_workforce_size,
+        cp.years_experience AS contractor_experience_years,
+        cp.availability AS contractor_availability,
+        cp.service_areas AS contractor_service_areas
       FROM applications app
       JOIN contractor_profiles cp ON cp.id = app.contractor_id
       WHERE app.requirement_id = ${id}
@@ -445,7 +453,13 @@ export async function getAllApplications(req: Request, res: Response, next: Next
         mr.status AS requirement_status,
         cp.company_name AS contractor_name,
         cp.city AS contractor_city,
-        cp.state AS contractor_state
+        cp.state AS contractor_state,
+        -- Comparison fields only — no contact details (see getRequirementApplications).
+        cp.industry AS contractor_industry,
+        cp.workforce_size AS contractor_workforce_size,
+        cp.years_experience AS contractor_experience_years,
+        cp.availability AS contractor_availability,
+        cp.service_areas AS contractor_service_areas
       FROM applications app
       JOIN manpower_requirements mr ON mr.id = app.requirement_id
       JOIN contractor_profiles cp ON cp.id = app.contractor_id
@@ -493,7 +507,13 @@ export async function getApplicationById(req: Request, res: Response, next: Next
         mr.status AS requirement_status,
         cp.company_name AS contractor_name,
         cp.city AS contractor_city,
-        cp.state AS contractor_state
+        cp.state AS contractor_state,
+        -- Comparison fields only — no contact details (see getRequirementApplications).
+        cp.industry AS contractor_industry,
+        cp.workforce_size AS contractor_workforce_size,
+        cp.years_experience AS contractor_experience_years,
+        cp.availability AS contractor_availability,
+        cp.service_areas AS contractor_service_areas
       FROM applications app
       JOIN manpower_requirements mr ON mr.id = app.requirement_id
       JOIN contractor_profiles cp ON cp.id = app.contractor_id
@@ -575,7 +595,8 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
       });
     }
 
-    // If SELECTED: update requirement status and notify Craly Staff
+    // If SELECTED: update requirement status, auto-reject the other
+    // applicants for this same requirement, and notify Craly Staff.
     if (newStatus === 'SELECTED') {
       await sql`
         UPDATE manpower_requirements
@@ -585,30 +606,48 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
 
       responseMessage = 'Contractor selected. Craly Staff will coordinate the next step.';
 
-      // Fire notifications to Craly Staff roles
+      // Only one contractor can be SELECTED per requirement — every other
+      // application on it (including a previously-SELECTED one, if the
+      // manufacturer changed their mind) moves to REJECTED, and each of
+      // those contractors is notified individually.
+      const otherApplicants = await sql`
+        UPDATE applications
+        SET status = 'REJECTED', updated_at = NOW()
+        WHERE requirement_id = ${appDetail.requirement_id}
+          AND id != ${appDetail.id}
+          AND status != 'REJECTED'
+        RETURNING id, contractor_id
+      `;
+
+      for (const rejected of otherApplicants) {
+        const [rejectedContractor] = await sql`
+          SELECT user_id FROM contractor_profiles WHERE id = ${rejected.contractor_id}
+        `;
+        if (rejectedContractor?.user_id) {
+          await createNotification({
+            userId: rejectedContractor.user_id,
+            type: 'APPLICATION_STATUS_CHANGED',
+            title: 'Application not selected',
+            message: `Your application for "${appDetail.requirement_title}" was not selected. Another contractor was chosen for this requirement.`,
+            referenceId: rejected.id,
+          });
+        }
+      }
+
+      // Fire notifications to Craly Staff roles — both the legacy internal
+      // roles and the current unified 'staff' role that /staff/engagements
+      // actually runs on, so this never goes to a workspace nobody checks.
       const notifTitle = 'Contractor Selected';
       const notifMessage = `Manufacturer "${manufacturer.company_name}" selected contractor "${appDetail.contractor_name}" for requirement "${appDetail.requirement_title}". Action: Contractor Selected.`;
 
-      await notifyUsersByRole('ops_head', {
-        type: 'CONTRACTOR_SELECTED',
-        title: notifTitle,
-        message: notifMessage,
-        referenceId: appDetail.id,
-      });
-
-      await notifyUsersByRole('field_staff', {
-        type: 'CONTRACTOR_SELECTED',
-        title: notifTitle,
-        message: notifMessage,
-        referenceId: appDetail.id,
-      });
-
-      await notifyUsersByRole('admin', {
-        type: 'CONTRACTOR_SELECTED',
-        title: notifTitle,
-        message: notifMessage,
-        referenceId: appDetail.id,
-      });
+      for (const role of ['staff', 'ops_head', 'field_staff', 'admin']) {
+        await notifyUsersByRole(role, {
+          type: 'CONTRACTOR_SELECTED',
+          title: notifTitle,
+          message: notifMessage,
+          referenceId: appDetail.id,
+        });
+      }
     }
 
     res.json({

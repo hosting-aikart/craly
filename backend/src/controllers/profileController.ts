@@ -40,7 +40,7 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
 
     if (role === 'business') {
       const [profile] = await sql`
-        SELECT id, company_name, industry, city, state, onboarding_complete
+        SELECT id, company_name, industry, city, state, phone, onboarding_complete
         FROM business_profiles WHERE user_id = ${userId}
       `;
       if (!profile) {
@@ -162,7 +162,7 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
         err.statusCode = 400;
         return next(err);
       }
-      const { companyName, industry, city, state } = parsed.data;
+      const { companyName, industry, city, state, phone } = parsed.data;
 
       const [updated] = await sql`
         UPDATE business_profiles SET
@@ -170,6 +170,7 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
           industry = COALESCE(${industry ?? null}, industry),
           city = COALESCE(${city ?? null}, city),
           state = COALESCE(${state ?? null}, state),
+          phone = COALESCE(${phone ?? null}, phone),
           onboarding_complete = true,
           updated_at = now()
         WHERE user_id = ${userId}

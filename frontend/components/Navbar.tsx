@@ -133,9 +133,10 @@ export default function Navbar() {
 
           <div className="craly-nav__divider" aria-hidden="true" />
 
-          {/* List Your Company Link */}
-          <Link href="/list-your-company" className="craly-nav__link-secondary">
-            {t.nav.listYourCompany}
+          {/* Contractors self-register now (see docs/open-decisions.md) —
+              this used to point at /list-your-company's lead form. */}
+          <Link href="/signup?role=contractor" className="craly-nav__link-secondary">
+            {t.auth.joinAsContractor}
           </Link>
 
           {/* Auth Buttons */}
@@ -202,11 +203,11 @@ export default function Navbar() {
                 </Link>
               ))}
               <Link
-                href="/list-your-company"
+                href="/signup?role=contractor"
                 className="craly-nav__mobile-link craly-nav__mobile-link--special"
                 onClick={closeAll}
               >
-                {t.nav.listYourCompany} →
+                {t.auth.joinAsContractor} →
               </Link>
             </div>
 

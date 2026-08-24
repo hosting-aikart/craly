@@ -18,11 +18,10 @@ export interface ContractorFullProfile {
   company_name: string;
   workforce_size: number | null;
   industry: string | null;
-  skills: string[] | null;
+  years_experience: number | null;
   city: string | null;
   state: string | null;
   service_areas: string[] | null;
-  availability: string | null;
   onboarding_complete: boolean;
 }
 
@@ -31,7 +30,7 @@ export interface ContractorFullProfile {
  */
 async function getContractorFullProfile(userId: string): Promise<ContractorFullProfile> {
   const [profile] = await sql<ContractorFullProfile[]>`
-    SELECT id, company_name, workforce_size, industry, skills, city, state, service_areas, availability, onboarding_complete
+    SELECT id, company_name, workforce_size, industry, years_experience, city, state, service_areas, onboarding_complete
     FROM contractor_profiles
     WHERE user_id = ${userId}
   `;
@@ -41,6 +40,59 @@ async function getContractorFullProfile(userId: string): Promise<ContractorFullP
     throw err;
   }
   return profile;
+}
+
+/**
+ * Opportunity matching checks workforce capacity, industry, experience,
+ * and location compatibility (Base City, State, or Coverage Areas / service_areas).
+ */
+function calculateOpportunityMatch(op: any, contractor: ContractorFullProfile) {
+  let score = 70;
+  const reasons: string[] = [];
+
+  if (contractor.workforce_size && op.workers_required) {
+    if (contractor.workforce_size >= op.workers_required * 1.5) {
+      score += 15;
+      reasons.push('Ample workforce capacity');
+    } else {
+      score += 10;
+      reasons.push('Meets workforce requirements');
+    }
+  }
+
+  if (contractor.industry && op.industry && contractor.industry.toLowerCase() === op.industry.toLowerCase()) {
+    score += 10;
+    reasons.push('Exact industry match');
+  }
+
+  if (op.experience_required) {
+    const contractorExperience = contractor.years_experience || 0;
+    if (contractorExperience >= op.experience_required * 1.5) {
+      score += 15;
+      reasons.push('Highly experienced for this role');
+    } else if (contractorExperience >= op.experience_required) {
+      score += 10;
+      reasons.push('Meets experience requirement');
+    }
+  }
+
+  if (op.location) {
+    const locLower = op.location.toLowerCase();
+    if (contractor.city && (locLower.includes(contractor.city.toLowerCase()) || contractor.city.toLowerCase().includes(locLower))) {
+      reasons.push('Location match (Base City)');
+    } else if (contractor.service_areas && contractor.service_areas.some((sa) => sa && (locLower.includes(sa.toLowerCase()) || sa.toLowerCase().includes(locLower)))) {
+      reasons.push('Location match (Coverage Area)');
+    } else if (contractor.state && (locLower.includes(contractor.state.toLowerCase()) || contractor.state.toLowerCase().includes(locLower))) {
+      reasons.push('Location match (State)');
+    }
+  }
+
+  const match_score = Math.min(score, 100);
+  let match_level = 'GOOD';
+  if (match_score >= 90) match_level = 'EXCELLENT';
+  else if (match_score >= 80) match_level = 'GREAT';
+
+  return { match_score, match_level, match_reasons: reasons };
 }
 
 /**
@@ -57,16 +109,15 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
       return;
     }
 
-    const contractorSkills = cp.skills || [];
-    const serviceAreas = cp.service_areas || [];
     const contractorCity = cp.city || '';
     const contractorState = cp.state || '';
+    const serviceAreas = cp.service_areas || [];
     const contractorIndustry = cp.industry || '';
     const contractorWorkforce = cp.workforce_size || 0;
-    const contractorAvailability = cp.availability || 'AVAILABLE';
+    const contractorExperience = cp.years_experience || 0;
 
     const opportunities = await sql`
-      SELECT 
+      SELECT
         mr.id,
         mr.title,
         mr.description,
@@ -85,29 +136,23 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
         app.id AS my_application_id,
         app.status AS my_application_status
       FROM manpower_requirements mr
-      LEFT JOIN applications app 
+      LEFT JOIN applications app
         ON app.requirement_id = mr.id AND app.contractor_id = ${cp.id}
       WHERE mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
         -- 1. Contractor workforce size >= requirement workers_required
         AND (${contractorWorkforce} >= mr.workers_required)
         -- 2. Contractor industry matches requirement industry
         AND (
-          mr.industry IS NULL 
+          mr.industry IS NULL
           OR TRIM(mr.industry) = ''
           OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
         )
-        -- 3. Required skills overlap with contractor skills
+        -- 3. Contractor years of experience >= requirement's required experience
         AND (
-          mr.required_skills IS NULL 
-          OR cardinality(mr.required_skills) = 0
-          OR EXISTS (
-            SELECT 1 
-            FROM unnest(mr.required_skills) req_skill
-            JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
-              ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
-          )
+          mr.experience_required IS NULL
+          OR ${contractorExperience} >= mr.experience_required
         )
-        -- 4. Requirement location compatible with contractor location/service areas
+        -- 4. Requirement location compatible with contractor's base city, state, or coverage areas (service_areas)
         AND (
           mr.location IS NULL
           OR TRIM(mr.location) = ''
@@ -116,7 +161,7 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
           OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
           OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
           OR EXISTS (
-            SELECT 1 
+            SELECT 1
             FROM unnest(${sql.array(serviceAreas)}::text[]) sa
             WHERE sa != '' AND (
               LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
@@ -124,14 +169,12 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
             )
           )
         )
-        -- 5. Contractor availability must be AVAILABLE
-        AND (${contractorAvailability} = 'AVAILABLE')
       ORDER BY mr.published_at DESC NULLS LAST, mr.created_at DESC
     `;
 
     const data = opportunities
       .map((op) => {
-        const match = calculateOpportunityMatch(op, contractor);
+        const match = calculateOpportunityMatch(op, cp);
         return {
           ...op,
           has_applied: !!op.my_application_id,
@@ -163,16 +206,15 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
       return next(err);
     }
 
-    const contractorSkills = cp.skills || [];
-    const serviceAreas = cp.service_areas || [];
     const contractorCity = cp.city || '';
     const contractorState = cp.state || '';
+    const serviceAreas = cp.service_areas || [];
     const contractorIndustry = cp.industry || '';
     const contractorWorkforce = cp.workforce_size || 0;
-    const contractorAvailability = cp.availability || 'AVAILABLE';
+    const contractorExperience = cp.years_experience || 0;
 
     const [opportunity] = await sql`
-      SELECT 
+      SELECT
         mr.id,
         mr.title,
         mr.description,
@@ -192,25 +234,19 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
         app.status AS my_application_status,
         app.created_at AS my_application_submitted_at
       FROM manpower_requirements mr
-      LEFT JOIN applications app 
+      LEFT JOIN applications app
         ON app.requirement_id = mr.id AND app.contractor_id = ${cp.id}
       WHERE mr.id = ${id}
         AND mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
         AND (${contractorWorkforce} >= mr.workers_required)
         AND (
-          mr.industry IS NULL 
+          mr.industry IS NULL
           OR TRIM(mr.industry) = ''
           OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
         )
         AND (
-          mr.required_skills IS NULL 
-          OR cardinality(mr.required_skills) = 0
-          OR EXISTS (
-            SELECT 1 
-            FROM unnest(mr.required_skills) req_skill
-            JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
-              ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
-          )
+          mr.experience_required IS NULL
+          OR ${contractorExperience} >= mr.experience_required
         )
         AND (
           mr.location IS NULL
@@ -220,7 +256,7 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
           OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
           OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
           OR EXISTS (
-            SELECT 1 
+            SELECT 1
             FROM unnest(${sql.array(serviceAreas)}::text[]) sa
             WHERE sa != '' AND (
               LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
@@ -228,7 +264,6 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
             )
           )
         )
-        AND (${contractorAvailability} = 'AVAILABLE')
     `;
 
     if (!opportunity) {
@@ -236,6 +271,8 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
       err.statusCode = 403;
       return next(err);
     }
+
+    const match = calculateOpportunityMatch(opportunity, cp);
 
     res.json({
       data: {
@@ -273,13 +310,10 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
       return next(err);
     }
 
-    const contractorSkills = cp.skills || [];
-    const serviceAreas = cp.service_areas || [];
     const contractorCity = cp.city || '';
-    const contractorState = cp.state || '';
     const contractorIndustry = cp.industry || '';
     const contractorWorkforce = cp.workforce_size || 0;
-    const contractorAvailability = cp.availability || 'AVAILABLE';
+    const contractorExperience = cp.years_experience || 0;
 
     // Verify requirement exists, is open, AND matches contractor criteria
     const [eligibleReq] = await sql`
@@ -288,37 +322,20 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
         AND mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
         AND (${contractorWorkforce} >= mr.workers_required)
         AND (
-          mr.industry IS NULL 
+          mr.industry IS NULL
           OR TRIM(mr.industry) = ''
           OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
         )
         AND (
-          mr.required_skills IS NULL 
-          OR cardinality(mr.required_skills) = 0
-          OR EXISTS (
-            SELECT 1 
-            FROM unnest(mr.required_skills) req_skill
-            JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
-              ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
-          )
+          mr.experience_required IS NULL
+          OR ${contractorExperience} >= mr.experience_required
         )
         AND (
           mr.location IS NULL
           OR TRIM(mr.location) = ''
           OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
           OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-          OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
-          OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-          OR EXISTS (
-            SELECT 1 
-            FROM unnest(${sql.array(serviceAreas)}::text[]) sa
-            WHERE sa != '' AND (
-              LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
-              OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
-            )
-          )
         )
-        AND (${contractorAvailability} = 'AVAILABLE')
     `;
 
     if (!eligibleReq) {
@@ -402,7 +419,7 @@ export async function getMyApplications(req: Request, res: Response, next: NextF
     const cp = await getContractorFullProfile(req.user!.sub);
 
     const applications = await sql`
-      SELECT 
+      SELECT
         app.id,
         app.requirement_id,
         app.proposed_workforce,
@@ -440,7 +457,7 @@ export async function getApplicationById(req: Request, res: Response, next: Next
     const cp = await getContractorFullProfile(req.user!.sub);
 
     const [application] = await sql`
-      SELECT 
+      SELECT
         app.id,
         app.requirement_id,
         app.proposed_workforce,
@@ -487,63 +504,43 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
     let opportunitiesCount = 0;
 
     if (cp.onboarding_complete && cp.workforce_size !== null && cp.workforce_size !== undefined) {
-      const contractorSkills = cp.skills || [];
-      const serviceAreas = cp.service_areas || [];
       const contractorCity = cp.city || '';
-      const contractorState = cp.state || '';
       const contractorIndustry = cp.industry || '';
       const contractorWorkforce = cp.workforce_size || 0;
-      const contractorAvailability = cp.availability || 'AVAILABLE';
+      const contractorExperience = cp.years_experience || 0;
 
       const [{ count }] = await sql`
         SELECT COUNT(*)::int FROM manpower_requirements mr
         WHERE mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
           AND (${contractorWorkforce} >= mr.workers_required)
           AND (
-            mr.industry IS NULL 
+            mr.industry IS NULL
             OR TRIM(mr.industry) = ''
             OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
           )
           AND (
-            mr.required_skills IS NULL 
-            OR cardinality(mr.required_skills) = 0
-            OR EXISTS (
-              SELECT 1 
-              FROM unnest(mr.required_skills) req_skill
-              JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
-                ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
-            )
+            mr.experience_required IS NULL
+            OR ${contractorExperience} >= mr.experience_required
           )
           AND (
             mr.location IS NULL
             OR TRIM(mr.location) = ''
             OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
             OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-            OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
-            OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-            OR EXISTS (
-              SELECT 1 
-              FROM unnest(${sql.array(serviceAreas)}::text[]) sa
-              WHERE sa != '' AND (
-                LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
-                OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
-              )
-            )
           )
-          AND (${contractorAvailability} = 'AVAILABLE')
       `;
       opportunitiesCount = count;
     }
 
     // Active applications count for contractor
     const [{ count: activeApplicationsCount }] = await sql`
-      SELECT COUNT(*)::int FROM applications 
+      SELECT COUNT(*)::int FROM applications
       WHERE contractor_id = ${cp.id} AND status IN ('SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED')
     `;
 
     // Selected applications count for contractor
     const [{ count: selectedApplicationsCount }] = await sql`
-      SELECT COUNT(*)::int FROM applications 
+      SELECT COUNT(*)::int FROM applications
       WHERE contractor_id = ${cp.id} AND status = 'SELECTED'
     `;
 

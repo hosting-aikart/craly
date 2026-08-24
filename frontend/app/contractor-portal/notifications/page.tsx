@@ -16,6 +16,7 @@ import './contractor-notifications.css';
 function iconFor(type: string): string {
   if (type.startsWith('APPLICATION')) return '📥';
   if (type.startsWith('KYC') || type.startsWith('CONTRACTOR_VERIFICATION')) return '🛡️';
+  if (type === 'ENGAGEMENT_CONFIRMED') return '🤝';
   if (type.includes('OPPORTUNITY')) return '🎯';
   return '🔔';
 }
@@ -45,7 +46,7 @@ export default function ContractorNotificationsPage() {
       setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, is_read: true } : x)));
     }
     if (!n.reference_id) return;
-    if (n.type.startsWith('APPLICATION')) {
+    if (n.type.startsWith('APPLICATION') || n.type === 'ENGAGEMENT_CONFIRMED') {
       router.push(`/contractor-portal/applications/${n.reference_id}`);
     } else if (n.type.startsWith('KYC') || n.type.startsWith('CONTRACTOR_VERIFICATION')) {
       router.push('/contractor-portal/profile?tab=documents');

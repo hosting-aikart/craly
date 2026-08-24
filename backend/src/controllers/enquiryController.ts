@@ -4,7 +4,7 @@ import config from '../config/index';
 import { createEnquirySchema } from '../validators/enquiryValidators';
 import { createNotification } from '../utils/notifications';
 import { sendEnquiryReceivedEmail, sendEnquiryAcceptedEmail } from '../utils/mailer';
-import { getOwnBusinessProfile } from '../utils/actorProfile';
+import { getOwnBusinessProfile, getOwnContractorProfile } from '../utils/actorProfile';
 import { sanitizeContactInfo } from '../utils/contactSanitizer';
 import { PUBLICLY_DISCOVERABLE_CONDITION } from '../utils/contractorVisibility';
 import { emitToUser, emitToEnquiryRoom } from '../socket/emitter';
@@ -326,6 +326,29 @@ export async function listEnquiries(req: Request, res: Response, next: NextFunct
       return;
     }
 
+    if (req.user!.role === 'contractor') {
+      const contractor = await getOwnContractorProfile(userId);
+      if (!contractor) {
+        res.json({ data: [] });
+        return;
+      }
+
+      const rows = await sql`
+        SELECT i.*, bp.company_name AS other_party_name, sc.name AS category_name,
+               EXISTS(
+                 SELECT 1 FROM inquiry_messages m
+                 WHERE m.inquiry_id = i.id AND m.receiver_id = ${userId} AND m.is_read = false
+               ) AS has_unread
+        FROM inquiries i
+        JOIN business_profiles bp ON bp.id = i.business_id
+        LEFT JOIN service_categories sc ON sc.id = i.category_id
+        WHERE i.contractor_id = ${contractor.id}
+        ORDER BY i.updated_at DESC
+      `;
+      res.json({ data: rows });
+      return;
+    }
+
     if (req.user!.role === 'ops_head' || req.user!.role === 'field_staff' || req.user!.role === 'admin') {
       // Staff aren't scoped to "their own" contractor — they broker across
       // the whole queue on behalf of whichever contractor each enquiry names.
@@ -342,7 +365,7 @@ export async function listEnquiries(req: Request, res: Response, next: NextFunct
       return;
     }
 
-    return next(forbidden('Enquiries are only available to business accounts and internal staff'));
+    return next(forbidden('Enquiries are only available to business accounts, contractor accounts, and internal staff'));
   } catch (err) {
     next(err);
   }
@@ -370,7 +393,13 @@ export async function getEnquiry(req: Request, res: Response, next: NextFunction
     if (!row) return next(notFound('Enquiry not found'));
 
     const isBusinessParty = row.business_user_id === userId;
-    const isContractorParty = row.contractor_user_id === userId; // legacy accounts only — always false for staff-managed contractors
+    let isContractorParty = row.contractor_user_id === userId;
+    if (!isContractorParty && req.user!.role === 'contractor') {
+      const contractor = await getOwnContractorProfile(userId);
+      if (contractor && contractor.id === row.contractor_id) {
+        isContractorParty = true;
+      }
+    }
     const isStaff = req.user!.role === 'ops_head' || req.user!.role === 'field_staff' || req.user!.role === 'admin';
     if (!isBusinessParty && !isContractorParty && !isStaff) {
       return next(forbidden('You do not have access to this enquiry'));
@@ -396,14 +425,23 @@ export async function updateEnquiryStatus(req: Request, res: Response, next: Nex
     const isStaff = req.user!.role === 'ops_head' || req.user!.role === 'field_staff' || req.user!.role === 'admin';
 
     const [row] = await sql`
-      SELECT i.id, bp.user_id AS business_user_id, cp.user_id AS contractor_user_id
+      SELECT i.id, i.contractor_id, bp.user_id AS business_user_id, cp.user_id AS contractor_user_id
       FROM inquiries i
       JOIN business_profiles bp ON bp.id = i.business_id
       JOIN contractor_profiles cp ON cp.id = i.contractor_id
       WHERE i.id = ${id}
     `;
     if (!row) return next(notFound('Enquiry not found'));
-    if (row.business_user_id !== userId && row.contractor_user_id !== userId && !isStaff) {
+
+    let isContractorParty = row.contractor_user_id === userId;
+    if (!isContractorParty && req.user!.role === 'contractor') {
+      const contractor = await getOwnContractorProfile(userId);
+      if (contractor && contractor.id === row.contractor_id) {
+        isContractorParty = true;
+      }
+    }
+
+    if (row.business_user_id !== userId && !isContractorParty && !isStaff) {
       return next(forbidden('You do not have access to this enquiry'));
     }
 

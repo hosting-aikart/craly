@@ -86,6 +86,15 @@ export default function ApplicationCompareModal({
                       </span>
                     </div>
 
+                    <div className="compare-card__section">
+                      <span className="compare-card__label">Industry / Capacity / Availability</span>
+                      <span className="compare-card__value">
+                        {app.contractor_industry || 'Industry N/A'}
+                        {app.contractor_workforce_size != null ? ` • ${app.contractor_workforce_size} total workforce` : ''}
+                        {app.contractor_availability ? ` • ${app.contractor_availability.replace(/_/g, ' ')}` : ''}
+                      </span>
+                    </div>
+
                     <div className="compare-card__section compare-card__section--flex">
                       <span className="compare-card__label">Relevant Experience & Message</span>
                       <p className="compare-card__text">

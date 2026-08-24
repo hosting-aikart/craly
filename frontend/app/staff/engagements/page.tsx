@@ -96,12 +96,15 @@ export default function StaffEngagementsPage() {
                   <span className="party-lbl">Manufacturer Company</span>
                   <strong className="party-name">{item.manufacturer_name}</strong>
                   {item.manufacturer_city && <span className="party-sub">{item.manufacturer_city}</span>}
+                  {item.manufacturer_phone && <span className="party-sub">📞 {item.manufacturer_phone}</span>}
+                  {item.manufacturer_email && <span className="party-sub">✉️ {item.manufacturer_email}</span>}
                 </div>
 
                 <div className="engagement-party-box">
                   <span className="party-lbl">Selected Contractor</span>
                   <strong className="party-name">{item.contractor_name}</strong>
                   {item.contractor_phone && <span className="party-sub">📞 {item.contractor_phone}</span>}
+                  {item.contractor_email && <span className="party-sub">✉️ {item.contractor_email}</span>}
                 </div>
 
                 <div className="engagement-party-box">
