@@ -408,3 +408,286 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* ── Service Coverage Modal & Cluster Cards ───────────────────────── */
+.contractor-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.contractor-modal-container {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.contractor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.contractor-modal-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.contractor-modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.contractor-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.contractor-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.contractor-modal-subtext {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 18px 0;
+  line-height: 1.4;
+}
+
+.contractor-cluster-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .contractor-cluster-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contractor-cluster-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.contractor-cluster-card:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.contractor-cluster-card--selected {
+  border-color: #10b981;
+  background: #f0fdf4;
+  box-shadow: 0 0 0 1px #10b981;
+}
+
+.contractor-cluster-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #10b981;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.contractor-cluster-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.contractor-cluster-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.contractor-cluster-sub {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.contractor-custom-cluster-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.contractor-custom-cluster-section label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  display: block;
+}
+
+.contractor-custom-cluster-input-wrap {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.contractor-custom-cluster-input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13.5px;
+  outline: none;
+}
+
+.contractor-custom-cluster-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+}
+
+.contractor-custom-cluster-btn {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.contractor-custom-cluster-btn:hover {
+  background: #1e293b;
+}
+
+.contractor-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.contractor-btn-cancel {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.contractor-btn-cancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.contractor-btn-save {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.contractor-btn-save:hover {
+  background: #059669;
+}
+
+/* ── Coverage Summary Dashboard Cards ─────────────────────────── */
+.contractor-cluster-pill-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.contractor-cluster-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.contractor-cluster-pill-tag--custom {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.contractor-cluster-pill-remove {
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: #059669;
+  font-weight: 700;
+  padding: 0 2px;
+  border-radius: 50%;
+}
+
+.contractor-cluster-pill-remove:hover {
+  color: #dc2626;
+}
+
