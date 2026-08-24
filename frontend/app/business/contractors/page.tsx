@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import ContractorCard from '@/components/ContractorCard';
 import FilterPanel from '@/components/FilterPanel';
@@ -26,6 +27,9 @@ export default function BusinessContractorsPage() {
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+
+  // Selected contractors for comparison
+  const [compareIds, setCompareIds] = useState<string[]>([]);
 
   useEffect(() => {
     listCategories()
@@ -76,15 +80,29 @@ export default function BusinessContractorsPage() {
     setMinWorkforce('');
   };
 
+  const handleToggleCompare = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (compareIds.includes(id)) {
+      setCompareIds(compareIds.filter((cid) => cid !== id));
+    } else {
+      if (compareIds.length >= 4) {
+        alert('You can compare up to 4 contractors at once.');
+        return;
+      }
+      setCompareIds([...compareIds, id]);
+    }
+  };
+
   const hasActiveFilters = Boolean(query || city || category || minExperience || minWorkforce);
 
   return (
     <>
       <WorkspacePageHeader
-        title="Find Contractors"
-        subtitle="Discover verified labour contractors by trade, location, and workforce capacity."
+        title="Find & Compare Contractors"
+        subtitle="Discover verified labour contractors by trade, location, and compare them side-by-side."
       />
-      <div className="contractors-page__body" style={{ margin: 0 }}>
+      <div className="contractors-page__body" style={{ margin: 0, position: 'relative' }}>
         <aside className="contractors-page__sidebar">
           <FilterPanel
             city={city}
@@ -125,7 +143,14 @@ export default function BusinessContractorsPage() {
             <>
               <div className="contractors-page__grid">
                 {contractors.map((c) => (
-                  <ContractorCard key={c.id} contractor={c} basePath="/business/contractors" />
+                  <ContractorCard
+                    key={c.id}
+                    contractor={c}
+                    basePath="/business/contractors"
+                    showCompareToggle={true}
+                    isSelectedForCompare={compareIds.includes(c.id)}
+                    onToggleCompare={handleToggleCompare}
+                  />
                 ))}
               </div>
 
@@ -139,6 +164,64 @@ export default function BusinessContractorsPage() {
             </>
           )}
         </main>
+
+        {/* Floating Compare Action Bar */}
+        {compareIds.length > 0 && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#0f172a',
+              color: '#ffffff',
+              padding: '12px 24px',
+              borderRadius: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+              zIndex: 1000,
+              maxWidth: '90vw',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600 }}>
+              <span>⚖️</span>
+              <span>{compareIds.length} Contractor{compareIds.length > 1 ? 's' : ''} Selected</span>
+            </div>
+
+            <Link
+              href={`/business/compare?ids=${compareIds.join(',')}`}
+              style={{
+                background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)',
+                color: '#ffffff',
+                padding: '8px 18px',
+                borderRadius: '25px',
+                fontSize: '13.5px',
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Compare Now ({compareIds.length}) →
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setCompareIds([])}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#94a3b8',
+                fontSize: '13px',
+                cursor: 'pointer',
+                padding: '4px',
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

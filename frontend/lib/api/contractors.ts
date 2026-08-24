@@ -10,6 +10,7 @@ export interface ContractorListing {
   state: string | null;
   years_experience: number | null;
   workforce_size: number | null;
+  verification_status?: string | null;
   categories: Category[];
 }
 
