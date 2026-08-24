@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getMyProfile, type MyProfile, type ContractorProfile } from '@/lib/api/profile';
-import { getDashboardStats, type ContractorDashboardStats } from '@/lib/api/contractorPortal';
+import { getDashboardStats, getOpportunities, type ContractorDashboardStats, type Opportunity } from '@/lib/api/contractorPortal';
 import { computeProfileCompletion } from '@/lib/util/contractorProfileCompletion';
 import LoadingState from '@/components/ui/LoadingState';
 import './contractor-dashboard.css';
