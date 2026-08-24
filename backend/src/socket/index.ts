@@ -24,14 +24,24 @@ export function initSocketServer(httpServer: HttpServer): Server {
       origin: (origin, callback) => {
         if (!origin) return callback(null, true);
         const cleanOrigin = origin.trim().replace(/\/$/, '');
-        if (cleanOrigin.endsWith('craly.co') || cleanOrigin.endsWith('.craly.co')) return callback(null, true);
+
+        if (config.allowedOrigins.includes('*')) {
+          return callback(null, true);
+        }
+
+        if (cleanOrigin.endsWith('craly.co') || cleanOrigin.endsWith('.craly.co')) {
+          return callback(null, true);
+        }
 
         const isAllowed = config.allowedOrigins.some((allowed) => {
           const cleanAllowed = allowed.trim().replace(/\/$/, '');
+          if (!cleanAllowed) return false;
+          if (cleanAllowed === '*') return true;
           if (cleanOrigin === cleanAllowed) return true;
           if (cleanAllowed.includes('vercel.app') && cleanOrigin.endsWith('.vercel.app')) return true;
           return false;
         });
+
         callback(null, isAllowed);
       },
       credentials: true,

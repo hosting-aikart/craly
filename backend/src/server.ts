@@ -22,12 +22,23 @@ app.use(
       if (!origin) return callback(null, true);
 
       const cleanOrigin = origin.trim().replace(/\/$/, '');
-      if (cleanOrigin.endsWith('craly.co') || cleanOrigin.endsWith('.craly.co')) return callback(null, true);
+
+      // Universal wildcard support (* in ALLOWED_ORIGINS)
+      if (config.allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      // Natively allow craly.co & subdomains
+      if (cleanOrigin.endsWith('craly.co') || cleanOrigin.endsWith('.craly.co')) {
+        return callback(null, true);
+      }
 
       const isAllowed = config.allowedOrigins.some((allowed) => {
         const cleanAllowed = allowed.trim().replace(/\/$/, '');
+        if (!cleanAllowed) return false;
+        if (cleanAllowed === '*') return true;
         if (cleanOrigin === cleanAllowed) return true;
-        // Allow Vercel preview deployment URLs if vercel.app domain is configured
+        // Allow Vercel preview deployment URLs if vercel.app is configured
         if (cleanAllowed.includes('vercel.app') && cleanOrigin.endsWith('.vercel.app')) return true;
         return false;
       });
