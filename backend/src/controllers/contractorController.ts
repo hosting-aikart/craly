@@ -32,7 +32,14 @@ export async function listContractors(req: Request, res: Response, next: NextFun
              ) AS categories
       FROM contractor_profiles cp
       WHERE ${PUBLICLY_DISCOVERABLE_CONDITION}
-        AND (${city ?? null}::text IS NULL OR cp.city ILIKE ${city ? `%${city}%` : null})
+        AND (
+          ${city ?? null}::text IS NULL
+          OR cp.city ILIKE ${city ? `%${city}%` : null}
+          OR cp.state ILIKE ${city ? `%${city}%` : null}
+          OR EXISTS (
+            SELECT 1 FROM unnest(cp.service_areas) sa WHERE sa ILIKE ${city ? `%${city}%` : null}
+          )
+        )
         AND (
           ${category ?? null}::text IS NULL OR EXISTS (
             SELECT 1 FROM contractor_categories cc

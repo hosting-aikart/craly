@@ -78,12 +78,44 @@ function calculateOpportunityMatch(op: any, contractor: ContractorFullProfile) {
 
   if (op.location) {
     const locLower = op.location.toLowerCase();
-    if (contractor.city && (locLower.includes(contractor.city.toLowerCase()) || contractor.city.toLowerCase().includes(locLower))) {
-      reasons.push('Location match (Base City)');
-    } else if (contractor.service_areas && contractor.service_areas.some((sa) => sa && (locLower.includes(sa.toLowerCase()) || sa.toLowerCase().includes(locLower)))) {
-      reasons.push('Location match (Coverage Area)');
-    } else if (contractor.state && (locLower.includes(contractor.state.toLowerCase()) || contractor.state.toLowerCase().includes(locLower))) {
-      reasons.push('Location match (State)');
+    let locationMatched = false;
+
+    // 1. Base City Check
+    if (contractor.city) {
+      const cityLower = contractor.city.toLowerCase().trim();
+      if (cityLower && (locLower.includes(cityLower) || cityLower.includes(locLower))) {
+        score += 15;
+        reasons.push(`Location match (Base City: ${contractor.city})`);
+        locationMatched = true;
+      }
+    }
+
+    // 2. Coverage Area (Service Areas) Check
+    if (contractor.service_areas && Array.isArray(contractor.service_areas)) {
+      const flatAreas = contractor.service_areas
+        .flatMap((sa) => String(sa).split(','))
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const matchedArea = flatAreas.find((sa) => {
+        const saLower = sa.toLowerCase();
+        return locLower.includes(saLower) || saLower.includes(locLower);
+      });
+
+      if (matchedArea) {
+        score += 15;
+        reasons.push(`Location match (Coverage Area: ${matchedArea})`);
+        locationMatched = true;
+      }
+    }
+
+    // 3. Base State Check
+    if (!locationMatched && contractor.state) {
+      const stateLower = contractor.state.toLowerCase().trim();
+      if (stateLower && (locLower.includes(stateLower) || stateLower.includes(locLower))) {
+        score += 10;
+        reasons.push(`Location match (State: ${contractor.state})`);
+      }
     }
   }
 
