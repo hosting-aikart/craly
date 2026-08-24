@@ -64,31 +64,12 @@
   display: block;
 }
 
-.craly-nav__brand-text {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .craly-nav__brand-name {
   font-family: var(--font-display, sans-serif);
   font-size: 21px;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.5px;
-}
-
-.craly-nav__brand-badge {
-  font-family: var(--font-body, sans-serif);
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #0f766e;
-  background: #f0fdfa;
-  border: 1px solid #ccfbf1;
-  padding: 1px 6px;
-  border-radius: 6px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
 }
 
 /* ---------------- Desktop Navigation Links ---------------- */

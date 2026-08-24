@@ -185,7 +185,7 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     {
       group: 'ACCOUNT',
       items: [
-        { label: 'Notifications', href: '/notifications', icon: '🔔', badge: unreadNotificationCount },
+        { label: 'Notifications', href: '/contractor-portal/notifications', icon: '🔔', badge: unreadNotificationCount },
         { label: 'Settings', href: '/contractor-portal/settings', icon: '⚙️' },
       ],
     },

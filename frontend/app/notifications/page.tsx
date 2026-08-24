@@ -33,7 +33,7 @@ export default function NotificationsPage() {
       : user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff'
       ? '/staff/notifications'
       : user.role === 'contractor'
-      ? '/contractor-portal/dashboard'
+      ? '/contractor-portal/notifications'
       : '/business/notifications';
 
     router.replace(targetRoute);

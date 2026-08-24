@@ -1,0 +1,115 @@
+.contractor-notifications-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.contractor-notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.contractor-notifications-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.contractor-notifications-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.contractor-notifications-mark-all {
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.contractor-notifications-mark-all:hover {
+  background: #f8fafc;
+}
+
+.contractor-notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contractor-notification-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.contractor-notification-card--unread {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.contractor-notification-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.contractor-notification-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.contractor-notification-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.contractor-notification-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.contractor-notification-time {
+  font-size: 11.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.contractor-notification-message {
+  font-size: 13px;
+  color: #475569;
+  margin: 4px 0 0 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .contractor-notifications-page {
+    padding: 16px;
+  }
+}
