@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/useAuth';
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import { getContractor, type ContractorDetail } from '@/lib/api/contractors';
 import { createEnquiry } from '@/lib/api/enquiries';
 import EmptyState from '@/components/ui/EmptyState';
@@ -39,7 +40,7 @@ export default function ContactContractorPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { router.push('/login'); return; }
-    if (user.role !== 'business') { router.push('/contractor/dashboard'); return; }
+    if (user.role !== 'business') { router.push(getRoleDefaultDashboard(user.role)); return; }
   }, [authLoading, user, router]);
 
   useEffect(() => {

@@ -15,10 +15,13 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
 
     if (role === 'contractor') {
       const [profile] = await sql`
-        SELECT id, company_name, phone, description, city, state, years_experience,
-               workforce_size, availability, verification_status, verification_note,
-               onboarding_complete
-        FROM contractor_profiles WHERE user_id = ${userId}
+        SELECT cp.id, cp.company_name, cp.phone, cp.description, cp.city, cp.state, cp.years_experience,
+               cp.workforce_size, cp.industry, cp.skills, cp.service_areas, cp.availability,
+               cp.verification_status, cp.verification_note, cp.onboarding_complete,
+               cp.last_verified_at, cp.updated_at, u.email AS user_email
+        FROM contractor_profiles cp
+        JOIN users u ON u.id = cp.user_id
+        WHERE cp.user_id = ${userId}
       `;
       if (!profile) {
         const err: AppError = new Error('Profile not found');
@@ -91,8 +94,20 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
         err.statusCode = 400;
         return next(err);
       }
-      const { companyName, description, city, state, yearsExperience, workforceSize, categoryIds } =
-        parsed.data;
+      const {
+        companyName,
+        phone,
+        description,
+        city,
+        state,
+        yearsExperience,
+        workforceSize,
+        industry,
+        skills,
+        serviceAreas,
+        availability,
+        categoryIds,
+      } = parsed.data;
 
       const cleanDesc = description ? sanitizeContactInfo(description) : null;
 
@@ -100,11 +115,16 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
         const [updated] = await tx`
           UPDATE contractor_profiles SET
             company_name = COALESCE(${companyName ?? null}, company_name),
+            phone = COALESCE(${phone ?? null}, phone),
             description = COALESCE(${cleanDesc}, description),
             city = COALESCE(${city ?? null}, city),
             state = COALESCE(${state ?? null}, state),
             years_experience = COALESCE(${yearsExperience ?? null}, years_experience),
             workforce_size = COALESCE(${workforceSize ?? null}, workforce_size),
+            industry = COALESCE(${industry ?? null}, industry),
+            skills = CASE WHEN ${skills !== undefined} THEN ${sql.array(skills || [])} ELSE skills END,
+            service_areas = CASE WHEN ${serviceAreas !== undefined} THEN ${sql.array(serviceAreas || [])} ELSE service_areas END,
+            availability = COALESCE(${availability ?? null}, availability),
             onboarding_complete = true,
             updated_at = now()
           WHERE user_id = ${userId}

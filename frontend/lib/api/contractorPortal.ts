@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from '@/lib/api';
+import { apiGet, apiPost, apiDelete, apiUpload } from '@/lib/api';
 
 export interface Opportunity {
   id: string;
@@ -77,3 +77,28 @@ export const getApplicationById = (id: string) =>
 
 export const getDashboardStats = () =>
   apiGet<{ data: ContractorDashboardStats }>('/contractor-portal/dashboard-stats');
+
+export interface ContractorDocumentItem {
+  id: string;
+  document_type: 'aadhaar' | 'pan' | 'business_registration' | 'industry_license' | 'safety_certification' | 'other_certificate';
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  status: 'pending' | 'approved' | 'rejected' | 'replacement_requested';
+  issue_date?: string | null;
+  expiry_date?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const getMyDocuments = () =>
+  apiGet<{ data: ContractorDocumentItem[] }>('/contractor-portal/documents');
+
+export const uploadMyDocument = (formData: FormData) =>
+  apiUpload<{ data: ContractorDocumentItem }>('/contractor-portal/documents', formData);
+
+export const getMyDocumentSignedUrl = (documentId: string, intent: 'view' | 'download' = 'view') =>
+  apiGet<{ data: { url: string; expiresInSeconds: number } }>(`/contractor-portal/documents/${documentId}/signed-url?intent=${intent}`);
+
+export const deleteMyDocument = (documentId: string) =>
+  apiDelete<{ data: { id: string; deleted: boolean } }>(`/contractor-portal/documents/${documentId}`);

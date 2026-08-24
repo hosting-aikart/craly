@@ -9,6 +9,11 @@ import {
   getStaffEngagements,
   updateEngagementStatus,
   getStaffNotifications,
+  getStaffVerificationContractors,
+  getStaffVerificationContractorById,
+  getStaffDocumentSignedUrl,
+  reviewStaffDocument,
+  updateStaffContractorVerificationStatus,
 } from '../controllers/staffController';
 
 const router = Router();
@@ -18,6 +23,13 @@ router.use(requireAuth, requireRole('staff', 'admin'));
 
 // Dashboard stats
 router.get('/dashboard-stats', getStaffDashboardStats);
+
+// KYC & Verification Review
+router.get('/verification/contractors', getStaffVerificationContractors);
+router.get('/verification/contractors/:id', getStaffVerificationContractorById);
+router.get('/verification/contractors/:id/documents/:documentId/signed-url', getStaffDocumentSignedUrl);
+router.patch('/verification/contractors/:id/documents/:documentId/review', reviewStaffDocument);
+router.patch('/verification/contractors/:id/status', updateStaffContractorVerificationStatus);
 
 // Contractor management
 router.get('/contractors', getContractors);

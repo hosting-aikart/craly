@@ -30,8 +30,10 @@ export default function NotificationsPage() {
 
     const targetRoute = user.role === 'admin'
       ? '/admin/notifications'
+      : user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff'
+      ? '/staff/notifications'
       : user.role === 'contractor'
-      ? '/contractor/notifications'
+      ? '/contractor-portal/notifications'
       : '/business/notifications';
 
     router.replace(targetRoute);

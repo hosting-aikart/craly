@@ -42,10 +42,10 @@ export default function Navbar() {
     return null;
   }
 
+  // Trimmed to the links people actually use — the logo already goes home,
+  // and "Why Craly" duplicated ground the homepage hero already covers.
   const navLinks = [
-    { href: '/', label: t.nav.home },
     { href: '/contractors', label: t.nav.contractors },
-    { href: '/#why', label: t.nav.whyCraly },
     { href: '/#how', label: t.nav.howItWorks },
     { href: '/#faq', label: t.nav.faq },
   ];
@@ -66,10 +66,7 @@ export default function Navbar() {
           <div className="craly-nav__logo-box">
             <img src={helmetLogo} alt="Craly" className="craly-nav__logo" />
           </div>
-          <div className="craly-nav__brand-text">
-            <span className="craly-nav__brand-name">Craly</span>
-            <span className="craly-nav__brand-badge">B2B</span>
-          </div>
+          <span className="craly-nav__brand-name">Craly</span>
         </Link>
 
         {/* ── Desktop Center Navigation ── */}

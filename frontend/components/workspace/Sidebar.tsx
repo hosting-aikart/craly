@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useSocket } from '@/lib/socket/SocketContext';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -32,6 +32,7 @@ const helmetLogo = '/assets/helmet.png';
 export default function Sidebar({ role, companyName }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { logout } = useAuth();
   const { socket } = useSocket();
   const { t } = useLanguage();
@@ -41,19 +42,21 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   const fetchCounts = () => {
-    listEnquiries()
-      .then(({ data }) => {
-        const pending = data.filter((e) => {
-          const st = String(e.status).toUpperCase();
-          return st === 'NEW' || st === 'UNDER_REVIEW';
-        }).length;
+    if (role === 'business' || role === 'staff' || role === 'contractor') {
+      listEnquiries()
+        .then(({ data }) => {
+          const pending = data.filter((e) => {
+            const st = String(e.status).toUpperCase();
+            return st === 'NEW' || st === 'UNDER_REVIEW';
+          }).length;
 
-        const unread = data.filter((e) => e.has_unread).length;
+          const unread = data.filter((e) => e.has_unread).length;
 
-        setPendingEnquiryCount(pending);
-        setUnreadMessageCount(unread);
-      })
-      .catch(() => {});
+          setPendingEnquiryCount(pending);
+          setUnreadMessageCount(unread);
+        })
+        .catch(() => {});
+    }
 
     listNotifications()
       .then(({ unreadCount }) => setUnreadNotificationCount(unreadCount))
@@ -87,7 +90,17 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     };
   }, [socket]);
 
-  const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
+  const currentTab = searchParams?.get('tab') || 'kyc';
+
+  const isActive = (href: string) => {
+    const [path, queryStr] = href.split('?');
+    if (pathname !== path) return false;
+    if (queryStr) {
+      const targetTab = new URLSearchParams(queryStr).get('tab');
+      return targetTab === currentTab;
+    }
+    return true;
+  };
 
   const businessNav: NavGroup[] = [
     {
@@ -141,18 +154,39 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
 
   const contractorPortalNav: NavGroup[] = [
     {
-      group: t.sidebarGroups.main,
+      group: 'OVERVIEW',
       items: [
-        { label: t.nav.dashboard, href: '/contractor-portal/dashboard', icon: '📊' },
-        { label: 'Opportunities', href: '/contractor-portal/opportunities', icon: '🎯' },
-        { label: 'My Applications', href: '/contractor-portal/applications', icon: '📥' },
+        { label: 'Dashboard', href: '/contractor-portal/dashboard', icon: '📊' },
       ],
     },
     {
-      group: t.sidebarGroups.account,
+      group: 'COMPANY',
       items: [
-        { label: t.nav.companyProfile, href: '/contractor-portal/profile', icon: '🏢' },
-        { label: t.nav.settings, href: '/contractor-portal/settings', icon: '⚙️' },
+        { label: 'KYC & Onboarding', href: '/contractor-portal/profile?tab=kyc', icon: '📋' },
+        { label: 'Company Profile', href: '/contractor-portal/profile?tab=profile', icon: '🏢' },
+        { label: 'Workforce & Skills', href: '/contractor-portal/profile?tab=workforce', icon: '⛑️' },
+        { label: 'Coverage', href: '/contractor-portal/profile?tab=coverage', icon: '📍' },
+      ],
+    },
+    {
+      group: 'COMPLIANCE',
+      items: [
+        { label: 'Documents', href: '/contractor-portal/profile?tab=documents', icon: '📄' },
+        { label: 'Verification', href: '/contractor-portal/profile?tab=verification', icon: '🛡️' },
+      ],
+    },
+    {
+      group: 'MARKETPLACE',
+      items: [
+        { label: 'Opportunities', href: '/contractor-portal/opportunities', icon: '🎯' },
+        { label: 'Applications', href: '/contractor-portal/applications', icon: '📥' },
+      ],
+    },
+    {
+      group: 'ACCOUNT',
+      items: [
+        { label: 'Notifications', href: '/contractor-portal/notifications', icon: '🔔', badge: unreadNotificationCount },
+        { label: 'Settings', href: '/contractor-portal/settings', icon: '⚙️' },
       ],
     },
   ];
@@ -162,6 +196,7 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
       group: t.sidebarGroups.main,
       items: [
         { label: t.nav.dashboard, href: '/staff/dashboard', icon: '📊' },
+        { label: 'KYC / Verification', href: '/staff/verification', icon: '🛡️' },
         { label: 'Contractors', href: '/staff/contractors', icon: '🏢' },
         { label: '+ Add Contractor', href: '/staff/contractors/new', icon: '➕' },
         { label: 'Engagements', href: '/staff/engagements', icon: '🤝' },
@@ -202,8 +237,10 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
       <div className="workspace-sidebar__brand">
         <Link href="/" className="workspace-sidebar__logo">
           <img src={helmetLogo} alt="Craly" className="workspace-sidebar__logo-img" />
-          <span className="workspace-sidebar__logo-craly">Craly</span>
-          <span className="workspace-sidebar__logo-badge">{getBadgeLabel()}</span>
+          <div className="workspace-sidebar__logo-text-group">
+            <span className="workspace-sidebar__logo-craly">Craly</span>
+            <span className="workspace-sidebar__logo-sub">Verified Workforce Network</span>
+          </div>
         </Link>
       </div>
 

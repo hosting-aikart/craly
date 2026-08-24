@@ -83,10 +83,16 @@ export default function WorkspaceHeader({
         >
           ☰
         </button>
+        <h1 className="workspace-header__title">{title}</h1>
       </div>
 
       <div className="workspace-header__right">
         {action && <div className="workspace-header__action">{action}</div>}
+
+        <div className="workspace-header__role-badge-pill">
+          <span className="workspace-header__role-badge-lbl">Active role</span>
+          <span className="workspace-header__role-badge-val">{getRoleLabel()} ▾</span>
+        </div>
 
         <LanguageSelector variant="header" />
 
@@ -105,7 +111,6 @@ export default function WorkspaceHeader({
             </div>
             <div className="workspace-header__user-meta">
               <strong className="workspace-header__company">{companyName}</strong>
-              <span className="workspace-header__role-tag">{getRoleLabel()}</span>
             </div>
             <span className="workspace-header__caret">▾</span>
           </button>

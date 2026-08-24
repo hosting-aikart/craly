@@ -13,94 +13,57 @@ const applySchema = z.object({
   proposedRate: z.union([z.number(), z.string().transform((v) => parseFloat(v))]).optional(),
 });
 
+export interface ContractorFullProfile {
+  id: string;
+  company_name: string;
+  workforce_size: number | null;
+  industry: string | null;
+  skills: string[] | null;
+  city: string | null;
+  state: string | null;
+  service_areas: string[] | null;
+  availability: string | null;
+  onboarding_complete: boolean;
+}
+
 /**
- * Helper to retrieve contractor_profiles.id for the logged in user
+ * Helper to retrieve contractor_profiles row for the logged in user
  */
-async function getContractorProfileId(userId: string): Promise<string> {
-  const [profile] = await sql`SELECT id FROM contractor_profiles WHERE user_id = ${userId}`;
+async function getContractorFullProfile(userId: string): Promise<ContractorFullProfile> {
+  const [profile] = await sql<ContractorFullProfile[]>`
+    SELECT id, company_name, workforce_size, industry, skills, city, state, service_areas, availability, onboarding_complete
+    FROM contractor_profiles
+    WHERE user_id = ${userId}
+  `;
   if (!profile) {
     const err: AppError = new Error('Contractor profile not found for this user');
     err.statusCode = 404;
     throw err;
   }
-  return profile.id;
-}
-
-/**
- * Helper to compute personalized match score and reasons for a contractor
- */
-function calculateOpportunityMatch(op: any, contractor: any) {
-  let score = 45; // baseline open opportunity score
-  const reasons: string[] = [];
-
-  // 1. Location match
-  if (contractor?.city && op.location) {
-    const opLoc = op.location.toLowerCase();
-    const cCity = contractor.city.toLowerCase();
-    const cState = (contractor.state || '').toLowerCase();
-    if (opLoc.includes(cCity) || cCity.includes(opLoc)) {
-      score += 25;
-      reasons.push(`Location match (${contractor.city})`);
-    } else if (cState && opLoc.includes(cState)) {
-      score += 15;
-      reasons.push(`Regional state match (${contractor.state})`);
-    }
-  }
-
-  // 2. Workforce capacity match
-  if (contractor?.workforce_size && op.workers_required) {
-    if (contractor.workforce_size >= op.workers_required) {
-      score += 20;
-      reasons.push(`Capacity match (${contractor.workforce_size} workers available vs ${op.workers_required} needed)`);
-    } else if (contractor.workforce_size >= Math.ceil(op.workers_required * 0.5)) {
-      score += 10;
-      reasons.push(`Partial capacity match (${contractor.workforce_size} workers)`);
-    }
-  }
-
-  // 3. Experience match
-  if (contractor?.years_experience !== null && contractor?.years_experience !== undefined && op.experience_required) {
-    if (contractor.years_experience >= op.experience_required) {
-      score += 15;
-      reasons.push(`Experience qualified (${contractor.years_experience}+ years)`);
-    }
-  } else if (contractor?.years_experience && contractor.years_experience >= 2) {
-    score += 8;
-  }
-
-  score = Math.min(score, 98);
-  const match_level: 'HIGH' | 'MEDIUM' | 'LOW' = score >= 75 ? 'HIGH' : score >= 55 ? 'MEDIUM' : 'LOW';
-
-  return {
-    match_score: score,
-    match_level,
-    match_reasons: reasons,
-  };
+  return profile;
 }
 
 /**
  * GET /api/contractor-portal/opportunities
- * Returns published/open manpower requirements scored and personalized for the caller contractor.
+ * Returns published/open manpower requirements MATCHED to the contractor profile.
+ * Includes `has_applied` boolean and `application_status` for the caller.
  */
 export async function getOpportunities(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const [contractor] = await sql`
-      SELECT 
-        cp.id,
-        cp.company_name,
-        cp.city,
-        cp.state,
-        cp.workforce_size,
-        cp.years_experience
-      FROM contractor_profiles cp
-      WHERE cp.user_id = ${req.user!.sub}
-    `;
+    const cp = await getContractorFullProfile(req.user!.sub);
 
-    if (!contractor) {
-      const err: AppError = new Error('Contractor profile not found for this user');
-      err.statusCode = 404;
-      return next(err);
+    if (!cp.onboarding_complete || cp.workforce_size === null || cp.workforce_size === undefined) {
+      res.json({ data: [], profile_incomplete: true });
+      return;
     }
+
+    const contractorSkills = cp.skills || [];
+    const serviceAreas = cp.service_areas || [];
+    const contractorCity = cp.city || '';
+    const contractorState = cp.state || '';
+    const contractorIndustry = cp.industry || '';
+    const contractorWorkforce = cp.workforce_size || 0;
+    const contractorAvailability = cp.availability || 'AVAILABLE';
 
     const opportunities = await sql`
       SELECT 
@@ -123,8 +86,46 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
         app.status AS my_application_status
       FROM manpower_requirements mr
       LEFT JOIN applications app 
-        ON app.requirement_id = mr.id AND app.contractor_id = ${contractor.id}
+        ON app.requirement_id = mr.id AND app.contractor_id = ${cp.id}
       WHERE mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
+        -- 1. Contractor workforce size >= requirement workers_required
+        AND (${contractorWorkforce} >= mr.workers_required)
+        -- 2. Contractor industry matches requirement industry
+        AND (
+          mr.industry IS NULL 
+          OR TRIM(mr.industry) = ''
+          OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
+        )
+        -- 3. Required skills overlap with contractor skills
+        AND (
+          mr.required_skills IS NULL 
+          OR cardinality(mr.required_skills) = 0
+          OR EXISTS (
+            SELECT 1 
+            FROM unnest(mr.required_skills) req_skill
+            JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
+              ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
+          )
+        )
+        -- 4. Requirement location compatible with contractor location/service areas
+        AND (
+          mr.location IS NULL
+          OR TRIM(mr.location) = ''
+          OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
+          OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+          OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
+          OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+          OR EXISTS (
+            SELECT 1 
+            FROM unnest(${sql.array(serviceAreas)}::text[]) sa
+            WHERE sa != '' AND (
+              LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
+              OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
+            )
+          )
+        )
+        -- 5. Contractor availability must be AVAILABLE
+        AND (${contractorAvailability} = 'AVAILABLE')
       ORDER BY mr.published_at DESC NULLS LAST, mr.created_at DESC
     `;
 
@@ -141,7 +142,7 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
       })
       .sort((a, b) => b.match_score - a.match_score);
 
-    res.json({ data });
+    res.json({ data, profile_incomplete: false });
   } catch (err) {
     next(err);
   }
@@ -149,12 +150,26 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
 
 /**
  * GET /api/contractor-portal/opportunities/:id
- * Single opportunity detail view.
+ * Single opportunity detail view — matched to caller's contractor profile.
  */
 export async function getOpportunityById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
-    const contractorId = await getContractorProfileId(req.user!.sub);
+    const cp = await getContractorFullProfile(req.user!.sub);
+
+    if (!cp.onboarding_complete || cp.workforce_size === null || cp.workforce_size === undefined) {
+      const err: AppError = new Error('Your contractor profile is incomplete. Please complete your profile to view opportunities.');
+      err.statusCode = 403;
+      return next(err);
+    }
+
+    const contractorSkills = cp.skills || [];
+    const serviceAreas = cp.service_areas || [];
+    const contractorCity = cp.city || '';
+    const contractorState = cp.state || '';
+    const contractorIndustry = cp.industry || '';
+    const contractorWorkforce = cp.workforce_size || 0;
+    const contractorAvailability = cp.availability || 'AVAILABLE';
 
     const [opportunity] = await sql`
       SELECT 
@@ -178,35 +193,49 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
         app.created_at AS my_application_submitted_at
       FROM manpower_requirements mr
       LEFT JOIN applications app 
-        ON app.requirement_id = mr.id AND app.contractor_id = ${contractorId}
+        ON app.requirement_id = mr.id AND app.contractor_id = ${cp.id}
       WHERE mr.id = ${id}
+        AND mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
+        AND (${contractorWorkforce} >= mr.workers_required)
+        AND (
+          mr.industry IS NULL 
+          OR TRIM(mr.industry) = ''
+          OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
+        )
+        AND (
+          mr.required_skills IS NULL 
+          OR cardinality(mr.required_skills) = 0
+          OR EXISTS (
+            SELECT 1 
+            FROM unnest(mr.required_skills) req_skill
+            JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
+              ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
+          )
+        )
+        AND (
+          mr.location IS NULL
+          OR TRIM(mr.location) = ''
+          OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
+          OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+          OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
+          OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+          OR EXISTS (
+            SELECT 1 
+            FROM unnest(${sql.array(serviceAreas)}::text[]) sa
+            WHERE sa != '' AND (
+              LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
+              OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
+            )
+          )
+        )
+        AND (${contractorAvailability} = 'AVAILABLE')
     `;
 
     if (!opportunity) {
-      const err: AppError = new Error('Opportunity not found');
-      err.statusCode = 404;
+      const err: AppError = new Error('Opportunity not found or not eligible based on matching criteria');
+      err.statusCode = 403;
       return next(err);
     }
-
-    if (!['PUBLISHED', 'APPLICATIONS_OPEN'].includes(opportunity.status)) {
-      const err: AppError = new Error('This opportunity is no longer open for applications');
-      err.statusCode = 400;
-      return next(err);
-    }
-
-    const [contractor] = await sql`
-      SELECT 
-        cp.id,
-        cp.company_name,
-        cp.city,
-        cp.state,
-        cp.workforce_size,
-        cp.years_experience
-      FROM contractor_profiles cp
-      WHERE cp.user_id = ${req.user!.sub}
-    `;
-
-    const match = calculateOpportunityMatch(opportunity, contractor);
 
     res.json({
       data: {
@@ -224,12 +253,18 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
 
 /**
  * POST /api/contractor-portal/opportunities/:id/apply
- * Submits an application for a manpower requirement.
+ * Submits an application for a manpower requirement (safety enforced).
  */
 export async function applyToOpportunity(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id: requirementId } = req.params;
-    const contractorId = await getContractorProfileId(req.user!.sub);
+    const cp = await getContractorFullProfile(req.user!.sub);
+
+    if (!cp.onboarding_complete || cp.workforce_size === null || cp.workforce_size === undefined) {
+      const err: AppError = new Error('Your contractor profile is incomplete. Please complete your profile to apply.');
+      err.statusCode = 403;
+      return next(err);
+    }
 
     const parsed = applySchema.safeParse(req.body);
     if (!parsed.success) {
@@ -238,28 +273,63 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
       return next(err);
     }
 
-    const { proposedWorkforce, availabilityDate, relevantExperience, message, proposedRate } = parsed.data;
+    const contractorSkills = cp.skills || [];
+    const serviceAreas = cp.service_areas || [];
+    const contractorCity = cp.city || '';
+    const contractorState = cp.state || '';
+    const contractorIndustry = cp.industry || '';
+    const contractorWorkforce = cp.workforce_size || 0;
+    const contractorAvailability = cp.availability || 'AVAILABLE';
 
-    // Check requirement exists and is open
-    const [requirement] = await sql`
-      SELECT id, title, manufacturer_id, status FROM manpower_requirements WHERE id = ${requirementId}
+    // Verify requirement exists, is open, AND matches contractor criteria
+    const [eligibleReq] = await sql`
+      SELECT id, title, manufacturer_id, status FROM manpower_requirements mr
+      WHERE mr.id = ${requirementId}
+        AND mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
+        AND (${contractorWorkforce} >= mr.workers_required)
+        AND (
+          mr.industry IS NULL 
+          OR TRIM(mr.industry) = ''
+          OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
+        )
+        AND (
+          mr.required_skills IS NULL 
+          OR cardinality(mr.required_skills) = 0
+          OR EXISTS (
+            SELECT 1 
+            FROM unnest(mr.required_skills) req_skill
+            JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
+              ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
+          )
+        )
+        AND (
+          mr.location IS NULL
+          OR TRIM(mr.location) = ''
+          OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
+          OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+          OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
+          OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+          OR EXISTS (
+            SELECT 1 
+            FROM unnest(${sql.array(serviceAreas)}::text[]) sa
+            WHERE sa != '' AND (
+              LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
+              OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
+            )
+          )
+        )
+        AND (${contractorAvailability} = 'AVAILABLE')
     `;
 
-    if (!requirement) {
-      const err: AppError = new Error('Requirement not found');
-      err.statusCode = 404;
-      return next(err);
-    }
-
-    if (!['PUBLISHED', 'APPLICATIONS_OPEN'].includes(requirement.status)) {
-      const err: AppError = new Error('This requirement is not accepting applications');
-      err.statusCode = 400;
+    if (!eligibleReq) {
+      const err: AppError = new Error('You are not eligible to apply for this opportunity based on matching criteria');
+      err.statusCode = 403;
       return next(err);
     }
 
     // Check duplicate application
     const [existing] = await sql`
-      SELECT id FROM applications WHERE requirement_id = ${requirementId} AND contractor_id = ${contractorId}
+      SELECT id FROM applications WHERE requirement_id = ${requirementId} AND contractor_id = ${cp.id}
     `;
 
     if (existing) {
@@ -268,6 +338,8 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
       return next(err);
     }
 
+    const { proposedWorkforce, availabilityDate, relevantExperience, message, proposedRate } = parsed.data;
+
     // Insert application
     const [application] = await sql`
       INSERT INTO applications (
@@ -275,39 +347,35 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
         relevant_experience, message, proposed_rate, status
       )
       VALUES (
-        ${requirementId}, ${contractorId}, ${proposedWorkforce}, ${availabilityDate},
+        ${requirementId}, ${cp.id}, ${proposedWorkforce}, ${availabilityDate},
         ${relevantExperience ?? null}, ${message ?? null}, ${proposedRate ?? null}, 'SUBMITTED'
       )
       RETURNING id, status, created_at
     `;
 
-    // Retrieve contractor company name for notification message
-    const [cProfile] = await sql`SELECT company_name FROM contractor_profiles WHERE id = ${contractorId}`;
-    const contractorName = cProfile?.company_name || 'A contractor';
-
     // Trigger APPLICATION_SUBMITTED notification for Ops Head and Field Staff
     await notifyUsersByRole('ops_head', {
       type: 'APPLICATION_SUBMITTED',
       title: 'New Contractor Application',
-      message: `${contractorName} submitted an application for "${requirement.title}"`,
+      message: `${cp.company_name} submitted an application for "${eligibleReq.title}"`,
       referenceId: application.id,
     });
 
     await notifyUsersByRole('field_staff', {
       type: 'APPLICATION_SUBMITTED',
       title: 'New Contractor Application',
-      message: `${contractorName} submitted an application for "${requirement.title}"`,
+      message: `${cp.company_name} submitted an application for "${eligibleReq.title}"`,
       referenceId: application.id,
     });
 
     // Notify manufacturer user linked to manufacturer_id if available
-    const [mUser] = await sql`SELECT user_id FROM business_profiles WHERE id = ${requirement.manufacturer_id}`;
+    const [mUser] = await sql`SELECT user_id FROM business_profiles WHERE id = ${eligibleReq.manufacturer_id}`;
     if (mUser?.user_id) {
       await createNotification({
         userId: mUser.user_id,
         type: 'APPLICATION_SUBMITTED',
         title: 'New Application Received',
-        message: `${contractorName} applied for your requirement "${requirement.title}"`,
+        message: `${cp.company_name} applied for your requirement "${eligibleReq.title}"`,
         referenceId: application.id,
       });
     }
@@ -331,7 +399,7 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
  */
 export async function getMyApplications(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const contractorId = await getContractorProfileId(req.user!.sub);
+    const cp = await getContractorFullProfile(req.user!.sub);
 
     const applications = await sql`
       SELECT 
@@ -352,7 +420,7 @@ export async function getMyApplications(req: Request, res: Response, next: NextF
         mr.status AS requirement_status
       FROM applications app
       JOIN manpower_requirements mr ON mr.id = app.requirement_id
-      WHERE app.contractor_id = ${contractorId}
+      WHERE app.contractor_id = ${cp.id}
       ORDER BY app.created_at DESC
     `;
 
@@ -369,7 +437,7 @@ export async function getMyApplications(req: Request, res: Response, next: NextF
 export async function getApplicationById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
-    const contractorId = await getContractorProfileId(req.user!.sub);
+    const cp = await getContractorFullProfile(req.user!.sub);
 
     const [application] = await sql`
       SELECT 
@@ -393,7 +461,7 @@ export async function getApplicationById(req: Request, res: Response, next: Next
         mr.status AS requirement_status
       FROM applications app
       JOIN manpower_requirements mr ON mr.id = app.requirement_id
-      WHERE app.id = ${id} AND app.contractor_id = ${contractorId}
+      WHERE app.id = ${id} AND app.contractor_id = ${cp.id}
     `;
 
     if (!application) {
@@ -410,27 +478,73 @@ export async function getApplicationById(req: Request, res: Response, next: Next
 
 /**
  * GET /api/contractor-portal/dashboard-stats
- * Returns counts for contractor dashboard metrics.
+ * Returns counts for contractor dashboard metrics based on matched criteria.
  */
 export async function getDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const contractorId = await getContractorProfileId(req.user!.sub);
+    const cp = await getContractorFullProfile(req.user!.sub);
 
-    // Published requirements count
-    const [{ count: opportunitiesCount }] = await sql`
-      SELECT COUNT(*)::int FROM manpower_requirements WHERE status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
-    `;
+    let opportunitiesCount = 0;
+
+    if (cp.onboarding_complete && cp.workforce_size !== null && cp.workforce_size !== undefined) {
+      const contractorSkills = cp.skills || [];
+      const serviceAreas = cp.service_areas || [];
+      const contractorCity = cp.city || '';
+      const contractorState = cp.state || '';
+      const contractorIndustry = cp.industry || '';
+      const contractorWorkforce = cp.workforce_size || 0;
+      const contractorAvailability = cp.availability || 'AVAILABLE';
+
+      const [{ count }] = await sql`
+        SELECT COUNT(*)::int FROM manpower_requirements mr
+        WHERE mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
+          AND (${contractorWorkforce} >= mr.workers_required)
+          AND (
+            mr.industry IS NULL 
+            OR TRIM(mr.industry) = ''
+            OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
+          )
+          AND (
+            mr.required_skills IS NULL 
+            OR cardinality(mr.required_skills) = 0
+            OR EXISTS (
+              SELECT 1 
+              FROM unnest(mr.required_skills) req_skill
+              JOIN unnest(${sql.array(contractorSkills)}::text[]) cp_skill
+                ON LOWER(TRIM(req_skill)) = LOWER(TRIM(cp_skill))
+            )
+          )
+          AND (
+            mr.location IS NULL
+            OR TRIM(mr.location) = ''
+            OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
+            OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+            OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
+            OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
+            OR EXISTS (
+              SELECT 1 
+              FROM unnest(${sql.array(serviceAreas)}::text[]) sa
+              WHERE sa != '' AND (
+                LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
+                OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
+              )
+            )
+          )
+          AND (${contractorAvailability} = 'AVAILABLE')
+      `;
+      opportunitiesCount = count;
+    }
 
     // Active applications count for contractor
     const [{ count: activeApplicationsCount }] = await sql`
       SELECT COUNT(*)::int FROM applications 
-      WHERE contractor_id = ${contractorId} AND status IN ('SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED')
+      WHERE contractor_id = ${cp.id} AND status IN ('SUBMITTED', 'UNDER_REVIEW', 'SHORTLISTED')
     `;
 
     // Selected applications count for contractor
     const [{ count: selectedApplicationsCount }] = await sql`
       SELECT COUNT(*)::int FROM applications 
-      WHERE contractor_id = ${contractorId} AND status = 'SELECTED'
+      WHERE contractor_id = ${cp.id} AND status = 'SELECTED'
     `;
 
     res.json({

@@ -7,6 +7,8 @@ import Sidebar from '@/components/workspace/Sidebar';
 import WorkspaceHeader from '@/components/workspace/WorkspaceHeader';
 import MobileNav from '@/components/workspace/MobileNav';
 import LoadingState from '@/components/ui/LoadingState';
+import { WorkspaceHeaderProvider } from '@/components/workspace/WorkspaceHeaderContext';
+import '@/components/workspace/WorkspaceLayout.css';
 
 import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 
@@ -39,29 +41,29 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 flex-shrink-0">
+    <WorkspaceHeaderProvider>
+      <div className="workspace-container">
+        {/* Desktop Sidebar */}
         <Sidebar role="staff" companyName="Craly Staff Operations" />
-      </div>
 
-      {/* Mobile Drawer */}
-      <MobileNav
-        role="staff"
-        companyName="Craly Staff Operations"
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-      />
+        {/* Main Content Area */}
+        <div className="workspace-main">
+          <WorkspaceHeader
+            userRole="staff"
+            companyName="Craly Operations"
+            onMobileMenuToggle={() => setMobileMenuOpen(true)}
+          />
+          <main className="workspace-content">{children}</main>
+        </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <WorkspaceHeader
-          userRole="staff"
-          companyName="Craly Operations"
-          onMobileMenuToggle={() => setMobileMenuOpen(true)}
+        {/* Mobile Drawer */}
+        <MobileNav
+          role="staff"
+          companyName="Craly Staff Operations"
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
       </div>
-    </div>
+    </WorkspaceHeaderProvider>
   );
 }

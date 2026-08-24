@@ -34,13 +34,11 @@ export default function MyApplicationsPage() {
 
   return (
     <div className="applications-page">
-      <div className="applications-header">
-        <div>
-          <h1 className="applications-title">My Submitted Applications</h1>
-          <p className="applications-subtitle">
-            Track status updates, workforce details, and progress for your submitted proposals.
-          </p>
-        </div>
+      <div className="applications-hero">
+        <h1>My Submitted Applications</h1>
+        <p>
+          Track status updates, workforce details, and progress for your submitted proposals.
+        </p>
       </div>
 
       {applications.length === 0 ? (

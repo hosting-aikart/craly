@@ -3,16 +3,15 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import './login.css';
 import { login } from '@/lib/api/auth';
 import { getMyProfile } from '@/lib/api/profile';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import LoadingState from '@/components/ui/LoadingState';
+import './login.css';
 
 const helmetLogo = '/assets/helmet.png';
-
-import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,8 +25,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (user) {
-      router.replace(getRoleDefaultDashboard(user.role));
+    if (user && user.role) {
+      const dashboard = getRoleDefaultDashboard(user.role);
+      if (dashboard && dashboard !== '/login') {
+        router.replace(dashboard);
+      }
     }
   }, [user, authLoading, router]);
 
@@ -55,24 +57,37 @@ export default function LoginPage() {
         return;
       }
 
-      try {
-        const { data: profile } = await getMyProfile();
-        router.push(
-          profile.onboarding_complete
-            ? user.role === 'business'
-              ? '/business/dashboard'
-              : '/contractor/dashboard'
-            : '/onboarding',
-        );
-      } catch {
-        router.push('/onboarding');
+      if (user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff') {
+        router.push('/staff/dashboard');
+        return;
+      }
+
+      if (user.role === 'business') {
+        try {
+          const { data: profile } = await getMyProfile();
+          router.push(profile.onboarding_complete ? '/business/dashboard' : '/onboarding');
+        } catch {
+          router.push('/business/dashboard');
+        }
+        return;
+      }
+
+      const target = getRoleDefaultDashboard(user.role);
+      if (target !== '/login') {
+        router.push(target);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t.contact.genericError);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (authLoading || user) {
+  const isRedirecting = Boolean(
+    user && user.role && getRoleDefaultDashboard(user.role) !== '/login'
+  );
+
+  if (authLoading || isRedirecting) {
     return (
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <LoadingState label="Redirecting to workspace…" />

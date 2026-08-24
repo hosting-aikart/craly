@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
-import { getMyProfile, type MyProfile } from '@/lib/api/profile';
+import { getMyProfile, type MyProfile, type ContractorProfile } from '@/lib/api/profile';
 import Sidebar from '@/components/workspace/Sidebar';
 import WorkspaceHeader from '@/components/workspace/WorkspaceHeader';
 import MobileNav from '@/components/workspace/MobileNav';
 import LoadingState from '@/components/ui/LoadingState';
+import ContractorProfileModal from '@/components/contractor/ContractorProfileModal';
 import { WorkspaceHeaderProvider } from '@/components/workspace/WorkspaceHeaderContext';
 import '@/components/workspace/WorkspaceLayout.css';
 
@@ -19,6 +20,14 @@ export default function ContractorPortalLayout({ children }: { children: React.R
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  const fetchProfile = useCallback(() => {
+    setLoading(true);
+    getMyProfile()
+      .then(({ data }) => setProfile(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -32,11 +41,8 @@ export default function ContractorPortalLayout({ children }: { children: React.R
       return;
     }
 
-    getMyProfile()
-      .then(({ data }) => setProfile(data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [authLoading, user, router]);
+    fetchProfile();
+  }, [authLoading, user, router, fetchProfile]);
 
   if (authLoading || loading || !user || user.role !== 'contractor') {
     return (
@@ -46,11 +52,23 @@ export default function ContractorPortalLayout({ children }: { children: React.R
     );
   }
 
-  const companyName = (profile as { company_name?: string } | null)?.company_name || user.email;
+  const contractorProfile = profile?.role === 'contractor' ? (profile as ContractorProfile) : null;
+  const companyName = contractorProfile?.company_name || user.email;
+  const isProfileIncomplete = contractorProfile
+    ? !contractorProfile.onboarding_complete || contractorProfile.workforce_size === null
+    : false;
 
   return (
     <WorkspaceHeaderProvider>
       <div className="workspace-container">
+        {isProfileIncomplete && (
+          <ContractorProfileModal
+            initialProfile={contractorProfile}
+            onComplete={fetchProfile}
+            allowClose={false}
+          />
+        )}
+
         <Sidebar role="contractor-portal" companyName={companyName} />
 
         <div className="workspace-main">
@@ -60,9 +78,7 @@ export default function ContractorPortalLayout({ children }: { children: React.R
             onMobileMenuToggle={() => setMobileDrawerOpen(true)}
           />
 
-          <main className="workspace-content">
-            {children}
-          </main>
+          <main className="workspace-content">{children}</main>
         </div>
 
         <MobileNav

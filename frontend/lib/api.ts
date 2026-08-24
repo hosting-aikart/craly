@@ -1,26 +1,20 @@
-/**
- * Craly API client
- *
- * Usage (in any component or server action):
- *
- *   import { apiGet, apiPost } from '@/lib/api';
- *
- *   const data = await apiGet('/contractors');
- *   const newContractor = await apiPost('/contractors', { name: 'Acme Ltd' });
- */
+export const getApiUrl = (path: string) => {
+  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base.replace(/\/$/, '')}${cleanPath}`;
+};
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
-
-export function getApiUrl(path: string): string {
-  return `${BASE_URL}/api${path}`;
+function parseErrorMessage(errorBody: any, fallback: string): string {
+  if (!errorBody) return fallback;
+  if (typeof errorBody === 'string') return errorBody;
+  if (typeof errorBody.error === 'string') return errorBody.error;
+  if (errorBody.error && typeof errorBody.error.message === 'string') return errorBody.error.message;
+  if (typeof errorBody.message === 'string') return errorBody.message;
+  return fallback;
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = getApiUrl(path);
-
   const res = await fetch(url, {
     credentials: 'include',
     headers: {
@@ -32,10 +26,7 @@ async function request<T>(
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
-    throw new Error(
-      (errorBody as { error?: { message?: string } }).error?.message ??
-        `Request failed: ${res.status} ${res.statusText}`,
-    );
+    throw new Error(parseErrorMessage(errorBody, `Request failed: ${res.status} ${res.statusText}`));
   }
 
   return res.json() as Promise<T>;
@@ -61,6 +52,23 @@ export const apiPatch = <T>(path: string, body: unknown, init?: RequestInit) =>
 export const apiDelete = <T>(path: string, init?: RequestInit) =>
   request<T>(path, { method: 'DELETE', ...init });
 
+export async function apiUpload<T>(path: string, formData: FormData, init?: RequestInit): Promise<T> {
+  const url = getApiUrl(path);
+  const res = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+    ...init,
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(parseErrorMessage(errorBody, `Upload failed: ${res.status} ${res.statusText}`));
+  }
+
+  return res.json() as Promise<T>;
+}
+
 /** Health check — useful for integration smoke tests */
 export const checkHealth = () =>
-  apiGet<{ status: string; timestamp: string; db: { status: string } }>('/health');
+  fetch(getApiUrl('/health')).then((r) => r.json());

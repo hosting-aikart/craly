@@ -7,6 +7,7 @@ import AdminSidebar from './AdminSidebar';
 import WorkspaceHeader from '@/components/workspace/WorkspaceHeader';
 import MobileNav from '@/components/workspace/MobileNav';
 import LoadingState from '@/components/ui/LoadingState';
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import '@/components/workspace/WorkspaceLayout.css';
 
 interface AdminLayoutProps {
@@ -34,7 +35,7 @@ export default function AdminLayout({
     }
 
     if (user.role !== 'admin') {
-      router.push(user.role === 'business' ? '/business/dashboard' : '/contractor/dashboard');
+      router.push(getRoleDefaultDashboard(user.role));
     }
   }, [authLoading, user, router]);
 
