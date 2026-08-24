@@ -8,7 +8,6 @@ import { signup } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
-import { COUNTRIES, DEFAULT_COUNTRY, type CountryOption } from '@/lib/util/countries';
 
 const helmetLogo = '/assets/helmet.png';
 
@@ -74,7 +73,7 @@ function SignupForm() {
       } else if (user.role === 'contractor') {
         router.replace('/contractor-portal/dashboard');
       } else {
-        router.replace('/contractor/dashboard');
+        router.replace(getRoleDefaultDashboard(user.role));
       }
     }
   }, [user, authLoading, router]);

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { z } from 'zod';
-import { notifyUsersByRole } from '../utils/notifications';
+import { createNotification, notifyUsersByRole } from '../utils/notifications';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -531,14 +531,15 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
 
     // Verify application belongs to caller's requirement
     const [appDetail] = await sql`
-      SELECT 
+      SELECT
         app.id,
         app.requirement_id,
         app.contractor_id,
         app.status AS current_status,
         mr.title AS requirement_title,
         mr.manufacturer_id,
-        cp.company_name AS contractor_name
+        cp.company_name AS contractor_name,
+        cp.user_id AS contractor_user_id
       FROM applications app
       JOIN manpower_requirements mr ON mr.id = app.requirement_id
       JOIN contractor_profiles cp ON cp.id = app.contractor_id
@@ -560,6 +561,19 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
     `;
 
     let responseMessage = `Application status updated to ${newStatus}.`;
+
+    // Notify the contractor that owns this application — every status
+    // transition, not just SELECTED, so "My Applications" status changes
+    // are never silent on their side.
+    if (appDetail.contractor_user_id) {
+      await createNotification({
+        userId: appDetail.contractor_user_id,
+        type: 'APPLICATION_STATUS_CHANGED',
+        title: `Application ${newStatus.replace('_', ' ')}`,
+        message: `Your application for "${appDetail.requirement_title}" is now ${newStatus.replace('_', ' ')}.`,
+        referenceId: appDetail.id,
+      });
+    }
 
     // If SELECTED: update requirement status and notify Craly Staff
     if (newStatus === 'SELECTED') {

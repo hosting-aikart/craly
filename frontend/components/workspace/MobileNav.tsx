@@ -47,7 +47,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
           ? '/staff/dashboard'
           : role === 'contractor-portal'
             ? '/contractor-portal/dashboard'
-            : '/contractor/dashboard';
+            : '/contractor-portal/dashboard';
   const enquiriesPath = role === 'business' ? '/business/enquiries' : '/contractor/enquiries';
   const inboxPath = role === 'business' ? '/business/inbox' : '/contractor/inbox';
   const notificationsPath = role === 'business' ? '/business/notifications' : '/notifications';

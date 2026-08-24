@@ -16,9 +16,15 @@ export interface ContractorProfile {
   state: string | null;
   years_experience: number | null;
   workforce_size: number | null;
+  industry?: string | null;
+  skills?: string[] | null;
+  service_areas?: string[] | null;
   availability?: string | null;
-  verification_status: 'pending' | 'verified' | 'rejected';
+  verification_status: 'pending' | 'under_review' | 'verified' | 'rejected' | 'needs_changes';
   verification_note: string | null;
+  last_verified_at?: string | null;
+  updated_at?: string | null;
+  user_email?: string | null;
   onboarding_complete: boolean;
   categories: Category[];
 }
@@ -49,11 +55,17 @@ export const getMyProfile = () => apiGet<{ data: MyProfile }>('/profile/me');
 
 export interface ContractorProfileUpdate {
   companyName?: string;
+  phone?: string;
   description?: string;
   city?: string;
   state?: string;
   yearsExperience?: number;
   workforceSize?: number;
+  industry?: string;
+  skills?: string[] | string;
+  serviceAreas?: string[] | string;
+  availability?: string;
+  notes?: string;
   categoryIds?: number[];
 }
 

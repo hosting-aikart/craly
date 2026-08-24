@@ -1,39 +1,33 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/lib/auth/useAuth';
 import LoadingState from '@/components/ui/LoadingState';
 import './contractor-settings.css';
 
+/**
+ * Account settings — deliberately read-only beyond what's already editable
+ * elsewhere. There is no notification-preference system in the backend
+ * (Craly Operations notifications are always sent, not opt-in/out per
+ * Phase 1 scope — see backend/src/utils/notifications.ts), so this page
+ * doesn't offer a toggle that would silently do nothing. Profile fields
+ * (company, industry, skills, coverage) are edited on the Profile page.
+ */
 export default function ContractorSettingsPage() {
   const { user, loading } = useAuth();
-  const [notificationEmail, setNotificationEmail] = useState(true);
-  const [saved, setSaved] = useState(false);
 
   if (loading || !user) {
     return <LoadingState label="Loading Settings…" />;
   }
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
 
   return (
     <div className="contractor-settings-page">
       <div className="contractor-settings-header">
         <h1 className="contractor-settings-title">Account Settings</h1>
         <p className="contractor-settings-subtitle">
-          Manage your account credentials, security, and preferences.
+          Your account credentials and status.
         </p>
       </div>
-
-      {saved && (
-        <div className="contractor-settings-alert">
-          Settings updated successfully.
-        </div>
-      )}
 
       <div className="contractor-settings-card">
         <h3 className="contractor-settings-section-title">Account Information</h3>
@@ -53,28 +47,13 @@ export default function ContractorSettingsPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSave}>
-        <div className="contractor-settings-card">
-          <h3 className="contractor-settings-section-title">Notification Preferences</h3>
-          <label className="contractor-settings-toggle">
-            <input
-              type="checkbox"
-              checked={notificationEmail}
-              onChange={(e) => setNotificationEmail(e.target.checked)}
-            />
-            <div>
-              <strong>Email Notifications</strong>
-              <p>Receive updates about manpower opportunity matches and Craly Operations announcements.</p>
-            </div>
-          </label>
-        </div>
-
-        <div className="contractor-settings-actions">
-          <button type="submit" className="contractor-settings-save-btn">
-            Save Preferences
-          </button>
-        </div>
-      </form>
+      <div className="contractor-settings-card">
+        <h3 className="contractor-settings-section-title">Notifications</h3>
+        <p className="contractor-settings-subtitle" style={{ margin: 0 }}>
+          Craly Operations sends you in-app notifications for matching opportunities, application status
+          changes, and KYC/document verification updates. View them from the bell icon in the sidebar.
+        </p>
+      </div>
     </div>
   );
 }

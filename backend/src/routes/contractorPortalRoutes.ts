@@ -8,6 +8,13 @@ import {
   getApplicationById,
   getDashboardStats,
 } from '../controllers/contractorPortalController';
+import {
+  uploadMyDocument,
+  listMyDocuments,
+  getMyDocumentSignedUrl,
+  deleteMyDocument,
+  documentUpload,
+} from '../controllers/documentController';
 
 const router = Router();
 
@@ -25,5 +32,11 @@ router.post('/opportunities/:id/apply', applyToOpportunity);
 // Applications
 router.get('/applications', getMyApplications);
 router.get('/applications/:id', getApplicationById);
+
+// KYC & Verification Documents (R2 Cloudflare storage)
+router.get('/documents', listMyDocuments);
+router.post('/documents', documentUpload, uploadMyDocument);
+router.get('/documents/:documentId/signed-url', getMyDocumentSignedUrl);
+router.delete('/documents/:documentId', deleteMyDocument);
 
 export default router;

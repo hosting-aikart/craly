@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import SearchBar from '@/components/SearchBar';
 import FilterPanel from '@/components/FilterPanel';
 import ContractorCard from '@/components/ContractorCard';
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import EmptyState from '@/components/ui/EmptyState';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
@@ -38,7 +39,7 @@ function ContractorsPageInner() {
       } else if (user.role === 'admin') {
         router.replace('/admin/dashboard');
       } else {
-        router.replace('/contractor/dashboard');
+        router.replace(getRoleDefaultDashboard(user.role));
       }
     }
   }, [user, authLoading, router]);

@@ -95,7 +95,7 @@ export default function OnboardingPage() {
           workforceSize: workforceSize ? parseInt(workforceSize, 10) : undefined,
           categoryIds: selectedCategoryIds,
         });
-        router.push('/contractor/dashboard');
+        router.push('/contractor-portal/dashboard');
       } else {
         await updateMyProfile({ city, state, industry });
         router.push('/business/dashboard');

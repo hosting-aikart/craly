@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getContractor, type ContractorDetail } from '@/lib/api/contractors';
 import { useAuth } from '@/lib/auth/useAuth';
+import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import EmptyState from '@/components/ui/EmptyState';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
@@ -30,7 +31,7 @@ export default function ContractorProfilePage() {
       } else if (user.role === 'admin') {
         router.replace('/admin/dashboard');
       } else {
-        router.replace('/contractor/dashboard');
+        router.replace(getRoleDefaultDashboard(user.role));
       }
     }
   }, [user, authLoading, id, router]);

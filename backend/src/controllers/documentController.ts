@@ -36,16 +36,159 @@ async function contractorExists(contractorId: string): Promise<boolean> {
   return Boolean(row);
 }
 
+async function getContractorIdFromUserId(userId: string): Promise<string> {
+  const [row] = await sql`SELECT id FROM contractor_profiles WHERE user_id = ${userId}`;
+  if (!row) {
+    const err: AppError = new Error('Contractor profile not found for this user');
+    err.statusCode = 404;
+    throw err;
+  }
+  return row.id;
+}
+
 function isSensitive(documentType: string): boolean {
   return (SENSITIVE_DOCUMENT_TYPES as string[]).includes(documentType);
 }
 
 /**
+ * POST /api/contractor-portal/documents
+ * Logged-in contractor uploads a KYC/verification document directly to Cloudflare R2.
+ */
+export async function uploadMyDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const contractorId = await getContractorIdFromUserId(req.user!.sub);
+
+    if (!req.file) return next(badRequest('No file was uploaded (expected multipart field "file")'));
+
+    const validation = validateDocumentFile(req.file.buffer);
+    if (!validation.ok) return next(badRequest(validation.reason ?? 'Invalid file'));
+
+    const parsed = uploadDocumentSchema.safeParse(req.body);
+    if (!parsed.success) return next(badRequest(parsed.error.issues[0]?.message ?? 'Invalid input'));
+    const { documentType, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
+
+    const documentId = randomUUID();
+    const storageKey = buildDocumentStorageKey(contractorId, documentId);
+
+    // Upload file buffer directly to Cloudflare R2
+    await putObject(storageKey, req.file.buffer, validation.mimeType!);
+
+    const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
+
+    const [row] = await sql`
+      INSERT INTO contractor_documents (
+        id, contractor_id, document_type, storage_key, file_name, mime_type, size_bytes,
+        uploaded_by, issue_date, expiry_date, certification_assessment_id, status
+      ) VALUES (
+        ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
+        ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
+        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending'
+      )
+      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at
+    `;
+
+    // Reset status to pending if previously rejected or needs_changes
+    await sql`
+      UPDATE contractor_profiles
+      SET verification_status = CASE 
+        WHEN verification_status IN ('rejected', 'needs_changes') THEN 'pending'
+        ELSE verification_status 
+      END,
+      updated_at = now()
+      WHERE id = ${contractorId}
+    `;
+
+    await logAudit(req.user!.sub, 'document:upload', 'contractor_document', documentId, undefined, {
+      contractorId,
+      documentType,
+    });
+
+    res.status(201).json({ data: row });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/contractor-portal/documents
+ * Logged-in contractor lists their uploaded KYC & verification documents.
+ */
+export async function listMyDocuments(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const contractorId = await getContractorIdFromUserId(req.user!.sub);
+
+    const rows = await sql`
+      SELECT d.id, d.document_type, d.file_name, d.mime_type, d.size_bytes, d.status,
+             d.issue_date, d.expiry_date, d.created_at, d.updated_at
+      FROM contractor_documents d
+      WHERE d.contractor_id = ${contractorId}
+      ORDER BY d.created_at DESC
+    `;
+
+    res.json({ data: rows });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/contractor-portal/documents/:documentId/signed-url
+ * Logged-in contractor gets a short-lived (120s) signed R2 URL to view/download their document.
+ */
+export async function getMyDocumentSignedUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const contractorId = await getContractorIdFromUserId(req.user!.sub);
+    const { documentId } = req.params;
+
+    const [doc] = await sql`
+      SELECT id, document_type, storage_key FROM contractor_documents
+      WHERE id = ${documentId} AND contractor_id = ${contractorId}
+    `;
+    if (!doc) return next(notFound('Document not found'));
+
+    const intent = req.query.intent === 'download' ? 'download' : 'view';
+    const url = await getSignedGetUrl(doc.storage_key, 120);
+
+    await logAudit(req.user!.sub, `document:${intent}`, 'contractor_document', documentId, undefined, { contractorId });
+
+    res.json({ data: { url, expiresInSeconds: 120 } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/contractor-portal/documents/:documentId
+ * Logged-in contractor deletes an uploaded document from R2 and DB.
+ */
+export async function deleteMyDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const contractorId = await getContractorIdFromUserId(req.user!.sub);
+    const { documentId } = req.params;
+
+    const [doc] = await sql`
+      SELECT id, document_type, storage_key FROM contractor_documents
+      WHERE id = ${documentId} AND contractor_id = ${contractorId}
+    `;
+    if (!doc) return next(notFound('Document not found'));
+
+    await deleteObject(doc.storage_key);
+    await sql`DELETE FROM contractor_documents WHERE id = ${documentId}`;
+
+    await logAudit(req.user!.sub, 'document:delete', 'contractor_document', documentId, undefined, {
+      contractorId,
+      documentType: doc.document_type,
+    });
+
+    res.json({ data: { id: documentId, deleted: true } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * POST /api/internal/contractors/:id/documents
- * Ops Head or Field Staff. Upload order is deliberate: generate the id,
- * PUT to R2, THEN write the metadata row — if R2 fails, nothing lands in
- * Postgres; a DB failure after a successful PUT leaves an orphaned R2
- * object, which is the safer failure direction than a DB row with no file.
+ * Ops Head or Field Staff upload.
  */
 export async function uploadDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -93,9 +236,7 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
 
 /**
  * GET /api/internal/contractors/:id/documents
- * Aadhaar/PAN rows are excluded from the result entirely for Field Staff —
- * not merely blocked on view/download — so the list response itself never
- * carries sensitive-document data to that role.
+ * List documents for internal staff workspace.
  */
 export async function listDocuments(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -123,10 +264,7 @@ export async function listDocuments(req: Request, res: Response, next: NextFunct
 
 /**
  * GET /api/internal/contractors/:id/documents/:documentId/signed-url?intent=view|download
- * Mints a short-lived (120s) R2 signed URL. Re-checks the sensitive-type
- * rule server-side regardless of what the list endpoint already filtered —
- * this endpoint must never trust that the caller only asks for rows it can
- * see.
+ * Mints short-lived (120s) R2 signed URL for internal staff.
  */
 export async function getDocumentSignedUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -154,8 +292,7 @@ export async function getDocumentSignedUrl(req: Request, res: Response, next: Ne
 
 /**
  * PATCH /api/internal/contractors/:id/documents/:documentId/review
- * Ops Head only (enforced by the route). Approve / reject / request
- * replacement — a note is required for anything but approval.
+ * Ops Head only. Approve / reject / request replacement.
  */
 export async function reviewDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -182,10 +319,7 @@ export async function reviewDocument(req: Request, res: Response, next: NextFunc
 
 /**
  * DELETE /api/internal/contractors/:id/documents/:documentId
- * Ops Head only. Deletes the R2 object first, then the metadata row — this
- * is the spec's "delete/anonymize": the audit_logs row survives (it doesn't
- * foreign-key the document), so the fact that a document existed and was
- * removed stays auditable even though the file content is gone.
+ * Ops Head only. Deletes R2 object and metadata row.
  */
 export async function deleteDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

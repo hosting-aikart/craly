@@ -83,6 +83,66 @@ export interface StaffEngagementItem {
   contractor_phone: string | null;
 }
 
+export interface StaffVerificationContractorItem {
+  id: string;
+  company_name: string;
+  city: string | null;
+  state: string | null;
+  phone: string | null;
+  verification_status: string;
+  verification_note: string | null;
+  created_at: string;
+  user_id: string | null;
+  user_email: string | null;
+  pending_docs_count: number;
+  total_docs_count: number;
+  last_submitted_at: string | null;
+}
+
+export interface StaffVerificationDocumentItem {
+  id: string;
+  document_type: string;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  status: 'pending' | 'approved' | 'rejected' | 'replacement_requested';
+  issue_date: string | null;
+  expiry_date: string | null;
+  created_at: string;
+  updated_at: string;
+  reviewer_note: string | null;
+}
+
+export interface StaffVerificationDetail {
+  contractor: {
+    id: string;
+    company_name: string;
+    phone: string | null;
+    city: string | null;
+    state: string | null;
+    industry: string | null;
+    workforce_size: number | null;
+    years_experience: number | null;
+    verification_status: string;
+    verification_note: string | null;
+    last_verified_at: string | null;
+    created_at: string;
+    user_id: string | null;
+    user_email: string | null;
+    description: string | null;
+    skills: string[] | null;
+    service_areas: string[] | null;
+  };
+  documents: StaffVerificationDocumentItem[];
+  reviewHistory: Array<{
+    id: string;
+    status: string;
+    notes: string | null;
+    created_at: string;
+    reviewer_email: string | null;
+  }>;
+}
+
 export const getStaffDashboardStats = () =>
   apiGet<{ data: StaffDashboardStats }>('/staff/dashboard-stats');
 
@@ -117,4 +177,32 @@ export const updateStaffEngagementStatus = (id: string, status: string) =>
 export const getStaffNotifications = () =>
   apiGet<{ data: Array<{ id: string; type: string; title: string; message: string; reference_id: string | null; is_read: boolean; created_at: string }> }>(
     '/staff/notifications',
+  );
+
+export const getStaffVerificationContractors = (status?: string) =>
+  apiGet<{ data: StaffVerificationContractorItem[] }>(`/staff/verification/contractors${status ? `?status=${status}` : ''}`);
+
+export const getStaffVerificationContractorById = (id: string) =>
+  apiGet<{ data: StaffVerificationDetail }>(`/staff/verification/contractors/${id}`);
+
+export const getStaffDocumentSignedUrl = (contractorId: string, documentId: string, intent: 'view' | 'download' = 'view') =>
+  apiGet<{ data: { url: string; expiresInSeconds: number } }>(
+    `/staff/verification/contractors/${contractorId}/documents/${documentId}/signed-url?intent=${intent}`,
+  );
+
+export const reviewStaffDocument = (
+  contractorId: string,
+  documentId: string,
+  decision: 'approved' | 'rejected' | 'replacement_requested',
+  note?: string,
+) =>
+  apiPatch<{ data: { document: { id: string; status: string }; overallContractorStatus: string } }>(
+    `/staff/verification/contractors/${contractorId}/documents/${documentId}/review`,
+    { decision, note },
+  );
+
+export const updateStaffContractorVerificationStatus = (contractorId: string, status: string, note?: string) =>
+  apiPatch<{ data: { id: string; verification_status: string; verification_note: string | null } }>(
+    `/staff/verification/contractors/${contractorId}/status`,
+    { status, note },
   );

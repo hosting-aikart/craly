@@ -16,8 +16,9 @@ function setAuthCookie(res: Response, token: string): void {
   res.cookie(AUTH_COOKIE_NAME, token, {
     httpOnly: true,
     secure: config.nodeEnv === 'production',
-    sameSite: 'lax',
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
     maxAge: COOKIE_MAX_AGE_MS,
+    path: '/',
   });
 }
 
@@ -291,7 +292,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
  * POST /api/auth/logout
  */
 export function logout(_req: Request, res: Response): void {
-  res.clearCookie(AUTH_COOKIE_NAME);
+  res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
   res.json({ data: { success: true } });
 }
 
