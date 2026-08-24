@@ -14,7 +14,20 @@ const SocketContext = createContext<SocketContextValue>({
   connected: false,
 });
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8080';
+const getSocketUrl = (): string => {
+  let raw = (
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    ''
+  ).trim();
+  if (!raw) return 'http://localhost:8080';
+  if (!raw.startsWith('http://') && !raw.startsWith('https://') && !raw.startsWith('/')) {
+    raw = `https://${raw}`;
+  }
+  return raw.replace(/\/api\/?$/, '').replace(/\/$/, '');
+};
+
+const BACKEND_URL = getSocketUrl();
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();

@@ -1,8 +1,31 @@
-export const getApiUrl = (path: string) => {
-  let base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api').replace(/\/$/, '');
-  if (!base.endsWith('/api')) {
+export const getApiUrl = (path: string): string => {
+  let raw = (
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    ''
+  ).trim();
+
+  if (!raw) {
+    if (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+      console.warn(
+        `[Craly API Warning] NEXT_PUBLIC_API_URL is NOT set in Vercel environment variables! ` +
+        `API requests are falling back to http://localhost:8080/api which will fail on deployed sites. ` +
+        `Please set NEXT_PUBLIC_API_URL in Vercel settings and REDEPLOY.`
+      );
+    }
+    raw = 'http://localhost:8080/api';
+  }
+
+  // Ensure protocol if domain was provided without http:// or https://
+  if (!raw.startsWith('http://') && !raw.startsWith('https://') && !raw.startsWith('/')) {
+    raw = `https://${raw}`;
+  }
+
+  let base = raw.replace(/\/$/, '');
+  if (!base.endsWith('/api') && !base.includes('/api/')) {
     base = `${base}/api`;
   }
+
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${base}${cleanPath}`;
 };

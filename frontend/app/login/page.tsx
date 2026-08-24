@@ -57,11 +57,6 @@ export default function LoginPage() {
         return;
       }
 
-      if (user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff') {
-        router.push('/staff/dashboard');
-        return;
-      }
-
       if (user.role === 'business') {
         try {
           const { data: profile } = await getMyProfile();
