@@ -147,10 +147,26 @@ export interface OtpEmailInput {
   name?: string;
 }
 
-/** Sent to user during signup/verification containing their 6-digit code. */
+/**
+ * Sent to user during signup/verification containing their 4-digit code.
+ *
+ * Production never falls back to logging the OTP: if Resend isn't
+ * configured, or the send call itself fails, this throws and the caller
+ * (authController.sendSignupOtp) surfaces a clear 500 rather than silently
+ * pretending the email went out. The console fallback below only ever runs
+ * in non-production when RESEND_API_KEY is missing entirely — a genuine
+ * send failure (bad key, rate limit, unverified domain, etc.) always
+ * throws, in every environment, so a real delivery problem can never be
+ * mistaken for a successful send.
+ */
 export async function sendOtpEmail(input: OtpEmailInput): Promise<void> {
   if (!resend) {
-    throw new Error('Email service is not configured (RESEND_API_KEY is missing)');
+    if (config.nodeEnv === 'production') {
+      throw new Error('Email service is not configured (RESEND_API_KEY is missing)');
+    }
+    console.warn('[mailer] DEV MODE: RESEND_API_KEY not set — logging OTP instead of emailing.');
+    console.log(`[DEV EMAIL OTP] To: ${input.to}  Code: ${input.otp}  (valid 10 minutes)`);
+    return;
   }
 
   const greeting = input.name ? `Hi ${escapeHtml(input.name)},` : 'Hello,';
@@ -163,7 +179,7 @@ export async function sendOtpEmail(input: OtpEmailInput): Promise<void> {
       <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
         <h2 style="color: #0f766e; margin-top: 0; font-size: 22px;">Verify your Craly account</h2>
         <p style="color: #475569; font-size: 15px; line-height: 1.5;">${greeting}</p>
-        <p style="color: #475569; font-size: 15px; line-height: 1.5;">Please use the following 6-digit verification code to confirm your email address. This code expires in <strong>10 minutes</strong>.</p>
+        <p style="color: #475569; font-size: 15px; line-height: 1.5;">Please use the following 4-digit verification code to confirm your email address. This code expires in <strong>10 minutes</strong>.</p>
         <div style="margin: 28px 0; text-align: center;">
           <span style="display: inline-block; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #0f766e; background: #f0fdfa; padding: 14px 28px; border-radius: 8px; border: 1px solid #99f6e4;">
             ${input.otp}
@@ -175,13 +191,10 @@ export async function sendOtpEmail(input: OtpEmailInput): Promise<void> {
   });
 
   if (error) {
-    console.warn(`[mailer] Resend notice (${error.name}): ${error.message}`);
-    console.log(`\n======================================================`);
-    console.log(`[EMAIL OTP FALLBACK] To: ${input.to}`);
-    console.log(`[EMAIL OTP FALLBACK] Verification Code: ${input.otp}`);
-    console.log(`[EMAIL OTP FALLBACK] (Valid for 10 minutes)`);
-    console.log(`======================================================\n`);
-    return;
+    // Always a hard failure — never logged as a fallback "sent" notice, in
+    // any environment. A caller that swallowed this would be pretending an
+    // OTP was delivered when it wasn't.
+    throw new Error(`Resend failed to send email: ${error.message}`);
   }
 }
 

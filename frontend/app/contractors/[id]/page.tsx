@@ -27,7 +27,9 @@ export default function ContractorProfilePage() {
     if (authLoading) return;
     if (user && id) {
       if (user.role === 'business') {
-        router.replace(`/business/contractors/${id}`);
+        // /business/contractors/[id] is deactivated (direct-contact bypass)
+        // — send Manufacturers to the real, requirement-driven flow instead.
+        router.replace('/business/requirements');
       } else if (user.role === 'admin') {
         router.replace('/admin/dashboard');
       } else {
@@ -73,24 +75,18 @@ export default function ContractorProfilePage() {
       backHref="/contractors"
       backLabel={t.contractorDetail.backToDirectory}
       cta={
-        user?.role !== 'contractor' ? (
-          user?.role === 'business' ? (
-            <>
-              <Button href={`/business/contractors/${contractor.id}/contact`} variant="primary">
-                {t.contractorDetail.contactBtn}
-              </Button>
-              <p className="profile-card__cta-note">
-                {t.contractorDetail.contactModalSub}
-              </p>
-            </>
-          ) : (
-            <>
-              <Button href="/login" variant="primary">{t.auth.logInTitle}</Button>
-              <p className="profile-card__cta-note">
-                {t.contractorDetail.contactModalSub}
-              </p>
-            </>
-          )
+        // Business users are redirected away above before this can render
+        // for them (see the effect) — the only CTA left to show here is the
+        // login prompt for anonymous visitors. Direct contact for logged-in
+        // Manufacturers is deactivated; publishing a requirement is the
+        // only supported path now.
+        !user ? (
+          <>
+            <Button href="/login" variant="primary">{t.auth.logInTitle}</Button>
+            <p className="profile-card__cta-note">
+              {t.contractorDetail.contactModalSub}
+            </p>
+          </>
         ) : undefined
       }
     />

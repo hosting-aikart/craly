@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { z } from 'zod';
 import { createNotification, notifyUsersByRole } from '../utils/notifications';
+import { requirementEligibilityCondition } from '../utils/opportunityMatching';
 import type { AppError } from '../middlewares/errorHandler';
 
 // Validator for submitting an application
@@ -22,6 +23,7 @@ export interface ContractorFullProfile {
   city: string | null;
   state: string | null;
   service_areas: string[] | null;
+  availability: string | null;
   onboarding_complete: boolean;
 }
 
@@ -30,7 +32,7 @@ export interface ContractorFullProfile {
  */
 async function getContractorFullProfile(userId: string): Promise<ContractorFullProfile> {
   const [profile] = await sql<ContractorFullProfile[]>`
-    SELECT id, company_name, workforce_size, industry, years_experience, city, state, service_areas, onboarding_complete
+    SELECT id, company_name, workforce_size, industry, years_experience, city, state, service_areas, availability, onboarding_complete
     FROM contractor_profiles
     WHERE user_id = ${userId}
   `;
@@ -45,6 +47,14 @@ async function getContractorFullProfile(userId: string): Promise<ContractorFullP
 /**
  * Opportunity matching checks workforce capacity, industry, experience,
  * and location compatibility (Base City, State, or Coverage Areas / service_areas).
+ *
+ * NOTE: this is a *display-only* scoring/ranking function (match_score,
+ * match_level, match_reasons for the UI) — it is NOT the eligibility gate.
+ * The actual hard eligibility filter lives in
+ * ../utils/opportunityMatching.ts (requirementEligibilityCondition) and is
+ * applied identically in every function below. This function still uses
+ * the freeform `location` text for its cosmetic "why this matched" copy,
+ * which is unrelated to and unaffected by the eligibility rule.
  */
 function calculateOpportunityMatch(op: any, contractor: ContractorFullProfile) {
   let score = 70;
@@ -141,12 +151,7 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
       return;
     }
 
-    const contractorCity = cp.city || '';
-    const contractorState = cp.state || '';
-    const serviceAreas = cp.service_areas || [];
-    const contractorIndustry = cp.industry || '';
-    const contractorWorkforce = cp.workforce_size || 0;
-    const contractorExperience = cp.years_experience || 0;
+    const eligibility = requirementEligibilityCondition(cp);
 
     const opportunities = await sql`
       SELECT
@@ -155,6 +160,8 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
         mr.description,
         mr.industry,
         mr.location,
+        mr.city,
+        mr.state,
         mr.workers_required,
         mr.required_skills,
         mr.start_date,
@@ -171,36 +178,7 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
       LEFT JOIN applications app
         ON app.requirement_id = mr.id AND app.contractor_id = ${cp.id}
       WHERE mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
-        -- 1. Contractor workforce size >= requirement workers_required
-        AND (${contractorWorkforce} >= mr.workers_required)
-        -- 2. Contractor industry matches requirement industry
-        AND (
-          mr.industry IS NULL
-          OR TRIM(mr.industry) = ''
-          OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
-        )
-        -- 3. Contractor years of experience >= requirement's required experience
-        AND (
-          mr.experience_required IS NULL
-          OR ${contractorExperience} >= mr.experience_required
-        )
-        -- 4. Requirement location compatible with contractor's base city, state, or coverage areas (service_areas)
-        AND (
-          mr.location IS NULL
-          OR TRIM(mr.location) = ''
-          OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
-          OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-          OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
-          OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-          OR EXISTS (
-            SELECT 1
-            FROM unnest(${sql.array(serviceAreas)}::text[]) sa
-            WHERE sa != '' AND (
-              LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
-              OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
-            )
-          )
-        )
+        AND ${eligibility}
       ORDER BY mr.published_at DESC NULLS LAST, mr.created_at DESC
     `;
 
@@ -238,12 +216,7 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
       return next(err);
     }
 
-    const contractorCity = cp.city || '';
-    const contractorState = cp.state || '';
-    const serviceAreas = cp.service_areas || [];
-    const contractorIndustry = cp.industry || '';
-    const contractorWorkforce = cp.workforce_size || 0;
-    const contractorExperience = cp.years_experience || 0;
+    const eligibility = requirementEligibilityCondition(cp);
 
     const [opportunity] = await sql`
       SELECT
@@ -252,6 +225,8 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
         mr.description,
         mr.industry,
         mr.location,
+        mr.city,
+        mr.state,
         mr.workers_required,
         mr.required_skills,
         mr.start_date,
@@ -270,32 +245,7 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
         ON app.requirement_id = mr.id AND app.contractor_id = ${cp.id}
       WHERE mr.id = ${id}
         AND mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
-        AND (${contractorWorkforce} >= mr.workers_required)
-        AND (
-          mr.industry IS NULL
-          OR TRIM(mr.industry) = ''
-          OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
-        )
-        AND (
-          mr.experience_required IS NULL
-          OR ${contractorExperience} >= mr.experience_required
-        )
-        AND (
-          mr.location IS NULL
-          OR TRIM(mr.location) = ''
-          OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
-          OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-          OR (${contractorState} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorState})) || '%')
-          OR (${contractorState} != '' AND LOWER(TRIM(${contractorState})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-          OR EXISTS (
-            SELECT 1
-            FROM unnest(${sql.array(serviceAreas)}::text[]) sa
-            WHERE sa != '' AND (
-              LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(sa)) || '%'
-              OR LOWER(TRIM(sa)) LIKE '%' || LOWER(TRIM(mr.location)) || '%'
-            )
-          )
-        )
+        AND ${eligibility}
     `;
 
     if (!opportunity) {
@@ -342,32 +292,17 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
       return next(err);
     }
 
-    const contractorCity = cp.city || '';
-    const contractorIndustry = cp.industry || '';
-    const contractorWorkforce = cp.workforce_size || 0;
-    const contractorExperience = cp.years_experience || 0;
+    const eligibility = requirementEligibilityCondition(cp);
 
-    // Verify requirement exists, is open, AND matches contractor criteria
+    // Verify requirement exists, is open, AND matches contractor criteria —
+    // uses the exact same eligibility condition as getOpportunities/
+    // getOpportunityById, so an opportunity that appears in the list can
+    // never be rejected here for a different reason.
     const [eligibleReq] = await sql`
       SELECT id, title, manufacturer_id, status FROM manpower_requirements mr
       WHERE mr.id = ${requirementId}
         AND mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
-        AND (${contractorWorkforce} >= mr.workers_required)
-        AND (
-          mr.industry IS NULL
-          OR TRIM(mr.industry) = ''
-          OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
-        )
-        AND (
-          mr.experience_required IS NULL
-          OR ${contractorExperience} >= mr.experience_required
-        )
-        AND (
-          mr.location IS NULL
-          OR TRIM(mr.location) = ''
-          OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
-          OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-        )
+        AND ${eligibility}
     `;
 
     if (!eligibleReq) {
@@ -536,30 +471,12 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
     let opportunitiesCount = 0;
 
     if (cp.onboarding_complete && cp.workforce_size !== null && cp.workforce_size !== undefined) {
-      const contractorCity = cp.city || '';
-      const contractorIndustry = cp.industry || '';
-      const contractorWorkforce = cp.workforce_size || 0;
-      const contractorExperience = cp.years_experience || 0;
+      const eligibility = requirementEligibilityCondition(cp);
 
       const [{ count }] = await sql`
         SELECT COUNT(*)::int FROM manpower_requirements mr
         WHERE mr.status IN ('PUBLISHED', 'APPLICATIONS_OPEN')
-          AND (${contractorWorkforce} >= mr.workers_required)
-          AND (
-            mr.industry IS NULL
-            OR TRIM(mr.industry) = ''
-            OR (${contractorIndustry} != '' AND LOWER(TRIM(${contractorIndustry})) = LOWER(TRIM(mr.industry)))
-          )
-          AND (
-            mr.experience_required IS NULL
-            OR ${contractorExperience} >= mr.experience_required
-          )
-          AND (
-            mr.location IS NULL
-            OR TRIM(mr.location) = ''
-            OR (${contractorCity} != '' AND LOWER(TRIM(mr.location)) LIKE '%' || LOWER(TRIM(${contractorCity})) || '%')
-            OR (${contractorCity} != '' AND LOWER(TRIM(${contractorCity})) LIKE '%' || LOWER(TRIM(mr.location)) || '%')
-          )
+          AND ${eligibility}
       `;
       opportunitiesCount = count;
     }

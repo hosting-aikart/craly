@@ -3,14 +3,21 @@ import sql from '../db/index';
 import { z } from 'zod';
 import type { AppError } from '../middlewares/errorHandler';
 import { getSignedGetUrl } from '../utils/r2';
+import { toPgTextArrayLiteral } from '../utils/pgArray';
 import { createNotification } from '../utils/notifications';
 import { logAudit } from '../utils/auditLog';
+import { hashPassword } from '../utils/password';
 
-// Schema for adding a new contractor profile
+// Schema for adding a new contractor profile. email + password are now
+// required — Staff sets a temporary password directly so the account is
+// login-ready immediately (product decision: a contractor Staff adds must
+// be able to log in and apply to opportunities themselves, not just exist
+// as an unreachable directory record).
 const createContractorSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
   contactPerson: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
+  email: z.string().email('A valid email is required to create a login'),
+  password: z.string().min(8, 'Temporary password must be at least 8 characters'),
   phone: z.string().optional(),
   industry: z.string().optional(),
   city: z.string().optional(),
@@ -164,6 +171,8 @@ export async function createContractor(req: Request, res: Response, next: NextFu
 
     const {
       companyName,
+      email,
+      password,
       phone,
       industry,
       skills,
@@ -176,23 +185,54 @@ export async function createContractor(req: Request, res: Response, next: NextFu
       notes,
     } = parsed.data;
 
-    const [contractor] = await sql`
-      INSERT INTO contractor_profiles (
-        company_name, phone, description, industry, skills, city, state, workforce_size,
-        years_experience, service_areas, availability, availability_note,
-        verification_status, created_by
-      )
-      VALUES (
-        ${companyName}, ${phone || null}, ${industry || null}, ${industry || null}, ${sql.array(skills || [])}, ${city || null}, ${state || null},
-        ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
-        ${availability || 'AVAILABLE'}, ${notes || null}, 'pending', ${req.user!.sub}
-      )
-      RETURNING id, company_name, city, state, workforce_size, availability, created_at
-    `;
+    const existingUser = await sql`SELECT id FROM users WHERE email = ${email}`;
+    if (existingUser.length > 0) {
+      const err: AppError = new Error('An account with this email already exists');
+      err.statusCode = 409;
+      return next(err);
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    // Creates a real login (users row) alongside the profile — a
+    // Staff-added contractor must be able to sign in and use the
+    // Contractor Portal themselves (apply to opportunities, manage KYC),
+    // not just exist as a directory record Staff edits on their behalf.
+    const contractor = await sql.begin(async (tx) => {
+      const [newUser] = await tx`
+        INSERT INTO users (email, password_hash, role, is_active)
+        VALUES (${email}, ${passwordHash}, 'contractor', true)
+        RETURNING id
+      `;
+
+      const [profile] = await tx`
+        INSERT INTO contractor_profiles (
+          user_id, company_name, phone, description, industry, skills, city, state, workforce_size,
+          years_experience, service_areas, availability, availability_note,
+          verification_status, onboarding_complete, created_by
+        )
+        VALUES (
+          ${newUser.id}, ${companyName}, ${phone || null}, ${industry || null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
+          ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
+          ${availability || 'AVAILABLE'}, ${notes || null}, 'pending', true, ${req.user!.sub}
+        )
+        RETURNING id, company_name, city, state, workforce_size, availability, created_at
+      `;
+
+      await tx`
+        INSERT INTO organization_members (user_id, contractor_profile_id, org_role, status)
+        VALUES (${newUser.id}, ${profile.id}, 'admin', 'active')
+        ON CONFLICT DO NOTHING
+      `;
+
+      return profile;
+    });
+
+    await logAudit(req.user!.sub, 'contractor:created_with_login', 'contractor_profile', contractor.id, undefined, { email });
 
     res.status(201).json({
       data: contractor,
-      message: 'Contractor profile created successfully.',
+      message: `Contractor profile created with a login for ${email}. Share the temporary password with them directly.`,
     });
   } catch (err) {
     next(err);

@@ -6,6 +6,8 @@ export interface RequirementItem {
   description: string | null;
   industry: string | null;
   location: string;
+  city: string | null;
+  state: string | null;
   workers_required: number;
   required_skills: string[];
   start_date: string;
@@ -25,6 +27,11 @@ export interface CreateRequirementInput {
   description?: string;
   industry?: string;
   location: string;
+  // Used for exact-match opportunity matching (state must match, and city
+  // must match or be one of the contractor's service areas) — `location`
+  // stays freeform for display.
+  city: string;
+  state: string;
   workersRequired: number;
   requiredSkills?: string[] | string;
   startDate: string;

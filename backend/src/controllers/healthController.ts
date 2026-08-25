@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import sql from '../db/index';
 
 /**
- * GET /api/health
+ * GET /health or GET /api/health
  * Returns server status and optionally a DB ping.
  */
 export async function healthCheck(req: Request, res: Response): Promise<void> {
@@ -16,8 +16,10 @@ export async function healthCheck(req: Request, res: Response): Promise<void> {
     dbMessage = err instanceof Error ? err.message : 'Unknown DB error';
   }
 
-  res.json({
-    status: 'ok',
+  const isHealthy = dbStatus === 'ok';
+
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     db: { status: dbStatus, ...(dbMessage && { message: dbMessage }) },
   });

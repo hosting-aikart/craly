@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { contractorProfileSchema, businessProfileSchema } from '../validators/profileValidators';
 import { sanitizeContactInfo } from '../utils/contactSanitizer';
+import { toPgTextArrayLiteral } from '../utils/pgArray';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -90,7 +91,7 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
     if (role === 'contractor') {
       const parsed = contractorProfileSchema.safeParse(req.body);
       if (!parsed.success) {
-        const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid input');
+        const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid profile input');
         err.statusCode = 400;
         return next(err);
       }
@@ -109,30 +110,40 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
         categoryIds,
       } = parsed.data;
 
-      const cleanDesc = description ? sanitizeContactInfo(description) : null;
+      const cleanDesc = description !== undefined ? (description ? sanitizeContactInfo(description) : null) : undefined;
 
       const profile = await sql.begin(async (tx) => {
+        const updateFields: Record<string, any> = {
+          onboarding_complete: true,
+          updated_at: sql`now()`,
+        };
+
+        if (companyName !== undefined) updateFields.company_name = companyName;
+        if (phone !== undefined) updateFields.phone = phone;
+        if (cleanDesc !== undefined) updateFields.description = cleanDesc;
+        if (city !== undefined) updateFields.city = city;
+        if (state !== undefined) updateFields.state = state;
+        if (yearsExperience !== undefined) updateFields.years_experience = yearsExperience;
+        if (workforceSize !== undefined) updateFields.workforce_size = workforceSize;
+        if (industry !== undefined) updateFields.industry = industry;
+        if (skills !== undefined) {
+          const lit = toPgTextArrayLiteral(skills);
+          updateFields.skills = sql`${lit}::text[]`;
+        }
+        if (serviceAreas !== undefined) {
+          const lit = toPgTextArrayLiteral(serviceAreas);
+          updateFields.service_areas = sql`${lit}::text[]`;
+        }
+        if (availability !== undefined) updateFields.availability = availability;
+
         const [updated] = await tx`
-          UPDATE contractor_profiles SET
-            company_name = COALESCE(${companyName ?? null}, company_name),
-            phone = COALESCE(${phone ?? null}, phone),
-            description = COALESCE(${cleanDesc}, description),
-            city = COALESCE(${city ?? null}, city),
-            state = COALESCE(${state ?? null}, state),
-            years_experience = COALESCE(${yearsExperience ?? null}, years_experience),
-            workforce_size = COALESCE(${workforceSize ?? null}, workforce_size),
-            industry = COALESCE(${industry ?? null}, industry),
-            skills = CASE WHEN ${skills !== undefined} THEN ${sql.array(skills || [])} ELSE skills END,
-            service_areas = CASE WHEN ${serviceAreas !== undefined} THEN ${sql.array(serviceAreas || [])} ELSE service_areas END,
-            availability = COALESCE(${availability ?? null}, availability),
-            onboarding_complete = true,
-            updated_at = now()
+          UPDATE contractor_profiles SET ${sql(updateFields)}
           WHERE user_id = ${userId}
           RETURNING id
         `;
 
         if (!updated) {
-          const err: AppError = new Error('Profile not found');
+          const err: AppError = new Error('Contractor profile not found');
           err.statusCode = 404;
           throw err;
         }
@@ -158,27 +169,30 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
     if (role === 'business') {
       const parsed = businessProfileSchema.safeParse(req.body);
       if (!parsed.success) {
-        const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid input');
+        const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid profile input');
         err.statusCode = 400;
         return next(err);
       }
       const { companyName, industry, city, state, phone } = parsed.data;
 
+      const updateFields: Record<string, any> = {
+        onboarding_complete: true,
+        updated_at: sql`now()`,
+      };
+      if (companyName !== undefined) updateFields.company_name = companyName;
+      if (industry !== undefined) updateFields.industry = industry;
+      if (city !== undefined) updateFields.city = city;
+      if (state !== undefined) updateFields.state = state;
+      if (phone !== undefined) updateFields.phone = phone;
+
       const [updated] = await sql`
-        UPDATE business_profiles SET
-          company_name = COALESCE(${companyName ?? null}, company_name),
-          industry = COALESCE(${industry ?? null}, industry),
-          city = COALESCE(${city ?? null}, city),
-          state = COALESCE(${state ?? null}, state),
-          phone = COALESCE(${phone ?? null}, phone),
-          onboarding_complete = true,
-          updated_at = now()
+        UPDATE business_profiles SET ${sql(updateFields)}
         WHERE user_id = ${userId}
         RETURNING id
       `;
 
       if (!updated) {
-        const err: AppError = new Error('Profile not found');
+        const err: AppError = new Error('Business profile not found');
         err.statusCode = 404;
         return next(err);
       }

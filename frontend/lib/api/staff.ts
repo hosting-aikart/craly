@@ -43,7 +43,8 @@ export interface StaffContractorItem {
 export interface CreateStaffContractorInput {
   companyName: string;
   contactPerson?: string;
-  email?: string;
+  email: string;
+  password: string;
   phone?: string;
   industry?: string;
   description?: string;

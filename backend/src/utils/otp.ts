@@ -4,9 +4,9 @@ import config from '../config/index';
 const OTP_SALT = config.jwtSecret || 'craly_otp_salt_fallback_2026';
 
 /**
- * Generates a cryptographically secure 6-digit numeric OTP.
+ * Generates a cryptographically secure 4-digit numeric OTP.
  */
-export function generateNumericOtp(length = 6): string {
+export function generateNumericOtp(length = 4): string {
   const min = Math.pow(10, length - 1);
   const max = Math.pow(10, length) - 1;
   const num = crypto.randomInt(min, max + 1);

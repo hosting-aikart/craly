@@ -6,7 +6,7 @@ import { signAuthToken } from '../utils/jwt';
 import { signupSchema, loginSchema, sendOtpSchema, verifyOtpSchema } from '../validators/authValidators';
 import { generateNumericOtp, hashOtp, verifyOtpHash } from '../utils/otp';
 import { sendOtpEmail } from '../utils/mailer';
-import { sendOtpSms } from '../utils/sms';
+import { sendPhoneOtp, verifyPhoneOtp } from '../utils/sms';
 import { AUTH_COOKIE_NAME } from '../middlewares/auth';
 import type { AppError } from '../middlewares/errorHandler';
 
@@ -24,7 +24,7 @@ function setAuthCookie(res: Response, token: string): void {
 
 /**
  * POST /api/auth/send-otp
- * Generates and sends 6-digit OTP codes to the user's email and phone number.
+ * Generates and sends 4-digit OTP codes to the user's email and phone number.
  */
 export async function sendSignupOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -44,31 +44,38 @@ export async function sendSignupOtp(req: Request, res: Response, next: NextFunct
       return next(err);
     }
 
-    // Generate 6-digit OTPs
-    const emailOtp = generateNumericOtp(6);
-    const phoneOtp = generateNumericOtp(6);
-
+    // Generate the email OTP locally — Craly still owns email OTP
+    // generation, hashing, storage, and verification end to end.
+    const emailOtp = generateNumericOtp(4);
     const emailOtpHash = hashOtp(email, emailOtp);
-    const phoneOtpHash = hashOtp(mobile, phoneOtp);
 
-    // Store in auth_verifications with 10-minute expiry
+    // Phone OTP: MSG91's OTP Widget generates the 4-digit code on its own
+    // servers and will verify it itself (see utils/sms.ts for the full
+    // trust-model explanation). This call both sends the SMS and returns
+    // the reqId Craly must store to verify the code MSG91 later reports.
+    const { reqId } = await sendPhoneOtp(mobile);
+
+    // Store in auth_verifications. Email keeps its own 10-minute local
+    // expiry (Craly-owned end to end). Phone's local expiry is set to 15
+    // minutes to match the MSG91 OTP Widget's configured "OTP Expiration
+    // Time" (MSG91 dashboard → OTP → Widgets → this widget → Widget
+    // Settings) — otherwise Craly could reject a code MSG91 would still
+    // accept as "expired" too early.
     await sql.begin(async (tx) => {
       // Invalidate existing pending OTPs for this target
       await tx`DELETE FROM auth_verifications WHERE target IN (${email}, ${mobile})`;
 
       await tx`
-        INSERT INTO auth_verifications (target, target_type, otp_hash, expires_at)
-        VALUES 
-          (${email}, 'email', ${emailOtpHash}, now() + interval '10 minutes'),
-          (${mobile}, 'phone', ${phoneOtpHash}, now() + interval '10 minutes')
+        INSERT INTO auth_verifications (target, target_type, otp_hash, provider_ref, expires_at)
+        VALUES
+          (${email}, 'email', ${emailOtpHash}, null, now() + interval '10 minutes'),
+          (${mobile}, 'phone', null, ${reqId}, now() + interval '15 minutes')
       `;
     });
 
-    // Dispatch OTP email (via Resend)
+    // Dispatch OTP email (via Resend). The phone SMS was already sent
+    // above as part of the MSG91 widget/sendOtp call.
     await sendOtpEmail({ to: email, otp: emailOtp, name });
-
-    // Dispatch OTP SMS (via SMS gateway or logged in dev)
-    await sendOtpSms({ phone: mobile, otp: phoneOtp });
 
     res.json({
       data: {
@@ -84,7 +91,7 @@ export async function sendSignupOtp(req: Request, res: Response, next: NextFunct
 
 /**
  * POST /api/auth/verify-otp
- * Validates the 6-digit email and phone OTPs submitted by the user.
+ * Validates the 4-digit email and phone OTPs submitted by the user.
  */
 export async function verifySignupOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -127,7 +134,7 @@ export async function verifySignupOtp(req: Request, res: Response, next: NextFun
 
     // Check phone OTP
     const [phoneRecord] = await sql`
-      SELECT id, otp_hash, attempts, expires_at, verified
+      SELECT id, provider_ref, attempts, expires_at, verified
       FROM auth_verifications
       WHERE target = ${mobile} AND target_type = 'phone'
       ORDER BY created_at DESC
@@ -146,7 +153,9 @@ export async function verifySignupOtp(req: Request, res: Response, next: NextFun
       return next(err);
     }
 
-    const isPhoneValid = verifyOtpHash(mobile, phoneOtp, phoneRecord.otp_hash);
+    // Unlike email (hashed locally), the phone code is verified by MSG91
+    // itself — Craly never has the plaintext code to hash-compare.
+    const isPhoneValid = await verifyPhoneOtp(phoneRecord.provider_ref, phoneOtp);
     if (!isPhoneValid) {
       await sql`UPDATE auth_verifications SET attempts = attempts + 1 WHERE id = ${phoneRecord.id}`;
       const err: AppError = new Error('Invalid phone verification code. Please check and try again.');
@@ -193,6 +202,30 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
     if (existing.length > 0) {
       const err: AppError = new Error('An account with this email already exists');
       err.statusCode = 409;
+      return next(err);
+    }
+
+    // Require that both email and phone actually completed OTP verification
+    // (POST /auth/send-otp + /auth/verify-otp) before an account is created.
+    // Without this check the endpoint previously hardcoded
+    // is_email_verified/is_phone_verified to true unconditionally, so OTP
+    // verification existed but was never enforced.
+    const [emailVerified] = await sql`
+      SELECT id FROM auth_verifications
+      WHERE target = ${email} AND target_type = 'email' AND verified = true
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const [phoneVerified] = await sql`
+      SELECT id FROM auth_verifications
+      WHERE target = ${mobile} AND target_type = 'phone' AND verified = true
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    if (!emailVerified || !phoneVerified) {
+      const err: AppError = new Error('Please verify your email and phone number before creating an account.');
+      err.statusCode = 400;
       return next(err);
     }
 

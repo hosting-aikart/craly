@@ -4,6 +4,7 @@ import React, { useEffect, useState, FormEvent, use } from 'react';
 import Link from 'next/link';
 import { getStaffContractorById, updateStaffContractor, type StaffContractorDetail } from '@/lib/api/staff';
 import LoadingState from '@/components/ui/LoadingState';
+import PhoneInput from '@/components/ui/PhoneInput';
 import './staff-contractor-detail.css';
 
 export default function StaffContractorDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -137,11 +138,7 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
 
             <div className="form-group">
               <label>Contact Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
+              <PhoneInput value={phone} onChange={setPhone} />
             </div>
 
             <div className="form-group">

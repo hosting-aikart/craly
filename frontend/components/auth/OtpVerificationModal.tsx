@@ -45,12 +45,12 @@ export default function OtpVerificationModal({
     e.preventDefault();
     setLocalError('');
 
-    if (emailOtp.length !== 6) {
-      setLocalError('Please enter the 6-digit code sent to your email.');
+    if (emailOtp.length !== 4) {
+      setLocalError('Please enter the 4-digit code sent to your email.');
       return;
     }
-    if (phoneOtp.length !== 6) {
-      setLocalError('Please enter the 6-digit code sent to your phone.');
+    if (phoneOtp.length !== 4) {
+      setLocalError('Please enter the 4-digit code sent to your phone.');
       return;
     }
 
@@ -89,7 +89,7 @@ export default function OtpVerificationModal({
           </div>
           <h2 className="otp-modal__title">Verify Your Contact Info</h2>
           <p className="otp-modal__subtitle">
-            We sent 6-digit verification codes to confirm ownership of your email and phone.
+            We sent 4-digit verification codes to confirm ownership of your email and phone.
           </p>
         </div>
 
@@ -110,10 +110,10 @@ export default function OtpVerificationModal({
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              maxLength={6}
+              maxLength={4}
               value={emailOtp}
-              onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, ''))}
-              placeholder="••••••"
+              onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              placeholder="••••"
               className="otp-modal__input"
               required
               autoFocus
@@ -135,10 +135,10 @@ export default function OtpVerificationModal({
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              maxLength={6}
+              maxLength={4}
               value={phoneOtp}
-              onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
-              placeholder="••••••"
+              onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              placeholder="••••"
               className="otp-modal__input"
               required
             />
@@ -150,7 +150,7 @@ export default function OtpVerificationModal({
             <button
               type="submit"
               className="otp-modal__submit-btn"
-              disabled={loading || emailOtp.length !== 6 || phoneOtp.length !== 6}
+              disabled={loading || emailOtp.length !== 4 || phoneOtp.length !== 4}
             >
               {loading ? 'Verifying & Creating Account…' : 'Confirm & Create Account'}
             </button>

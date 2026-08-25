@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { createContractorRequest } from '@/lib/api/contractorRequests';
 import Button from '@/components/ui/Button';
+import PhoneInput from '@/components/ui/PhoneInput';
 import '@/components/AuthForm.css';
 import './list-your-company.css';
 
@@ -92,10 +93,10 @@ export default function ListYourCompanyPage() {
           </div>
 
           <div className="auth-row">
-            <label className="auth-field">
+            <div className="auth-field">
               <span>Phone Number *</span>
-              <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. 98765 43210" />
-            </label>
+              <PhoneInput value={phone} onChange={setPhone} required />
+            </div>
             <label className="auth-field">
               <span>Email</span>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />

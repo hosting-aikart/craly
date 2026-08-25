@@ -73,7 +73,7 @@ export default function BusinessEnquiriesPage() {
         <EmptyState
           title={t.enquiries.emptyEnquiries}
           subtitle={t.enquiries.businessSubtitle}
-          action={<Button href="/business/contractors" variant="primary" size="sm">{t.nav.findContractors}</Button>}
+          action={<Button href="/business/requirements" variant="primary" size="sm">{t.nav.findContractors}</Button>}
         />
       ) : filteredEnquiries.length === 0 ? (
         <EmptyState title={t.enquiries.emptyEnquiries} subtitle="" />

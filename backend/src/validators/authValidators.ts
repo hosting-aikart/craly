@@ -53,8 +53,8 @@ export const verifyOtpSchema = z.object({
       (v) => /^\+?[0-9]{7,15}$/.test(v),
       { message: 'Please enter a valid phone number' },
     ),
-  emailOtp: z.string().length(6, 'Email verification code must be 6 digits'),
-  phoneOtp: z.string().length(6, 'Phone verification code must be 6 digits'),
+  emailOtp: z.string().length(4, 'Email verification code must be 4 digits'),
+  phoneOtp: z.string().length(4, 'Phone verification code must be 4 digits'),
 });
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 

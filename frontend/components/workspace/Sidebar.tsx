@@ -112,12 +112,6 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
       ],
     },
     {
-      group: 'MARKETPLACE',
-      items: [
-        { label: 'Compare Contractors', href: '/business/compare', icon: '⚖️' },
-      ],
-    },
-    {
       group: t.sidebarGroups.work,
       items: [
         { label: t.notifications.pageTitle, href: '/business/notifications', icon: '🔔', badge: unreadNotificationCount },

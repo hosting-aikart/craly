@@ -5,8 +5,22 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { getMyProfile, updateMyProfile, type ContractorProfile } from '@/lib/api/profile';
 import { computeProfileCompletion } from '@/lib/util/contractorProfileCompletion';
 import LoadingState from '@/components/ui/LoadingState';
+import PhoneInput from '@/components/ui/PhoneInput';
 import ContractorDocumentsSection from '@/components/contractor/ContractorDocumentsSection';
 import './contractor-profile.css';
+
+// Predefined skill options for the profile's Skills & Specializations picker
+// — a contractor selects from this list rather than free-typing, so
+// declared skills stay consistent and reliably matchable against
+// requirement.required_skills. Sorted alphabetically for the dropdown.
+const COMMON_SKILLS = [
+  'Arc Welder', 'Assembly Operator', 'Carpenter', 'CNC Operator', 'Crane Operator',
+  'Electrician', 'Fabrication', 'Fitter', 'Forklift Operator', 'Helper / General Labour',
+  'Housekeeping Staff', 'Hydraulic Technician', 'Instrumentation Technician',
+  'Loader / Unloader', 'Machine Operator', 'Mason', 'MIG Welder', 'Packing Staff',
+  'Painter', 'Pipe Fitter', 'Plumber', 'Quality Control (QC)', 'Rigger', 'Scaffolder',
+  'Security Guard', 'Sheet Metal Worker', 'Supervisor', 'TIG Welder',
+].sort();
 
 const DEFAULT_INDUSTRIAL_CLUSTERS = [
   { name: 'Chakan', cluster: 'Pune industrial cluster' },
@@ -51,7 +65,8 @@ export default function ContractorProfilePage() {
   const [companyName, setCompanyName] = useState('');
   const [phone, setPhone] = useState('');
   const [industry, setIndustry] = useState('');
-  const [skills, setSkills] = useState('');
+  const [skills, setSkills] = useState<string[]>([]);
+  const [skillToAdd, setSkillToAdd] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [serviceAreas, setServiceAreas] = useState('');
@@ -69,7 +84,7 @@ export default function ContractorProfilePage() {
           setCompanyName(cp.company_name || '');
           setPhone(cp.phone || '');
           setIndustry(cp.industry || '');
-          setSkills(Array.isArray(cp.skills) ? cp.skills.join(', ') : '');
+          setSkills(Array.isArray(cp.skills) ? cp.skills : []);
           setCity(cp.city || '');
           setState(cp.state || '');
           const areas = Array.isArray(cp.service_areas) ? cp.service_areas : [];
@@ -99,7 +114,7 @@ export default function ContractorProfilePage() {
         companyName,
         phone: phone || undefined,
         industry: industry || undefined,
-        skills: skills || undefined,
+        skills,
         city: city || undefined,
         state: state || undefined,
         serviceAreas: serviceAreas || undefined,
@@ -211,7 +226,7 @@ export default function ContractorProfilePage() {
                 </div>
                 <div className="contractor-field">
                   <label>Contact Phone *</label>
-                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                  <PhoneInput value={phone} onChange={setPhone} required />
                 </div>
                 <div className="contractor-field">
                   <label>Industry *</label>
@@ -343,7 +358,7 @@ export default function ContractorProfilePage() {
                 </div>
                 <div className="contractor-field">
                   <label>Contact Phone</label>
-                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                  <PhoneInput value={phone} onChange={setPhone} />
                 </div>
                 <div className="contractor-field">
                   <label>Industry</label>
@@ -367,8 +382,69 @@ export default function ContractorProfilePage() {
                   </select>
                 </div>
                 <div className="contractor-field contractor-field--full">
-                  <label>Skills & Specializations (comma separated) — used for opportunity matching</label>
-                  <input type="text" value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="e.g. CNC Operator, MIG Welder, Assembly Operator" />
+                  <label>Skills & Specializations — used for opportunity matching</label>
+                  <div className="contractor-custom-cluster-input-wrap">
+                    <select
+                      className="contractor-custom-cluster-input"
+                      value={skillToAdd}
+                      onChange={(e) => setSkillToAdd(e.target.value)}
+                    >
+                      <option value="">Select a skill to add…</option>
+                      {COMMON_SKILLS.filter((s) => !skills.includes(s)).map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="contractor-custom-cluster-btn"
+                      disabled={!skillToAdd}
+                      onClick={() => {
+                        if (skillToAdd && !skills.includes(skillToAdd)) {
+                          setSkills((prev) => [...prev, skillToAdd]);
+                        }
+                        setSkillToAdd('');
+                      }}
+                    >
+                      + Add
+                    </button>
+                  </div>
+                  
+                  {/* Preset Quick Add Skill Chips with + Icons */}
+                  <div style={{ marginTop: '10px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      Popular Skills (Click '+' to add):
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                      {COMMON_SKILLS.filter((s) => !skills.includes(s)).slice(0, 14).map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          className="cp-preset-chip"
+                          onClick={() => setSkills((prev) => [...prev, s])}
+                        >
+                          <span className="cp-plus-icon">+</span> {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {skills.length > 0 ? (
+                    <div className="contractor-cluster-pill-grid" style={{ marginTop: '12px' }}>
+                      {skills.map((s) => (
+                        <span key={s} className="contractor-cluster-pill-tag contractor-cluster-pill-tag--custom">
+                          <span>{s}</span>
+                          <span
+                            className="contractor-cluster-pill-remove"
+                            onClick={() => setSkills((prev) => prev.filter((x) => x !== s))}
+                          >
+                            ×
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="contractor-card-sub" style={{ marginTop: '8px' }}>No skills selected yet — pick from the dropdown or quick chips above.</p>
+                  )}
                 </div>
               </div>
               <div className="contractor-field contractor-field--full" style={{ marginTop: '14px' }}>

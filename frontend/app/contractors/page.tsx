@@ -35,7 +35,9 @@ function ContractorsPageInner() {
     if (authLoading) return;
     if (user) {
       if (user.role === 'business') {
-        router.replace('/business/contractors');
+        // /business/contractors is deactivated (direct-contact bypass) —
+        // send Manufacturers to the real, requirement-driven flow instead.
+        router.replace('/business/requirements');
       } else if (user.role === 'admin') {
         router.replace('/admin/dashboard');
       } else {

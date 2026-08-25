@@ -50,6 +50,8 @@ export default function ContractorNotificationsPage() {
       router.push(`/contractor-portal/applications/${n.reference_id}`);
     } else if (n.type.startsWith('KYC') || n.type.startsWith('CONTRACTOR_VERIFICATION')) {
       router.push('/contractor-portal/profile?tab=documents');
+    } else if (n.type.includes('OPPORTUNITY')) {
+      router.push(`/contractor-portal/opportunities/${n.reference_id}`);
     }
   };
 

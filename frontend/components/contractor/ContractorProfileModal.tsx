@@ -2,6 +2,7 @@
 
 import React, { useState, FormEvent } from 'react';
 import { updateMyProfile, type ContractorProfile } from '@/lib/api/profile';
+import PhoneInput from '@/components/ui/PhoneInput';
 import './ContractorProfileModal.css';
 
 interface ContractorProfileModalProps {
@@ -9,6 +10,36 @@ interface ContractorProfileModalProps {
   onComplete: () => void;
   allowClose?: boolean;
 }
+
+const PRESET_INDUSTRIES = [
+  'Construction & Infrastructure',
+  'Manufacturing & Industrial',
+  'Automotive & Ancillary',
+  'Electrical & Power',
+  'PEB & Steel Structures',
+  'Mechanical & HVAC',
+  'Pipeline & Process Engineering',
+  'Facility & Plant Management',
+  'Logistics & Warehousing',
+];
+
+const PRESET_SKILLS = [
+  'Welding (Arc/MIG/TIG)',
+  'CNC / Machine Operator',
+  'Electrician',
+  'Fabrication Fitter',
+  'Pipe Fitter & Plumber',
+  'Scaffolder',
+  'Crane & Forklift Operator',
+  'Assembly Operator',
+  'Helper / General Labour',
+  'Masonry & Civil',
+  'Quality Control (QC)',
+  'Safety Officer & Supervisor',
+  'Hydraulic Technician',
+  'Instrumentation Tech',
+  'Painter & Blaster',
+];
 
 export default function ContractorProfileModal({
   initialProfile,
@@ -23,9 +54,17 @@ export default function ContractorProfileModal({
       : '',
   );
   const [industry, setIndustry] = useState(initialProfile?.industry || '');
-  const [skills, setSkills] = useState(
-    Array.isArray(initialProfile?.skills) ? initialProfile.skills.join(', ') : '',
-  );
+  
+  // Skills list state as an array of tags/chips
+  const [skillsList, setSkillsList] = useState<string[]>(() => {
+    if (Array.isArray(initialProfile?.skills)) return initialProfile.skills;
+    if (typeof initialProfile?.skills === 'string') {
+      return (initialProfile.skills as string).split(',').map((s) => s.trim()).filter(Boolean);
+    }
+    return [];
+  });
+  const [customSkillInput, setCustomSkillInput] = useState('');
+
   const [city, setCity] = useState(initialProfile?.city || '');
   const [state, setState] = useState(initialProfile?.state || '');
   const [serviceAreas, setServiceAreas] = useState(
@@ -42,6 +81,19 @@ export default function ContractorProfileModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const addSkill = (skillToAdd: string) => {
+    const trimmed = skillToAdd.trim();
+    if (!trimmed) return;
+    if (!skillsList.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
+      setSkillsList((prev) => [...prev, trimmed]);
+    }
+    setCustomSkillInput('');
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setSkillsList((prev) => prev.filter((s) => s !== skillToRemove));
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!companyName.trim()) {
@@ -53,7 +105,7 @@ export default function ContractorProfileModal({
       return;
     }
     if (!industry.trim()) {
-      setError('Industry is required for opportunity matching');
+      setError('Please select or enter your Industry');
       return;
     }
 
@@ -66,7 +118,7 @@ export default function ContractorProfileModal({
         phone: phone.trim() || undefined,
         workforceSize: Number(workforceSize),
         industry: industry.trim(),
-        skills: skills.trim(),
+        skills: skillsList,
         city: city.trim(),
         state: state.trim(),
         serviceAreas: serviceAreas.trim(),
@@ -77,7 +129,16 @@ export default function ContractorProfileModal({
 
       onComplete();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save contractor profile.');
+      // User-friendly error message format
+      let friendlyMsg = 'Failed to save contractor profile. Please check your details and try again.';
+      if (err instanceof Error && err.message) {
+        if (err.message.includes('CASE types') || err.message.includes('PostgresError') || err.message.includes('500')) {
+          friendlyMsg = 'Database processing error occurred. Our team has been notified. Please try again.';
+        } else {
+          friendlyMsg = err.message;
+        }
+      }
+      setError(friendlyMsg);
     } finally {
       setSaving(false);
     }
@@ -118,12 +179,7 @@ export default function ContractorProfileModal({
 
             <div className="cp-modal-field">
               <label>Contact Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. +91 9876543210"
-              />
+              <PhoneInput value={phone} onChange={setPhone} />
             </div>
 
             <div className="cp-modal-field">
@@ -140,13 +196,33 @@ export default function ContractorProfileModal({
 
             <div className="cp-modal-field">
               <label>Industry *</label>
-              <input
-                type="text"
-                required
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                placeholder="e.g. Automotive, Manufacturing, Construction"
-              />
+              <select
+                value={PRESET_INDUSTRIES.includes(industry) ? industry : (industry ? 'CUSTOM' : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== 'CUSTOM') {
+                    setIndustry(val);
+                  }
+                }}
+              >
+                <option value="">-- Select Industry --</option>
+                {PRESET_INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind}>
+                    {ind}
+                  </option>
+                ))}
+                <option value="CUSTOM">Other / Custom Industry</option>
+              </select>
+              {(!PRESET_INDUSTRIES.includes(industry) || industry === 'CUSTOM') && (
+                <input
+                  type="text"
+                  required
+                  style={{ marginTop: '6px' }}
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  placeholder="Enter custom industry name"
+                />
+              )}
             </div>
 
             <div className="cp-modal-field">
@@ -159,14 +235,86 @@ export default function ContractorProfileModal({
               </select>
             </div>
 
-            <div className="cp-modal-field cp-modal-field--full">
-              <label>Skills & Specializations (Comma separated)</label>
+            <div className="cp-modal-field">
+              <label>Years of Experience</label>
               <input
-                type="text"
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-                placeholder="e.g. Welding, Assembly, Electrical, CNC Operation"
+                type="number"
+                min={0}
+                value={yearsExperience}
+                onChange={(e) => setYearsExperience(e.target.value ? Number(e.target.value) : '')}
+                placeholder="e.g. 5"
               />
+            </div>
+
+            {/* ── Skills & Specializations Picker ─────────────────── */}
+            <div className="cp-modal-field cp-modal-field--full">
+              <label>Skills & Specializations (Add multiple skills)</label>
+              
+              {/* Selected Skills Chips */}
+              <div className="cp-selected-skills-box">
+                {skillsList.length > 0 ? (
+                  <div className="cp-chips-list">
+                    {skillsList.map((skill) => (
+                      <span key={skill} className="cp-skill-chip">
+                        <span>{skill}</span>
+                        <button
+                          type="button"
+                          className="cp-skill-remove-btn"
+                          onClick={() => removeSkill(skill)}
+                          title="Remove skill"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="cp-skills-placeholder">
+                    No skills added yet. Select from presets below or add custom skills.
+                  </p>
+                )}
+              </div>
+
+              {/* Add Custom Skill Input Row */}
+              <div className="cp-skill-input-row">
+                <input
+                  type="text"
+                  value={customSkillInput}
+                  onChange={(e) => setCustomSkillInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addSkill(customSkillInput);
+                    }
+                  }}
+                  placeholder="Type a skill and press Enter or click '+'..."
+                />
+                <button
+                  type="button"
+                  className="cp-add-skill-btn"
+                  onClick={() => addSkill(customSkillInput)}
+                  disabled={!customSkillInput.trim()}
+                >
+                  + Add
+                </button>
+              </div>
+
+              {/* Quick Add Preset Skills Chips with '+' icons */}
+              <div className="cp-presets-container">
+                <span className="cp-presets-label">Popular Skills (Click '+' to add):</span>
+                <div className="cp-preset-chips">
+                  {PRESET_SKILLS.filter((s) => !skillsList.some((added) => added.toLowerCase() === s.toLowerCase())).map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      className="cp-preset-chip"
+                      onClick={() => addSkill(preset)}
+                    >
+                      <span className="cp-plus-icon">+</span> {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="cp-modal-field">
@@ -189,24 +337,13 @@ export default function ContractorProfileModal({
               />
             </div>
 
-            <div className="cp-modal-field">
+            <div className="cp-modal-field cp-modal-field--full">
               <label>Service Areas (Comma separated)</label>
               <input
                 type="text"
                 value={serviceAreas}
                 onChange={(e) => setServiceAreas(e.target.value)}
                 placeholder="e.g. Pune, Pimpri-Chinchwad, Chakan, Talegaon"
-              />
-            </div>
-
-            <div className="cp-modal-field">
-              <label>Years of Experience</label>
-              <input
-                type="number"
-                min={0}
-                value={yearsExperience}
-                onChange={(e) => setYearsExperience(e.target.value ? Number(e.target.value) : '')}
-                placeholder="e.g. 5"
               />
             </div>
           </div>
@@ -231,3 +368,4 @@ export default function ContractorProfileModal({
     </div>
   );
 }
+

@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { z } from 'zod';
-import { createNotification, notifyUsersByRole } from '../utils/notifications';
+import { createNotification, notifyUsersByRole, notifyMatchingContractors } from '../utils/notifications';
+import { toPgTextArrayLiteral } from '../utils/pgArray';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -25,6 +26,12 @@ const createRequirementSchema = z.object({
   description: z.string().optional(),
   industry: z.string().optional(),
   location: z.string().min(2, 'Location is required'),
+  // Structured fields used for exact-match opportunity matching (see
+  // ../utils/opportunityMatching.ts) — `location` above stays freeform for
+  // display purposes; these are what the matching rule actually compares
+  // against a contractor's city/state.
+  city: z.string().min(1, 'City is required'),
+  state: z.string().min(1, 'State is required'),
   workersRequired: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).pipe(z.number().positive('Workers required must be at least 1')),
   requiredSkills: z.union([z.array(z.string()), z.string()]).transform((val) => {
     if (Array.isArray(val)) return val;
@@ -115,6 +122,8 @@ export async function getRequirements(req: Request, res: Response, next: NextFun
         mr.description,
         mr.industry,
         mr.location,
+        mr.city,
+        mr.state,
         mr.workers_required,
         mr.required_skills,
         mr.start_date,
@@ -156,6 +165,8 @@ export async function getRequirementById(req: Request, res: Response, next: Next
         mr.description,
         mr.industry,
         mr.location,
+        mr.city,
+        mr.state,
         mr.workers_required,
         mr.required_skills,
         mr.start_date,
@@ -211,6 +222,8 @@ export async function createRequirement(req: Request, res: Response, next: NextF
         description,
         industry,
         location,
+        city,
+        state,
         workers_required,
         required_skills,
         start_date,
@@ -227,8 +240,10 @@ export async function createRequirement(req: Request, res: Response, next: NextF
         ${data.description ?? null},
         ${data.industry ?? null},
         ${data.location},
+        ${data.city},
+        ${data.state},
         ${data.workersRequired},
-        ${sql.array(data.requiredSkills)},
+        ${toPgTextArrayLiteral(data.requiredSkills)}::text[],
         ${data.startDate},
         ${data.duration},
         ${data.experienceRequired ?? null},
@@ -239,6 +254,13 @@ export async function createRequirement(req: Request, res: Response, next: NextF
       )
       RETURNING *
     `;
+
+    if (initialStatus === 'PUBLISHED') {
+      // Fan out the matching-opportunity notification (Task 3) — fire and
+      // forget from the caller's perspective, but awaited here so any
+      // failure surfaces in logs rather than silently vanishing.
+      await notifyMatchingContractors(requirement as any);
+    }
 
     res.status(201).json({
       data: requirement,
@@ -285,8 +307,10 @@ export async function updateRequirement(req: Request, res: Response, next: NextF
         description = COALESCE(${data.description ?? null}, description),
         industry = COALESCE(${data.industry ?? null}, industry),
         location = COALESCE(${data.location ?? null}, location),
+        city = COALESCE(${data.city ?? null}, city),
+        state = COALESCE(${data.state ?? null}, state),
         workers_required = COALESCE(${data.workersRequired ?? null}, workers_required),
-        required_skills = CASE WHEN ${data.requiredSkills !== undefined} THEN ${sql.array(data.requiredSkills || [])} ELSE required_skills END,
+        required_skills = COALESCE(${data.requiredSkills !== undefined ? toPgTextArrayLiteral(data.requiredSkills) : null}::text[], required_skills),
         start_date = COALESCE(${data.startDate ?? null}, start_date),
         duration = COALESCE(${data.duration ?? null}, duration),
         experience_required = COALESCE(${data.experienceRequired ?? null}, experience_required),
@@ -298,6 +322,13 @@ export async function updateRequirement(req: Request, res: Response, next: NextF
       WHERE id = ${id} AND manufacturer_id = ${manufacturer.id}
       RETURNING *
     `;
+
+    // Only notify on the transition INTO 'PUBLISHED' — not on every
+    // subsequent save of an already-published requirement, to avoid
+    // re-spamming contractors who were already notified.
+    if (nextStatus === 'PUBLISHED' && existing.status !== 'PUBLISHED') {
+      await notifyMatchingContractors(updated as any);
+    }
 
     res.json({
       data: updated,
@@ -316,6 +347,16 @@ export async function publishRequirement(req: Request, res: Response, next: Next
     const { id } = req.params;
     const manufacturer = await getManufacturerProfile(req.user!.sub);
 
+    const [existing] = await sql`
+      SELECT status FROM manpower_requirements WHERE id = ${id} AND manufacturer_id = ${manufacturer.id}
+    `;
+
+    if (!existing) {
+      const err: AppError = new Error('Requirement not found');
+      err.statusCode = 404;
+      return next(err);
+    }
+
     const [updated] = await sql`
       UPDATE manpower_requirements
       SET
@@ -326,10 +367,9 @@ export async function publishRequirement(req: Request, res: Response, next: Next
       RETURNING *
     `;
 
-    if (!updated) {
-      const err: AppError = new Error('Requirement not found');
-      err.statusCode = 404;
-      return next(err);
+    // Same transition guard as updateRequirement above.
+    if (existing.status !== 'PUBLISHED') {
+      await notifyMatchingContractors(updated as any);
     }
 
     res.json({

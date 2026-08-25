@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import './signup.css';
-import { signup } from '@/lib/api/auth';
+import { signup, sendSignupOtp, verifySignupOtp } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
@@ -40,6 +40,18 @@ function SignupForm() {
   const [emailError, setEmailError] = useState('');
   const [mobileError, setMobileError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Signup is a two-step flow: collect the form, send OTP codes to the
+  // entered email + phone, then require both codes to be verified before
+  // the account is actually created (see authController.signup — it now
+  // rejects signup unless matching `auth_verifications` rows are verified).
+  const [step, setStep] = useState<'form' | 'otp'>('form');
+  const [emailOtp, setEmailOtp] = useState('');
+  const [phoneOtp, setPhoneOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [otpSubmitting, setOtpSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [otpNotice, setOtpNotice] = useState('');
 
   useEffect(() => {
     if (roleParam === 'contractor') {
@@ -84,14 +96,18 @@ function SignupForm() {
     }
   }, [user, authLoading, router]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const fullMobile = getFullMobile(phoneNumber, selectedCountry);
+  const fullLocation = city.trim() ? `${city.trim()}, ${selectedCountry.name}` : selectedCountry.name;
+
+  // Step 1: validate the form, then request OTP codes for the entered
+  // email + phone. Nothing is created yet — account creation only happens
+  // after both codes are verified in step 2.
+  const handleSendOtp = async (e: FormEvent) => {
     e.preventDefault();
     if (!consent) {
       setError('You must agree to the Terms of Service & Privacy Policy.');
       return;
     }
-
-    const fullMobile = getFullMobile(phoneNumber, selectedCountry);
 
     let hasError = false;
     if (!EMAIL_RE.test(email)) {
@@ -108,20 +124,60 @@ function SignupForm() {
       setMobileError('Phone number is required');
       hasError = true;
     }
+    if (!password || password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      hasError = true;
+    }
     if (hasError) return;
 
     setSubmitting(true);
     setError('');
 
-    const fullLocation = city.trim() ? `${city.trim()}, ${selectedCountry.name}` : selectedCountry.name;
+    try {
+      const { data } = await sendSignupOtp({ email, mobile: fullMobile, name: companyName });
+      setOtpNotice(data.message || 'Verification codes sent to your email and phone number.');
+      setStep('otp');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.contact.genericError);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Step 2: verify both OTP codes, then create the account.
+  const handleVerifyAndCreate = async (e: FormEvent) => {
+    e.preventDefault();
+    if (emailOtp.length !== 4 || phoneOtp.length !== 4) {
+      setOtpError('Enter the 4-digit code sent to your email and phone.');
+      return;
+    }
+
+    setOtpSubmitting(true);
+    setOtpError('');
 
     try {
+      await verifySignupOtp({ email, mobile: fullMobile, emailOtp, phoneOtp });
       await signup({ email, password, role, companyName, mobile: fullMobile, city: fullLocation });
       await refresh();
       router.push(role === 'contractor' ? '/contractor-portal/dashboard' : '/onboarding');
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.contact.genericError);
-      setSubmitting(false);
+      setOtpError(err instanceof Error ? err.message : t.contact.genericError);
+      setOtpSubmitting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setResending(true);
+    setOtpError('');
+    try {
+      const { data } = await sendSignupOtp({ email, mobile: fullMobile, name: companyName });
+      setOtpNotice(data.message || 'A new verification code has been sent.');
+      setEmailOtp('');
+      setPhoneOtp('');
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : t.contact.genericError);
+    } finally {
+      setResending(false);
     }
   };
 
@@ -222,7 +278,8 @@ function SignupForm() {
             </button>
           </div>
 
-          <form className="signup-fields" onSubmit={handleSubmit}>
+          {step === 'form' ? (
+          <form className="signup-fields" onSubmit={handleSendOtp}>
             <label className="signup-field">
               <span>{role === 'contractor' ? 'Company / Contractor Name' : t.auth.companyNameLabel}</span>
               <div className="signup-field__input">
@@ -384,9 +441,78 @@ function SignupForm() {
             {error && <p className="signup-error">{error}</p>}
 
             <button type="submit" className="signup-submit" disabled={submitting}>
-              {submitting ? t.auth.creatingAccount : (role === 'business' ? 'Create Manufacturer Account' : t.auth.createAccountBtn)}
+              {submitting ? 'Sending code…' : 'Send Verification Code'}
             </button>
           </form>
+          ) : (
+          <form className="signup-fields" onSubmit={handleVerifyAndCreate}>
+            <p className="signup-form-panel__eyebrow" style={{ marginBottom: 4 }}>
+              Enter the 4-digit codes sent to:
+            </p>
+            <p style={{ margin: '0 0 8px', fontSize: 14, color: 'var(--text-secondary, #555)' }}>
+              <strong>{email}</strong> and <strong>{fullMobile}</strong>
+            </p>
+
+            <label className="signup-field">
+              <span>Email Verification Code</span>
+              <div className="signup-field__input">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={4}
+                  required
+                  value={emailOtp}
+                  onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="1234"
+                />
+              </div>
+            </label>
+
+            <label className="signup-field">
+              <span>Phone Verification Code</span>
+              <div className="signup-field__input">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={4}
+                  required
+                  value={phoneOtp}
+                  onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="1234"
+                />
+              </div>
+            </label>
+
+            {otpNotice && !otpError && <p className="signup-form-panel__eyebrow" style={{ margin: 0 }}>{otpNotice}</p>}
+            {otpError && <p className="signup-error">{otpError}</p>}
+
+            <button type="submit" className="signup-submit" disabled={otpSubmitting}>
+              {otpSubmitting ? t.auth.creatingAccount : 'Verify & Create Account'}
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+              <button
+                type="button"
+                className="signup-footer-link"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                onClick={() => { setStep('form'); setOtpError(''); setOtpNotice(''); setEmailOtp(''); setPhoneOtp(''); }}
+              >
+                ← Back to edit details
+              </button>
+              <button
+                type="button"
+                className="signup-footer-link"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                onClick={handleResendOtp}
+                disabled={resending}
+              >
+                {resending ? 'Resending…' : 'Resend code'}
+              </button>
+            </div>
+          </form>
+          )}
 
           <p className="signup-footer-link">
             {t.auth.alreadyHaveAccount} <Link href="/login">{t.auth.logInTitle}</Link>

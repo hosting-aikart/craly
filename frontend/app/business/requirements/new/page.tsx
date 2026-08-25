@@ -17,6 +17,8 @@ export default function CreateRequirementPage() {
     description: '',
     industry: '',
     location: '',
+    city: '',
+    state: '',
     workersRequired: 10,
     requiredSkills: '',
     startDate: '',
@@ -47,6 +49,14 @@ export default function CreateRequirementPage() {
     }
     if (!formData.location.trim()) {
       setError('Location is required');
+      return;
+    }
+    if (!formData.city.trim()) {
+      setError('City is required');
+      return;
+    }
+    if (!formData.state.trim()) {
+      setError('State is required');
       return;
     }
     if (!formData.startDate) {
@@ -130,7 +140,7 @@ export default function CreateRequirementPage() {
 
             <div>
               <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Location / City *
+                Location (Area/Locality) *
               </label>
               <input
                 type="text"
@@ -141,6 +151,44 @@ export default function CreateRequirementPage() {
                 required
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
+                City *
+              </label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="e.g. Pune"
+                required
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--craly-muted, #888)', marginTop: '4px' }}>
+                Used to match contractors — must match a contractor&apos;s base city or one of their service areas exactly.
+              </p>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
+                State *
+              </label>
+              <input
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                placeholder="e.g. Maharashtra"
+                required
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--craly-muted, #888)', marginTop: '4px' }}>
+                Used to match contractors — must match a contractor&apos;s state exactly.
+              </p>
             </div>
           </div>
 

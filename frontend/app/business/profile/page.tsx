@@ -5,6 +5,7 @@ import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderConte
 import { getMyProfile, updateMyProfile, type BusinessProfile } from '@/lib/api/profile';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
+import PhoneInput from '@/components/ui/PhoneInput';
 
 export default function BusinessProfilePage() {
   const [profile, setProfile] = useState<BusinessProfile | null>(null);
@@ -109,13 +110,7 @@ export default function BusinessProfilePage() {
 
             <div>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--craly-navy)', marginBottom: '6px' }}>Contact Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. +91 9876543210"
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--craly-border)', fontSize: '14px' }}
-              />
+              <PhoneInput value={phone} onChange={setPhone} />
               <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--craly-muted)' }}>
                 Only shared with Craly Staff after you select a contractor — never with the contractor directly.
               </p>

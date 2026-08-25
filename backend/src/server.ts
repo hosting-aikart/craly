@@ -6,6 +6,7 @@ import config from './config/index';
 import apiRouter from './routes/index';
 import { errorHandler } from './middlewares/errorHandler';
 import { initSocketServer } from './socket/index';
+import { healthCheck } from './controllers/healthController';
 
 const app = express();
 
@@ -83,6 +84,8 @@ app.use((req, res, next) => {
 app.get('/', (_req, res) => {
   res.json({ name: 'Craly API', status: 'running', env: config.nodeEnv });
 });
+
+app.get('/health', healthCheck);
 
 app.use('/api', apiRouter);
 

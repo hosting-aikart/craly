@@ -92,7 +92,11 @@ export default function NotificationBell() {
       setUnreadCount((c) => Math.max(0, c - 1));
     }
     if (n.reference_id) {
-      if (user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff') {
+      if (n.type.includes('OPPORTUNITY') && user.role === 'contractor') {
+        router.push(`/contractor-portal/opportunities/${n.reference_id}`);
+      } else if (n.type.startsWith('APPLICATION') || n.type === 'ENGAGEMENT_CONFIRMED') {
+        router.push(user.role === 'contractor' ? `/contractor-portal/applications/${n.reference_id}` : '/business/requirements');
+      } else if (user.role === 'staff' || user.role === 'ops_head' || user.role === 'field_staff') {
         router.push('/staff/engagements');
       } else {
         router.push(user.role === 'contractor' ? `/contractor/enquiries/${n.reference_id}` : `/business/enquiries/${n.reference_id}`);

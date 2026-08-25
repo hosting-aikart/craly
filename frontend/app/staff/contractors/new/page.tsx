@@ -4,19 +4,29 @@ import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createStaffContractor } from '@/lib/api/staff';
+import PhoneInput from '@/components/ui/PhoneInput';
 import './staff-new-contractor.css';
+
+function generateTempPassword(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  let out = '';
+  for (let i = 0; i < 10; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
 
 export default function AddContractorPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [createdId, setCreatedId] = useState('');
 
   // Form state
   const [companyName, setCompanyName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState(generateTempPassword());
   const [industry, setIndustry] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -33,6 +43,14 @@ export default function AddContractorPage() {
       setError('Company name is required.');
       return;
     }
+    if (!email.trim()) {
+      setError('Email is required — this becomes the contractor\'s login.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Temporary password must be at least 8 characters.');
+      return;
+    }
 
     setSubmitting(true);
     setError('');
@@ -44,7 +62,8 @@ export default function AddContractorPage() {
       const res = await createStaffContractor({
         companyName,
         contactPerson: contactPerson || undefined,
-        email: email || undefined,
+        email,
+        password,
         phone: phone || undefined,
         industry: industry || undefined,
         city: city || undefined,
@@ -58,9 +77,7 @@ export default function AddContractorPage() {
       });
 
       setSuccess(res.message || 'Contractor profile created successfully!');
-      setTimeout(() => {
-        router.push(`/staff/contractors/${res.data.id}`);
-      }, 1000);
+      setCreatedId(res.data.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create contractor profile');
     } finally {
@@ -81,8 +98,21 @@ export default function AddContractorPage() {
         </div>
 
         {error && <div className="form-alert form-alert--error">{error}</div>}
-        {success && <div className="form-alert form-alert--success">{success}</div>}
+        {success && (
+          <div className="form-alert form-alert--success">
+            {success}
+            <div style={{ marginTop: '10px' }}>
+              <strong>Login:</strong> {email} &nbsp; <strong>Password:</strong> {password}
+            </div>
+            <div style={{ marginTop: '10px' }}>
+              <button type="button" className="btn-submit" onClick={() => router.push(`/staff/contractors/${createdId}`)}>
+                View Contractor Profile
+              </button>
+            </div>
+          </div>
+        )}
 
+        {!success && (
         <form onSubmit={handleSubmit} className="contractor-form">
           <div className="form-grid">
             <div className="form-group col-span-2">
@@ -108,22 +138,41 @@ export default function AddContractorPage() {
 
             <div className="form-group">
               <label>Contact Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. +91 98765 43210"
-              />
+              <PhoneInput value={phone} onChange={setPhone} />
             </div>
 
             <div className="form-group">
-              <label>Email Address</label>
+              <label>Email Address *</label>
               <input
                 type="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="e.g. contact@acmeworkforce.com"
               />
+              <p className="form-hint">This becomes the contractor's login email.</p>
+            </div>
+
+            <div className="form-group">
+              <label>Temporary Password *</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={() => setPassword(generateTempPassword())}
+                >
+                  Regenerate
+                </button>
+              </div>
+              <p className="form-hint">Share this with the contractor directly — they can log in immediately with it.</p>
             </div>
 
             <div className="form-group">
@@ -232,6 +281,7 @@ export default function AddContractorPage() {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

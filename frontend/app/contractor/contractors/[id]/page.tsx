@@ -18,6 +18,7 @@ import { useContractorDraftSync, readLocalDraft } from '@/lib/hooks/useContracto
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
+import PhoneInput from '@/components/ui/PhoneInput';
 import '../../field-staff.css';
 import '../contractor-form.css';
 
@@ -270,7 +271,7 @@ export default function ContractorFormPage() {
           </div>
           <div className="pf-field">
             <label htmlFor="phone">{ft.phone}</label>
-            <input id="phone" type="tel" inputMode="tel" value={form.phone} onChange={(e) => update('phone', e.target.value)} />
+            <PhoneInput id="phone" value={form.phone} onChange={(v) => update('phone', v)} />
           </div>
           <div className="pf-field">
             <label htmlFor="city">{ft.city}</label>
