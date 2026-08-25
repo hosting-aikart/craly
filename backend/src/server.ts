@@ -105,8 +105,17 @@ const server = http.createServer(app);
 // Attach Socket.IO to the HTTP server
 initSocketServer(server);
 
-server.listen(config.port, () => {
-  console.log(`[server] Craly API running on http://localhost:${config.port}`);
+// Bind explicitly to 0.0.0.0 (all interfaces) rather than relying on
+// Node's implicit default. Railway (and most PaaS containers) proxy
+// traffic in from outside the container to config.port — if the process
+// only accepts connections on the loopback interface, that traffic never
+// reaches it even though the process itself is "running". Binding to
+// 0.0.0.0 still accepts connections via localhost/127.0.0.1 too, so this
+// doesn't change anything about local development.
+const HOST = '0.0.0.0';
+
+server.listen(config.port, HOST, () => {
+  console.log(`[server] Craly API running on http://${HOST}:${config.port} (PORT env: ${process.env.PORT ?? 'unset, defaulted to 8080'})`);
   console.log(`[server] Environment: ${config.nodeEnv}`);
   console.log(`[server] Allowed origins: ${config.allowedOrigins.join(', ')}`);
 });
