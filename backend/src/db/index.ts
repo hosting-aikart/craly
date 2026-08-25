@@ -43,7 +43,14 @@ const sql = postgres(config.databaseUrl, {
   max_lifetime: 300,    // recycle connections every 5 mins (300s) to maintain pool stability
   onnotice: () => {},     // suppress NOTICE messages in dev
   ssl: 'require',         // enforce SSL for Neon database connection
-  fetch_types: false,   // skip unnecessary pg_catalog type fetching on connection startup
+  // `fetch_types: false` looks like a harmless startup-speed shortcut, but it
+  // disables postgres.js's one-time-per-connection pg_catalog lookup that
+  // registers array-type parsers (see fetchArrayTypes() in postgres.js) —
+  // without it, EVERY text[]/array column (contractor_profiles.skills,
+  // .service_areas, etc.) comes back as a raw, unparsed Postgres array
+  // literal string (e.g. '{"a","b"}') instead of a JS array, which crashes
+  // any code that calls .map()/.length on it expecting an array. Must stay
+  // at its default (true).
 });
 
 export default sql;

@@ -11,14 +11,15 @@ import sql from '../db/index';
  * Eligibility requires ALL of:
  *   1. contractor.workforce_size >= requirement.workers_required
  *   2. industry matches (blank requirement industry = no constraint)
- *   3. contractor.years_experience >= requirement.experience_required
- *      (blank requirement experience_required = no constraint)
- *   4. contractor.availability = 'AVAILABLE'
- *   5. contractor.state == requirement.state (exact match, case/whitespace
+ *   3. contractor.state == requirement.state (exact match, case/whitespace
  *      insensitive) — state alone is never sufficient on its own.
- *   6. AND contractor.city == requirement.city, OR requirement.city is one
+ *   4. AND contractor.city == requirement.city, OR requirement.city is one
  *      of contractor.service_areas (exact match, case/whitespace
  *      insensitive).
+ *
+ * Deliberately simple by request: workforce count, industry, and
+ * location-or-coverage only. Experience and availability are NOT checked
+ * here (they used to be) — this is intentional, not an oversight.
  *
  * A NULL/blank requirement city or state is treated as "no constraint" —
  * this only matters for requirements published before the city/state
@@ -29,8 +30,6 @@ import sql from '../db/index';
 export interface MatchContractorProfile {
   workforce_size: number | null;
   industry: string | null;
-  years_experience: number | null;
-  availability: string | null;
   city: string | null;
   state: string | null;
   service_areas: string[] | null;
@@ -39,7 +38,6 @@ export interface MatchContractorProfile {
 export interface MatchRequirement {
   workers_required: number;
   industry: string | null;
-  experience_required: number | null;
   city: string | null;
   state: string | null;
 }
@@ -54,8 +52,6 @@ export interface MatchRequirement {
 export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   const workforce = cp.workforce_size ?? 0;
   const industry = cp.industry || '';
-  const experience = cp.years_experience ?? 0;
-  const availability = cp.availability || '';
   const city = cp.city || '';
   const state = cp.state || '';
   const serviceAreas = cp.service_areas || [];
@@ -68,18 +64,12 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
       mr.industry IS NULL OR TRIM(mr.industry) = ''
       OR (${industry} != '' AND LOWER(TRIM(${industry})) = LOWER(TRIM(mr.industry)))
     )
-    -- 3. Experience
-    AND (
-      mr.experience_required IS NULL OR ${experience} >= mr.experience_required
-    )
-    -- 4. Availability
-    AND (${availability} = 'AVAILABLE')
-    -- 5. State must match exactly
+    -- 3. State must match exactly
     AND (
       mr.state IS NULL OR TRIM(mr.state) = ''
       OR (${state} != '' AND LOWER(TRIM(${state})) = LOWER(TRIM(mr.state)))
     )
-    -- 6. City must match exactly, OR requirement city is a covered service area
+    -- 4. City must match exactly, OR requirement city is a covered service area
     AND (
       mr.city IS NULL OR TRIM(mr.city) = ''
       OR (${city} != '' AND LOWER(TRIM(${city})) = LOWER(TRIM(mr.city)))
@@ -102,7 +92,6 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
 export function contractorEligibilityCondition(mr: MatchRequirement) {
   const workersRequired = mr.workers_required;
   const industry = mr.industry || '';
-  const experienceRequired = mr.experience_required ?? null;
   const city = mr.city || '';
   const state = mr.state || '';
 
@@ -115,19 +104,12 @@ export function contractorEligibilityCondition(mr: MatchRequirement) {
       ${industry} = ''
       OR (cp.industry IS NOT NULL AND TRIM(cp.industry) != '' AND LOWER(TRIM(cp.industry)) = LOWER(TRIM(${industry})))
     )
-    -- 3. Experience
-    AND (
-      ${experienceRequired}::int IS NULL
-      OR COALESCE(cp.years_experience, 0) >= ${experienceRequired}::int
-    )
-    -- 4. Availability
-    AND cp.availability = 'AVAILABLE'
-    -- 5. State must match exactly
+    -- 3. State must match exactly
     AND (
       ${state} = ''
       OR (cp.state IS NOT NULL AND TRIM(cp.state) != '' AND LOWER(TRIM(cp.state)) = LOWER(TRIM(${state})))
     )
-    -- 6. City must match exactly, OR requirement city is a covered service area
+    -- 4. City must match exactly, OR requirement city is a covered service area
     AND (
       ${city} = ''
       OR (cp.city IS NOT NULL AND TRIM(cp.city) != '' AND LOWER(TRIM(cp.city)) = LOWER(TRIM(${city})))
