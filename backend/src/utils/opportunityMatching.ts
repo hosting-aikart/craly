@@ -1,4 +1,5 @@
 import sql from '../db/index';
+import { toPgTextArrayLiteral } from './pgArray';
 
 /**
  * The single, canonical contractor <-> requirement eligibility rule. Every
@@ -54,7 +55,13 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   const industry = cp.industry || '';
   const city = cp.city || '';
   const state = cp.state || '';
-  const serviceAreas = cp.service_areas || [];
+  // sql.array() is unreliable inside a dynamic query fragment like this one
+  // (same issue documented on toPgTextArrayLiteral in pgArray.ts — it can
+  // send the parameter as a plain comma-joined string instead of a proper
+  // text[], producing "malformed array literal" and making the whole
+  // opportunities query throw for any contractor with service_areas set).
+  // Building the literal ourselves and casting it explicitly sidesteps that.
+  const serviceAreasLiteral = toPgTextArrayLiteral(cp.service_areas || []);
 
   return sql`(
     -- 1. Worker capacity
@@ -74,7 +81,7 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
       mr.city IS NULL OR TRIM(mr.city) = ''
       OR (${city} != '' AND LOWER(TRIM(${city})) = LOWER(TRIM(mr.city)))
       OR EXISTS (
-        SELECT 1 FROM unnest(${sql.array(serviceAreas)}::text[]) sa
+        SELECT 1 FROM unnest(${serviceAreasLiteral}::text[]) sa
         WHERE LOWER(TRIM(sa)) = LOWER(TRIM(mr.city))
       )
     )

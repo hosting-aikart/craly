@@ -534,8 +534,8 @@ export default function ContractorProfilePage() {
             <h3>Declared skills</h3>
             {declaredSkills.length > 0 ? (
               <div className="contractor-chip-list">
-                {declaredSkills.map((s) => (
-                  <span className="contractor-chip" key={s}>{s}</span>
+                {declaredSkills.map((s, i) => (
+                  <span className="contractor-chip" key={`${s}-${i}`}>{s}</span>
                 ))}
               </div>
             ) : (
@@ -591,8 +591,8 @@ export default function ContractorProfilePage() {
             <h3>Declared skills</h3>
             {declaredSkills.length > 0 ? (
               <div className="contractor-chip-list">
-                {declaredSkills.map((s) => (
-                  <span className="contractor-chip" key={s}>{s}</span>
+                {declaredSkills.map((s, i) => (
+                  <span className="contractor-chip" key={`${s}-${i}`}>{s}</span>
                 ))}
               </div>
             ) : (
