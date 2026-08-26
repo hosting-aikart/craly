@@ -17,16 +17,13 @@ const config = {
   contactEmailTo: process.env.CONTACT_EMAIL_TO ?? 'vishalsambare2004@gmail.com',
   contactEmailFrom: process.env.CONTACT_EMAIL_FROM ?? 'Craly <onboarding@resend.dev>',
 
-  // MSG91 (SMS OTP) — OTP Widget. The Widget itself runs client-side (see
-  // frontend/app/signup/page.tsx — it needs its own NEXT_PUBLIC_MSG91_WIDGET_ID
-  // / NEXT_PUBLIC_MSG91_TOKEN_AUTH, which are a *separate* frontend-side
-  // config, not read here). The backend's only MSG91 job is confirming the
-  // access-token the widget produces, via MSG91's verifyAccessToken API —
-  // authenticated with the account Authkey (MSG91 dashboard → API), which
-  // is a real secret and must stay server-side only. See utils/sms.ts,
-  // which fails fast and clearly instead of silently pretending a phone
-  // was verified when this is missing.
-  msg91AuthKey: process.env.MSG91_AUTH_KEY ?? '',
+  // NOTE: no MSG91/SMS config here. Signup verification is email-only —
+  // phone OTP/SMS is intentionally disconnected from the active auth flow
+  // (phone number itself is still a normal signup field). The MSG91
+  // integration is kept intact and self-contained in utils/sms.ts (it
+  // reads process.env.MSG91_AUTH_KEY directly) so it can be reintroduced
+  // later without touching this file again — it is simply unimported by
+  // anything in the active app right now.
 
   // Google OAuth 2.0 Credentials
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
@@ -48,8 +45,6 @@ export const isR2Configured = Boolean(
   config.r2AccountId && config.r2AccessKeyId && config.r2SecretAccessKey && config.r2Bucket && config.r2Endpoint,
 );
 
-export const isMsg91Configured = Boolean(config.msg91AuthKey);
-
 if (!isR2Configured) {
   console.warn('[config] R2_* env vars are not fully set — document upload/download will return 503 until configured.');
 }
@@ -64,14 +59,6 @@ if (!config.jwtSecret) {
 
 if (!config.resendApiKey) {
   console.warn('[config] RESEND_API_KEY is not set — contact form emails will fail.');
-}
-
-if (!isMsg91Configured) {
-  const level = config.nodeEnv === 'production' ? 'error' : 'warn';
-  console[level](
-    '[config] MSG91_AUTH_KEY is not set — phone OTP verification will ' +
-    (config.nodeEnv === 'production' ? 'fail (no dev fallback in production).' : 'fall back to auto-accepting any submitted access-token in development only.'),
-  );
 }
 
 export default config;

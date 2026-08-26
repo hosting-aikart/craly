@@ -29,13 +29,15 @@ export interface SignupInput {
 export const signup = (input: SignupInput) =>
   apiPost<{ data: AuthUser }>('/auth/signup', input);
 
-export const sendSignupOtp = (input: { email: string; mobile: string; name?: string }) =>
+// Signup verification is email-only — phone number is collected on the
+// signup form and stored on the profile, but is not itself verified.
+// SMS/MSG91 is intentionally out of the active auth flow; the widget
+// integration is kept intact (unused) in backend/src/utils/sms.ts so phone
+// verification can be reintroduced later without rebuilding it.
+export const sendSignupOtp = (input: { email: string; name?: string }) =>
   apiPost<{ data: { success: boolean; message: string; expiresInSeconds: number } }>('/auth/send-otp', input);
 
-// phoneAccessToken is the JWT the MSG91 OTP Widget issues client-side on
-// a successful phone verification — not a 4-digit code. See
-// app/signup/page.tsx and backend/src/utils/sms.ts.
-export const verifySignupOtp = (input: { email: string; mobile: string; emailOtp: string; phoneAccessToken: string }) =>
+export const verifySignupOtp = (input: { email: string; emailOtp: string }) =>
   apiPost<{ data: { success: boolean; verified: boolean; message: string } }>('/auth/verify-otp', input);
 
 export const login = (input: { email: string; password: string }) =>

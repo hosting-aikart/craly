@@ -29,37 +29,20 @@ export const signupSchema = z.object({
 });
 export type SignupInput = z.infer<typeof signupSchema>;
 
+// Email-only signup verification. Phone number is still collected on the
+// signup form (see signupSchema.mobile) and stored on the profile, but is
+// NOT verified as part of signup — SMS/MSG91 is intentionally out of the
+// active auth flow (see utils/sms.ts, kept intact but unused, so phone
+// verification can be reintroduced later without rebuilding it).
 export const sendOtpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  mobile: z
-    .string({ message: 'Phone number is required' })
-    .min(1, 'Phone number is required')
-    .transform((v) => v.replace(/[\s\-().]/g, ''))
-    .refine(
-      (v) => /^\+?[0-9]{7,15}$/.test(v),
-      { message: 'Please enter a valid phone number (7-15 digits with optional country code)' },
-    ),
   name: z.string().optional(),
 });
 export type SendOtpInput = z.infer<typeof sendOtpSchema>;
 
 export const verifyOtpSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  mobile: z
-    .string({ message: 'Phone number is required' })
-    .min(1, 'Phone number is required')
-    .transform((v) => v.replace(/[\s\-().]/g, ''))
-    .refine(
-      (v) => /^\+?[0-9]{7,15}$/.test(v),
-      { message: 'Please enter a valid phone number' },
-    ),
   emailOtp: z.string().length(4, 'Email verification code must be 4 digits'),
-  // The MSG91 OTP Widget runs client-side and verifies the phone code
-  // itself; the widget hands the frontend an access-token (JWT) on
-  // success, which is what's submitted here — not a 4-digit code. Craly's
-  // backend confirms it server-side via MSG91's verifyAccessToken API
-  // (see utils/sms.ts verifyMsg91AccessToken).
-  phoneAccessToken: z.string().min(1, 'Phone verification token is required'),
 });
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 

@@ -1,4 +1,10 @@
-import config, { isMsg91Configured } from '../config/index';
+// NOT WIRED INTO THE ACTIVE AUTH FLOW — kept intact and self-contained
+// (reads process.env directly rather than the shared config module) so
+// phone verification can be reintroduced later by importing
+// verifyMsg91AccessToken from authController again; nothing currently
+// calls this file. Signup verification is email-only.
+const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY ?? '';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 const MSG91_VERIFY_ACCESS_TOKEN_URL = 'https://control.msg91.com/api/v5/widget/verifyAccessToken';
 
@@ -45,8 +51,8 @@ export interface VerifyMsg91AccessTokenResult {
  * environment.
  */
 export async function verifyMsg91AccessToken(accessToken: string): Promise<VerifyMsg91AccessTokenResult> {
-  if (!isMsg91Configured) {
-    if (config.nodeEnv === 'production') {
+  if (!MSG91_AUTH_KEY) {
+    if (IS_PRODUCTION) {
       throw new Error('SMS verification service is not configured (MSG91_AUTH_KEY is missing)');
     }
     console.warn('[sms] DEV MODE: MSG91_AUTH_KEY not configured — auto-accepting any submitted access-token.');
@@ -62,7 +68,7 @@ export async function verifyMsg91AccessToken(accessToken: string): Promise<Verif
         Accept: 'application/json',
       },
       body: JSON.stringify({
-        authkey: config.msg91AuthKey,
+        authkey: MSG91_AUTH_KEY,
         'access-token': accessToken,
       }),
     });

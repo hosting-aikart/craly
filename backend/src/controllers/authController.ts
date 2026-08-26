@@ -6,7 +6,6 @@ import { signAuthToken } from '../utils/jwt';
 import { signupSchema, loginSchema, sendOtpSchema, verifyOtpSchema } from '../validators/authValidators';
 import { generateNumericOtp, hashOtp, verifyOtpHash } from '../utils/otp';
 import { sendOtpEmail } from '../utils/mailer';
-import { verifyMsg91AccessToken } from '../utils/sms';
 import { AUTH_COOKIE_NAME } from '../middlewares/auth';
 import type { AppError } from '../middlewares/errorHandler';
 
@@ -24,7 +23,11 @@ function setAuthCookie(res: Response, token: string): void {
 
 /**
  * POST /api/auth/send-otp
- * Generates and sends 4-digit OTP codes to the user's email and phone number.
+ * Generates and sends a 4-digit OTP code to the user's email. Signup
+ * verification is email-only — phone number is collected on the signup
+ * form and stored on the profile, but is not itself verified (SMS/MSG91
+ * is intentionally disconnected from the active auth flow; see
+ * utils/sms.ts).
  */
 export async function sendSignupOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -34,7 +37,7 @@ export async function sendSignupOtp(req: Request, res: Response, next: NextFunct
       err.statusCode = 400;
       return next(err);
     }
-    const { email, mobile, name } = parsed.data;
+    const { email, name } = parsed.data;
 
     // Check if email already exists
     const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
@@ -44,40 +47,26 @@ export async function sendSignupOtp(req: Request, res: Response, next: NextFunct
       return next(err);
     }
 
-    // Generate the email OTP locally — Craly still owns email OTP
-    // generation, hashing, storage, and verification end to end.
+    // Generate the email OTP locally — Craly generates, hashes, stores,
+    // and verifies this end to end.
     const emailOtp = generateNumericOtp(4);
     const emailOtpHash = hashOtp(email, emailOtp);
 
-    // Phone OTP: the MSG91 OTP Widget is a client-side product — the
-    // frontend's widget SDK (see app/signup/page.tsx) sends and verifies
-    // the code itself, talking to MSG91 directly. Craly's backend never
-    // dispatches the phone SMS; it only ever confirms the access-token
-    // the widget later produces (POST /api/auth/verify-otp ->
-    // verifyMsg91AccessToken). This placeholder row just gives phone
-    // verification the same "pending, expires, attempts" bookkeeping
-    // email already has, and is what /api/auth/signup checks for
-    // verified = true before creating an account.
-    await sql.begin(async (tx) => {
-      // Invalidate existing pending OTPs for this target
-      await tx`DELETE FROM auth_verifications WHERE target IN (${email}, ${mobile})`;
+    // Invalidate any existing pending OTP for this email, then store the
+    // new one with a 10-minute expiry.
+    await sql`DELETE FROM auth_verifications WHERE target = ${email}`;
+    await sql`
+      INSERT INTO auth_verifications (target, target_type, otp_hash, expires_at)
+      VALUES (${email}, 'email', ${emailOtpHash}, now() + interval '10 minutes')
+    `;
 
-      await tx`
-        INSERT INTO auth_verifications (target, target_type, otp_hash, expires_at)
-        VALUES
-          (${email}, 'email', ${emailOtpHash}, now() + interval '10 minutes'),
-          (${mobile}, 'phone', null, now() + interval '15 minutes')
-      `;
-    });
-
-    // Dispatch OTP email (via Resend). The phone leg is handled entirely
-    // client-side by the MSG91 widget — nothing to dispatch here.
+    // Dispatch OTP email (via Resend).
     await sendOtpEmail({ to: email, otp: emailOtp, name });
 
     res.json({
       data: {
         success: true,
-        message: 'Verification codes sent to your email and phone number',
+        message: 'Verification code sent to your email',
         expiresInSeconds: 600,
       },
     });
@@ -88,7 +77,8 @@ export async function sendSignupOtp(req: Request, res: Response, next: NextFunct
 
 /**
  * POST /api/auth/verify-otp
- * Validates the 4-digit email and phone OTPs submitted by the user.
+ * Validates the 4-digit email OTP submitted by the user. Email is the
+ * only verified channel for signup — see sendSignupOtp.
  */
 export async function verifySignupOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -98,7 +88,7 @@ export async function verifySignupOtp(req: Request, res: Response, next: NextFun
       err.statusCode = 400;
       return next(err);
     }
-    const { email, mobile, emailOtp, phoneAccessToken } = parsed.data;
+    const { email, emailOtp } = parsed.data;
 
     // Check email OTP
     const [emailRecord] = await sql`
@@ -129,52 +119,17 @@ export async function verifySignupOtp(req: Request, res: Response, next: NextFun
       return next(err);
     }
 
-    // Check phone verification
-    const [phoneRecord] = await sql`
-      SELECT id, attempts, expires_at, verified
-      FROM auth_verifications
-      WHERE target = ${mobile} AND target_type = 'phone'
-      ORDER BY created_at DESC
-      LIMIT 1
-    `;
-
-    if (!phoneRecord || new Date() > new Date(phoneRecord.expires_at)) {
-      const err: AppError = new Error('Phone verification has expired. Please request a new code.');
-      err.statusCode = 400;
-      return next(err);
-    }
-
-    if (phoneRecord.attempts >= 5) {
-      const err: AppError = new Error('Too many incorrect phone verification attempts. Please request a new code.');
-      err.statusCode = 400;
-      return next(err);
-    }
-
-    // Unlike email (hashed locally), the phone code itself was already
-    // sent and verified by MSG91's Widget SDK running in the browser —
-    // Craly never sees the plaintext code. What arrives here is the
-    // access-token the widget issued on success, which Craly confirms
-    // server-side via MSG91's verifyAccessToken API.
-    const phoneResult = await verifyMsg91AccessToken(phoneAccessToken);
-    if (!phoneResult.verified) {
-      await sql`UPDATE auth_verifications SET attempts = attempts + 1 WHERE id = ${phoneRecord.id}`;
-      const err: AppError = new Error('Invalid or expired phone verification. Please check and try again.');
-      err.statusCode = 400;
-      return next(err);
-    }
-
-    // Mark both verified
     await sql`
       UPDATE auth_verifications
       SET verified = true, updated_at = now()
-      WHERE id IN (${emailRecord.id}, ${phoneRecord.id})
+      WHERE id = ${emailRecord.id}
     `;
 
     res.json({
       data: {
         success: true,
         verified: true,
-        message: 'Email and phone number verified successfully.',
+        message: 'Email verified successfully.',
       },
     });
   } catch (err) {
@@ -205,26 +160,19 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
       return next(err);
     }
 
-    // Require that both email and phone actually completed OTP verification
-    // (POST /auth/send-otp + /auth/verify-otp) before an account is created.
-    // Without this check the endpoint previously hardcoded
-    // is_email_verified/is_phone_verified to true unconditionally, so OTP
-    // verification existed but was never enforced.
+    // Require that email actually completed OTP verification (POST
+    // /auth/send-otp + /auth/verify-otp) before an account is created.
+    // Signup verification is email-only — phone is collected as a normal
+    // profile field but is not itself verified (see sendSignupOtp).
     const [emailVerified] = await sql`
       SELECT id FROM auth_verifications
       WHERE target = ${email} AND target_type = 'email' AND verified = true
       ORDER BY created_at DESC
       LIMIT 1
     `;
-    const [phoneVerified] = await sql`
-      SELECT id FROM auth_verifications
-      WHERE target = ${mobile} AND target_type = 'phone' AND verified = true
-      ORDER BY created_at DESC
-      LIMIT 1
-    `;
 
-    if (!emailVerified || !phoneVerified) {
-      const err: AppError = new Error('Please verify your email and phone number before creating an account.');
+    if (!emailVerified) {
+      const err: AppError = new Error('Please verify your email before creating an account.');
       err.statusCode = 400;
       return next(err);
     }
@@ -232,9 +180,11 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
     const passwordHash = await hashPassword(password);
 
     const user = await sql.begin(async (tx) => {
+      // is_phone_verified stays false — phone number is collected but not
+      // verified as part of signup (SMS/MSG91 is out of the active flow).
       const [newUser] = await tx`
         INSERT INTO users (email, password_hash, role, is_active, is_email_verified, is_phone_verified)
-        VALUES (${email}, ${passwordHash}, ${role}, true, true, true)
+        VALUES (${email}, ${passwordHash}, ${role}, true, true, false)
         RETURNING id, email, role
       `;
 
@@ -269,8 +219,8 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
         `;
       }
 
-      // Cleanup used verification records
-      await tx`DELETE FROM auth_verifications WHERE target IN (${email}, ${mobile})`;
+      // Cleanup the used verification record
+      await tx`DELETE FROM auth_verifications WHERE target = ${email}`;
 
       return newUser;
     });
