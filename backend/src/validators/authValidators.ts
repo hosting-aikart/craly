@@ -54,7 +54,12 @@ export const verifyOtpSchema = z.object({
       { message: 'Please enter a valid phone number' },
     ),
   emailOtp: z.string().length(4, 'Email verification code must be 4 digits'),
-  phoneOtp: z.string().length(4, 'Phone verification code must be 4 digits'),
+  // The MSG91 OTP Widget runs client-side and verifies the phone code
+  // itself; the widget hands the frontend an access-token (JWT) on
+  // success, which is what's submitted here — not a 4-digit code. Craly's
+  // backend confirms it server-side via MSG91's verifyAccessToken API
+  // (see utils/sms.ts verifyMsg91AccessToken).
+  phoneAccessToken: z.string().min(1, 'Phone verification token is required'),
 });
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 

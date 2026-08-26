@@ -6,7 +6,7 @@ import { signAuthToken } from '../utils/jwt';
 import { signupSchema, loginSchema, sendOtpSchema, verifyOtpSchema } from '../validators/authValidators';
 import { generateNumericOtp, hashOtp, verifyOtpHash } from '../utils/otp';
 import { sendOtpEmail } from '../utils/mailer';
-import { sendPhoneOtp, verifyPhoneOtp } from '../utils/sms';
+import { verifyMsg91AccessToken } from '../utils/sms';
 import { AUTH_COOKIE_NAME } from '../middlewares/auth';
 import type { AppError } from '../middlewares/errorHandler';
 
@@ -49,32 +49,29 @@ export async function sendSignupOtp(req: Request, res: Response, next: NextFunct
     const emailOtp = generateNumericOtp(4);
     const emailOtpHash = hashOtp(email, emailOtp);
 
-    // Phone OTP: MSG91's OTP Widget generates the 4-digit code on its own
-    // servers and will verify it itself (see utils/sms.ts for the full
-    // trust-model explanation). This call both sends the SMS and returns
-    // the reqId Craly must store to verify the code MSG91 later reports.
-    const { reqId } = await sendPhoneOtp(mobile);
-
-    // Store in auth_verifications. Email keeps its own 10-minute local
-    // expiry (Craly-owned end to end). Phone's local expiry is set to 15
-    // minutes to match the MSG91 OTP Widget's configured "OTP Expiration
-    // Time" (MSG91 dashboard → OTP → Widgets → this widget → Widget
-    // Settings) — otherwise Craly could reject a code MSG91 would still
-    // accept as "expired" too early.
+    // Phone OTP: the MSG91 OTP Widget is a client-side product — the
+    // frontend's widget SDK (see app/signup/page.tsx) sends and verifies
+    // the code itself, talking to MSG91 directly. Craly's backend never
+    // dispatches the phone SMS; it only ever confirms the access-token
+    // the widget later produces (POST /api/auth/verify-otp ->
+    // verifyMsg91AccessToken). This placeholder row just gives phone
+    // verification the same "pending, expires, attempts" bookkeeping
+    // email already has, and is what /api/auth/signup checks for
+    // verified = true before creating an account.
     await sql.begin(async (tx) => {
       // Invalidate existing pending OTPs for this target
       await tx`DELETE FROM auth_verifications WHERE target IN (${email}, ${mobile})`;
 
       await tx`
-        INSERT INTO auth_verifications (target, target_type, otp_hash, provider_ref, expires_at)
+        INSERT INTO auth_verifications (target, target_type, otp_hash, expires_at)
         VALUES
-          (${email}, 'email', ${emailOtpHash}, null, now() + interval '10 minutes'),
-          (${mobile}, 'phone', null, ${reqId}, now() + interval '15 minutes')
+          (${email}, 'email', ${emailOtpHash}, now() + interval '10 minutes'),
+          (${mobile}, 'phone', null, now() + interval '15 minutes')
       `;
     });
 
-    // Dispatch OTP email (via Resend). The phone SMS was already sent
-    // above as part of the MSG91 widget/sendOtp call.
+    // Dispatch OTP email (via Resend). The phone leg is handled entirely
+    // client-side by the MSG91 widget — nothing to dispatch here.
     await sendOtpEmail({ to: email, otp: emailOtp, name });
 
     res.json({
@@ -101,7 +98,7 @@ export async function verifySignupOtp(req: Request, res: Response, next: NextFun
       err.statusCode = 400;
       return next(err);
     }
-    const { email, mobile, emailOtp, phoneOtp } = parsed.data;
+    const { email, mobile, emailOtp, phoneAccessToken } = parsed.data;
 
     // Check email OTP
     const [emailRecord] = await sql`
@@ -132,9 +129,9 @@ export async function verifySignupOtp(req: Request, res: Response, next: NextFun
       return next(err);
     }
 
-    // Check phone OTP
+    // Check phone verification
     const [phoneRecord] = await sql`
-      SELECT id, provider_ref, attempts, expires_at, verified
+      SELECT id, attempts, expires_at, verified
       FROM auth_verifications
       WHERE target = ${mobile} AND target_type = 'phone'
       ORDER BY created_at DESC
@@ -142,23 +139,26 @@ export async function verifySignupOtp(req: Request, res: Response, next: NextFun
     `;
 
     if (!phoneRecord || new Date() > new Date(phoneRecord.expires_at)) {
-      const err: AppError = new Error('Phone verification code has expired. Please request a new code.');
+      const err: AppError = new Error('Phone verification has expired. Please request a new code.');
       err.statusCode = 400;
       return next(err);
     }
 
     if (phoneRecord.attempts >= 5) {
-      const err: AppError = new Error('Too many incorrect phone code attempts. Please request a new code.');
+      const err: AppError = new Error('Too many incorrect phone verification attempts. Please request a new code.');
       err.statusCode = 400;
       return next(err);
     }
 
-    // Unlike email (hashed locally), the phone code is verified by MSG91
-    // itself — Craly never has the plaintext code to hash-compare.
-    const isPhoneValid = await verifyPhoneOtp(phoneRecord.provider_ref, phoneOtp);
-    if (!isPhoneValid) {
+    // Unlike email (hashed locally), the phone code itself was already
+    // sent and verified by MSG91's Widget SDK running in the browser —
+    // Craly never sees the plaintext code. What arrives here is the
+    // access-token the widget issued on success, which Craly confirms
+    // server-side via MSG91's verifyAccessToken API.
+    const phoneResult = await verifyMsg91AccessToken(phoneAccessToken);
+    if (!phoneResult.verified) {
       await sql`UPDATE auth_verifications SET attempts = attempts + 1 WHERE id = ${phoneRecord.id}`;
-      const err: AppError = new Error('Invalid phone verification code. Please check and try again.');
+      const err: AppError = new Error('Invalid or expired phone verification. Please check and try again.');
       err.statusCode = 400;
       return next(err);
     }

@@ -32,7 +32,10 @@ export const signup = (input: SignupInput) =>
 export const sendSignupOtp = (input: { email: string; mobile: string; name?: string }) =>
   apiPost<{ data: { success: boolean; message: string; expiresInSeconds: number } }>('/auth/send-otp', input);
 
-export const verifySignupOtp = (input: { email: string; mobile: string; emailOtp: string; phoneOtp: string }) =>
+// phoneAccessToken is the JWT the MSG91 OTP Widget issues client-side on
+// a successful phone verification — not a 4-digit code. See
+// app/signup/page.tsx and backend/src/utils/sms.ts.
+export const verifySignupOtp = (input: { email: string; mobile: string; emailOtp: string; phoneAccessToken: string }) =>
   apiPost<{ data: { success: boolean; verified: boolean; message: string } }>('/auth/verify-otp', input);
 
 export const login = (input: { email: string; password: string }) =>

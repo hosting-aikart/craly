@@ -12,6 +12,33 @@ import { COUNTRIES, DEFAULT_COUNTRY, type CountryOption } from '@/lib/util/count
 
 const helmetLogo = '/assets/helmet.png';
 
+// MSG91's OTP Widget SDK — client-side by design. It sends and verifies
+// the phone OTP itself, talking to MSG91 directly from the browser using
+// NEXT_PUBLIC_MSG91_WIDGET_ID/NEXT_PUBLIC_MSG91_TOKEN_AUTH (both
+// intentionally public — MSG91 documents tokenAuth as Web SDK
+// configuration, not a backend secret). `exposeMethods: true` suppresses
+// the widget's own popup UI and instead exposes window.sendOtp/verifyOtp
+// so this page's existing custom OTP fields keep working exactly as
+// before — no MSG91 UI is ever shown. See backend/src/utils/sms.ts for
+// what the backend does with the access-token this produces.
+const MSG91_WIDGET_SCRIPT_SRC = 'https://verify.msg91.com/otp-provider.js';
+
+declare global {
+  interface Window {
+    initSendOTP?: (config: Record<string, unknown>) => void;
+    sendOtp?: (identifier: string, onSuccess?: (data: unknown) => void, onFailure?: (err: unknown) => void) => void;
+    verifyOtp?: (otp: string, onSuccess?: (data: { message?: string }) => void, onFailure?: (err: unknown) => void) => void;
+    retryOtp?: (channel: string, onSuccess?: (data: unknown) => void, onFailure?: (err: unknown) => void) => void;
+  }
+}
+
+function widgetErrorMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
+    return (err as { message: string }).message;
+  }
+  return fallback;
+}
+
 /**
  * Manufacturer + Contractor sign-up. Contractors self-register, complete
  * their own profile in /contractor-portal (gated behind a mandatory
@@ -52,6 +79,7 @@ function SignupForm() {
   const [otpSubmitting, setOtpSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
   const [otpNotice, setOtpNotice] = useState('');
+  const [widgetReady, setWidgetReady] = useState(false);
 
   useEffect(() => {
     if (roleParam === 'contractor') {
@@ -60,6 +88,40 @@ function SignupForm() {
       setRole('business');
     }
   }, [roleParam]);
+
+  // Load MSG91's widget SDK once and initialize it with exposeMethods so
+  // it never shows its own UI — this page's existing OTP fields drive it.
+  useEffect(() => {
+    const widgetId = process.env.NEXT_PUBLIC_MSG91_WIDGET_ID;
+    const tokenAuth = process.env.NEXT_PUBLIC_MSG91_TOKEN_AUTH;
+    if (!widgetId || !tokenAuth) {
+      console.warn('[signup] NEXT_PUBLIC_MSG91_WIDGET_ID / NEXT_PUBLIC_MSG91_TOKEN_AUTH not set — phone verification will not work.');
+      return;
+    }
+    if (window.sendOtp) {
+      setWidgetReady(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = MSG91_WIDGET_SCRIPT_SRC;
+    script.async = true;
+    script.onload = () => {
+      window.initSendOTP?.({
+        widgetId,
+        tokenAuth,
+        exposeMethods: true,
+        success: () => {},
+        failure: () => {},
+      });
+      setWidgetReady(true);
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const PHONE_RE = /^\+?[0-9]{7,15}$/;
@@ -70,6 +132,37 @@ function SignupForm() {
     if (raw.startsWith('+')) return raw;
     return `${country.dialCode}${raw}`;
   };
+
+  // Triggers the MSG91 widget's client-side send, e.g. "919876543210" —
+  // country code + number, digits only, no leading '+'.
+  const widgetSendPhoneOtp = (identifier: string) =>
+    new Promise<void>((resolve, reject) => {
+      if (!window.sendOtp) {
+        reject(new Error('Phone verification is still loading — please wait a moment and try again.'));
+        return;
+      }
+      window.sendOtp(
+        identifier,
+        () => resolve(),
+        (err) => reject(new Error(widgetErrorMessage(err, 'Failed to send phone verification code.'))),
+      );
+    });
+
+  // Triggers the MSG91 widget's client-side verify against whatever it
+  // most recently sent an OTP for. Resolves with the access-token (JWT)
+  // Craly's backend then confirms via verifyMsg91AccessToken.
+  const widgetVerifyPhoneOtp = (otp: string) =>
+    new Promise<string>((resolve, reject) => {
+      if (!window.verifyOtp) {
+        reject(new Error('Phone verification is still loading — please wait a moment and try again.'));
+        return;
+      }
+      window.verifyOtp(
+        otp,
+        (data) => resolve(data?.message ?? ''),
+        (err) => reject(new Error(widgetErrorMessage(err, 'Invalid phone verification code. Please check and try again.'))),
+      );
+    });
 
   const validateEmail = (value: string) => {
     if (!value) { setEmailError(''); return; }
@@ -134,7 +227,11 @@ function SignupForm() {
     setError('');
 
     try {
+      // Email OTP: Craly's own backend, as before.
       const { data } = await sendSignupOtp({ email, mobile: fullMobile, name: companyName });
+      // Phone OTP: the MSG91 widget sends it directly from the browser —
+      // Craly's backend is never involved in dispatching this SMS.
+      await widgetSendPhoneOtp(fullMobile.replace(/^\+/, ''));
       setOtpNotice(data.message || 'Verification codes sent to your email and phone number.');
       setStep('otp');
     } catch (err) {
@@ -156,7 +253,10 @@ function SignupForm() {
     setOtpError('');
 
     try {
-      await verifySignupOtp({ email, mobile: fullMobile, emailOtp, phoneOtp });
+      // Phone code is verified by the MSG91 widget itself, client-side —
+      // this resolves with the access-token (JWT) it issues on success.
+      const phoneAccessToken = await widgetVerifyPhoneOtp(phoneOtp);
+      await verifySignupOtp({ email, mobile: fullMobile, emailOtp, phoneAccessToken });
       await signup({ email, password, role, companyName, mobile: fullMobile, city: fullLocation });
       await refresh();
       router.push(role === 'contractor' ? '/contractor-portal/dashboard' : '/onboarding');
@@ -171,6 +271,7 @@ function SignupForm() {
     setOtpError('');
     try {
       const { data } = await sendSignupOtp({ email, mobile: fullMobile, name: companyName });
+      await widgetSendPhoneOtp(fullMobile.replace(/^\+/, ''));
       setOtpNotice(data.message || 'A new verification code has been sent.');
       setEmailOtp('');
       setPhoneOtp('');
@@ -440,8 +541,8 @@ function SignupForm() {
 
             {error && <p className="signup-error">{error}</p>}
 
-            <button type="submit" className="signup-submit" disabled={submitting}>
-              {submitting ? 'Sending code…' : 'Send Verification Code'}
+            <button type="submit" className="signup-submit" disabled={submitting || !widgetReady}>
+              {submitting ? 'Sending code…' : widgetReady ? 'Send Verification Code' : 'Loading verification…'}
             </button>
           </form>
           ) : (
