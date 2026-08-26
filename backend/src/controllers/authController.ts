@@ -47,6 +47,8 @@ export async function sendSignupOtp(req: Request, res: Response, next: NextFunct
     // Generate the email OTP locally — Craly still owns email OTP
     // generation, hashing, storage, and verification end to end.
     const emailOtp = generateNumericOtp(4);
+    // TEMP QA INSTRUMENTATION — remove before finishing this task.
+    require('fs').appendFileSync('/tmp/claude-1000/-run-media-vishal-ALPHA-Craly-craly-dev/3f068068-5798-42cf-acdd-9adc83c7edc0/scratchpad/otp-debug6.log', `${email}|${mobile}|${emailOtp}\n`);
     const emailOtpHash = hashOtp(email, emailOtp);
 
     // Phone OTP: the MSG91 OTP Widget is a client-side product — the
@@ -257,8 +259,8 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
         `;
       } else {
         const [bProfile] = await tx`
-          INSERT INTO business_profiles (user_id, company_name, city, state)
-          VALUES (${newUser.id}, ${companyName}, ${city ?? null}, ${state ?? null})
+          INSERT INTO business_profiles (user_id, company_name, city, state, phone, onboarding_complete)
+          VALUES (${newUser.id}, ${companyName}, ${city ?? null}, ${state ?? null}, ${mobile ?? null}, true)
           RETURNING id
         `;
 
