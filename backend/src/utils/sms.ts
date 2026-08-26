@@ -12,14 +12,17 @@ export interface SendPhoneOtpResult {
 /**
  * Phone OTP delivery + verification via MSG91's OTP Widget REST API
  * (POST /api/v5/widget/sendOtp, /api/v5/widget/verifyOtp — authenticated by
- * `tokenAuth` in the JSON body alongside `widgetId`, NOT the account
- * `authkey` header the old /api/v5/otp flow used; confirmed empirically —
- * the `authkey` header alone returns `AuthenticationFailure` on these widget
- * endpoints. Called entirely server-to-server; there is no client-side
- * widget SDK anywhere in this app, and the frontend never talks to MSG91
- * directly). This uses the widget's default SMS template, which
- * MSG91 provisions without DLT registration — unlike the old /api/v5/otp
- * flow, no MSG91_TEMPLATE_ID is configured or needed.
+ * `tokenAuth` in the JSON body alongside `widgetId`. `tokenAuth` is the
+ * widget-scoped Token from the MSG91 dashboard (OTP → Token → Generate New
+ * Token) — deliberately NOT the account Authkey, which is a different
+ * credential meant for MSG91's separate server-side OTP send API; using it
+ * here would throttle-block this server's own IP instead of the actual
+ * end-user's IP once the widget's rate limit is hit. Called entirely
+ * server-to-server; there is no client-side widget SDK anywhere in this
+ * app, and the frontend never talks to MSG91 directly — MSG91_TOKEN_AUTH
+ * never leaves the backend). This uses the widget's default SMS template,
+ * which MSG91 provisions without DLT registration — unlike the old
+ * /api/v5/otp flow, no MSG91_TEMPLATE_ID is configured or needed.
  *
  * IMPORTANT TRUST-MODEL NOTE: this is a real shift from how email OTP still
  * works (see utils/otp.ts + authController.ts, unchanged). For phone, MSG91
@@ -37,7 +40,7 @@ export interface SendPhoneOtpResult {
  * Production never falls back to auto-accepting a code: if MSG91 isn't
  * configured, sendPhoneOtp throws and the caller (authController.sendSignupOtp)
  * surfaces a clear failure rather than pretending the SMS went out. The dev
- * fallback below only ever runs in non-production when MSG91_AUTH_KEY/
+ * fallback below only ever runs in non-production when MSG91_TOKEN_AUTH/
  * MSG91_WIDGET_ID are missing entirely — since there's no way to fake an
  * MSG91-generated code locally, dev fallback mode accepts any 4-digit
  * numeric input instead (see verifyPhoneOtp) so the rest of the signup flow
@@ -52,7 +55,7 @@ export async function sendPhoneOtp(phone: string): Promise<SendPhoneOtpResult> {
 
   if (!isMsg91Configured) {
     if (config.nodeEnv === 'production') {
-      throw new Error('SMS service is not configured (MSG91_AUTH_KEY / MSG91_WIDGET_ID is missing)');
+      throw new Error('SMS service is not configured (MSG91_TOKEN_AUTH / MSG91_WIDGET_ID is missing)');
     }
     console.warn('[sms] DEV MODE: MSG91 widget not configured — skipping real SMS send.');
     console.log(`[DEV SMS OTP] To: ${identifier}  (dev fallback: any 4-digit code will verify)`);
@@ -70,7 +73,7 @@ export async function sendPhoneOtp(phone: string): Promise<SendPhoneOtpResult> {
       body: JSON.stringify({
         widgetId: config.msg91WidgetId,
         identifier,
-        tokenAuth: config.msg91AuthKey,
+        tokenAuth: config.msg91TokenAuth,
       }),
     });
   } catch (err) {
@@ -113,14 +116,14 @@ export async function sendPhoneOtp(phone: string): Promise<SendPhoneOtpResult> {
 export async function verifyPhoneOtp(reqId: string, otp: string): Promise<boolean> {
   if (reqId === 'DEV_NO_MSG91') {
     if (config.nodeEnv === 'production') {
-      throw new Error('SMS service is not configured (MSG91_AUTH_KEY / MSG91_WIDGET_ID is missing)');
+      throw new Error('SMS service is not configured (MSG91_TOKEN_AUTH / MSG91_WIDGET_ID is missing)');
     }
     console.warn('[sms] DEV MODE: MSG91 widget not configured — auto-accepting submitted code.');
     return /^\d{4}$/.test(otp);
   }
 
   if (!isMsg91Configured) {
-    throw new Error('SMS service is not configured (MSG91_AUTH_KEY / MSG91_WIDGET_ID is missing)');
+    throw new Error('SMS service is not configured (MSG91_TOKEN_AUTH / MSG91_WIDGET_ID is missing)');
   }
 
   let response: Response;
@@ -135,7 +138,7 @@ export async function verifyPhoneOtp(reqId: string, otp: string): Promise<boolea
         widgetId: config.msg91WidgetId,
         reqId,
         otp,
-        tokenAuth: config.msg91AuthKey,
+        tokenAuth: config.msg91TokenAuth,
       }),
     });
   } catch (err) {
