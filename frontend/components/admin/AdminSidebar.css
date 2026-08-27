@@ -26,7 +26,7 @@
 }
 
 .admin-sidebar__logo-img {
-  height: 44px;
+  height: 56px;
   width: auto;
   flex-shrink: 0;
   filter: brightness(0) invert(1);

@@ -199,7 +199,7 @@ function SignupForm() {
         <div className="signup-panel">
           <div>
             <div className="signup-panel__brand">
-              <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '56px', width: 'auto' }} />
+              <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '76px', width: 'auto' }} />
             </div>
 
             <p className="signup-panel__eyebrow">{t.auth.createAccountEyebrow}</p>
@@ -249,7 +249,7 @@ function SignupForm() {
         {/* ── Right: white form panel ───────────────────────────────── */}
         <div className="signup-form-panel">
           <div className="signup-mobile-brand">
-            <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '56px', width: 'auto' }} />
+            <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '76px', width: 'auto' }} />
           </div>
           <p className="signup-form-panel__eyebrow">{t.auth.createAccountEyebrow}</p>
           <h1 className="signup-form-panel__heading">

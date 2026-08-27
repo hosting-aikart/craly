@@ -96,7 +96,7 @@ export default function LoginPage() {
         <div className="login-panel">
           <div>
             <div className="login-panel__brand">
-              <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '56px', width: 'auto' }} />
+              <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '76px', width: 'auto' }} />
             </div>
 
             <p className="login-panel__eyebrow">{t.auth.networkEyebrow}</p>
@@ -137,7 +137,7 @@ export default function LoginPage() {
         {/* ── Right: white form panel ───────────────────────────────── */}
         <div className="login-form-panel">
           <div className="login-mobile-brand">
-            <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '56px', width: 'auto' }} />
+            <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '76px', width: 'auto' }} />
           </div>
           <p className="login-form-panel__eyebrow">{t.auth.welcomeBackEyebrow}</p>
           <h1 className="login-form-panel__heading">{t.auth.logInTitle}</h1>
