@@ -85,7 +85,7 @@ export default function AdminSidebar({ adminEmail }: AdminSidebarProps) {
     <aside className="admin-sidebar">
       <div className="admin-sidebar__brand">
         <Link href="/admin/dashboard" className="admin-sidebar__logo">
-          <img src="/assets/craly-logo.svg" alt="Craly" className="admin-sidebar__logo-img" />
+          <img src="/assets/craly-logo.png" alt="Craly" className="admin-sidebar__logo-img" />
           <span className="admin-sidebar__logo-badge">ADMIN</span>
         </Link>
       </div>

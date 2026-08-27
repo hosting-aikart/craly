@@ -16,7 +16,7 @@ export default function Foot() {
         <div className="footer-top">
 
           <div className="footer-brand">
-            <img src="/assets/craly-logo.svg" alt="Craly" className="footer__logo-wordmark" />
+            <img src="/assets/craly-logo.png" alt="Craly" className="footer__logo-wordmark" />
             <p>{t.footer.tagline}</p>
             <span>{t.footer.subtext}</span>
           </div>
