@@ -95,7 +95,6 @@
   height: 62px;
   width: auto;
   flex-shrink: 0;
-  filter: brightness(0) invert(1);
 }
 
 .mobile-drawer__logo-text {

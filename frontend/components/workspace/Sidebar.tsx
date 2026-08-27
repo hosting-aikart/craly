@@ -234,7 +234,7 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     <aside className="workspace-sidebar">
       <div className="workspace-sidebar__brand">
         <Link href="/" className="workspace-sidebar__logo">
-          <img src="/assets/craly-logo.png" alt="Craly" className="workspace-sidebar__logo-img" />
+          <img src="/assets/craly-logo-white.png" alt="Craly" className="workspace-sidebar__logo-img" />
           <span className="workspace-sidebar__logo-sub">Verified Workforce Network</span>
         </Link>
       </div>

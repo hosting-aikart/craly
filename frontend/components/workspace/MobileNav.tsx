@@ -102,7 +102,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
           <div className="mobile-drawer__content" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-drawer__header">
               <div className="mobile-drawer__brand">
-                <img src="/assets/craly-logo.png" alt="Craly" className="mobile-drawer__logo-img" />
+                <img src="/assets/craly-logo-white.png" alt="Craly" className="mobile-drawer__logo-img" />
               </div>
               <button className="mobile-drawer__close" onClick={closeDrawer} aria-label="Close menu">×</button>
             </div>

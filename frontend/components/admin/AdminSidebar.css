@@ -29,7 +29,6 @@
   height: 58px;
   width: auto;
   flex-shrink: 0;
-  filter: brightness(0) invert(1);
 }
 
 .admin-sidebar__logo-badge {
