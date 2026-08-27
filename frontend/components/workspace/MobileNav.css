@@ -92,7 +92,7 @@
 }
 
 .mobile-drawer__logo-img {
-  height: 60px;
+  height: 62px;
   width: auto;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
