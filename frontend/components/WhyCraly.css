@@ -105,23 +105,23 @@
 /* ---------------- Positions (% of stage box) ---------------- */
 
 .badge--top-left {
-  left: 2%;
-  top: 14%;
+  left: 16%;
+  top: 22%;
 }
 
 .badge--mid-left {
-  left: 0%;
-  top: 60%;
+  left: 12%;
+  top: 56%;
 }
 
 .badge--mid-right {
-  right: 2%;
-  top: 18%;
+  right: 14%;
+  top: 24%;
 }
 
 .badge--bottom-right {
-  right: 1%;
-  bottom: 12%;
+  right: 12%;
+  bottom: 18%;
 }
 
 /* ---------------- Responsive ---------------- */
