@@ -1,0 +1,96 @@
+.notifications-page {
+  min-height: calc(100vh - 68px);
+  background: var(--craly-off-white);
+  padding: var(--space-7) 24px 80px;
+}
+
+.notifications-page__inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.notifications-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: var(--space-5);
+}
+
+.notifications-page__header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.5vw, 30px);
+  font-weight: 500;
+  color: var(--craly-navy);
+}
+
+.notifications-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notifications-page__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: var(--craly-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.notifications-page__item:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--craly-border-strong);
+}
+
+.notifications-page__item--unread {
+  border-color: #bfeae3;
+  background: linear-gradient(180deg, var(--craly-mint) 0%, var(--craly-white) 48px);
+}
+
+.notifications-page__item-dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: transparent;
+}
+
+.notifications-page__item--unread .notifications-page__item-dot {
+  background: var(--craly-teal);
+}
+
+.notifications-page__item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.notifications-page__item-body strong {
+  font-family: var(--font-heading);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--craly-navy);
+}
+
+.notifications-page__item-body span {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--craly-text-muted);
+  line-height: 1.5;
+}
+
+.notifications-page__item-body em {
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--craly-text-faint);
+  margin-top: 2px;
+}

@@ -1,0 +1,200 @@
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-content {
+  width: 100%;
+  padding: 0 20px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.hero-content--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-icon {
+  display: block;
+  width: 72px;
+  height: auto;
+  margin: 0 auto 18px;
+  position: relative;
+  top: -50px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.hero-headline {
+    font-family: var(--font-display);
+    color: white;
+    font-size: clamp(52px, 6vw, 76px);
+    font-weight: 300;      /* Medium instead of Bold */
+    line-height: 1;
+    position: relative;
+    top: -50px;
+    letter-spacing: -0.03em;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+.hero-accent {
+  color: #2dd4bf;
+}
+
+.hero-subtext {
+  position: relative;
+  top: -20px;
+  font-family: var(--font-body);
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.hero-cta {
+  position: relative;
+  top: -10px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.hero-cta__btn {
+  padding: 16px 30px;
+  border-radius: 999px;
+  font-family: var(--font-button);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.hero-cta__btn--solid {
+  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
+  color: white;
+  box-shadow: 0 16px 32px rgba(15, 118, 110, 0.35);
+}
+
+.hero-cta__btn--solid:hover {
+  background: linear-gradient(135deg, #0b5c56 0%, #0b3b38 100%);
+}
+
+.hero-cta__btn--outline {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: white;
+  backdrop-filter: blur(8px);
+}
+
+.hero-cta__btn--outline:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.shield-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #2563EB;
+  -webkit-mask-image: url('/assets/shield-icon.png');
+  mask-image: url('/assets/shield-icon.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 100px 0 60px;
+  }
+
+  .hero-headline {
+    top: -20px;
+    font-size: clamp(34px, 7.5vw, 50px);
+    line-height: 1.15;
+  }
+
+  .hero-subtext {
+    top: -5px;
+    font-size: 15px;
+  }
+
+  .hero-cta {
+    top: 10px;
+    gap: 12px;
+  }
+
+  .hero-icon {
+    top: -20px;
+    width: 54px;
+  }
+}
+
+/* Small phones — headline/pill need their own sizing, not just a
+   scaled-down desktop layout, or text wraps awkwardly. */
+@media (max-width: 480px) {
+
+  .hero-content {
+    padding: 0 16px;
+  }
+
+  .hero-headline {
+    top: 0;
+    font-size: clamp(28px, 8.5vw, 36px);
+    line-height: 1.2;
+  }
+
+  .hero-subtext {
+    top: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .hero-cta {
+    top: 20px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+    margin: 20px auto 0;
+  }
+
+  .hero-cta__btn {
+    width: auto;
+    flex: 0 1 auto;
+    text-align: center;
+    padding: 9px 15px;
+    font-size: 12.5px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .hero-icon {
+    top: 0;
+    width: 46px;
+  }
+
+}

@@ -1,0 +1,188 @@
+.staff-contractors-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-add {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.search-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.filter-select {
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.search-btn {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.contractors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contractor-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.contractor-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.contractor-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+}
+
+.contractor-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contractor-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.status-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.status-tag--available {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-tag--currently_at_capacity {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-tag--not_available,
+.status-tag--suspended {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-tag--paused {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.contractor-card__details {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #475569;
+}
+
+.btn-view {
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.btn-view:hover {
+  background: #e2e8f0;
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .contractor-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .contractor-card__actions {
+    width: 100%;
+  }
+
+  .btn-view {
+    display: block;
+    text-align: center;
+  }
+}

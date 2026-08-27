@@ -1,0 +1,117 @@
+.role-select {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.role-select__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.role-select__eyebrow {
+  color: #0f766e;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.role-select__heading {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 38px);
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 52px;
+}
+
+.role-select__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  text-align: left;
+}
+
+.role-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.role-card:hover {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.09);
+  transform: translateY(-2px);
+}
+
+.role-card--contractor {
+  --role-color: #0f766e;
+}
+
+.role-card--business {
+  --role-color: #2563eb;
+}
+
+.role-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--role-color);
+}
+
+.role-card--contractor .role-card__icon {
+  background: #ccfbf1;
+}
+
+.role-card--business .role-card__icon {
+  background: #dbeafe;
+}
+
+.role-card h3 {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.role-card p {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.role-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--role-color);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.role-card__action:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .role-select {
+    padding: 64px 20px;
+  }
+
+  .role-select__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,331 @@
+.cp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: cp-modal-fade-in 0.25s ease-out;
+}
+
+@keyframes cp-modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cp-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e2e8f0;
+  padding: 28px;
+}
+
+.cp-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.cp-modal-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
+  margin-bottom: 8px;
+}
+
+.cp-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.cp-modal-header p {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cp-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.cp-modal-close:hover {
+  color: #0f172a;
+}
+
+.cp-modal-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+.cp-modal-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .cp-modal-backdrop {
+    padding: 12px;
+  }
+
+  .cp-modal-content {
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  .cp-modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .cp-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cp-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cp-modal-field--full {
+  grid-column: 1 / -1;
+}
+
+.cp-modal-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.cp-modal-field input,
+.cp-modal-field select,
+.cp-modal-field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background-color: #f8fafc;
+  transition: all 0.15s ease;
+}
+
+.cp-modal-field input:focus,
+.cp-modal-field select:focus,
+.cp-modal-field textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.cp-modal-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cp-modal-submit-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.cp-modal-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.cp-modal-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Interactive Skills & Preset Chips Styling ──────────────── */
+.cp-selected-skills-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.cp-chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cp-skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  font-size: 0.825rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  transition: all 0.15s ease;
+}
+
+.cp-skill-chip:hover {
+  background: #dbeafe;
+}
+
+.cp-skill-remove-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-skill-remove-btn:hover {
+  color: #1e40af;
+}
+
+.cp-skills-placeholder {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.cp-skill-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cp-skill-input-row input {
+  flex: 1;
+}
+
+.cp-add-skill-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.cp-add-skill-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.cp-add-skill-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cp-presets-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cp-presets-label {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cp-preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cp-preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.775rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cp-preset-chip:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.cp-plus-icon {
+  font-weight: 700;
+  color: #2563eb;
+  font-size: 0.9rem;
+}
+

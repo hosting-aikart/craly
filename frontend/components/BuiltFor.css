@@ -1,0 +1,148 @@
+.built-for {
+  padding: 80px 24px;
+  text-align: center;
+  background: linear-gradient(160deg, #111827 0%, #0b1120 55%, #0f172a 100%);
+}
+
+.built-for__eyebrow {
+  font-family: var(--font-body);
+  color: #f5a623;
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-size: 16px; /* was 13px */
+  margin-bottom: 12px;
+}
+
+.built-for__heading {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 52px); /* was clamp(28px, 4vw, 40px) */
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 40px;
+}
+
+.built-for__carousel {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.built-for__image-wrap {
+  width: 100%;
+  height: 529px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.built-for__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: fade-in 0.5s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.built-for__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 24px;
+  text-align: left;
+}
+
+.built-for__caption {
+  animation: fade-in 0.5s ease;
+  text-align: left;
+}
+
+.built-for__title {
+  font-family: var(--font-heading); /* Red Hat Display */
+  font-size: 32px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.built-for__text {
+  font-family: var(--font-body); /* Inter */
+  font-size: 20px;
+  color: #a1a1aa;
+}
+
+.built-for__nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.built-for__nav button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(45, 212, 191, 0.4);
+  background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.35);
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.built-for__nav button:hover {
+  transform: translateY(-3px) scale(1.06);
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  box-shadow: 0 12px 28px rgba(15, 118, 110, 0.5);
+}
+
+@media (max-width: 900px) {
+  .built-for__image-wrap {
+    height: 380px;
+  }
+}
+
+@media (max-width: 600px) {
+  .built-for {
+    padding: 56px 20px;
+  }
+
+  .built-for__heading {
+    font-size: clamp(26px, 6vw, 34px);
+    margin-bottom: 28px;
+  }
+
+  .built-for__image-wrap {
+    height: 240px;
+    border-radius: 14px;
+  }
+
+  .built-for__title {
+    font-size: 22px;
+  }
+
+  .built-for__text {
+    font-size: 15px;
+  }
+
+  .built-for__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    text-align: left;
+  }
+
+  .built-for__nav {
+    justify-content: center;
+    width: 100%;
+  }
+}

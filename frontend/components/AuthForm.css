@@ -1,0 +1,192 @@
+/* Shared field/button styling for login, signup, onboarding, and dashboard
+   edit forms — one input/button language across every authenticated form. */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-row {
+  display: flex;
+  gap: 16px;
+}
+
+.auth-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-body);
+}
+
+.auth-field span {
+  font-size: 13px;
+  color: var(--craly-text-muted);
+  font-weight: 500;
+}
+
+.auth-field input,
+.auth-field textarea,
+.auth-field select {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--craly-text);
+  background: var(--craly-off-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  outline: none;
+  transition: 0.2s;
+  resize: vertical;
+}
+
+.auth-field input:focus,
+.auth-field textarea:focus,
+.auth-field select:focus {
+  border-color: var(--craly-teal);
+  background: var(--craly-white);
+  box-shadow: 0 0 0 4px rgba(15, 139, 130, 0.12);
+}
+
+.auth-field input::placeholder,
+.auth-field textarea::placeholder {
+  color: var(--craly-text-faint);
+}
+
+.auth-field select option {
+  background: var(--craly-white);
+  color: var(--craly-text);
+}
+
+/* Role picker used on signup */
+.auth-role-picker {
+  display: flex;
+  gap: 12px;
+}
+
+.auth-role-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--craly-border);
+  background: var(--craly-off-white);
+  color: var(--craly-text-muted);
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: var(--font-body);
+}
+
+.auth-role-option span:first-child {
+  font-size: 22px;
+}
+
+.auth-role-option span:last-child {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-role-option:hover {
+  border-color: var(--craly-teal);
+}
+
+.auth-role-option--active {
+  border-color: var(--craly-teal);
+  background: var(--craly-mint);
+  color: var(--craly-teal-dark);
+}
+
+/* Category chips used on onboarding */
+.auth-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.auth-chip {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--craly-text-muted);
+  background: var(--craly-off-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.auth-chip:hover {
+  border-color: var(--craly-teal);
+  color: var(--craly-teal-dark);
+}
+
+.auth-chip--active {
+  background: var(--craly-teal);
+  border-color: var(--craly-teal);
+  color: var(--craly-white);
+}
+
+.auth-error {
+  color: var(--craly-danger);
+  font-family: var(--font-body);
+  font-size: 14px;
+  background: var(--craly-danger-bg);
+  border: 1px solid var(--craly-danger-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.auth-submit {
+  font-family: var(--font-button);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--craly-white);
+  background: var(--craly-teal);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 4px;
+  box-shadow: var(--shadow-md);
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: var(--craly-teal-dark);
+  transform: translateY(-2px);
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-footer-link {
+  margin-top: 22px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--craly-text-muted);
+}
+
+.auth-footer-link a {
+  color: var(--craly-teal-dark);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-footer-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .auth-row,
+  .auth-role-picker {
+    flex-direction: column;
+  }
+}

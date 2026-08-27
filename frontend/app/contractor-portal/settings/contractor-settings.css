@@ -1,0 +1,133 @@
+.contractor-settings-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.contractor-settings-header {
+  margin-bottom: 24px;
+}
+
+.contractor-settings-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.contractor-settings-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.contractor-settings-alert {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.contractor-settings-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.contractor-settings-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.contractor-settings-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contractor-settings-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.contractor-settings-info-item span {
+  color: #64748b;
+}
+
+.contractor-settings-info-item strong {
+  color: #0f172a;
+}
+
+.contractor-settings-role-tag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.contractor-settings-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.contractor-settings-toggle input {
+  margin-top: 4px;
+  width: 16px;
+  height: 16px;
+}
+
+.contractor-settings-toggle strong {
+  display: block;
+  font-size: 14px;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.contractor-settings-toggle p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.contractor-settings-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.contractor-settings-save-btn {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.contractor-settings-save-btn:hover {
+  background: #1e293b;
+}
+
+@media (max-width: 640px) {
+  .contractor-settings-page {
+    padding: 16px;
+  }
+}

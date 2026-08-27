@@ -1,0 +1,37 @@
+.empty-state {
+  text-align: center;
+  padding: var(--space-8) var(--space-5);
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.empty-state__icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--craly-mint);
+  color: var(--craly-teal-dark);
+}
+
+.empty-state__title {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--craly-text);
+  margin-bottom: 6px;
+}
+
+.empty-state__subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--craly-text-muted);
+  line-height: 1.6;
+}
+
+.empty-state__action {
+  margin-top: var(--space-5);
+}

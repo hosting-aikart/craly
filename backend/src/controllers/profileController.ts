@@ -1,0 +1,216 @@
+import { Request, Response, NextFunction } from 'express';
+import sql from '../db/index';
+import { contractorProfileSchema, businessProfileSchema } from '../validators/profileValidators';
+import { sanitizeContactInfo } from '../utils/contactSanitizer';
+import { toPgTextArrayLiteral } from '../utils/pgArray';
+import type { AppError } from '../middlewares/errorHandler';
+
+/**
+ * GET /api/profile/me
+ * Requires requireAuth. Returns the caller's role-specific profile row —
+ * used by the frontend to decide login → onboarding vs. login → dashboard.
+ */
+export async function getMyProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { sub: userId, role } = req.user!;
+
+    if (role === 'contractor') {
+      const [profile] = await sql`
+        SELECT cp.id, cp.company_name, cp.phone, cp.description, cp.city, cp.state, cp.years_experience,
+               cp.workforce_size, cp.industry, cp.skills, cp.service_areas, cp.availability,
+               cp.verification_status, cp.verification_note, cp.onboarding_complete,
+               cp.last_verified_at, cp.updated_at, u.email AS user_email
+        FROM contractor_profiles cp
+        JOIN users u ON u.id = cp.user_id
+        WHERE cp.user_id = ${userId}
+      `;
+      if (!profile) {
+        const err: AppError = new Error('Profile not found');
+        err.statusCode = 404;
+        return next(err);
+      }
+      const categories = await sql`
+        SELECT sc.id, sc.name, sc.slug
+        FROM contractor_categories cc
+        JOIN service_categories sc ON sc.id = cc.category_id
+        WHERE cc.contractor_id = ${profile.id}
+      `;
+      res.json({ data: { role, ...profile, categories } });
+      return;
+    }
+
+    if (role === 'business') {
+      const [profile] = await sql`
+        SELECT id, company_name, industry, city, state, phone, onboarding_complete
+        FROM business_profiles WHERE user_id = ${userId}
+      `;
+      if (!profile) {
+        const err: AppError = new Error('Profile not found');
+        err.statusCode = 404;
+        return next(err);
+      }
+      res.json({ data: { role, ...profile } });
+      return;
+    }
+
+    if (role === 'admin') {
+      res.json({ data: { role: 'admin', id: userId, company_name: 'Craly Admin', onboarding_complete: true } });
+      return;
+    }
+
+    // Field Staff / Staff / Ops Head have no business profile — their profile
+    // response returns internal account info with onboarding_complete: true.
+    if (role === 'staff' || role === 'field_staff' || role === 'ops_head') {
+      const [account] = await sql`SELECT id, email, created_at FROM users WHERE id = ${userId}`;
+      if (!account) {
+        const err: AppError = new Error('Account not found');
+        err.statusCode = 404;
+        return next(err);
+      }
+      res.json({ data: { role, id: account.id, email: account.email, company_name: 'Craly Operations', created_at: account.created_at, onboarding_complete: true } });
+      return;
+    }
+
+    const err: AppError = new Error('Invalid user role');
+    err.statusCode = 400;
+    next(err);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/profile/me
+ * Requires requireAuth. Updates the caller's role-specific profile and
+ * marks onboarding_complete = true.
+ */
+export async function updateMyProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { sub: userId, role } = req.user!;
+
+    if (role === 'contractor') {
+      const parsed = contractorProfileSchema.safeParse(req.body);
+      if (!parsed.success) {
+        const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid profile input');
+        err.statusCode = 400;
+        return next(err);
+      }
+      const {
+        companyName,
+        phone,
+        description,
+        city,
+        state,
+        yearsExperience,
+        workforceSize,
+        industry,
+        skills,
+        serviceAreas,
+        availability,
+        categoryIds,
+      } = parsed.data;
+
+      const cleanDesc = description !== undefined ? (description ? sanitizeContactInfo(description) : null) : undefined;
+
+      const profile = await sql.begin(async (tx) => {
+        const updateFields: Record<string, any> = {
+          onboarding_complete: true,
+          updated_at: sql`now()`,
+        };
+
+        if (companyName !== undefined) updateFields.company_name = companyName;
+        if (phone !== undefined) updateFields.phone = phone;
+        if (cleanDesc !== undefined) updateFields.description = cleanDesc;
+        if (city !== undefined) updateFields.city = city;
+        if (state !== undefined) updateFields.state = state;
+        if (yearsExperience !== undefined) updateFields.years_experience = yearsExperience;
+        if (workforceSize !== undefined) updateFields.workforce_size = workforceSize;
+        if (industry !== undefined) updateFields.industry = industry;
+        if (skills !== undefined) {
+          const lit = toPgTextArrayLiteral(skills);
+          updateFields.skills = sql`${lit}::text[]`;
+        }
+        if (serviceAreas !== undefined) {
+          const lit = toPgTextArrayLiteral(serviceAreas);
+          updateFields.service_areas = sql`${lit}::text[]`;
+        }
+        if (availability !== undefined) updateFields.availability = availability;
+
+        const [updated] = await tx`
+          UPDATE contractor_profiles SET ${sql(updateFields)}
+          WHERE user_id = ${userId}
+          RETURNING id
+        `;
+
+        if (!updated) {
+          const err: AppError = new Error('Contractor profile not found');
+          err.statusCode = 404;
+          throw err;
+        }
+
+        if (categoryIds) {
+          await tx`DELETE FROM contractor_categories WHERE contractor_id = ${updated.id}`;
+          for (const categoryId of categoryIds) {
+            await tx`
+              INSERT INTO contractor_categories (contractor_id, category_id)
+              VALUES (${updated.id}, ${categoryId})
+              ON CONFLICT DO NOTHING
+            `;
+          }
+        }
+
+        return updated;
+      });
+
+      res.json({ data: { id: profile.id } });
+      return;
+    }
+
+    if (role === 'business') {
+      const parsed = businessProfileSchema.safeParse(req.body);
+      if (!parsed.success) {
+        const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid profile input');
+        err.statusCode = 400;
+        return next(err);
+      }
+      const { companyName, industry, city, state, phone } = parsed.data;
+
+      const updateFields: Record<string, any> = {
+        onboarding_complete: true,
+        updated_at: sql`now()`,
+      };
+      if (companyName !== undefined) updateFields.company_name = companyName;
+      if (industry !== undefined) updateFields.industry = industry;
+      if (city !== undefined) updateFields.city = city;
+      if (state !== undefined) updateFields.state = state;
+      if (phone !== undefined) updateFields.phone = phone;
+
+      const [updated] = await sql`
+        UPDATE business_profiles SET ${sql(updateFields)}
+        WHERE user_id = ${userId}
+        RETURNING id
+      `;
+
+      if (!updated) {
+        const err: AppError = new Error('Business profile not found');
+        err.statusCode = 404;
+        return next(err);
+      }
+
+      res.json({ data: { id: updated.id } });
+      return;
+    }
+
+    if (role === 'field_staff' || role === 'ops_head') {
+      const err: AppError = new Error('Staff profile fields are not editable in Phase 1');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const err: AppError = new Error('Admins do not have a profile');
+    err.statusCode = 400;
+    next(err);
+  } catch (err) {
+    next(err);
+  }
+}

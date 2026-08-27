@@ -1,0 +1,265 @@
+/* Shared styles for the Field Staff workspace: Dashboard, My Activity,
+   Profile, Settings. Mobile-first — single column by default, opening up
+   into a grid only at wider breakpoints. */
+
+.fs-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: var(--space-6);
+}
+
+@media (min-width: 640px) {
+  .fs-tiles {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+.fs-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--craly-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  min-height: 44px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+a.fs-tile:hover, a.fs-tile:focus-visible {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.fs-tile__value {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--craly-navy);
+  line-height: 1;
+}
+
+.fs-tile__label {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--craly-text-muted);
+  line-height: 1.3;
+}
+
+.fs-section {
+  background: var(--craly-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-5);
+}
+
+.fs-section h2 {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  color: var(--craly-navy);
+  margin-bottom: 14px;
+}
+
+.fs-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fs-activity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--craly-border);
+}
+
+.fs-activity-item:last-child {
+  border-bottom: none;
+}
+
+.fs-activity-item__action {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--craly-navy);
+}
+
+.fs-activity-item__meta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--craly-text-faint);
+}
+
+/* ---------------- Profile completion (distinct from verification/publication) ---------------- */
+
+.fs-completion {
+  background: var(--craly-white);
+  border: 1px solid var(--craly-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.fs-completion__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+}
+
+.fs-completion__top strong {
+  font-size: 13.5px;
+  color: var(--craly-navy);
+}
+
+.fs-completion__top span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--craly-teal-dark);
+}
+
+.fs-completion__bar {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--craly-off-white);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.fs-completion__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--craly-teal);
+  transition: width 0.4s ease;
+}
+
+.fs-completion__missing {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--craly-warning);
+}
+
+.fs-completion__missing span {
+  background: var(--craly-warning-bg);
+  border: 1px solid var(--craly-warning-border);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+}
+
+.fs-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.fs-status-badge {
+  font-family: var(--font-button);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  white-space: nowrap;
+  background: var(--craly-off-white);
+  color: var(--craly-text-muted);
+  border: 1px solid var(--craly-border);
+}
+
+.fs-status-badge--positive {
+  background: var(--craly-mint);
+  color: var(--craly-teal-dark);
+  border-color: #bfeae3;
+}
+
+.fs-status-badge--pending {
+  background: var(--craly-warning-bg);
+  color: var(--craly-warning);
+  border-color: var(--craly-warning-border);
+}
+
+/* ---------------- Sync status indicator (§9) ---------------- */
+
+.fs-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.fs-sync--idle, .fs-sync--saved, .fs-sync--synced {
+  background: var(--craly-mint);
+  color: var(--craly-teal-dark);
+}
+
+.fs-sync--saving, .fs-sync--syncing {
+  background: var(--craly-off-white);
+  color: var(--craly-text-muted);
+}
+
+.fs-sync--saved_offline {
+  background: var(--craly-warning-bg);
+  color: var(--craly-warning);
+}
+
+.fs-sync--sync_failed {
+  background: var(--craly-danger-bg);
+  color: var(--craly-danger);
+}
+
+.fs-sync__retry {
+  background: none;
+  border: none;
+  text-decoration: underline;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ---------------- Simple key/value info rows (Profile/Settings) ---------------- */
+
+.fs-info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--craly-border);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.fs-info-row:last-child {
+  border-bottom: none;
+}
+
+.fs-info-row span:first-child {
+  color: var(--craly-text-muted);
+}
+
+.fs-info-row span:last-child {
+  color: var(--craly-navy);
+  font-weight: 600;
+  text-align: right;
+}

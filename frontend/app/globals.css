@@ -1,0 +1,90 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   Craly design tokens
+   A trusted B2B contractor network — not a generic SaaS dashboard. Navy +
+   teal for structure and trust, off-white/white for surfaces, restrained
+   radius and shadow. Every new page/component should build on these
+   variables instead of hardcoding hex values.
+   ========================================================================== */
+:root {
+  --font-display: "Red Hat Display", sans-serif;
+  --font-heading: "Red Hat Display", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-button: "Poppins", sans-serif;
+
+  /* ---- Brand ---- */
+  --craly-navy: #102a2a;
+  --craly-navy-soft: #1b3f3e;
+  --craly-teal: #0f8b82;
+  --craly-teal-dark: #0b6c64;
+  --craly-mint: #ddf7f2;
+  --craly-off-white: #f8f9f6;
+  --craly-white: #ffffff;
+  --craly-text: #17202a;
+  --craly-text-muted: #5b6b6a;
+  --craly-text-faint: #8a9998;
+  --craly-border: #e2e9e7;
+  --craly-border-strong: #c9d6d3;
+
+  /* ---- Status (used sparingly — not the brand palette) ---- */
+  --craly-danger: #dc2626;
+  --craly-danger-bg: #fef2f2;
+  --craly-danger-border: #fecaca;
+  --craly-warning: #b45309;
+  --craly-warning-bg: #fffbeb;
+  --craly-warning-border: #fde68a;
+
+  /* ---- Radius ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 999px;
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 2px rgba(16, 42, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(16, 42, 42, 0.08);
+  --shadow-lg: 0 20px 48px rgba(16, 42, 42, 0.14);
+
+  /* ---- Spacing ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --container-max: 1160px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--craly-off-white);
+  color: var(--craly-text);
+}
+
+a {
+  color: inherit;
+}
+
+/* So #trust/#why/#how/#faq/#contact anchor jumps (navbar + footer links)
+   don't land content half-hidden under the sticky navbar. */
+#trust,
+#why,
+#how,
+#faq,
+#contact {
+  scroll-margin-top: 84px;
+}
