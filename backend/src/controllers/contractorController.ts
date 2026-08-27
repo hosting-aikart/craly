@@ -5,9 +5,11 @@ import type { AppError } from '../middlewares/errorHandler';
 
 /**
  * GET /api/contractors
- * Public directory listing — every contractor who has completed onboarding
- * and is not SUSPENDED is listed directly, no admin approval step. Optional
- * category/city/search/experience/workforce filters and pagination.
+ * Public directory listing — only contractors who have completed
+ * onboarding, been approved by Staff/Admin (verification_status =
+ * 'verified'), and are not SUSPENDED are listed (see
+ * PUBLICLY_DISCOVERABLE_CONDITION). Optional category/city/search/
+ * experience/workforce filters and pagination.
  */
 export async function listContractors(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

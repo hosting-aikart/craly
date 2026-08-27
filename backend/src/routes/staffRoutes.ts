@@ -15,6 +15,7 @@ import {
   reviewStaffDocument,
   updateStaffContractorVerificationStatus,
 } from '../controllers/staffController';
+import { getStaffVerificationMessages, sendStaffVerificationMessage } from '../controllers/verificationMessageController';
 
 const router = Router();
 
@@ -30,6 +31,8 @@ router.get('/verification/contractors/:id', getStaffVerificationContractorById);
 router.get('/verification/contractors/:id/documents/:documentId/signed-url', getStaffDocumentSignedUrl);
 router.patch('/verification/contractors/:id/documents/:documentId/review', reviewStaffDocument);
 router.patch('/verification/contractors/:id/status', updateStaffContractorVerificationStatus);
+router.get('/verification/contractors/:id/messages', getStaffVerificationMessages);
+router.post('/verification/contractors/:id/messages', sendStaffVerificationMessage);
 
 // Contractor management
 router.get('/contractors', getContractors);

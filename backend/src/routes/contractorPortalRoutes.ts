@@ -15,6 +15,7 @@ import {
   deleteMyDocument,
   documentUpload,
 } from '../controllers/documentController';
+import { getMyVerificationMessages, sendMyVerificationMessage } from '../controllers/verificationMessageController';
 
 const router = Router();
 
@@ -38,5 +39,9 @@ router.get('/documents', listMyDocuments);
 router.post('/documents', documentUpload, uploadMyDocument);
 router.get('/documents/:documentId/signed-url', getMyDocumentSignedUrl);
 router.delete('/documents/:documentId', deleteMyDocument);
+
+// Verification review thread (Contractor Application / Approval workflow)
+router.get('/verification/messages', getMyVerificationMessages);
+router.post('/verification/messages', sendMyVerificationMessage);
 
 export default router;

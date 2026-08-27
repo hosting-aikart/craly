@@ -210,3 +210,20 @@ export const updateStaffContractorVerificationStatus = (contractorId: string, st
     `/staff/verification/contractors/${contractorId}/status`,
     { status, note },
   );
+
+export interface StaffVerificationMessageItem {
+  id: string;
+  contractor_id: string;
+  sender_id: string | null;
+  sender_role: 'contractor' | 'staff' | 'admin' | 'ops_head' | 'field_staff';
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  sender_email: string | null;
+}
+
+export const getStaffVerificationMessages = (contractorId: string) =>
+  apiGet<{ data: StaffVerificationMessageItem[] }>(`/staff/verification/contractors/${contractorId}/messages`);
+
+export const sendStaffVerificationMessage = (contractorId: string, message: string) =>
+  apiPost<{ data: StaffVerificationMessageItem }>(`/staff/verification/contractors/${contractorId}/messages`, { message });

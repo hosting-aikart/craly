@@ -9,6 +9,7 @@ import WorkspaceHeader from '@/components/workspace/WorkspaceHeader';
 import MobileNav from '@/components/workspace/MobileNav';
 import LoadingState from '@/components/ui/LoadingState';
 import ContractorProfileModal from '@/components/contractor/ContractorProfileModal';
+import ApplicationReviewStatus from '@/components/contractor/ApplicationReviewStatus';
 import { WorkspaceHeaderProvider } from '@/components/workspace/WorkspaceHeaderContext';
 import '@/components/workspace/WorkspaceLayout.css';
 
@@ -58,6 +59,18 @@ export default function ContractorPortalLayout({ children }: { children: React.R
     ? !contractorProfile.onboarding_complete || contractorProfile.workforce_size === null
     : false;
 
+  // Contractor Application / Approval workflow: once the profile form is
+  // complete, normal contractor-portal functionality (opportunities,
+  // applying, marketplace visibility) stays gated behind an "Application
+  // Under Review" / "Application Rejected" screen until Staff/Admin
+  // approves the account (verification_status = 'verified'). This is a
+  // frontend convenience only — the real enforcement is server-side (see
+  // contractorPortalController.ts / contractorVisibility.ts), so this gate
+  // can't be relied on for security, only for a coherent UI.
+  const isAwaitingApproval = Boolean(
+    contractorProfile && !isProfileIncomplete && contractorProfile.verification_status !== 'verified',
+  );
+
   return (
     <WorkspaceHeaderProvider>
       <div className="workspace-container">
@@ -78,7 +91,13 @@ export default function ContractorPortalLayout({ children }: { children: React.R
             onMobileMenuToggle={() => setMobileDrawerOpen(true)}
           />
 
-          <main className="workspace-content">{children}</main>
+          <main className="workspace-content">
+            {isAwaitingApproval && contractorProfile ? (
+              <ApplicationReviewStatus profile={contractorProfile} />
+            ) : (
+              children
+            )}
+          </main>
         </div>
 
         <MobileNav

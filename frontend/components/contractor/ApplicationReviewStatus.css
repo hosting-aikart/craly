@@ -1,0 +1,231 @@
+.ars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.ars-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+}
+
+.ars-hero--rejected {
+  background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+}
+
+.ars-hero-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.ars-hero-title {
+  margin: 6px 0 12px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.ars-hero-desc {
+  margin: 0 0 20px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #cbd5e1;
+  max-width: 640px;
+}
+
+.ars-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ars-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ars-meta-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.ars-meta-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.ars-status-pill {
+  display: inline-block;
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: #334155;
+  color: #e2e8f0;
+}
+
+.ars-status-pill--verified { background: #14532d; color: #bbf7d0; }
+.ars-status-pill--rejected { background: #7f1d1d; color: #fecaca; }
+.ars-status-pill--needs_changes { background: #78350f; color: #fde68a; }
+.ars-status-pill--under_review,
+.ars-status-pill--pending { background: #1e3a8a; color: #bfdbfe; }
+
+.ars-feedback-box {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #f59e0b;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #f1f5f9;
+}
+
+.ars-section {
+  background: #ffffff;
+}
+
+.ars-messages-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.ars-messages-header h3 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ars-messages-header p {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.ars-messages-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 8px 4px;
+  margin-bottom: 12px;
+}
+
+.ars-messages-empty {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.ars-message {
+  display: flex;
+}
+
+.ars-message--mine {
+  justify-content: flex-end;
+}
+
+.ars-message--staff {
+  justify-content: flex-start;
+}
+
+.ars-message-bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f1f5f9;
+}
+
+.ars-message--mine .ars-message-bubble {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.ars-message-sender {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.75;
+  margin-bottom: 2px;
+}
+
+.ars-message-bubble p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ars-message-time {
+  display: block;
+  font-size: 0.68rem;
+  opacity: 0.65;
+  margin-top: 4px;
+}
+
+.ars-reply-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+
+.ars-reply-form textarea {
+  flex: 1;
+  resize: vertical;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+
+.ars-reply-form button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #0f766e;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ars-reply-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ars-reply-error {
+  width: 100%;
+  color: #dc2626;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}

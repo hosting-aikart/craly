@@ -24,6 +24,7 @@ export interface ContractorProfile {
   verification_note: string | null;
   last_verified_at?: string | null;
   updated_at?: string | null;
+  created_at?: string | null;
   user_email?: string | null;
   onboarding_complete: boolean;
   categories: Category[];

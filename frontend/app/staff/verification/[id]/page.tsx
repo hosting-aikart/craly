@@ -9,8 +9,11 @@ import {
   getStaffDocumentSignedUrl,
   reviewStaffDocument,
   updateStaffContractorVerificationStatus,
+  getStaffVerificationMessages,
+  sendStaffVerificationMessage,
   type StaffVerificationDetail,
   type StaffVerificationDocumentItem,
+  type StaffVerificationMessageItem,
 } from '@/lib/api/staff';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
@@ -47,6 +50,37 @@ export default function StaffVerificationDetailPage() {
   const [overallNote, setOverallNote] = useState('');
   const [submittingOverall, setSubmittingOverall] = useState(false);
 
+  // Verification review thread (Contractor Application / Approval workflow)
+  const [messages, setMessages] = useState<StaffVerificationMessageItem[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [reply, setReply] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const [replyError, setReplyError] = useState('');
+
+  const fetchMessages = () => {
+    if (!contractorId) return;
+    getStaffVerificationMessages(contractorId)
+      .then(({ data }) => setMessages(data || []))
+      .catch(() => {})
+      .finally(() => setLoadingMessages(false));
+  };
+
+  const submitReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reply.trim()) return;
+    setSendingReply(true);
+    setReplyError('');
+    try {
+      await sendStaffVerificationMessage(contractorId, reply.trim());
+      setReply('');
+      fetchMessages();
+    } catch (err) {
+      setReplyError(err instanceof Error ? err.message : 'Failed to send message.');
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   const fetchDetail = () => {
     if (!contractorId) return;
     setLoading(true);
@@ -63,6 +97,7 @@ export default function StaffVerificationDetailPage() {
 
   useEffect(() => {
     fetchDetail();
+    fetchMessages();
   }, [contractorId]);
 
   const handleViewSignedUrl = async (documentId: string) => {
@@ -327,6 +362,47 @@ export default function StaffVerificationDetailPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Contractor Messages / Feedback Thread */}
+      <div className="staff-vd-card">
+        <div className="staff-vd-card-header">
+          <h3>Messages with Contractor</h3>
+        </div>
+
+        <div className="staff-vd-messages-thread">
+          {loadingMessages ? (
+            <LoadingState label="Loading messages…" />
+          ) : messages.length === 0 ? (
+            <p className="staff-vd-empty-text">No messages yet. Send feedback or a question below.</p>
+          ) : (
+            messages.map((m) => (
+              <div key={m.id} className={`staff-vd-message staff-vd-message--${m.sender_role === 'contractor' ? 'contractor' : 'staff'}`}>
+                <div className="staff-vd-message-bubble">
+                  <span className="staff-vd-message-sender">
+                    {m.sender_role === 'contractor' ? contractor.company_name : (m.sender_email || 'Craly Operations')}
+                  </span>
+                  <p>{m.message}</p>
+                  <span className="staff-vd-message-time">{new Date(m.created_at).toLocaleString()}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <form className="staff-vd-reply-form" onSubmit={submitReply}>
+          {replyError && <div className="staff-vd-alert staff-vd-alert--error">{replyError}</div>}
+          <textarea
+            rows={2}
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            placeholder="Send feedback or a question to this contractor…"
+            maxLength={2000}
+          />
+          <button type="submit" className="staff-vd-btn-prim" disabled={sendingReply || !reply.trim()}>
+            {sendingReply ? 'Sending…' : 'Send'}
+          </button>
+        </form>
       </div>
 
       {/* Review Modal for Individual Document */}

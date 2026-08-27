@@ -25,6 +25,8 @@ export interface ContractorFullProfile {
   service_areas: string[] | null;
   availability: string | null;
   onboarding_complete: boolean;
+  verification_status: string;
+  created_at: string;
 }
 
 /**
@@ -32,7 +34,7 @@ export interface ContractorFullProfile {
  */
 async function getContractorFullProfile(userId: string): Promise<ContractorFullProfile> {
   const [profile] = await sql<ContractorFullProfile[]>`
-    SELECT id, company_name, workforce_size, industry, years_experience, city, state, service_areas, availability, onboarding_complete
+    SELECT id, company_name, workforce_size, industry, years_experience, city, state, service_areas, availability, onboarding_complete, verification_status, created_at
     FROM contractor_profiles
     WHERE user_id = ${userId}
   `;
@@ -42,6 +44,29 @@ async function getContractorFullProfile(userId: string): Promise<ContractorFullP
     throw err;
   }
   return profile;
+}
+
+/**
+ * Contractor Application / Approval workflow gate: normal marketplace
+ * access (viewing/applying to opportunities, being counted in dashboard
+ * stats) is only available once Staff/Admin has approved the contractor
+ * (verification_status = 'verified') — same rule as
+ * PUBLICLY_DISCOVERABLE_CONDITION (contractorVisibility.ts), just
+ * evaluated in JS here since the profile row is already loaded. Enforced
+ * server-side (403) so an under-review contractor can't bypass the
+ * frontend's "Application Under Review" screen by calling the API
+ * directly.
+ */
+function isApprovedForMarketplace(cp: ContractorFullProfile): boolean {
+  return cp.onboarding_complete && cp.verification_status === 'verified';
+}
+
+function forbiddenNotApproved(): AppError {
+  const err: AppError = new Error(
+    'Your contractor application is still under review. You will get full marketplace access once Craly Operations approves your account.',
+  );
+  err.statusCode = 403;
+  return err;
 }
 
 /**
@@ -151,6 +176,11 @@ export async function getOpportunities(req: Request, res: Response, next: NextFu
       return;
     }
 
+    if (!isApprovedForMarketplace(cp)) {
+      res.json({ data: [], profile_incomplete: false, application_under_review: true });
+      return;
+    }
+
     const eligibility = requirementEligibilityCondition(cp);
 
     const opportunities = await sql`
@@ -214,6 +244,10 @@ export async function getOpportunityById(req: Request, res: Response, next: Next
       const err: AppError = new Error('Your contractor profile is incomplete. Please complete your profile to view opportunities.');
       err.statusCode = 403;
       return next(err);
+    }
+
+    if (!isApprovedForMarketplace(cp)) {
+      return next(forbiddenNotApproved());
     }
 
     const eligibility = requirementEligibilityCondition(cp);
@@ -283,6 +317,10 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
       const err: AppError = new Error('Your contractor profile is incomplete. Please complete your profile to apply.');
       err.statusCode = 403;
       return next(err);
+    }
+
+    if (!isApprovedForMarketplace(cp)) {
+      return next(forbiddenNotApproved());
     }
 
     const parsed = applySchema.safeParse(req.body);
@@ -470,7 +508,7 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
 
     let opportunitiesCount = 0;
 
-    if (cp.onboarding_complete && cp.workforce_size !== null && cp.workforce_size !== undefined) {
+    if (isApprovedForMarketplace(cp) && cp.workforce_size !== null && cp.workforce_size !== undefined) {
       const eligibility = requirementEligibilityCondition(cp);
 
       const [{ count }] = await sql`
