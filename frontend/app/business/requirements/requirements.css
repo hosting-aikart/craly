@@ -1,0 +1,289 @@
+/* ==========================================================================
+   Manufacturer Requirements List Styles
+   ========================================================================== */
+
+.reqs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Filter Tabs ── */
+.reqs-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.reqs-tab-btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-full, 999px);
+  border: 1px solid var(--craly-border, #e2e9e7);
+  background: var(--craly-white, #ffffff);
+  color: var(--craly-navy, #102a2a);
+  font-family: var(--font-button, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+
+.reqs-tab-btn:hover {
+  background: var(--craly-off-white, #f8f9f6);
+  border-color: var(--craly-border-strong, #c9d6d3);
+}
+
+.reqs-tab-btn--active {
+  background: var(--craly-teal, #0f8b82) !important;
+  border-color: var(--craly-teal, #0f8b82) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(15, 139, 130, 0.25);
+}
+
+/* ── Empty State ── */
+.reqs-empty-card {
+  background: var(--craly-white, #ffffff);
+  border: 1px dashed var(--craly-border-strong, #c9d6d3);
+  border-radius: var(--radius-lg, 16px);
+  padding: 64px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.reqs-empty-icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--craly-mint, #ddf7f2);
+  color: var(--craly-teal, #0f8b82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  border: 1px solid rgba(15, 139, 130, 0.15);
+}
+
+.reqs-empty-title {
+  font-family: var(--font-heading, sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  margin: 0;
+}
+
+.reqs-empty-desc {
+  font-size: 13.5px;
+  color: var(--craly-text-muted, #5b6b6a);
+  max-width: 420px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ── Requirements Card Grid ── */
+.reqs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reqs-card {
+  background: var(--craly-white, #ffffff);
+  border: 1px solid var(--craly-border, #e2e9e7);
+  border-radius: var(--radius-md, 14px);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(16, 42, 42, 0.04));
+  transition: all 0.2s ease;
+}
+
+.reqs-card:hover {
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(16, 42, 42, 0.08));
+  border-color: rgba(15, 139, 130, 0.3);
+}
+
+.reqs-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.reqs-card__title {
+  font-family: var(--font-heading, sans-serif);
+  font-size: 17.5px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  margin: 0 0 6px 0;
+}
+
+.reqs-card__title a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.reqs-card__title a:hover {
+  color: var(--craly-teal, #0f8b82);
+}
+
+.reqs-card__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--craly-text-muted, #5b6b6a);
+}
+
+.reqs-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.reqs-card__meta-item svg {
+  color: var(--craly-teal, #0f8b82);
+}
+
+/* ── Status Badges ── */
+.reqs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full, 999px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.reqs-badge--published {
+  background: var(--craly-mint, #ddf7f2);
+  color: var(--craly-teal-dark, #0b6c64);
+  border: 1px solid #b2ece2;
+}
+
+.reqs-badge--draft {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.reqs-badge--selected {
+  background: #e0e7ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+}
+
+.reqs-badge--closed {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* ── Skills Tags ── */
+.reqs-skills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.reqs-skill-pill {
+  background: var(--craly-off-white, #f8f9f6);
+  border: 1px solid var(--craly-border, #e2e9e7);
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 999px);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--craly-navy, #102a2a);
+}
+
+/* ── Footer Row ── */
+.reqs-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--craly-border, #e2e9e7);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.reqs-app-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--craly-teal-dark, #0b6c64);
+}
+
+.reqs-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reqs-btn-action {
+  padding: 7px 16px;
+  border-radius: var(--radius-full, 999px);
+  font-family: var(--font-button, sans-serif);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.reqs-btn-action--outline {
+  background: var(--craly-white, #ffffff);
+  border-color: var(--craly-border, #e2e9e7);
+  color: var(--craly-navy, #102a2a);
+}
+
+.reqs-btn-action--outline:hover {
+  background: var(--craly-off-white, #f8f9f6);
+  border-color: var(--craly-border-strong, #c9d6d3);
+}
+
+.reqs-btn-action--primary {
+  background: var(--craly-teal, #0f8b82);
+  color: #ffffff;
+}
+
+.reqs-btn-action--primary:hover {
+  background: var(--craly-teal-dark, #0b6c64);
+}
+
+.reqs-btn-action--publish {
+  background: var(--craly-teal, #0f8b82);
+  color: #ffffff;
+}
+
+.reqs-btn-action--delete {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.reqs-btn-action--delete:hover {
+  background: #fee2e2;
+}
