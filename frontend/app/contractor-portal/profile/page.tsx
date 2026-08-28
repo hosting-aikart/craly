@@ -7,6 +7,19 @@ import { computeProfileCompletion } from '@/lib/util/contractorProfileCompletion
 import LoadingState from '@/components/ui/LoadingState';
 import PhoneInput from '@/components/ui/PhoneInput';
 import ContractorDocumentsSection from '@/components/contractor/ContractorDocumentsSection';
+import {
+  IconShield,
+  IconBuilding,
+  IconUser,
+  IconMapPin,
+  IconCheck,
+  IconLock,
+  IconBriefcase,
+  IconGlobe,
+  IconTarget,
+  IconUsers,
+  IconZap,
+} from '@/components/ui/Icons';
 import './contractor-profile.css';
 
 // Predefined skill options for the profile's Skills & Specializations picker
@@ -153,45 +166,6 @@ export default function ContractorProfilePage() {
 
   return (
     <div className="contractor-profile-container">
-      {/* ── Sub Navigation Tabs ──────────────────────────────────────── */}
-      <div className="contractor-nav-subtabs">
-        <button
-          type="button"
-          className={`contractor-subtab-btn ${activeTab === 'kyc' ? 'contractor-subtab-btn--active' : ''}`}
-          onClick={() => handleTabChange('kyc')}
-        >
-          KYC & Onboarding
-        </button>
-        <button
-          type="button"
-          className={`contractor-subtab-btn ${activeTab === 'profile' ? 'contractor-subtab-btn--active' : ''}`}
-          onClick={() => handleTabChange('profile')}
-        >
-          Company Profile
-        </button>
-        <button
-          type="button"
-          className={`contractor-subtab-btn ${activeTab === 'workforce' ? 'contractor-subtab-btn--active' : ''}`}
-          onClick={() => handleTabChange('workforce')}
-        >
-          Workforce & Skills
-        </button>
-        <button
-          type="button"
-          className={`contractor-subtab-btn ${activeTab === 'coverage' ? 'contractor-subtab-btn--active' : ''}`}
-          onClick={() => handleTabChange('coverage')}
-        >
-          Coverage
-        </button>
-        <button
-          type="button"
-          className={`contractor-subtab-btn ${activeTab === 'documents' || activeTab === 'verification' ? 'contractor-subtab-btn--active' : ''}`}
-          onClick={() => handleTabChange('documents')}
-        >
-          Documents & Verification
-        </button>
-      </div>
-
       {message && (
         <div className={`contractor-profile-alert contractor-profile-alert--${message.type}`}>
           {message.text}
@@ -203,8 +177,13 @@ export default function ContractorProfilePage() {
         <div className="contractor-tab-view">
           <div className="contractor-hero-banner">
             <div>
-              <h2>Contractor KYC & onboarding</h2>
-              <p>Business identity captured at signup, plus the documents Craly Operations reviews to verify your account.</p>
+              <span className="contractor-hero-badge">
+                <IconShield size={12} /> Compliance & Verification
+              </span>
+              <h2>Contractor KYC & Onboarding</h2>
+              <p>
+                Business identity verified by Craly Operations for manufacturer trust and guaranteed project access.
+              </p>
             </div>
             <div className="contractor-hero-actions">
               <button type="button" className="contractor-hero-btn-sec" onClick={() => setEditMode(!editMode)}>
@@ -218,7 +197,14 @@ export default function ContractorProfilePage() {
 
           {editMode ? (
             <form className="contractor-edit-card" onSubmit={handleSubmit}>
-              <h3>Edit Business Identity Information</h3>
+              <div className="contractor-card-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="contractor-header-icon-box">
+                    <IconBuilding size={16} />
+                  </div>
+                  <h3 style={{ margin: 0 }}>Edit Business Identity</h3>
+                </div>
+              </div>
               <div className="contractor-form-grid">
                 <div className="contractor-field">
                   <label>Legal / Trading Name *</label>
@@ -256,75 +242,92 @@ export default function ContractorProfilePage() {
               {/* Business Identity Card */}
               <div className="contractor-card">
                 <div className="contractor-card-header">
-                  <div>
-                    <h3>Business identity</h3>
-                    <p className="contractor-card-sub">Captured at signup and kept current here.</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="contractor-header-icon-box">
+                      <IconBuilding size={16} />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '16px' }}>Business Identity</h3>
+                      <p className="contractor-card-sub" style={{ margin: 0 }}>Registered details captured during onboarding</p>
+                    </div>
                   </div>
                   <span className={completionPercent === 100 ? 'contractor-tag-complete' : 'contractor-tag-missing'}>
-                    {completionPercent}% complete
+                    {completionPercent}% Complete
                   </span>
                 </div>
 
-                <div className="contractor-progress-bar-wrap">
-                  <div className="contractor-progress-bar-fill" style={{ width: `${completionPercent}%` }} />
-                </div>
-
-                <div className="contractor-kv-grid">
-                  <div className="contractor-kv-item">
-                    <label>Company name</label>
-                    <span>{profile.company_name}</span>
+                <div className="contractor-kv-list">
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Company Name</span>
+                    <span className="contractor-kv-pill__val">{profile.company_name}</span>
                   </div>
-                  <div className="contractor-kv-item">
-                    <label>Industry</label>
-                    <span>{profile.industry || 'Not declared'}</span>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Industry</span>
+                    <span className="contractor-kv-pill__val">{profile.industry || 'Not declared'}</span>
                   </div>
-                  <div className="contractor-kv-item contractor-kv-item--full">
-                    <label>Registered location</label>
-                    <span>{[profile.city, profile.state].filter(Boolean).join(', ') || 'Not declared'}</span>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Registered Location</span>
+                    <span className="contractor-kv-pill__val">
+                      {[profile.city, profile.state].filter(Boolean).join(', ') || 'Not declared'}
+                    </span>
                   </div>
-                  <div className="contractor-kv-item">
-                    <label>Contact phone</label>
-                    <span>{profile.phone || 'Not set'}</span>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Contact Phone</span>
+                    <span className="contractor-kv-pill__val">{profile.phone || 'Not set'}</span>
                   </div>
-                  <div className="contractor-kv-item">
-                    <label>Registered email</label>
-                    <span>{profile.user_email || '—'}</span>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Registered Email</span>
+                    <span className="contractor-kv-pill__val">{profile.user_email || '—'}</span>
                   </div>
+                  {profile.workforce_size ? (
+                    <div className="contractor-kv-pill">
+                      <span className="contractor-kv-pill__label">Headcount</span>
+                      <span className="contractor-kv-pill__val">{profile.workforce_size} Workers</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
               {/* Onboarding Checklist Card */}
               <div className="contractor-card">
                 <div className="contractor-card-header">
-                  <h3>Onboarding checklist</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="contractor-header-icon-box">
+                      <IconShield size={16} />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '16px' }}>Onboarding Checklist</h3>
+                      <p className="contractor-card-sub" style={{ margin: 0 }}>Compliance & verification milestones</p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="contractor-chk-list">
                   {checklist.map((item) => (
-                    <div key={item.label} className="contractor-chk-row">
-                      <span>{item.label}</span>
+                    <div key={item.label} className="contractor-chk-pill">
+                      <span className="contractor-chk-pill__label">{item.label}</span>
                       <span className={item.complete ? 'contractor-tag-complete' : 'contractor-tag-missing'}>
-                        {item.complete ? '✓ Complete' : 'Missing'}
+                        {item.complete ? '✓ Complete' : 'Pending'}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="contractor-case-info">
-                  <div className="contractor-trust-stat-row">
-                    <span>Verification status</span>
-                    <strong style={{ color: isVerified ? '#059669' : '#b45309' }}>
-                      {profile.verification_status.replace('_', ' ').toUpperCase()}
-                    </strong>
+                {/* Verification Status Card Banner */}
+                <div className="contractor-case-banner">
+                  <div className="contractor-case-banner__header">
+                    <span className="contractor-case-banner__label">Verification Status</span>
+                    <span className={`contractor-status-pill contractor-status-pill--${profile.verification_status}`}>
+                      ● {profile.verification_status.replace('_', ' ').toUpperCase()}
+                    </span>
                   </div>
                   {profile.verification_note && (
-                    <div className="contractor-trust-stat-row">
-                      <span>Reviewer note</span>
-                      <strong>{profile.verification_note}</strong>
+                    <div className="contractor-case-banner__note">
+                      <strong>Reviewer Note:</strong> {profile.verification_note}
                     </div>
                   )}
-                  <p className="contractor-case-sub">
-                    Verification is decided by Craly Operations after reviewing your uploaded documents — see the Documents & Verification tab.
+                  <p className="contractor-case-banner__desc">
+                    Official verification is conducted by Craly Compliance Operations upon reviewing your uploaded GST & business registration documents.
                   </p>
                 </div>
               </div>
@@ -338,8 +341,13 @@ export default function ContractorProfilePage() {
         <div className="contractor-tab-view">
           <div className="contractor-hero-banner">
             <div>
-              <h2>Detailed contractor profile</h2>
-              <p>Maintain the organization profile used by businesses during contractor discovery and evaluation.</p>
+              <span className="contractor-hero-badge">
+                <IconBuilding size={12} /> Public Organization Identity
+              </span>
+              <h2>Detailed Company Profile</h2>
+              <p>
+                Maintain your business parameters and verified capabilities used by manufacturers during contractor discovery.
+              </p>
             </div>
             <div className="contractor-hero-actions">
               <button type="button" className="contractor-hero-btn-sec" onClick={() => setEditMode(!editMode)}>
@@ -350,7 +358,14 @@ export default function ContractorProfilePage() {
 
           {editMode ? (
             <form className="contractor-edit-card" onSubmit={handleSubmit}>
-              <h3>Edit Company Profile Details</h3>
+              <div className="contractor-card-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="contractor-header-icon-box">
+                    <IconBuilding size={16} />
+                  </div>
+                  <h3 style={{ margin: 0 }}>Edit Company Profile Details</h3>
+                </div>
+              </div>
               <div className="contractor-form-grid">
                 <div className="contractor-field">
                   <label>Company Name *</label>
@@ -365,7 +380,7 @@ export default function ContractorProfilePage() {
                   <input type="text" value={industry} onChange={(e) => setIndustry(e.target.value)} />
                 </div>
                 <div className="contractor-field">
-                  <label>Workforce Size</label>
+                  <label>Workforce Size (Headcount)</label>
                   <input type="number" value={workforceSize} onChange={(e) => setWorkforceSize(e.target.value ? Number(e.target.value) : '')} />
                 </div>
                 <div className="contractor-field">
@@ -373,7 +388,7 @@ export default function ContractorProfilePage() {
                   <input type="number" value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value ? Number(e.target.value) : '')} />
                 </div>
                 <div className="contractor-field">
-                  <label>Availability</label>
+                  <label>Availability Status</label>
                   <select value={availability} onChange={(e) => setAvailability(e.target.value)}>
                     <option value="AVAILABLE">AVAILABLE</option>
                     <option value="CURRENTLY_AT_CAPACITY">CURRENTLY AT CAPACITY</option>
@@ -382,7 +397,7 @@ export default function ContractorProfilePage() {
                   </select>
                 </div>
                 <div className="contractor-field contractor-field--full">
-                  <label>Skills & Specializations — used for opportunity matching</label>
+                  <label>Skills & Specializations (Opportunity Matching)</label>
                   <div className="contractor-custom-cluster-input-wrap">
                     <select
                       className="contractor-custom-cluster-input"
@@ -409,10 +424,10 @@ export default function ContractorProfilePage() {
                     </button>
                   </div>
                   
-                  {/* Preset Quick Add Skill Chips with + Icons */}
+                  {/* Preset Quick Add Skill Chips */}
                   <div style={{ marginTop: '10px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                      Popular Skills (Click '+' to add):
+                      Popular Skills (Click to add):
                     </span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
                       {COMMON_SKILLS.filter((s) => !skills.includes(s)).slice(0, 14).map((s) => (
@@ -443,105 +458,121 @@ export default function ContractorProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="contractor-card-sub" style={{ marginTop: '8px' }}>No skills selected yet — pick from the dropdown or quick chips above.</p>
+                    <p className="contractor-card-sub" style={{ marginTop: '8px' }}>No skills selected yet pick from the dropdown or quick chips above.</p>
                   )}
                 </div>
               </div>
               <div className="contractor-field contractor-field--full" style={{ marginTop: '14px' }}>
-                <label>Overview / Description</label>
-                <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+                <label>Company Overview / Profile Summary</label>
+                <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Provide a brief summary of your track record and strengths..." />
               </div>
               <div className="contractor-form-actions">
                 <button type="submit" className="contractor-btn-primary" disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Profile'}
+                  {saving ? 'Saving Changes…' : 'Save Changes'}
+                </button>
+                <button type="button" className="contractor-btn-cancel" onClick={() => setEditMode(false)}>
+                  Cancel
                 </button>
               </div>
             </form>
           ) : (
             <div className="contractor-grid-2col">
+              {/* Left Card: Core Business Parameters */}
               <div className="contractor-card">
                 <div className="contractor-card-header">
-                  <div>
-                    <h3>{profile.company_name}</h3>
-                    <p className="contractor-card-sub">
-                      {[profile.industry, profile.years_experience != null ? `${profile.years_experience} years in business` : null]
-                        .filter(Boolean)
-                        .join(' • ') || 'Industry and experience not declared'}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="contractor-header-icon-box">
+                      <IconBuilding size={16} />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '16px' }}>Business Information</h3>
+                      <p className="contractor-card-sub" style={{ margin: 0 }}>Operational capacity & availability</p>
+                    </div>
+                  </div>
+                  <span className="contractor-tag-published">● Active</span>
+                </div>
+
+                <div className="contractor-kv-list">
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Company Name</span>
+                    <span className="contractor-kv-pill__val">{profile.company_name}</span>
+                  </div>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Industry Sector</span>
+                    <span className="contractor-kv-pill__val">{profile.industry || '—'}</span>
+                  </div>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Workforce Capacity</span>
+                    <span className="contractor-kv-pill__val">{profile.workforce_size ? `${profile.workforce_size} Workers` : '—'}</span>
+                  </div>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Experience</span>
+                    <span className="contractor-kv-pill__val">{profile.years_experience ? `${profile.years_experience} Years` : '—'}</span>
+                  </div>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Contact Phone</span>
+                    <span className="contractor-kv-pill__val">{profile.phone || '—'}</span>
+                  </div>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Availability</span>
+                    <span className="contractor-kv-pill__val" style={{ color: profile.availability === 'AVAILABLE' ? '#059669' : '#b45309' }}>
+                      ● {profile.availability?.replace('_', ' ') || 'AVAILABLE'}
+                    </span>
+                  </div>
+                </div>
+
+                {profile.description && (
+                  <div style={{ marginTop: '8px', padding: '12px 16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--craly-text-muted)', display: 'block', marginBottom: '4px' }}>
+                      Profile Summary
+                    </span>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--craly-navy)', lineHeight: 1.55 }}>
+                      {profile.description}
                     </p>
                   </div>
-                  <span className="contractor-tag-published">● {profile.availability?.replace('_', ' ') || 'AVAILABLE'}</span>
-                </div>
-
-                <p className="contractor-profile-desc">
-                  {profile.description || 'No company overview provided yet.'}
-                </p>
-
-                <div className="contractor-divider" />
-
-                <div className="contractor-kv-grid">
-                  <div className="contractor-kv-item">
-                    <label>Contact phone</label>
-                    <span>{profile.phone || 'Not set'}</span>
-                  </div>
-                  <div className="contractor-kv-item">
-                    <label>Registered email</label>
-                    <span>{profile.user_email || '—'}</span>
-                  </div>
-                  <div className="contractor-kv-item contractor-kv-item--full">
-                    <label>Base location</label>
-                    <span>{[profile.city, profile.state].filter(Boolean).join(', ') || 'Not declared'}</span>
-                  </div>
-                </div>
+                )}
               </div>
 
-              {/* Profile Completion Overview */}
+              {/* Right Card: Declared Skills & Capabilities */}
               <div className="contractor-card">
                 <div className="contractor-card-header">
-                  <h3>Profile completion</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="contractor-header-icon-box">
+                      <IconBriefcase size={16} />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '16px' }}>Declared Capabilities</h3>
+                      <p className="contractor-card-sub" style={{ margin: 0 }}>Specializations matched with requirements</p>
+                    </div>
+                  </div>
+                  <span className="contractor-tag-complete">
+                    {declaredSkills.length} Skills
+                  </span>
                 </div>
 
-                <div className="contractor-big-percent">{completionPercent}%</div>
-                <div className="contractor-progress-bar-wrap">
-                  <div className="contractor-progress-bar-fill" style={{ width: `${completionPercent}%` }} />
-                </div>
-
-                <div className="contractor-trust-stats-list" style={{ marginTop: '16px' }}>
-                  <div className="contractor-trust-stat-row">
-                    <span>Onboarding</span>
-                    <strong>{profile.onboarding_complete ? 'Complete' : 'Incomplete'}</strong>
+                {declaredSkills.length > 0 ? (
+                  <>
+                    <div className="contractor-chip-list" style={{ marginTop: '4px' }}>
+                      {declaredSkills.map((s, i) => (
+                        <span className="contractor-chip" key={`${s}-${i}`}>
+                          <span style={{ color: 'var(--craly-teal)', fontWeight: 700 }}>✓</span> {s}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: '8px', padding: '12px 14px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '12px', color: 'var(--craly-text-muted)', lineHeight: 1.45 }}>
+                      💡 These skills are automatically matched with manufacturer requirements in your service areas.
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ padding: '20px 16px', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                    <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+                      No capabilities declared yet. Add skills via <strong>Edit Profile</strong> to improve your requirement matching.
+                    </p>
                   </div>
-                  <div className="contractor-trust-stat-row">
-                    <span>Verification</span>
-                    <strong style={{ color: isVerified ? '#059669' : '#b45309' }}>
-                      {isVerified ? 'Verified' : profile.verification_status.replace('_', ' ')}
-                    </strong>
-                  </div>
-                  <div className="contractor-trust-stat-row">
-                    <span>Verified on</span>
-                    <strong>{profile.last_verified_at ? new Date(profile.last_verified_at).toLocaleDateString() : 'Not yet verified'}</strong>
-                  </div>
-                  <div className="contractor-trust-stat-row">
-                    <span>Data freshness</span>
-                    <strong>{profile.updated_at ? `Updated ${new Date(profile.updated_at).toLocaleDateString()}` : '—'}</strong>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           )}
-
-          {/* Declared skills — real data, editable above */}
-          <div className="contractor-card" style={{ marginTop: '24px' }}>
-            <h3>Declared skills</h3>
-            {declaredSkills.length > 0 ? (
-              <div className="contractor-chip-list">
-                {declaredSkills.map((s, i) => (
-                  <span className="contractor-chip" key={`${s}-${i}`}>{s}</span>
-                ))}
-              </div>
-            ) : (
-              <p className="contractor-card-sub">No skills declared yet — add them via Edit Profile so businesses can find you in matching.</p>
-            )}
-          </div>
         </div>
       )}
 
@@ -550,57 +581,132 @@ export default function ContractorProfilePage() {
         <div className="contractor-tab-view">
           <div className="contractor-hero-banner">
             <div>
-              <h2>Workforce & skills</h2>
-              <p>Your declared workforce size and skills are what Craly matches against published manpower requirements.</p>
+              <span className="contractor-hero-badge">
+                <IconUser size={12} /> Workforce & Capacity
+              </span>
+              <h2>Workforce & Skill Distribution</h2>
+              <p>
+                Your declared workforce capacity and verified skill sets drive automated matching against published manufacturer requirements.
+              </p>
             </div>
             <div className="contractor-hero-actions">
-              <button type="button" className="contractor-hero-btn-sec" onClick={() => handleTabChange('profile')}>Edit in Company Profile</button>
+              <button type="button" className="contractor-hero-btn-sec" onClick={() => handleTabChange('profile')}>
+                Edit in Company Profile
+              </button>
             </div>
           </div>
 
+          {/* 3 Metric Cards */}
           <div className="contractor-metrics-3row">
             <div className="contractor-metric-card">
               <div className="contractor-metric-body">
                 <span className="contractor-metric-lbl">Total Workforce</span>
-                <div className="contractor-metric-val">{profile.workforce_size ?? '—'}</div>
-                <span className="contractor-metric-sub">Declared headcount</span>
+                <div className="contractor-metric-val">{profile.workforce_size ? `${profile.workforce_size}` : '—'}</div>
+                <span className="contractor-metric-sub">Active Deployable Headcount</span>
               </div>
-              <div className="contractor-metric-icon-box contractor-metric-icon-box--green">▲</div>
+              <div className="contractor-metric-icon-box">
+                <IconUser size={20} />
+              </div>
             </div>
 
             <div className="contractor-metric-card">
               <div className="contractor-metric-body">
                 <span className="contractor-metric-lbl">Skills Declared</span>
                 <div className="contractor-metric-val">{declaredSkills.length}</div>
-                <span className="contractor-metric-sub">Used for opportunity matching</span>
+                <span className="contractor-metric-sub">Active Matching Specializations</span>
               </div>
-              <div className="contractor-metric-icon-box contractor-metric-icon-box--emerald">🎯</div>
+              <div className="contractor-metric-icon-box">
+                <IconBriefcase size={20} />
+              </div>
             </div>
 
             <div className="contractor-metric-card">
               <div className="contractor-metric-body">
-                <span className="contractor-metric-lbl">Years of Experience</span>
-                <div className="contractor-metric-val">{profile.years_experience ?? '—'}</div>
-                <span className="contractor-metric-sub">Availability: {profile.availability?.replace('_', ' ') || 'AVAILABLE'}</span>
+                <span className="contractor-metric-lbl">Industry Experience</span>
+                <div className="contractor-metric-val">{profile.years_experience ? `${profile.years_experience} Years` : '—'}</div>
+                <span className="contractor-metric-sub">
+                  ● {profile.availability?.replace('_', ' ') || 'AVAILABLE'}
+                </span>
               </div>
-              <div className="contractor-metric-icon-box contractor-metric-icon-box--mint">🔄</div>
+              <div className="contractor-metric-icon-box">
+                <IconShield size={20} />
+              </div>
             </div>
           </div>
 
-          <div className="contractor-card" style={{ marginTop: '24px' }}>
-            <h3>Declared skills</h3>
-            {declaredSkills.length > 0 ? (
-              <div className="contractor-chip-list">
-                {declaredSkills.map((s, i) => (
-                  <span className="contractor-chip" key={`${s}-${i}`}>{s}</span>
-                ))}
+          {/* 2-Column Dashboard: Skills List & Matching Intelligence */}
+          <div className="contractor-grid-2col">
+            <div className="contractor-card">
+              <div className="contractor-card-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="contractor-header-icon-box">
+                    <IconBriefcase size={16} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>Declared Capabilities</h3>
+                    <p className="contractor-card-sub" style={{ margin: 0 }}>Specializations matched with requirements</p>
+                  </div>
+                </div>
+                <span className="contractor-tag-complete">
+                  {declaredSkills.length} Skills
+                </span>
               </div>
-            ) : (
-              <p className="contractor-card-sub">No skills declared yet.</p>
-            )}
-            <div className="contractor-rule-callout" style={{ marginTop: '16px' }}>
-              Only requirements whose required skills overlap with your declared skills — and whose headcount is within
-              your declared workforce size — appear in your Opportunities list.
+
+              {declaredSkills.length > 0 ? (
+                <div className="contractor-chip-list">
+                  {declaredSkills.map((s, i) => (
+                    <span className="contractor-chip" key={`${s}-${i}`}>
+                      <span style={{ color: 'var(--craly-teal)', fontWeight: 700 }}>✓</span> {s}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ padding: '24px 16px', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                  <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+                    No skills declared yet. Add skills via <strong>Company Profile</strong> to receive matching opportunities.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="contractor-card">
+              <div className="contractor-card-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="contractor-header-icon-box">
+                    <IconTarget size={16} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>Match Intelligence</h3>
+                    <p className="contractor-card-sub" style={{ margin: 0 }}>How Craly matches you with manufacturers</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="contractor-intel-list">
+                <div className="contractor-intel-item">
+                  <span className="contractor-intel-icon"><IconTarget size={16} /></span>
+                  <div className="contractor-intel-text">
+                    <strong>Skill Overlap Matching</strong>
+                    Opportunities only appear when your declared specializations directly overlap with required project roles.
+                  </div>
+                </div>
+
+                <div className="contractor-intel-item">
+                  <span className="contractor-intel-icon"><IconUsers size={16} /></span>
+                  <div className="contractor-intel-text">
+                    <strong>Headcount Demand Filter</strong>
+                    Requirements with headcount requests within your total workforce capacity are prioritized for you.
+                  </div>
+                </div>
+
+                <div className="contractor-intel-item">
+                  <span className="contractor-intel-icon"><IconZap size={16} /></span>
+                  <div className="contractor-intel-text">
+                    <strong>Immediate Dispatch Availability</strong>
+                    Keeping status as <em>AVAILABLE</em> provides top visibility in contractor search results.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

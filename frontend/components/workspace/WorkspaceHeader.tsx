@@ -8,6 +8,7 @@ import LanguageSelector from '@/components/language/LanguageSelector';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useWorkspaceHeader } from './WorkspaceHeaderContext';
+import { IconMenu, IconBuilding, IconSettings, IconDashboard, IconClipboard, IconLogout, IconChevronDown } from '@/components/ui/Icons';
 import './WorkspaceHeader.css';
 
 interface WorkspaceHeaderProps {
@@ -81,7 +82,7 @@ export default function WorkspaceHeader({
           onClick={onMobileMenuToggle}
           aria-label="Open mobile navigation"
         >
-          ☰
+          <IconMenu size={20} />
         </button>
         <h1 className="workspace-header__title">{title}</h1>
       </div>
@@ -90,9 +91,10 @@ export default function WorkspaceHeader({
         {action && <div className="workspace-header__action">{action}</div>}
 
         <div className="workspace-header__role-badge-pill">
-          <span className="workspace-header__role-badge-lbl">Active role</span>
-          <span className="workspace-header__role-badge-val">{getRoleLabel()} ▾</span>
+          <span className="workspace-header__role-dot" />
+          <span className="workspace-header__role-badge-val">{getRoleLabel()}</span>
         </div>
+
 
         <LanguageSelector variant="header" />
 
@@ -112,7 +114,7 @@ export default function WorkspaceHeader({
             <div className="workspace-header__user-meta">
               <strong className="workspace-header__company">{companyName}</strong>
             </div>
-            <span className="workspace-header__caret">▾</span>
+            <IconChevronDown size={13} className="workspace-header__caret" />
           </button>
 
           {dropdownOpen && (
@@ -137,7 +139,7 @@ export default function WorkspaceHeader({
                       className="workspace-header__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <span className="workspace-header__dropdown-icon">🏢</span>
+                      <IconBuilding size={15} className="workspace-header__dropdown-icon" />
                       <span>{t.nav.companyProfile || 'Company Profile'}</span>
                     </Link>
                     <Link
@@ -145,7 +147,7 @@ export default function WorkspaceHeader({
                       className="workspace-header__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <span className="workspace-header__dropdown-icon">⚙️</span>
+                      <IconSettings size={15} className="workspace-header__dropdown-icon" />
                       <span>{t.nav.settings || 'Settings'}</span>
                     </Link>
                     <Link
@@ -153,7 +155,7 @@ export default function WorkspaceHeader({
                       className="workspace-header__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <span className="workspace-header__dropdown-icon">📊</span>
+                      <IconDashboard size={15} className="workspace-header__dropdown-icon" />
                       <span>{t.nav.dashboard || 'Dashboard'}</span>
                     </Link>
                   </>
@@ -163,7 +165,7 @@ export default function WorkspaceHeader({
                     className="workspace-header__dropdown-item"
                     onClick={() => setDropdownOpen(false)}
                   >
-                    <span className="workspace-header__dropdown-icon">📋</span>
+                    <IconClipboard size={15} className="workspace-header__dropdown-icon" />
                     <span>{t.nav.enquiries || 'Enquiries'}</span>
                   </Link>
                 ) : (
@@ -173,7 +175,7 @@ export default function WorkspaceHeader({
                       className="workspace-header__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <span className="workspace-header__dropdown-icon">🏢</span>
+                      <IconBuilding size={15} className="workspace-header__dropdown-icon" />
                       <span>{t.nav.companyProfile || 'Company Profile'}</span>
                     </Link>
                     <Link
@@ -181,7 +183,7 @@ export default function WorkspaceHeader({
                       className="workspace-header__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <span className="workspace-header__dropdown-icon">⚙️</span>
+                      <IconSettings size={15} className="workspace-header__dropdown-icon" />
                       <span>{t.nav.settings || 'Settings'}</span>
                     </Link>
                     <Link
@@ -189,7 +191,7 @@ export default function WorkspaceHeader({
                       className="workspace-header__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <span className="workspace-header__dropdown-icon">📊</span>
+                      <IconDashboard size={15} className="workspace-header__dropdown-icon" />
                       <span>{t.nav.dashboard || 'Dashboard'}</span>
                     </Link>
                   </>
@@ -202,7 +204,7 @@ export default function WorkspaceHeader({
                   className="workspace-header__dropdown-item workspace-header__dropdown-item--logout"
                   onClick={handleLogout}
                 >
-                  <span className="workspace-header__dropdown-icon">🚪</span>
+                  <IconLogout size={15} className="workspace-header__dropdown-icon" />
                   <span>{t.nav.logout || 'Log Out'}</span>
                 </button>
               </div>

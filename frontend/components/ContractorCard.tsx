@@ -2,6 +2,7 @@ import Link from 'next/link';
 import ListedBadge from '@/components/ui/ListedBadge';
 import type { ContractorListing } from '@/lib/api/contractors';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { IconMapPin } from '@/components/ui/Icons';
 import './ContractorCard.css';
 
 interface ContractorCardProps {
@@ -59,7 +60,7 @@ export default function ContractorCard({
         </div>
 
         <h3 className="contractor-card__name">{c.company_name}</h3>
-        {location && <p className="contractor-card__location">📍 {location}</p>}
+        {location && <p className="contractor-card__location"><IconMapPin size={13} className="inline-icon" /> {location}</p>}
 
         {c.description && <p className="contractor-card__desc">{c.description}</p>}
 

@@ -22,8 +22,12 @@ export interface ProfileCompletion {
  * number.
  */
 export function computeProfileCompletion(profile: ContractorProfile): ProfileCompletion {
+  if (!profile) {
+    return { percent: 0, items: [] };
+  }
   const hasSkills = Array.isArray(profile.skills) && profile.skills.length > 0;
   const hasServiceAreas = Array.isArray(profile.service_areas) && profile.service_areas.length > 0;
+
 
   const items: ProfileChecklistItem[] = [
     {

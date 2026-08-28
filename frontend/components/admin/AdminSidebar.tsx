@@ -6,6 +6,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { apiGet } from '@/lib/api';
+import {
+  IconDashboard, IconTrending, IconUsers, IconHardHat, IconClipboard, IconBell,
+  IconShield, IconAlertTriangle, IconFile, IconSettings, IconLogout,
+} from '@/components/ui/Icons';
 import './AdminSidebar.css';
 
 interface AdminSidebarProps {
@@ -39,7 +43,7 @@ export default function AdminSidebar({ adminEmail }: AdminSidebarProps) {
   interface NavItem {
     label: string;
     href: string;
-    icon: string;
+    icon: React.ComponentType<{ size?: number; className?: string }>;
     badge?: number;
   }
 
@@ -47,31 +51,31 @@ export default function AdminSidebar({ adminEmail }: AdminSidebarProps) {
     {
       group: t.sidebarGroups.overview,
       items: [
-        { label: t.nav.dashboard, href: '/admin/dashboard', icon: '📊' },
-        { label: t.nav.analytics, href: '/admin/analytics', icon: '📈' },
+        { label: t.nav.dashboard, href: '/admin/dashboard', icon: IconDashboard },
+        { label: t.nav.analytics, href: '/admin/analytics', icon: IconTrending },
       ],
     },
     {
       group: t.sidebarGroups.platform,
       items: [
-        { label: t.nav.users, href: '/admin/users', icon: '👥' },
-        { label: t.nav.contractors, href: '/admin/contractors', icon: '🏗️' },
-        { label: t.nav.enquiries, href: '/admin/enquiries', icon: '📋' },
-        { label: t.notifications.pageTitle, href: '/admin/notifications', icon: '🔔' },
+        { label: t.nav.users, href: '/admin/users', icon: IconUsers },
+        { label: t.nav.contractors, href: '/admin/contractors', icon: IconHardHat },
+        { label: t.nav.enquiries, href: '/admin/enquiries', icon: IconClipboard },
+        { label: t.notifications.pageTitle, href: '/admin/notifications', icon: IconBell },
       ],
     },
     {
       group: t.sidebarGroups.trustSafety,
       items: [
-        { label: t.nav.verification, href: '/admin/verification', icon: '🛡️', badge: pendingVerificationCount },
-        { label: t.nav.reports, href: '/admin/reports', icon: '⚠️', badge: openReportsCount },
+        { label: t.nav.verification, href: '/admin/verification', icon: IconShield, badge: pendingVerificationCount },
+        { label: t.nav.reports, href: '/admin/reports', icon: IconAlertTriangle, badge: openReportsCount },
       ],
     },
     {
       group: t.sidebarGroups.system,
       items: [
-        { label: t.nav.auditLogs, href: '/admin/audit-logs', icon: '📜' },
-        { label: t.nav.settings, href: '/admin/settings', icon: '⚙️' },
+        { label: t.nav.auditLogs, href: '/admin/audit-logs', icon: IconFile },
+        { label: t.nav.settings, href: '/admin/settings', icon: IconSettings },
       ],
     },
   ];
@@ -103,7 +107,7 @@ export default function AdminSidebar({ adminEmail }: AdminSidebarProps) {
                       href={item.href}
                       className={`admin-sidebar__link ${active ? 'admin-sidebar__link--active' : ''}`}
                     >
-                      <span className="admin-sidebar__icon">{item.icon}</span>
+                      <item.icon size={17} className="admin-sidebar__icon" />
                       <span className="admin-sidebar__label">{item.label}</span>
                       {Boolean(item.badge && item.badge > 0) && (
                         <span className="admin-sidebar__badge">{item.badge}</span>
@@ -119,7 +123,7 @@ export default function AdminSidebar({ adminEmail }: AdminSidebarProps) {
 
       <div className="admin-sidebar__footer">
         <div className="admin-sidebar__user">
-          <div className="admin-sidebar__avatar">🛡️</div>
+          <div className="admin-sidebar__avatar"><IconShield size={18} /></div>
           <div className="admin-sidebar__user-info">
             <strong className="admin-sidebar__user-name">{adminEmail}</strong>
             <span className="admin-sidebar__user-role">Super Administrator</span>
@@ -131,7 +135,7 @@ export default function AdminSidebar({ adminEmail }: AdminSidebarProps) {
           className="admin-sidebar__logout-btn"
           title="Log Out"
         >
-          🚪
+          <IconLogout size={16} />
         </button>
       </div>
     </aside>

@@ -76,7 +76,7 @@ export default function ListYourCompanyPage() {
         <h1 className="list-company-page__heading">List Your Company</h1>
         <p className="list-company-page__subtext">
           Get discovered by manufacturers looking for verified workforce partners. Submit your
-          details below — there&apos;s no account or password to create. Our team will contact you
+          details below there&apos;s no account or password to create. Our team will contact you
           directly for verification and onboarding.
         </p>
 

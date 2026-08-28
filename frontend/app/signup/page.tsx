@@ -329,7 +329,7 @@ function SignupForm() {
                 >
                   {COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>
-                      {c.flag} {c.code} ({c.dialCode})
+                      {c.code} ({c.dialCode})
                     </option>
                   ))}
                 </select>
@@ -371,7 +371,7 @@ function SignupForm() {
                   >
                     {COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code}>
-                        {c.flag} {c.name}
+                        {c.name}
                       </option>
                     ))}
                   </select>

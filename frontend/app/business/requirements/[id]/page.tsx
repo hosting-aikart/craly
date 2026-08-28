@@ -12,6 +12,7 @@ import {
 } from '@/lib/api/businessPortal';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
+import { IconUsers, IconMapPin, IconCalendar, IconRupee } from '@/components/ui/Icons';
 
 export default function RequirementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -179,14 +180,14 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
               <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
                 Workers Required
               </span>
-              <strong style={{ fontSize: '18px', color: 'var(--craly-navy)' }}>👥 {requirement.workers_required}</strong>
+              <strong style={{ fontSize: '18px', color: 'var(--craly-navy)' }}><IconUsers size={15} className="inline-icon" /> {requirement.workers_required}</strong>
             </div>
 
             <div>
               <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
                 Location
               </span>
-              <span style={{ fontSize: '15px', color: 'var(--craly-navy)' }}>📍 {requirement.location}</span>
+              <span style={{ fontSize: '15px', color: 'var(--craly-navy)' }}><IconMapPin size={14} className="inline-icon" /> {requirement.location}</span>
             </div>
 
             <div>
@@ -194,7 +195,7 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
                 Start Date & Duration
               </span>
               <span style={{ fontSize: '15px', color: 'var(--craly-navy)' }}>
-                📅 {new Date(requirement.start_date).toLocaleDateString()} ({requirement.duration})
+                <IconCalendar size={14} className="inline-icon" /> {new Date(requirement.start_date).toLocaleDateString()} ({requirement.duration})
               </span>
             </div>
 
@@ -203,7 +204,7 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
                 Budget Range
               </span>
               <span style={{ fontSize: '15px', color: 'var(--craly-navy)' }}>
-                💰 {requirement.budget_min || requirement.budget_max ? `₹${requirement.budget_min || 0} - ₹${requirement.budget_max || 'N/A'}` : 'Negotiable'}
+                <IconRupee size={14} className="inline-icon" /> {requirement.budget_min || requirement.budget_max ? `₹${requirement.budget_min || 0} - ₹${requirement.budget_max || 'N/A'}` : 'Negotiable'}
               </span>
             </div>
           </div>

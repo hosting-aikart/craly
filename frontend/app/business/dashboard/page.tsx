@@ -8,6 +8,7 @@ import { getBusinessDashboardStats, type BusinessDashboardStats } from '@/lib/ap
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
+import { IconSearch } from '@/components/ui/Icons';
 import '@/components/AuthForm.css';
 import '../../dashboard.css';
 
@@ -103,8 +104,8 @@ export default function BusinessDashboardPage() {
                 <Link href="/business/requirements/new" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
                   + Post New Requirement
                 </Link>
-                <Link href="/business/applications" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
-                  🔍 Compare Proposals
+                <Link href="/business/applications" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <IconSearch size={13} /> Compare Proposals
                 </Link>
               </div>
             </div>

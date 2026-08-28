@@ -70,7 +70,7 @@ export default function PhoneInput({ value, onChange, placeholder, required, id 
       >
         {COUNTRIES.map((c) => (
           <option key={`${c.code}-${c.dialCode}`} value={c.dialCode}>
-            {c.flag} {c.name} ({c.dialCode})
+            {c.name} ({c.dialCode})
           </option>
         ))}
       </select>

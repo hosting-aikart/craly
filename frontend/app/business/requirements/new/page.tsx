@@ -169,7 +169,7 @@ export default function CreateRequirementPage() {
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
               <p style={{ fontSize: '12px', color: 'var(--craly-muted, #888)', marginTop: '4px' }}>
-                Used to match contractors — must match a contractor&apos;s base city or one of their service areas exactly.
+                Used to match contractors must match a contractor&apos;s base city or one of their service areas exactly.
               </p>
             </div>
 
@@ -187,7 +187,7 @@ export default function CreateRequirementPage() {
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
               <p style={{ fontSize: '12px', color: 'var(--craly-muted, #888)', marginTop: '4px' }}>
-                Used to match contractors — must match a contractor&apos;s state exactly.
+                Used to match contractors must match a contractor&apos;s state exactly.
               </p>
             </div>
           </div>

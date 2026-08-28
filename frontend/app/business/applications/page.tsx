@@ -14,6 +14,7 @@ import ApplicationCompareModal from '@/components/business/ApplicationCompareMod
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
+import { IconAlertTriangle, IconUsers, IconCalendar, IconRupee } from '@/components/ui/Icons';
 
 export default function MasterApplicationsPage() {
   const [applications, setApplications] = useState<ApplicationReceived[]>([]);
@@ -82,8 +83,8 @@ export default function MasterApplicationsPage() {
       )}
 
       {error && (
-        <div style={{ padding: '14px 18px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '10px', marginBottom: '20px', fontWeight: 600 }}>
-          ⚠️ {error}
+        <div style={{ padding: '14px 18px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '10px', marginBottom: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconAlertTriangle size={16} /> {error}
         </div>
       )}
 
@@ -185,8 +186,8 @@ export default function MasterApplicationsPage() {
                     <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
                       Workforce Offered
                     </span>
-                    <strong style={{ fontSize: '16px', color: 'var(--craly-navy)' }}>
-                      👥 {app.proposed_workforce} Workers
+                    <strong style={{ fontSize: '16px', color: 'var(--craly-navy)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <IconUsers size={15} /> {app.proposed_workforce} Workers
                     </strong>
                   </div>
 
@@ -194,8 +195,8 @@ export default function MasterApplicationsPage() {
                     <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
                       Availability Date
                     </span>
-                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)' }}>
-                      📅 {new Date(app.availability_date).toLocaleDateString()}
+                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <IconCalendar size={14} /> {new Date(app.availability_date).toLocaleDateString()}
                     </span>
                   </div>
 
@@ -203,8 +204,8 @@ export default function MasterApplicationsPage() {
                     <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
                       Proposed Rate
                     </span>
-                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)' }}>
-                      💰 {app.proposed_rate ? `₹${app.proposed_rate}` : 'Negotiable'}
+                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <IconRupee size={14} /> {app.proposed_rate ? `₹${app.proposed_rate}` : 'Negotiable'}
                     </span>
                   </div>
                 </div>

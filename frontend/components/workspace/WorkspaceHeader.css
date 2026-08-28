@@ -53,24 +53,27 @@
 .workspace-header__role-badge-pill {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  gap: 7px;
+  background: var(--craly-off-white, #f8f9f6);
+  border: 1px solid var(--craly-border, #e2e9e7);
   padding: 5px 12px;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  color: #334155;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.78rem;
 }
 
-.workspace-header__role-badge-lbl {
-  color: #64748b;
-  font-size: 0.75rem;
+.workspace-header__role-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
 .workspace-header__role-badge-val {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--craly-navy, #102a2a);
 }
+
 
 @media (max-width: 768px) {
   .workspace-header__role-badge-pill {

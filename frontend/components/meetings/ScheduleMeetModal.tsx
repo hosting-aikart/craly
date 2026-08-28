@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getApiUrl } from '@/lib/api';
 import Button from '@/components/ui/Button';
+import { IconLink, IconVideo } from '@/components/ui/Icons';
 import './ScheduleMeetModal.css';
 
 interface ScheduleMeetModalProps {
@@ -159,11 +160,11 @@ export default function ScheduleMeetModal({ enquiryId, onClose, onSuccess }: Sch
           <div className="meet-modal__actions">
             {calendarConnected === false ? (
               <Button type="button" variant="primary" onClick={handleConnectGoogle} disabled={loading}>
-                {loading ? 'Connecting…' : '🔗 Connect Google Calendar'}
+                {loading ? 'Connecting…' : <><IconLink size={15} /> Connect Google Calendar</>}
               </Button>
             ) : (
               <Button type="submit" variant="primary" disabled={loading}>
-                {loading ? 'Scheduling…' : '📹 Create Google Meet'}
+                {loading ? 'Scheduling…' : <><IconVideo size={15} /> Create Google Meet</>}
               </Button>
             )}
             <Button type="button" variant="ghost" onClick={onClose}>

@@ -12,6 +12,7 @@ import Conversation from '@/components/enquiries/Conversation';
 import EmptyState from '@/components/ui/EmptyState';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
+import { IconClock, IconMessage } from '@/components/ui/Icons';
 import '@/components/enquiries/EnquiryDetail.css';
 
 export default function BusinessEnquiryDetailPage() {
@@ -126,7 +127,7 @@ export default function BusinessEnquiryDetailPage() {
               {/* Pending Banner */}
               {isPending && (
                 <div style={{ marginTop: '24px', padding: '16px', background: '#fffbe8', border: '1px solid #fef3c7', borderRadius: '12px', color: '#92400e' }}>
-                  <strong style={{ display: 'block', marginBottom: '4px' }}>⏳ Waiting for Contractor Acceptance</strong>
+                  <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><IconClock size={14} /> Waiting for Contractor Acceptance</strong>
                   <p style={{ margin: 0, fontSize: '13.5px' }}>
                     Your enquiry has been delivered to <strong>{enquiry.contractor_name}</strong>. Chat will be unlocked once they accept your project requirement.
                   </p>
@@ -137,7 +138,7 @@ export default function BusinessEnquiryDetailPage() {
               {isAccepted && (
                 <div style={{ marginTop: '24px', padding: '16px', background: 'var(--craly-mint)', borderRadius: '12px', border: '1px solid var(--craly-teal)' }}>
                   <strong style={{ color: 'var(--craly-teal-dark)', display: 'block' }}>✓ Enquiry Accepted!</strong>
-                  <span style={{ fontSize: '13px', color: 'var(--craly-text)' }}>Craly is coordinating with {enquiry.contractor_name} — you can message below.</span>
+                  <span style={{ fontSize: '13px', color: 'var(--craly-text)' }}>Craly is coordinating with {enquiry.contractor_name} you can message below.</span>
                 </div>
               )}
 
@@ -176,7 +177,7 @@ export default function BusinessEnquiryDetailPage() {
               </div>
             ) : isPending ? (
               <div className="conversation-card" style={{ padding: '32px 24px', textAlign: 'center', color: 'var(--craly-muted)', background: 'var(--craly-white)', borderRadius: '16px', border: '1px solid var(--craly-border)' }}>
-                <p style={{ margin: 0, fontWeight: 500 }}>💬 Chat unlocks automatically as soon as {enquiry.contractor_name} accepts your enquiry.</p>
+                <p style={{ margin: 0, fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}><IconMessage size={14} /> Chat unlocks automatically as soon as {enquiry.contractor_name} accepts your enquiry.</p>
               </div>
             ) : null}
           </>

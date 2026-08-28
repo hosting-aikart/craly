@@ -9,6 +9,7 @@ import {
 } from '@/lib/api/staff';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
+import { IconShield, IconZap } from '@/components/ui/Icons';
 import './staff-verification.css';
 
 const FILTER_OPTIONS = [
@@ -63,7 +64,7 @@ export default function StaffVerificationPage() {
         <LoadingState label="Loading verification Queue…" />
       ) : contractors.length === 0 ? (
         <EmptyState
-          icon="🛡️"
+          icon={<IconShield size={26} />}
           title="No Contractors Found"
           subtitle="There are currently no contractors matching the selected verification filter."
         />

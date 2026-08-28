@@ -44,7 +44,7 @@ export default function AddContractorPage() {
       return;
     }
     if (!email.trim()) {
-      setError('Email is required — this becomes the contractor\'s login.');
+      setError('Email is required this becomes the contractor\'s login.');
       return;
     }
     if (password.length < 8) {
@@ -172,7 +172,7 @@ export default function AddContractorPage() {
                   Regenerate
                 </button>
               </div>
-              <p className="form-hint">Share this with the contractor directly — they can log in immediately with it.</p>
+              <p className="form-hint">Share this with the contractor directly they can log in immediately with it.</p>
             </div>
 
             <div className="form-group">

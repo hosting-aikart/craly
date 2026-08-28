@@ -13,6 +13,17 @@ import {
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
+import {
+  IconMapPin,
+  IconUsers,
+  IconClock,
+  IconArrowRight,
+  IconApplications,
+  IconBuilding,
+  IconPlus,
+} from '@/components/ui/Icons';
+
+import './requirements.css';
 
 const STATUS_TABS = [
   { label: 'All Requirements', value: '' },
@@ -33,8 +44,11 @@ export default function BusinessRequirementsListPage() {
   const fetchRequirements = (statusFilter: string) => {
     setLoading(true);
     getBusinessRequirements(statusFilter)
-      .then(({ data }) => setRequirements(data))
-      .catch((err) => setError(err.message || 'Failed to fetch requirements'))
+      .then(({ data }) => setRequirements(Array.isArray(data) ? data : []))
+      .catch((err) => {
+        setError(err.message || 'Failed to fetch requirements');
+        setRequirements([]);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -67,53 +81,78 @@ export default function BusinessRequirementsListPage() {
     }
   };
 
+  const getStatusBadgeClass = (status: string) => {
+    const s = status.toUpperCase();
+    if (s === 'PUBLISHED') return 'reqs-badge--published';
+    if (s === 'SELECTED') return 'reqs-badge--selected';
+    if (s === 'CLOSED') return 'reqs-badge--closed';
+    return 'reqs-badge--draft';
+  };
+
+  const getStatusBadgeLabel = (status: string) => {
+    const s = status.toUpperCase();
+    if (s === 'PUBLISHED') return 'Published';
+    if (s === 'SELECTED') return 'Contractor Selected';
+    if (s === 'CLOSED') return 'Closed';
+    return 'Draft';
+  };
+
+  const hasRequirements = requirements.length > 0;
+
   return (
-    <>
+    <div className="reqs-page">
       <WorkspacePageHeader
         title="Manpower Requirements"
-        subtitle="Post manpower needs, view active listings, and track contractor applications."
+        subtitle="Post your workforce needs and track contractor applications in real time."
       />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+      {/* Top Controls Bar */}
+      <div className="reqs-header-bar">
+        {/* Status Filter Tabs */}
+        <div className="reqs-filter-bar">
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
               type="button"
               onClick={() => setActiveStatus(tab.value)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: '1px solid',
-                borderColor: activeStatus === tab.value ? 'var(--craly-teal)' : 'var(--craly-border)',
-                background: activeStatus === tab.value ? 'var(--craly-teal)' : 'var(--craly-white)',
-                color: activeStatus === tab.value ? '#ffffff' : 'var(--craly-navy)',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+              className={`reqs-tab-btn ${activeStatus === tab.value ? 'reqs-tab-btn--active' : ''}`}
             >
               {tab.label}
             </button>
           ))}
         </div>
 
-        <Button variant="primary" onClick={() => router.push('/business/requirements/new')}>
-          + Create Requirement
-        </Button>
+        {/* Top-Right Create Requirement Button: ONLY shown when requirements exist */}
+        {!loading && hasRequirements && (
+          <Button
+            variant="primary"
+            onClick={() => router.push('/business/requirements/new')}
+            className="reqs-create-top-btn"
+          >
+            <IconPlus size={16} />
+            Create Requirement
+          </Button>
+        )}
       </div>
 
+      {/* Content Area */}
       {loading ? (
         <LoadingState label="Loading manpower requirements…" />
       ) : error ? (
-        <div style={{ color: '#ef4444', padding: '16px', background: '#fef2f2', borderRadius: '8px' }}>
-          {error}
+        <div className="reqs-error-banner">
+          <p>{error}</p>
+          <button type="button" onClick={() => fetchRequirements(activeStatus)} className="reqs-retry-btn">
+            Retry
+          </button>
         </div>
-      ) : requirements.length === 0 ? (
+      ) : !hasRequirements ? (
         <EmptyState
           title="No requirements found"
-          subtitle={activeStatus ? `No requirements with status '${activeStatus}'` : 'Create your first requirement to start receiving contractor proposals.'}
+          subtitle={
+            activeStatus
+              ? `You have no requirements currently under '${STATUS_TABS.find((t) => t.value === activeStatus)?.label}'.`
+              : 'Create your first workforce requirement to start receiving matched proposals from verified contractors.'
+          }
           action={
             <Button variant="primary" onClick={() => router.push('/business/requirements/new')}>
               + Create Requirement
@@ -121,101 +160,77 @@ export default function BusinessRequirementsListPage() {
           }
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+        <div className="reqs-list">
           {requirements.map((req) => (
-            <div
-              key={req.id}
-              style={{
-                background: 'var(--craly-white)',
-                border: '1px solid var(--craly-border)',
-                borderRadius: '12px',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+            <div key={req.id} className="reqs-card">
+              {/* Card Header: Title & Status Badge */}
+              <div className="reqs-card__header">
                 <div>
-                  <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', color: 'var(--craly-navy)' }}>
-                    <Link href={`/business/requirements/${req.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                  <h3 className="reqs-card__title">
+                    <Link href={`/business/requirements/${req.id}`}>
                       {req.title}
                     </Link>
                   </h3>
-                  <div style={{ fontSize: '13px', color: 'var(--craly-muted)', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <span>📍 {req.location}</span>
-                    <span>🏢 {req.industry || 'General Industry'}</span>
-                    <span>👥 {req.workers_required} Workers</span>
-                    <span>📅 Starts {new Date(req.start_date).toLocaleDateString()}</span>
+                  {/* Essential Info Row */}
+                  <div className="reqs-card__meta-row">
+                    <span className="reqs-card__meta-item">
+                      <IconMapPin size={14} />
+                      {req.location}
+                    </span>
+                    <span className="reqs-card__meta-item">
+                      <IconUsers size={14} />
+                      <strong>{req.workers_required} Workers</strong>
+                    </span>
+                    <span className="reqs-card__meta-item">
+                      <IconClock size={14} />
+                      Starts {new Date(req.start_date).toLocaleDateString()}
+                    </span>
+                    {req.industry && (
+                      <span className="reqs-card__meta-item">
+                        <IconBuilding size={14} />
+                        {req.industry}
+                      </span>
+                    )}
+
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span
-                    style={{
-                      padding: '4px 12px',
-                      borderRadius: '9999px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.4px',
-                      background: req.status === 'PUBLISHED' ? '#dcfce7' : req.status === 'SELECTED' ? '#e0e7ff' : '#f1f5f9',
-                      color: req.status === 'PUBLISHED' ? '#15803d' : req.status === 'SELECTED' ? '#4338ca' : '#64748b',
-                    }}
-                  >
-                    {req.status.replace('_', ' ')}
-                  </span>
-                </div>
+                <span className={`reqs-badge ${getStatusBadgeClass(req.status)}`}>
+                  {getStatusBadgeLabel(req.status)}
+                </span>
               </div>
 
-              {req.description && (
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--craly-text)', lineHeight: '1.5' }}>
-                  {req.description.length > 180 ? `${req.description.slice(0, 180)}…` : req.description}
-                </p>
-              )}
-
+              {/* Skills Tags (Only top 3 for clean view) */}
               {req.required_skills && req.required_skills.length > 0 && (
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {req.required_skills.map((skill, idx) => (
-                    <span
-                      key={idx}
-                      style={{
-                        background: 'var(--craly-surface)',
-                        border: '1px solid var(--craly-border)',
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        color: 'var(--craly-navy)',
-                      }}
-                    >
+                <div className="reqs-skills">
+                  {req.required_skills.slice(0, 4).map((skill, idx) => (
+                    <span key={idx} className="reqs-skill-pill">
                       {skill}
                     </span>
                   ))}
+                  {req.required_skills.length > 4 && (
+                    <span className="reqs-skill-pill reqs-skill-pill--more">
+                      +{req.required_skills.length - 4} more
+                    </span>
+                  )}
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--craly-border)', flexWrap: 'wrap', gap: '12px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--craly-teal)' }}>
-                  📥 {req.applications_count} {req.applications_count === 1 ? 'Application' : 'Applications'} Received
+              {/* Card Footer: Proposals count and Clean Action Buttons */}
+              <div className="reqs-card__footer">
+                <span className="reqs-app-count">
+                  <IconApplications size={15} />
+                  <strong>{req.applications_count || 0}</strong> {req.applications_count === 1 ? 'Proposal' : 'Proposals'} Received
                 </span>
 
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="reqs-actions">
                   {req.status === 'DRAFT' && (
                     <>
                       <button
                         type="button"
                         onClick={() => handlePublishDraft(req.id)}
                         disabled={actionId === req.id}
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          color: '#ffffff',
-                          background: 'var(--craly-teal)',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                        }}
+                        className="reqs-btn-action reqs-btn-action--publish"
                       >
                         {actionId === req.id ? 'Publishing…' : 'Publish Now'}
                       </button>
@@ -224,16 +239,7 @@ export default function BusinessRequirementsListPage() {
                         type="button"
                         onClick={() => handleDeleteDraft(req.id)}
                         disabled={actionId === req.id}
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          color: '#dc2626',
-                          background: '#fef2f2',
-                          border: '1px solid #fecaca',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                        }}
+                        className="reqs-btn-action reqs-btn-action--delete"
                       >
                         Delete Draft
                       </button>
@@ -242,32 +248,17 @@ export default function BusinessRequirementsListPage() {
 
                   <Link
                     href={`/business/requirements/${req.id}`}
-                    style={{
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: 'var(--craly-navy)',
-                      textDecoration: 'none',
-                      padding: '6px 12px',
-                      border: '1px solid var(--craly-border)',
-                      borderRadius: '6px',
-                    }}
+                    className="reqs-btn-action reqs-btn-action--outline"
                   >
                     View Details
                   </Link>
 
                   <Link
                     href={`/business/requirements/${req.id}/applications`}
-                    style={{
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#ffffff',
-                      background: req.status === 'DRAFT' ? 'var(--craly-navy)' : 'var(--craly-teal)',
-                      textDecoration: 'none',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                    }}
+                    className="reqs-btn-action reqs-btn-action--primary"
                   >
-                    Applications ({req.applications_count}) →
+                    Review Proposals ({req.applications_count || 0})
+                    <IconArrowRight size={14} />
                   </Link>
                 </div>
               </div>
@@ -275,6 +266,6 @@ export default function BusinessRequirementsListPage() {
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }

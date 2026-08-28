@@ -10,6 +10,7 @@ import {
 } from '@/lib/api/contractorPortal';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
+import { IconUpload, IconFolder, IconFile } from '@/components/ui/Icons';
 import './ContractorDocumentsSection.css';
 
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
@@ -141,7 +142,7 @@ export default function ContractorDocumentsSection({
       {/* Upload Form Card */}
       <div className="cp-docs-card">
         <div className="cp-docs-card-header">
-          <span className="cp-docs-card-icon">📤</span>
+          <span className="cp-docs-card-icon"><IconUpload size={18} /></span>
           <h3>Upload Verification / KYC Document</h3>
         </div>
 
@@ -194,7 +195,7 @@ export default function ContractorDocumentsSection({
       {/* Uploaded Documents List Card */}
       <div className="cp-docs-card">
         <div className="cp-docs-card-header">
-          <span className="cp-docs-card-icon">📁</span>
+          <span className="cp-docs-card-icon"><IconFolder size={18} /></span>
           <h3>Uploaded Verification Documents ({documents.length})</h3>
         </div>
 
@@ -202,7 +203,7 @@ export default function ContractorDocumentsSection({
           <LoadingState label="Loading documents…" />
         ) : documents.length === 0 ? (
           <EmptyState
-            icon="📄"
+            icon={<IconFile size={24} />}
             title="No Documents Uploaded Yet"
             subtitle="Upload your business registration, PAN/Aadhaar, or industry licenses above to initiate verification."
           />

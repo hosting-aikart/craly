@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { ContractorDetail } from '@/lib/api/contractors';
 import ListedBadge from '@/components/ui/ListedBadge';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { IconMapPin } from '@/components/ui/Icons';
 
 interface ContractorProfileCardProps {
   contractor: ContractorDetail;
@@ -40,7 +41,7 @@ export default function ContractorProfileCard({ contractor, backHref, backLabel,
             <div>
               <ListedBadge />
               <h1 className="profile-card__name">{contractor.company_name}</h1>
-              {location && <p className="profile-card__location">📍 {location}</p>}
+              {location && <p className="profile-card__location"><IconMapPin size={13} className="inline-icon" /> {location}</p>}
             </div>
           </div>
 

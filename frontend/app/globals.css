@@ -8,6 +8,15 @@ html,
 body {
   width: 100%;
   min-height: 100vh;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* ==========================================================================
@@ -79,6 +88,15 @@ a {
   color: inherit;
 }
 
+/* Small inline icon used next to text where an emoji used to sit
+   (location, workers, dates, etc.) — keeps it baseline-aligned with text. */
+.inline-icon {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
 /* So #trust/#why/#how/#faq/#contact anchor jumps (navbar + footer links)
    don't land content half-hidden under the sticky navbar. */
 #trust,
@@ -87,4 +105,26 @@ a {
 #faq,
 #contact {
   scroll-margin-top: 84px;
+}
+
+/* ==========================================================================
+   Global Curved Button System
+   All primary, secondary, and interactive buttons use smooth rounded curves (pill shape)
+   ========================================================================== */
+button:not([class*="toggle"]):not([class*="checkbox"]):not([class*="radio"]):not([class*="close"]):not([class*="icon"]):not([class*="subtab"]):not([class*="tab"]):not([class*="menu"]),
+.btn,
+.btn-primary,
+.btn-secondary,
+[class*="-btn-"],
+[class*="__btn"],
+[class*="-button"],
+[class*="__button"],
+.contractor-btn-primary,
+.contractor-btn-secondary,
+.contractor-hero-btn-prim,
+.contractor-hero-btn-sec,
+.contractor-btn-save,
+.contractor-btn-cancel,
+.contractor-custom-cluster-btn {
+  border-radius: var(--radius-full, 9999px) !important;
 }

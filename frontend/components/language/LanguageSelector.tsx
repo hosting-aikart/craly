@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { LANGUAGES, type Language } from '@/lib/i18n/translations';
+import { IconGlobe, IconCheck, IconChevronDown } from '@/components/ui/Icons';
 import './LanguageSelector.css';
 
 interface LanguageSelectorProps {
@@ -54,7 +55,7 @@ export default function LanguageSelector({ variant = 'header' }: LanguageSelecto
               className={`mobile-lang-selector__option ${language === l.code ? 'mobile-lang-selector__option--active' : ''}`}
               onClick={() => handleSelect(l.code)}
             >
-              {l.label} {language === l.code ? '✓' : ''}
+              {l.label} {language === l.code ? <IconCheck size={13} /> : null}
             </button>
           ))}
         </div>
@@ -72,9 +73,9 @@ export default function LanguageSelector({ variant = 'header' }: LanguageSelecto
         aria-expanded={isOpen}
         aria-label="Select language"
       >
-        <span className="lang-selector__globe">🌐</span>
+        <IconGlobe size={15} className="lang-selector__globe" />
         <span className="lang-selector__current">{currentLang.label}</span>
-        <span className="lang-selector__arrow">▾</span>
+        <IconChevronDown size={12} className="lang-selector__arrow" />
       </button>
 
       {isOpen && (
@@ -91,7 +92,7 @@ export default function LanguageSelector({ variant = 'header' }: LanguageSelecto
                 onClick={() => handleSelect(l.code)}
               >
                 <span>{l.label}</span>
-                {isSelected && <span className="lang-selector__check">✓</span>}
+                {isSelected && <IconCheck size={13} className="lang-selector__check" />}
               </button>
             );
           })}
