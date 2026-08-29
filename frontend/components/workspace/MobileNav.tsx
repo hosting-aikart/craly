@@ -17,9 +17,10 @@ interface MobileNavProps {
   companyName: string;
   isOpen?: boolean;
   onClose?: () => void;
+  isVerified?: boolean;
 }
 
-export default function MobileNav({ role, companyName, isOpen, onClose }: MobileNavProps) {
+export default function MobileNav({ role, companyName, isOpen, onClose, isVerified = true }: MobileNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();

@@ -113,31 +113,36 @@ export default function ContractorDashboardPage() {
       {/* Sleek, Compact Hero Banner */}
       <div className="contractor-dashboard__banner">
         <div className="contractor-dashboard__banner-decor" />
-        <div className="contractor-dashboard__banner-info">
-          <div className="contractor-dashboard__banner-top-row">
-            <div className="contractor-dashboard__banner-badge">
-              <span className={`contractor-dashboard__badge-dot ${isVerified ? 'contractor-dashboard__badge-dot--verified' : ''}`} />
-              {isVerified ? 'Verified Partner' : 'Contractor Account'}
-            </div>
-            <span className="contractor-dashboard__banner-loc">
-              <IconMapPin size={13} /> {[p.city, p.state].filter(Boolean).join(', ') || 'Location active'}
-            </span>
+        
+        {/* Top Header Row (Badge on Left, Location on Top Right) */}
+        <div className="contractor-dashboard__banner-top">
+          <div className="contractor-dashboard__banner-badge">
+            <span className={`contractor-dashboard__badge-dot ${isVerified ? 'contractor-dashboard__badge-dot--verified' : ''}`} />
+            {isVerified ? 'Verified Partner' : 'Contractor Account'}
           </div>
-
-          <h1 className="contractor-dashboard__title">Welcome back, {firstName}</h1>
-          <p className="contractor-dashboard__subtitle">
-            Find new work for your workers, check your applications, and update company details.
-          </p>
+          <span className="contractor-dashboard__banner-loc">
+            <IconMapPin size={13} /> {[p.city, p.state].filter(Boolean).join(', ') || 'Location active'}
+          </span>
         </div>
 
-        <div className="contractor-dashboard__banner-actions">
-          <Link href="/contractor-portal/opportunities" className="contractor-btn-primary">
-            Find Work
-            <IconArrowRight size={15} />
-          </Link>
-          <Link href="/contractor-portal/profile?tab=verification" className="contractor-btn-secondary">
-            My Documents
-          </Link>
+        {/* Bottom / Main Content Row (Title/Subtitle on Left, Buttons on Lower Right) */}
+        <div className="contractor-dashboard__banner-main">
+          <div className="contractor-dashboard__banner-info">
+            <h1 className="contractor-dashboard__title">Welcome back, {firstName}</h1>
+            <p className="contractor-dashboard__subtitle">
+              Find new work for your workers, check your applications, and update company details.
+            </p>
+          </div>
+
+          <div className="contractor-dashboard__banner-actions">
+            <Link href="/contractor-portal/opportunities" className="contractor-btn-primary">
+              Find Work
+              <IconArrowRight size={15} />
+            </Link>
+            <Link href="/contractor-portal/profile?tab=documents" className="contractor-btn-secondary">
+              My Documents
+            </Link>
+          </div>
         </div>
       </div>
 

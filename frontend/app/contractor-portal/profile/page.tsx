@@ -19,6 +19,15 @@ import {
   IconTarget,
   IconUsers,
   IconZap,
+  IconSearch,
+  IconPlus,
+  IconSparkle,
+  IconRocket,
+  IconTrash,
+  IconAlertCircle,
+  IconArrowRight,
+  IconFolder,
+  IconFile,
 } from '@/components/ui/Icons';
 import './contractor-profile.css';
 
@@ -35,24 +44,34 @@ const COMMON_SKILLS = [
   'Security Guard', 'Sheet Metal Worker', 'Supervisor', 'TIG Welder',
 ].sort();
 
-const DEFAULT_INDUSTRIAL_CLUSTERS = [
-  { name: 'Chakan', cluster: 'Pune industrial cluster' },
-  { name: 'Talegaon', cluster: 'Pune industrial cluster' },
-  { name: 'Ranjangaon', cluster: 'Pune industrial cluster' },
-  { name: 'Pimpri-Chinchwad', cluster: 'Pune industrial cluster' },
-  { name: 'Bhosari', cluster: 'Pune industrial cluster' },
-  { name: 'Shikrapur', cluster: 'Pune industrial cluster' },
-  { name: 'Pirangut', cluster: 'Pune industrial cluster' },
-  { name: 'Hadapsar', cluster: 'Pune industrial cluster' },
-  { name: 'Sanaswadi', cluster: 'Pune industrial cluster' },
-  { name: 'Kurkumbh', cluster: 'Pune industrial cluster' },
-  { name: 'Thane / Belapur', cluster: 'MMR industrial cluster' },
-  { name: 'Navi Mumbai', cluster: 'MMR industrial cluster' },
-  { name: 'Tarapur', cluster: 'MMR industrial cluster' },
-  { name: 'Nashik', cluster: 'North Maharashtra cluster' },
-  { name: 'Chhatrapati Sambhajinagar', cluster: 'Marathwada cluster' },
-  { name: 'Kolhapur', cluster: 'South Maharashtra cluster' },
-  { name: 'Nagpur', cluster: 'Vidarbha cluster' },
+export interface IndustrialClusterOption {
+  name: string;
+  cluster: string;
+  region: 'pune' | 'mmr' | 'north' | 'marathwada' | 'south' | 'vidarbha' | 'gujarat' | 'south_india';
+  regionLabel: string;
+}
+
+const DEFAULT_INDUSTRIAL_CLUSTERS: IndustrialClusterOption[] = [
+  { name: 'Chakan', cluster: 'Auto & Heavy Engineering', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Talegaon', cluster: 'Electronics & Component SEZ', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Ranjangaon', cluster: 'Consumer Durables & Auto', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Pimpri-Chinchwad', cluster: 'Automotive & Precision Tooling', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Bhosari', cluster: 'MIDC Fabrication & Machinery', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Shikrapur', cluster: 'Logistics & Warehousing Hub', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Pirangut', cluster: 'Engineering & Manufacturing', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Hadapsar', cluster: 'Industrial Estate & IT Parks', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Sanaswadi', cluster: 'Heavy Fabrication & Steel', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Kurkumbh', cluster: 'Chemical & Pharma Zone', region: 'pune', regionLabel: 'Pune Industrial Belt' },
+  { name: 'Thane / Belapur', cluster: 'Chemical & Technology Corridor', region: 'mmr', regionLabel: 'MMR Corridor' },
+  { name: 'Navi Mumbai', cluster: 'Port & Cold Storage Logistics', region: 'mmr', regionLabel: 'MMR Corridor' },
+  { name: 'Tarapur', cluster: 'Specialty Chemicals & Textiles', region: 'mmr', regionLabel: 'MMR Corridor' },
+  { name: 'Nashik', cluster: 'Automotive & Electrical Belt', region: 'north', regionLabel: 'North Maharashtra' },
+  { name: 'Chhatrapati Sambhajinagar', cluster: 'Auto & Breweries Hub', region: 'marathwada', regionLabel: 'Marathwada Belt' },
+  { name: 'Kolhapur', cluster: 'Foundry & Castings Industrial Cluster', region: 'south', regionLabel: 'South Maharashtra' },
+  { name: 'Nagpur', cluster: 'MIHAN SEZ & Central Cargo Logistics', region: 'vidarbha', regionLabel: 'Vidarbha Corridor' },
+  { name: 'Sanand', cluster: 'Automotive & Heavy Industry SEZ', region: 'gujarat', regionLabel: 'Gujarat Belt' },
+  { name: 'Dahej', cluster: 'Petrochemical & PCPIR Mega Hub', region: 'gujarat', regionLabel: 'Gujarat Belt' },
+  { name: 'Sriperumbudur', cluster: 'Automotive & Hardware Corridor', region: 'south_india', regionLabel: 'South India Corridor' },
 ];
 
 export default function ContractorProfilePage() {
@@ -69,10 +88,29 @@ export default function ContractorProfilePage() {
   const [editMode, setEditMode] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Coverage Modal states
+  // Coverage Tab & Modal states
   const [isCoverageModalOpen, setIsCoverageModalOpen] = useState(false);
   const [selectedClusters, setSelectedClusters] = useState<string[]>([]);
   const [customClusterInput, setCustomClusterInput] = useState('');
+  const [coverageFilter, setCoverageFilter] = useState<'all' | 'pune' | 'mmr' | 'other' | 'custom'>('all');
+  const [coverageSearch, setCoverageSearch] = useState('');
+  const [inlineClusterInput, setInlineClusterInput] = useState('');
+  const [modalSearch, setModalSearch] = useState('');
+  const [modalRegionFilter, setModalRegionFilter] = useState<'all' | 'pune' | 'mmr' | 'other'>('all');
+
+  // Sliding tab glider state & refs
+  const coverageTabRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
+  const [coverageGliderStyle, setCoverageGliderStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const el = coverageTabRefs.current[coverageFilter];
+    if (el) {
+      setCoverageGliderStyle({
+        left: el.offsetLeft,
+        width: el.offsetWidth,
+      });
+    }
+  }, [coverageFilter, profile?.service_areas?.length, activeTab]);
 
   // Form states
   const [companyName, setCompanyName] = useState('');
@@ -198,42 +236,95 @@ export default function ContractorProfilePage() {
           {editMode ? (
             <form className="contractor-edit-card" onSubmit={handleSubmit}>
               <div className="contractor-card-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div className="contractor-header-icon-box">
-                    <IconBuilding size={16} />
+                    <IconBuilding size={18} />
                   </div>
-                  <h3 style={{ margin: 0 }}>Edit Business Identity</h3>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16.5px', fontWeight: 800 }}>Edit Business Identity</h3>
+                    <p className="contractor-card-sub" style={{ margin: '2px 0 0 0' }}>
+                      Update legal trading name, primary contact, and operational scale
+                    </p>
+                  </div>
                 </div>
               </div>
+
               <div className="contractor-form-grid">
                 <div className="contractor-field">
                   <label>Legal / Trading Name *</label>
-                  <input type="text" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Acme Engineering Works Pvt Ltd"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                  />
+                  <span className="contractor-field-hint">Registered legal name as per government records</span>
                 </div>
+
                 <div className="contractor-field">
                   <label>Contact Phone *</label>
                   <PhoneInput value={phone} onChange={setPhone} required />
+                  <span className="contractor-field-hint">Primary operational phone for verification & notifications</span>
                 </div>
+
                 <div className="contractor-field">
                   <label>Industry *</label>
-                  <input type="text" required value={industry} onChange={(e) => setIndustry(e.target.value)} />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Construction & Infrastructure"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                  />
+                  <span className="contractor-field-hint">Primary trade or manufacturing vertical</span>
                 </div>
+
                 <div className="contractor-field">
                   <label>Base City</label>
-                  <input type="text" value={city} onChange={(e) => setCity(e.target.value)} />
+                  <input
+                    type="text"
+                    placeholder="e.g. Pune, Mumbai, Nashik"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                  <span className="contractor-field-hint">Headquarters or primary dispatch location</span>
                 </div>
+
                 <div className="contractor-field">
                   <label>State</label>
-                  <input type="text" value={state} onChange={(e) => setState(e.target.value)} />
+                  <input
+                    type="text"
+                    placeholder="e.g. Maharashtra"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  />
+                  <span className="contractor-field-hint">State jurisdiction for statutory compliance</span>
                 </div>
+
                 <div className="contractor-field">
                   <label>Workforce Size (Headcount)</label>
-                  <input type="number" value={workforceSize} onChange={(e) => setWorkforceSize(e.target.value ? Number(e.target.value) : '')} />
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 50"
+                    value={workforceSize}
+                    onChange={(e) => setWorkforceSize(e.target.value ? Number(e.target.value) : '')}
+                  />
+                  <span className="contractor-field-hint">Total registered workforce and skilled tradesmen pool</span>
                 </div>
               </div>
+
               <div className="contractor-form-actions">
+                <button
+                  type="button"
+                  className="contractor-form-cancel-btn"
+                  onClick={() => setEditMode(false)}
+                >
+                  Cancel
+                </button>
                 <button type="submit" className="contractor-btn-primary" disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving ? 'Saving Changes...' : 'Save Changes'}
                 </button>
               </div>
             </form>
@@ -717,8 +808,13 @@ export default function ContractorProfilePage() {
         <div className="contractor-tab-view">
           <div className="contractor-hero-banner">
             <div>
-              <h2>Location & service coverage</h2>
-              <p>Declare the base location and industrial clusters where your organization can mobilise manpower.</p>
+              <span className="contractor-hero-badge">
+                <IconMapPin size={12} /> Geo-Coverage & Industrial Hubs
+              </span>
+              <h2>Location & Service Coverage</h2>
+              <p>
+                Declare your deployment clusters and industrial corridors. Craly Smart Matching Engine prioritizes your profile for nearby manufacturing & infrastructure requirements.
+              </p>
             </div>
             <div className="contractor-hero-actions">
               <button
@@ -729,78 +825,379 @@ export default function ContractorProfilePage() {
                   setIsCoverageModalOpen(true);
                 }}
               >
+                + Manage All Clusters
+              </button>
+              <button
+                type="button"
+                className="contractor-hero-btn-prim"
+                onClick={() => {
+                  setSelectedClusters(declaredServiceAreas);
+                  setIsCoverageModalOpen(true);
+                }}
+              >
                 Edit Coverage
               </button>
             </div>
           </div>
 
+          {/* Top Metrics Row */}
+          <div className="contractor-metrics-3row">
+            <div className="contractor-metric-card">
+              <div className="contractor-metric-body">
+                <span className="contractor-metric-lbl">Primary Base Hub</span>
+                <span className="contractor-metric-val">{profile.city || 'Pune'}, {profile.state || 'Maharashtra'}</span>
+                <span className="contractor-metric-sub">Registered Operations HQ</span>
+              </div>
+              <div className="contractor-metric-icon-box">
+                <IconBuilding size={20} />
+              </div>
+            </div>
+
+            <div className="contractor-metric-card">
+              <div className="contractor-metric-body">
+                <span className="contractor-metric-lbl">Active Mobilization Zones</span>
+                <span className="contractor-metric-val">{declaredServiceAreas.length} {declaredServiceAreas.length === 1 ? 'Cluster' : 'Clusters'}</span>
+                <span className="contractor-metric-sub">
+                  {declaredServiceAreas.length > 0 ? 'Multi-zone industrial reach' : 'No clusters declared'}
+                </span>
+              </div>
+              <div className="contractor-metric-icon-box">
+                <IconMapPin size={20} />
+              </div>
+            </div>
+
+            <div className="contractor-metric-card">
+              <div className="contractor-metric-body">
+                <span className="contractor-metric-lbl">Matching Readiness</span>
+                <span className="contractor-metric-val" style={{ color: declaredServiceAreas.length > 0 ? '#047857' : '#b45309' }}>
+                  {declaredServiceAreas.length >= 4 ? 'High Priority' : declaredServiceAreas.length >= 1 ? 'Moderate Reach' : 'Action Needed'}
+                </span>
+                <span className="contractor-metric-sub">
+                  {declaredServiceAreas.length >= 1 ? 'Active tender notifications' : 'Add clusters to unlock tenders'}
+                </span>
+              </div>
+              <div className="contractor-metric-icon-box">
+                <IconZap size={20} />
+              </div>
+            </div>
+          </div>
+
           <div className="contractor-grid-2col">
+            {/* Left Card: Operating Clusters with Search and Quick Actions */}
             <div className="contractor-card">
               <div className="contractor-card-header">
                 <div>
-                  <h3>Operating clusters & cities</h3>
-                  <p className="contractor-card-sub">Active industrial zones where you provide manpower.</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="contractor-header-icon-box">
+                      <IconMapPin size={16} />
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>Declared Service Clusters</h3>
+                  </div>
+                  <p className="contractor-card-sub" style={{ marginTop: '4px' }}>
+                    Active industrial zones where your workforce can be mobilised.
+                  </p>
                 </div>
                 <span className="contractor-badge-pill contractor-badge-pill--green">
-                  {declaredServiceAreas.length} {declaredServiceAreas.length === 1 ? 'Cluster' : 'Clusters'}
+                  {declaredServiceAreas.length} {declaredServiceAreas.length === 1 ? 'Zone' : 'Zones'} Active
                 </span>
               </div>
 
+              {/* Filter Tabs & Search */}
+              {declaredServiceAreas.length > 0 && (
+                <div className="contractor-coverage-filter-bar">
+                  <div className="contractor-coverage-tabs">
+                    {coverageGliderStyle.width > 0 && (
+                      <div
+                        className="contractor-coverage-tab-glider"
+                        style={{
+                          left: `${coverageGliderStyle.left}px`,
+                          width: `${coverageGliderStyle.width}px`,
+                        }}
+                      />
+                    )}
+                    <button
+                      ref={(el) => { coverageTabRefs.current['all'] = el; }}
+                      type="button"
+                      className={`contractor-coverage-tab-btn ${coverageFilter === 'all' ? 'active' : ''}`}
+                      onClick={() => setCoverageFilter('all')}
+                    >
+                      All ({declaredServiceAreas.length})
+                    </button>
+                    <button
+                      ref={(el) => { coverageTabRefs.current['pune'] = el; }}
+                      type="button"
+                      className={`contractor-coverage-tab-btn ${coverageFilter === 'pune' ? 'active' : ''}`}
+                      onClick={() => setCoverageFilter('pune')}
+                    >
+                      Pune Belt
+                    </button>
+                    <button
+                      ref={(el) => { coverageTabRefs.current['mmr'] = el; }}
+                      type="button"
+                      className={`contractor-coverage-tab-btn ${coverageFilter === 'mmr' ? 'active' : ''}`}
+                      onClick={() => setCoverageFilter('mmr')}
+                    >
+                      MMR
+                    </button>
+                    <button
+                      ref={(el) => { coverageTabRefs.current['other'] = el; }}
+                      type="button"
+                      className={`contractor-coverage-tab-btn ${coverageFilter === 'other' ? 'active' : ''}`}
+                      onClick={() => setCoverageFilter('other')}
+                    >
+                      Other
+                    </button>
+                  </div>
+
+                  <div className="contractor-coverage-search-wrap">
+                    <IconSearch size={14} className="contractor-search-icon" />
+                    <input
+                      type="text"
+                      className="contractor-coverage-search-input"
+                      placeholder="Filter declared clusters..."
+                      value={coverageSearch}
+                      onChange={(e) => setCoverageSearch(e.target.value)}
+                    />
+                    {coverageSearch && (
+                      <button
+                        type="button"
+                        className="contractor-search-clear-btn"
+                        onClick={() => setCoverageSearch('')}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Cluster Badges List */}
               {declaredServiceAreas.length > 0 ? (
                 <div className="contractor-cluster-pill-grid">
-                  {declaredServiceAreas.map((clusterName) => {
-                    const matchedPreset = DEFAULT_INDUSTRIAL_CLUSTERS.find(
-                      (c) => c.name.toLowerCase() === clusterName.toLowerCase()
-                    );
-                    return (
-                      <span
-                        key={clusterName}
-                        className={`contractor-cluster-pill-tag ${
-                          matchedPreset ? '' : 'contractor-cluster-pill-tag--custom'
-                        }`}
-                      >
-                        <span>{clusterName}</span>
-                        {matchedPreset && (
-                          <span style={{ fontSize: '11px', opacity: 0.8 }}>({matchedPreset.cluster.split(' ')[0]})</span>
-                        )}
-                      </span>
-                    );
-                  })}
+                  {declaredServiceAreas
+                    .filter((name) => {
+                      if (coverageSearch && !name.toLowerCase().includes(coverageSearch.toLowerCase())) {
+                        return false;
+                      }
+                      const matched = DEFAULT_INDUSTRIAL_CLUSTERS.find(
+                        (c) => c.name.toLowerCase() === name.toLowerCase()
+                      );
+                      if (coverageFilter === 'pune') return matched?.region === 'pune';
+                      if (coverageFilter === 'mmr') return matched?.region === 'mmr';
+                      if (coverageFilter === 'other') return !matched || (matched.region !== 'pune' && matched.region !== 'mmr');
+                      return true;
+                    })
+                    .map((clusterName) => {
+                      const matchedPreset = DEFAULT_INDUSTRIAL_CLUSTERS.find(
+                        (c) => c.name.toLowerCase() === clusterName.toLowerCase()
+                      );
+                      return (
+                        <span
+                          key={clusterName}
+                          className={`contractor-cluster-pill-tag ${
+                            matchedPreset ? '' : 'contractor-cluster-pill-tag--custom'
+                          }`}
+                        >
+                          <span className="contractor-cluster-pill-name">{clusterName}</span>
+                          {matchedPreset ? (
+                            <span className="contractor-cluster-pill-sub">
+                              {matchedPreset.region === 'pune' ? 'Pune Belt' : matchedPreset.region === 'mmr' ? 'MMR' : matchedPreset.regionLabel.split(' ')[0]}
+                            </span>
+                          ) : (
+                            <span className="contractor-cluster-pill-sub">Custom Zone</span>
+                          )}
+                          <button
+                            type="button"
+                            className="contractor-cluster-pill-remove"
+                            title={`Remove ${clusterName}`}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const updated = declaredServiceAreas.filter((c) => c !== clusterName);
+                              try {
+                                await updateMyProfile({
+                                  serviceAreas: updated,
+                                });
+                                setServiceAreas(updated.join(', '));
+                                setSelectedClusters(updated);
+                                setMessage({ type: 'success', text: `Removed ${clusterName} from coverage.` });
+                                loadProfile();
+                              } catch {
+                                setMessage({ type: 'error', text: `Failed to remove ${clusterName}.` });
+                              }
+                            }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      );
+                    })}
                 </div>
               ) : (
-                <p className="contractor-card-sub" style={{ marginTop: '12px' }}>
-                  No service areas or clusters declared yet. Click <strong>Edit Coverage</strong> to add industrial clusters.
-                </p>
+                <div className="contractor-empty-clusters-box">
+                  <div className="contractor-empty-icon-wrap">
+                    <IconMapPin size={28} />
+                  </div>
+                  <h4>No industrial clusters declared yet</h4>
+                  <p>
+                    Adding service areas allows the Craly matching engine to pair your agency with local manufacturer requirements.
+                  </p>
+                  <button
+                    type="button"
+                    className="contractor-btn-primary"
+                    style={{ marginTop: '12px' }}
+                    onClick={() => {
+                      setSelectedClusters(declaredServiceAreas);
+                      setIsCoverageModalOpen(true);
+                    }}
+                  >
+                    <IconPlus size={14} /> Add Industrial Clusters
+                  </button>
+                </div>
               )}
+
+              {/* Quick Inline Add Form */}
+              <div className="contractor-quick-add-cluster-box">
+                <label className="contractor-quick-add-label">Quick add location or industrial zone:</label>
+                <div className="contractor-quick-add-row">
+                  <input
+                    type="text"
+                    className="contractor-quick-add-input"
+                    placeholder="e.g. Supa MIDC, Shirwal, Waluj..."
+                    value={inlineClusterInput}
+                    onChange={(e) => setInlineClusterInput(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = inlineClusterInput.trim();
+                        if (val && !declaredServiceAreas.includes(val)) {
+                          const updated = [...declaredServiceAreas, val];
+                          try {
+                            await updateMyProfile({ serviceAreas: updated });
+                            setServiceAreas(updated.join(', '));
+                            setSelectedClusters(updated);
+                            setInlineClusterInput('');
+                            setMessage({ type: 'success', text: `Added ${val} to service coverage!` });
+                            loadProfile();
+                          } catch {
+                            setMessage({ type: 'error', text: `Failed to add ${val}.` });
+                          }
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="contractor-quick-add-btn"
+                    onClick={async () => {
+                      const val = inlineClusterInput.trim();
+                      if (val && !declaredServiceAreas.includes(val)) {
+                        const updated = [...declaredServiceAreas, val];
+                        try {
+                          await updateMyProfile({ serviceAreas: updated });
+                          setServiceAreas(updated.join(', '));
+                          setSelectedClusters(updated);
+                          setInlineClusterInput('');
+                          setMessage({ type: 'success', text: `Added ${val} to service coverage!` });
+                          loadProfile();
+                        } catch {
+                          setMessage({ type: 'error', text: `Failed to add ${val}.` });
+                        }
+                      }
+                    }}
+                  >
+                    + Add
+                  </button>
+                </div>
+              </div>
             </div>
 
+            {/* Right Card: Mobility Logistics & HQ Readiness */}
             <div className="contractor-card">
-              <h3>Base location</h3>
-              <div className="contractor-trust-stats-list" style={{ marginTop: '12px' }}>
-                <div className="contractor-trust-stat-row">
-                  <span>State</span>
-                  <strong>{profile.state || 'Maharashtra'}</strong>
+              <div className="contractor-card-header">
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="contractor-header-icon-box">
+                      <IconBuilding size={16} />
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>Deployment Logistics</h3>
+                  </div>
+                  <p className="contractor-card-sub" style={{ marginTop: '4px' }}>
+                    Mobility parameters used by manufacturers when scoring proposals.
+                  </p>
                 </div>
-                <div className="contractor-trust-stat-row">
-                  <span>Base City / Hub</span>
-                  <strong>{profile.city || 'Pune'}</strong>
+              </div>
+
+              <div className="contractor-kv-list" style={{ marginTop: '8px' }}>
+                <div className="contractor-kv-pill">
+                  <span className="contractor-kv-pill__label">Registered State</span>
+                  <span className="contractor-kv-pill__val">{profile.state || 'Maharashtra'}</span>
                 </div>
-                <div className="contractor-trust-stat-row">
-                  <span>Total Coverage Clusters</span>
-                  <strong>{declaredServiceAreas.length} Zones</strong>
+                <div className="contractor-kv-pill">
+                  <span className="contractor-kv-pill__label">Base City / Hub</span>
+                  <span className="contractor-kv-pill__val">{profile.city || 'Pune'}</span>
                 </div>
-                <div className="contractor-trust-stat-row">
-                  <span>Coverage Scope</span>
-                  <strong style={{ color: '#059669' }}>Cluster + nearby industrial zones</strong>
+                <div className="contractor-kv-pill">
+                  <span className="contractor-kv-pill__label">Active Coverage Zones</span>
+                  <span className="contractor-kv-pill__val" style={{ color: '#0f8b82' }}>
+                    {declaredServiceAreas.length} Industrial Zones
+                  </span>
+                </div>
+                <div className="contractor-kv-pill">
+                  <span className="contractor-kv-pill__label">Mobilization Lead Time</span>
+                  <span className="contractor-kv-pill__val">24 - 48 Hours On-site</span>
+                </div>
+                <div className="contractor-kv-pill">
+                  <span className="contractor-kv-pill__label">Logistics Support</span>
+                  <span className="contractor-kv-pill__val">Local Worker Transit Ready</span>
+                </div>
+              </div>
+
+              <div className="contractor-coverage-tip-box" style={{ marginTop: '16px' }}>
+                <div className="contractor-coverage-tip-icon">
+                  <IconSparkle size={16} />
+                </div>
+                <div className="contractor-coverage-tip-text">
+                  <strong>Expand your reach:</strong> Contractors covering 3+ industrial clusters receive 3.4x more interview requests and contract invitations on Craly.
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Smart Matching Feature Showcase */}
           <div className="contractor-card" style={{ marginTop: '24px' }}>
-            <h3>How matching uses this</h3>
-            <div className="contractor-rule-callout">
-              Manpower requirements match your organization when their location falls within your base city, state, or any of your declared industrial coverage clusters.
+            <div className="contractor-card-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="contractor-header-icon-box">
+                  <IconRocket size={16} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: '16px' }}>How Craly Smart Matching Works</h3>
+              </div>
+            </div>
+
+            <div className="contractor-matching-steps-grid">
+              <div className="contractor-matching-step-item">
+                <div className="contractor-step-number">1</div>
+                <div className="contractor-step-content">
+                  <h4>Cluster Geofencing</h4>
+                  <p>When a plant posts a requirement in Chakan, Bhosari, or MMR, contractors mapped to those zones get instant priority alerts.</p>
+                </div>
+              </div>
+
+              <div className="contractor-matching-step-item">
+                <div className="contractor-step-number">2</div>
+                <div className="contractor-step-content">
+                  <h4>Skill & Capacity Pairing</h4>
+                  <p>Requirements are paired against your declared trade specializations and workforce headcount for optimal contract fits.</p>
+                </div>
+              </div>
+
+              <div className="contractor-matching-step-item">
+                <div className="contractor-step-number">3</div>
+                <div className="contractor-step-content">
+                  <h4>Verified Rapid Dispatch</h4>
+                  <p>Verified contractors with established regional clusters get the Craly Fast-Track badge for direct interview scheduling.</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -809,7 +1206,12 @@ export default function ContractorProfilePage() {
             <div className="contractor-modal-overlay" onClick={() => setIsCoverageModalOpen(false)}>
               <div className="contractor-modal-container" onClick={(e) => e.stopPropagation()}>
                 <div className="contractor-modal-header">
-                  <h3 className="contractor-modal-title">Edit Service Coverage</h3>
+                  <div>
+                    <h3 className="contractor-modal-title">Edit Service Coverage</h3>
+                    <p className="contractor-modal-subtext" style={{ margin: '4px 0 0 0' }}>
+                      Select the industrial clusters where your agency can supply and manage manpower.
+                    </p>
+                  </div>
                   <button
                     type="button"
                     className="contractor-modal-close"
@@ -821,13 +1223,71 @@ export default function ContractorProfilePage() {
                 </div>
 
                 <div className="contractor-modal-body">
-                  <p className="contractor-modal-subtext">
-                    Select industrial clusters where you can mobilise manpower.
-                  </p>
+                  {/* Modal Search and Filter Controls */}
+                  <div className="contractor-modal-toolbar">
+                    <div className="contractor-modal-search-wrap">
+                      <IconSearch size={15} className="contractor-search-icon" />
+                      <input
+                        type="text"
+                        className="contractor-modal-search-input"
+                        placeholder="Search clusters (e.g., Chakan, Thane, Tarapur, Nashik)..."
+                        value={modalSearch}
+                        onChange={(e) => setModalSearch(e.target.value)}
+                      />
+                      {modalSearch && (
+                        <button
+                          type="button"
+                          className="contractor-search-clear-btn"
+                          onClick={() => setModalSearch('')}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="contractor-modal-region-tabs">
+                      <button
+                        type="button"
+                        className={`contractor-modal-region-btn ${modalRegionFilter === 'all' ? 'active' : ''}`}
+                        onClick={() => setModalRegionFilter('all')}
+                      >
+                        All Zones
+                      </button>
+                      <button
+                        type="button"
+                        className={`contractor-modal-region-btn ${modalRegionFilter === 'pune' ? 'active' : ''}`}
+                        onClick={() => setModalRegionFilter('pune')}
+                      >
+                        Pune Belt
+                      </button>
+                      <button
+                        type="button"
+                        className={`contractor-modal-region-btn ${modalRegionFilter === 'mmr' ? 'active' : ''}`}
+                        onClick={() => setModalRegionFilter('mmr')}
+                      >
+                        MMR Region
+                      </button>
+                      <button
+                        type="button"
+                        className={`contractor-modal-region-btn ${modalRegionFilter === 'other' ? 'active' : ''}`}
+                        onClick={() => setModalRegionFilter('other')}
+                      >
+                        Other Belts
+                      </button>
+                    </div>
+                  </div>
 
                   {/* Pre-defined Industrial Clusters Grid */}
                   <div className="contractor-cluster-grid">
-                    {DEFAULT_INDUSTRIAL_CLUSTERS.map((item) => {
+                    {DEFAULT_INDUSTRIAL_CLUSTERS.filter((item) => {
+                      if (modalSearch && !item.name.toLowerCase().includes(modalSearch.toLowerCase()) && !item.cluster.toLowerCase().includes(modalSearch.toLowerCase())) {
+                        return false;
+                      }
+                      if (modalRegionFilter === 'pune') return item.region === 'pune';
+                      if (modalRegionFilter === 'mmr') return item.region === 'mmr';
+                      if (modalRegionFilter === 'other') return item.region !== 'pune' && item.region !== 'mmr';
+                      return true;
+                    }).map((item) => {
                       const isSelected = selectedClusters.some(
                         (sc) => sc.toLowerCase() === item.name.toLowerCase()
                       );
@@ -847,14 +1307,19 @@ export default function ContractorProfilePage() {
                             }
                           }}
                         >
-                          <input
-                            type="checkbox"
-                            className="contractor-cluster-checkbox"
-                            checked={isSelected}
-                            onChange={() => {}} // Handled by div container click
-                          />
+                          <div className="contractor-cluster-card-check">
+                            <input
+                              type="checkbox"
+                              className="contractor-cluster-checkbox"
+                              checked={isSelected}
+                              onChange={() => {}} // Handled by container
+                            />
+                          </div>
                           <div className="contractor-cluster-info">
-                            <span className="contractor-cluster-name">{item.name}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                              <span className="contractor-cluster-name">{item.name}</span>
+                              <span className="contractor-cluster-region-pill">{item.regionLabel.split(' ')[0]}</span>
+                            </div>
                             <span className="contractor-cluster-sub">{item.cluster}</span>
                           </div>
                         </div>
@@ -862,16 +1327,16 @@ export default function ContractorProfilePage() {
                     })}
                   </div>
 
-                  {/* Custom Industrial Clusters already added (not in preset list) */}
+                  {/* Custom Industrial Clusters already added */}
                   {selectedClusters.filter(
                     (sc) =>
                       !DEFAULT_INDUSTRIAL_CLUSTERS.some(
                         (d) => d.name.toLowerCase() === sc.toLowerCase()
                       )
                   ).length > 0 && (
-                    <div style={{ marginTop: '16px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                        Custom Locations Added:
+                    <div className="contractor-custom-clusters-added-box">
+                      <label className="contractor-custom-clusters-heading">
+                        Custom Locations Selected:
                       </label>
                       <div className="contractor-cluster-pill-grid">
                         {selectedClusters
@@ -901,19 +1366,19 @@ export default function ContractorProfilePage() {
 
                   {/* Add Custom Location Section */}
                   <div className="contractor-custom-cluster-section">
-                    <label>Add custom city or industrial cluster:</label>
+                    <label>Add custom city, industrial zone, or MIDC cluster:</label>
                     <div className="contractor-custom-cluster-input-wrap">
                       <input
                         type="text"
                         className="contractor-custom-cluster-input"
-                        placeholder="e.g. Sanand, Dahej, Sriperumbudur..."
+                        placeholder="e.g. Sanand SEZ, Dahej, Sriperumbudur..."
                         value={customClusterInput}
                         onChange={(e) => setCustomClusterInput(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
                             const val = customClusterInput.trim();
-                            if (val && !selectedClusters.includes(val)) {
+                            if (val && !selectedClusters.some((sc) => sc.toLowerCase() === val.toLowerCase())) {
                               setSelectedClusters((prev) => [...prev, val]);
                               setCustomClusterInput('');
                             }
@@ -925,55 +1390,60 @@ export default function ContractorProfilePage() {
                         className="contractor-custom-cluster-btn"
                         onClick={() => {
                           const val = customClusterInput.trim();
-                          if (val && !selectedClusters.includes(val)) {
+                          if (val && !selectedClusters.some((sc) => sc.toLowerCase() === val.toLowerCase())) {
                             setSelectedClusters((prev) => [...prev, val]);
                             setCustomClusterInput('');
                           }
                         }}
                       >
-                        + Add
+                        + Add Custom
                       </button>
                     </div>
                   </div>
                 </div>
 
                 <div className="contractor-modal-footer">
-                  <button
-                    type="button"
-                    className="contractor-btn-cancel"
-                    onClick={() => setIsCoverageModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="contractor-btn-save"
-                    disabled={saving}
-                    onClick={async () => {
-                      setSaving(true);
-                      setMessage(null);
-                      try {
-                        await updateMyProfile({
-                          city: city || undefined,
-                          state: state || undefined,
-                          serviceAreas: selectedClusters,
-                        });
-                        setServiceAreas(selectedClusters.join(', '));
-                        setMessage({ type: 'success', text: 'Coverage updated successfully!' });
-                        setIsCoverageModalOpen(false);
-                        loadProfile();
-                      } catch (err) {
-                        setMessage({
-                          type: 'error',
-                          text: err instanceof Error ? err.message : 'Failed to update coverage.',
-                        });
-                      } finally {
-                        setSaving(false);
-                      }
-                    }}
-                  >
-                    {saving ? 'Saving...' : 'Save Coverage'}
-                  </button>
+                  <div className="contractor-modal-selected-summary">
+                    <strong>{selectedClusters.length}</strong> {selectedClusters.length === 1 ? 'cluster' : 'clusters'} selected
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      className="contractor-btn-cancel"
+                      onClick={() => setIsCoverageModalOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="contractor-btn-save"
+                      disabled={saving}
+                      onClick={async () => {
+                        setSaving(true);
+                        setMessage(null);
+                        try {
+                          await updateMyProfile({
+                            city: city || undefined,
+                            state: state || undefined,
+                            serviceAreas: selectedClusters,
+                          });
+                          setServiceAreas(selectedClusters.join(', '));
+                          setMessage({ type: 'success', text: 'Coverage updated successfully!' });
+                          setIsCoverageModalOpen(false);
+                          loadProfile();
+                        } catch (err) {
+                          setMessage({
+                            type: 'error',
+                            text: err instanceof Error ? err.message : 'Failed to update coverage.',
+                          });
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                    >
+                      {saving ? 'Saving...' : 'Save Coverage'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

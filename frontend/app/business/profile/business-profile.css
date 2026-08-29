@@ -18,15 +18,17 @@
   position: relative;
   background: linear-gradient(135deg, #102a2a 0%, #173f3e 50%, #0d544f 100%);
   color: #ffffff;
-  padding: 32px 36px;
+  padding: 30px 36px;
   border-radius: var(--radius-lg, 18px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 32px -4px rgba(16, 42, 42, 0.22);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 24px;
   overflow: hidden;
+  min-height: 110px;
+  box-sizing: border-box;
 }
 
 .bp-hero::after {
@@ -47,6 +49,7 @@
   gap: 20px;
   position: relative;
   z-index: 1;
+  flex: 1;
 }
 
 .bp-hero__avatar-wrap {
@@ -142,27 +145,30 @@
   position: relative;
   z-index: 1;
   flex-shrink: 0;
+  align-self: flex-end;
+  margin-top: auto;
 }
 
 .bp-hero__action-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border-radius: var(--radius-full, 9999px);
   font-family: var(--font-button, 'Poppins', sans-serif);
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-decoration: none;
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bp-hero__action-btn:hover {
   background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
 }
 

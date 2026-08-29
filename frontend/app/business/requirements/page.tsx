@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
@@ -21,8 +21,15 @@ import {
   IconApplications,
   IconBuilding,
   IconPlus,
+  IconSearch,
+  IconBriefcase,
+  IconTarget,
+  IconRupee,
+  IconCalendar,
+  IconShield,
+  IconCheck,
+  IconAlertTriangle,
 } from '@/components/ui/Icons';
-
 import './requirements.css';
 
 const STATUS_TABS = [
@@ -38,6 +45,7 @@ export default function BusinessRequirementsListPage() {
   const [requirements, setRequirements] = useState<RequirementItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStatus, setActiveStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
@@ -81,6 +89,26 @@ export default function BusinessRequirementsListPage() {
     }
   };
 
+  // Filtered by Search Query
+  const filteredRequirements = useMemo(() => {
+    if (!searchQuery.trim()) return requirements;
+    const q = searchQuery.toLowerCase();
+    return requirements.filter((r) => {
+      const titleMatch = r.title.toLowerCase().includes(q);
+      const locMatch = (r.location || '').toLowerCase().includes(q) || (r.city || '').toLowerCase().includes(q);
+      const indMatch = (r.industry || '').toLowerCase().includes(q);
+      const skillsMatch = Array.isArray(r.required_skills)
+        ? r.required_skills.some((s) => s.toLowerCase().includes(q))
+        : false;
+      return titleMatch || locMatch || indMatch || skillsMatch;
+    });
+  }, [requirements, searchQuery]);
+
+  // Metric Intelligence calculations
+  const totalCount = requirements.length;
+  const publishedCount = requirements.filter((r) => r.status === 'PUBLISHED').length;
+  const totalApplicationsCount = requirements.reduce((acc, r) => acc + (r.applications_count || 0), 0);
+
   const getStatusBadgeClass = (status: string) => {
     const s = status.toUpperCase();
     if (s === 'PUBLISHED') return 'reqs-badge--published';
@@ -97,168 +125,233 @@ export default function BusinessRequirementsListPage() {
     return 'Draft';
   };
 
-  const hasRequirements = requirements.length > 0;
+  const activeTabIndex = STATUS_TABS.findIndex((t) => t.value === activeStatus);
 
   return (
     <div className="reqs-page">
-      <WorkspacePageHeader
-        title="Manpower Requirements"
-        subtitle="Post your workforce needs and track contractor applications in real time."
-      />
+      {/* ── Hero Banner & Intelligence Header ────────────────────────── */}
+      <div className="reqs-hero-banner">
+        <div className="reqs-hero-top">
+          <div className="reqs-hero-text">
+            <span className="reqs-hero-badge">
+              <IconBriefcase size={12} /> Enterprise Manpower Management
+            </span>
+            <h1>Manpower Requirements & Tenders</h1>
+            <p>
+              Post your workforce requirements, receive matching bids from verified industrial contractors,
+              and manage proposals in real-time.
+            </p>
+          </div>
 
-      {/* Top Controls Bar */}
-      <div className="reqs-header-bar">
-        {/* Status Filter Tabs */}
-        <div className="reqs-filter-bar">
+          <Link href="/business/requirements/new" className="reqs-hero-create-btn">
+            <IconPlus size={16} /> Create Requirement
+          </Link>
+        </div>
+
+        {/* 3-Metric Intelligence Row */}
+        <div className="reqs-metrics-row">
+          <div className="reqs-metric-card">
+            <span className="reqs-metric-label">Total Requirements</span>
+            <strong className="reqs-metric-val">{totalCount}</strong>
+          </div>
+          <div className="reqs-metric-card">
+            <span className="reqs-metric-label">Active Published Tenders</span>
+            <strong className="reqs-metric-val">{publishedCount}</strong>
+          </div>
+          <div className="reqs-metric-card">
+            <span className="reqs-metric-label">Total Proposals Received</span>
+            <strong className="reqs-metric-val reqs-metric-val--teal">{totalApplicationsCount}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Search & Filter Controls ─────────────────────────────────── */}
+      <div className="reqs-controls-bar">
+        {/* Instant Search Field */}
+        <div className="reqs-search-box">
+          <IconSearch size={15} className="reqs-search-icon" />
+          <input
+            type="text"
+            className="reqs-search-input"
+            placeholder="Search requirements by trade, city, skills, or industry..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="reqs-search-clear"
+              onClick={() => setSearchQuery('')}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Filter Tabs Bar */}
+        <div className="reqs-tabs-container">
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
               type="button"
               onClick={() => setActiveStatus(tab.value)}
-              className={`reqs-tab-btn ${activeStatus === tab.value ? 'reqs-tab-btn--active' : ''}`}
+              className={`reqs-tab-item ${activeStatus === tab.value ? 'active' : ''}`}
             >
               {tab.label}
             </button>
           ))}
         </div>
-
-        {/* Top-Right Create Requirement Button: ONLY shown when requirements exist */}
-        {!loading && hasRequirements && (
-          <Button
-            variant="primary"
-            onClick={() => router.push('/business/requirements/new')}
-            className="reqs-create-top-btn"
-          >
-            <IconPlus size={16} />
-            Create Requirement
-          </Button>
-        )}
       </div>
 
-      {/* Content Area */}
+      {/* ── Content Grid ─────────────────────────────────────────────── */}
       {loading ? (
         <LoadingState label="Loading manpower requirements…" />
       ) : error ? (
         <div className="reqs-error-banner">
+          <IconAlertTriangle size={18} />
           <p>{error}</p>
           <button type="button" onClick={() => fetchRequirements(activeStatus)} className="reqs-retry-btn">
             Retry
           </button>
         </div>
-      ) : !hasRequirements ? (
+      ) : filteredRequirements.length === 0 ? (
         <EmptyState
-          title="No requirements found"
+          title={searchQuery ? 'No matching requirements' : 'No requirements found'}
           subtitle={
-            activeStatus
+            searchQuery
+              ? `No requirements match "${searchQuery}". Try a different keyword.`
+              : activeStatus
               ? `You have no requirements currently under '${STATUS_TABS.find((t) => t.value === activeStatus)?.label}'.`
               : 'Create your first workforce requirement to start receiving matched proposals from verified contractors.'
           }
           action={
-            <Button variant="primary" onClick={() => router.push('/business/requirements/new')}>
-              + Create Requirement
-            </Button>
+            <Link href="/business/requirements/new" className="reqs-empty-create-btn">
+              <IconPlus size={15} /> Create Requirement
+            </Link>
           }
         />
       ) : (
-        <div className="reqs-list">
-          {requirements.map((req) => (
-            <div key={req.id} className="reqs-card">
-              {/* Card Header: Title & Status Badge */}
-              <div className="reqs-card__header">
-                <div>
-                  <h3 className="reqs-card__title">
-                    <Link href={`/business/requirements/${req.id}`}>
-                      {req.title}
-                    </Link>
-                  </h3>
-                  {/* Essential Info Row */}
-                  <div className="reqs-card__meta-row">
-                    <span className="reqs-card__meta-item">
-                      <IconMapPin size={14} />
-                      {req.location}
-                    </span>
-                    <span className="reqs-card__meta-item">
-                      <IconUsers size={14} />
-                      <strong>{req.workers_required} Workers</strong>
-                    </span>
-                    <span className="reqs-card__meta-item">
-                      <IconClock size={14} />
-                      Starts {new Date(req.start_date).toLocaleDateString()}
-                    </span>
-                    {req.industry && (
-                      <span className="reqs-card__meta-item">
-                        <IconBuilding size={14} />
-                        {req.industry}
-                      </span>
-                    )}
+        <div className="reqs-cards-grid">
+          {filteredRequirements.map((req) => (
+            <div key={req.id} className="reqs-grid-card">
+              {/* Card Top: Badges & Title */}
+              <div className="reqs-card-top">
+                <div className="reqs-badge-row">
+                  <span className={`reqs-status-badge ${getStatusBadgeClass(req.status)}`}>
+                    <span className="reqs-status-dot" />
+                    {getStatusBadgeLabel(req.status)}
+                  </span>
 
-                  </div>
+                  {req.industry && (
+                    <span className="reqs-industry-tag">
+                      <IconBuilding size={11} /> {req.industry}
+                    </span>
+                  )}
                 </div>
 
-                <span className={`reqs-badge ${getStatusBadgeClass(req.status)}`}>
-                  {getStatusBadgeLabel(req.status)}
-                </span>
+                <h3 className="reqs-card-title">
+                  <Link href={`/business/requirements/${req.id}`}>
+                    {req.title}
+                  </Link>
+                </h3>
+
+                <div className="reqs-location-row">
+                  <IconMapPin size={13} className="reqs-loc-icon" />
+                  <span>{req.city ? `${req.city}, ${req.state || ''}` : req.location}</span>
+                </div>
               </div>
 
-              {/* Skills Tags (Only top 3 for clean view) */}
+              {/* Parameter Matrix: 4 Metrics Grid */}
+              <div className="reqs-matrix-grid">
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Headcount</span>
+                  <strong className="reqs-matrix-val">
+                    <IconUsers size={14} /> {req.workers_required}
+                  </strong>
+                </div>
+
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Starts</span>
+                  <span className="reqs-matrix-val">
+                    <IconCalendar size={14} /> {new Date(req.start_date).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Duration</span>
+                  <span className="reqs-matrix-val">
+                    <IconClock size={14} /> {req.duration || 'Flexible'}
+                  </span>
+                </div>
+
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Daily Budget</span>
+                  <span className="reqs-matrix-val reqs-matrix-val--budget">
+                    <IconRupee size={13} /> {req.budget_min || req.budget_max ? `₹${Math.round(Number(req.budget_min || 0))}-${Math.round(Number(req.budget_max || 0))}` : 'Negotiable'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Skills Pills */}
               {req.required_skills && req.required_skills.length > 0 && (
-                <div className="reqs-skills">
-                  {req.required_skills.slice(0, 4).map((skill, idx) => (
-                    <span key={idx} className="reqs-skill-pill">
+                <div className="reqs-skills-row">
+                  {req.required_skills.slice(0, 3).map((skill, idx) => (
+                    <span key={idx} className="reqs-skill-chip">
                       {skill}
                     </span>
                   ))}
-                  {req.required_skills.length > 4 && (
-                    <span className="reqs-skill-pill reqs-skill-pill--more">
-                      +{req.required_skills.length - 4} more
+                  {req.required_skills.length > 3 && (
+                    <span className="reqs-skill-chip reqs-skill-chip--more">
+                      +{req.required_skills.length - 3} more
                     </span>
                   )}
                 </div>
               )}
 
-              {/* Card Footer: Proposals count and Clean Action Buttons */}
-              <div className="reqs-card__footer">
-                <span className="reqs-app-count">
-                  <IconApplications size={15} />
-                  <strong>{req.applications_count || 0}</strong> {req.applications_count === 1 ? 'Proposal' : 'Proposals'} Received
-                </span>
+              {/* Card Footer: Proposal count and Action Buttons */}
+              <div className="reqs-card-bottom">
+                <div className="reqs-proposals-pill">
+                  <IconApplications size={14} />
+                  <span>
+                    <strong>{req.applications_count || 0}</strong> {req.applications_count === 1 ? 'Proposal' : 'Proposals'}
+                  </span>
+                </div>
 
-                <div className="reqs-actions">
+                <div className="reqs-actions-group">
                   {req.status === 'DRAFT' && (
                     <>
                       <button
                         type="button"
                         onClick={() => handlePublishDraft(req.id)}
                         disabled={actionId === req.id}
-                        className="reqs-btn-action reqs-btn-action--publish"
+                        className="reqs-btn reqs-btn--publish"
                       >
-                        {actionId === req.id ? 'Publishing…' : 'Publish Now'}
+                        {actionId === req.id ? 'Publishing…' : 'Publish'}
                       </button>
 
                       <button
                         type="button"
                         onClick={() => handleDeleteDraft(req.id)}
                         disabled={actionId === req.id}
-                        className="reqs-btn-action reqs-btn-action--delete"
+                        className="reqs-btn reqs-btn--delete"
                       >
-                        Delete Draft
+                        Delete
                       </button>
                     </>
                   )}
 
                   <Link
                     href={`/business/requirements/${req.id}`}
-                    className="reqs-btn-action reqs-btn-action--outline"
+                    className="reqs-btn reqs-btn--detail"
                   >
-                    View Details
+                    Details
                   </Link>
 
                   <Link
                     href={`/business/requirements/${req.id}/applications`}
-                    className="reqs-btn-action reqs-btn-action--primary"
+                    className="reqs-btn reqs-btn--primary"
                   >
-                    Review Proposals ({req.applications_count || 0})
-                    <IconArrowRight size={14} />
+                    Proposals ({req.applications_count || 0}) <IconArrowRight size={13} />
                   </Link>
                 </div>
               </div>
