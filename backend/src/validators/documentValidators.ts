@@ -4,13 +4,21 @@ import { z } from 'zod';
 // a migration (contractor_documents.document_type has no DB check
 // constraint, by design; see the migration's comment).
 export const DOCUMENT_TYPES = [
-  'aadhaar',
+  'gst',
   'pan',
+  'aadhaar',
+  'labor_license',
+  'msme',
+  'pf_registration',
+  'esic_registration',
   'business_registration',
   'industry_license',
   'safety_certification',
+  'compliance_certificate',
+  'compliance_report',
   'other_certificate',
   'verification_evidence',
+  'other',
 ] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 

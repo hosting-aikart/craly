@@ -17,4 +17,4 @@ import sql from '../db/index';
  *
  * Every query using this fragment must alias `contractor_profiles` as `cp`.
  */
-export const PUBLICLY_DISCOVERABLE_CONDITION = sql`(cp.onboarding_complete = true AND cp.availability <> 'SUSPENDED')`;
+export const PUBLICLY_DISCOVERABLE_CONDITION = sql`(cp.onboarding_complete = true AND cp.verification_status = 'verified' AND cp.availability <> 'SUSPENDED' AND cp.is_unlisted = false)`;

@@ -1,3 +1,8 @@
+/* ==========================================================================
+   CRALY STAFF DASHBOARD
+   Consistent brand palette: Craly Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
 .staff-dashboard {
   width: 100%;
   max-width: 1200px;
@@ -5,47 +10,54 @@
   box-sizing: border-box;
 }
 
+/* ── Welcome Banner ──────────────────────────────────────────────────────── */
 .staff-dashboard__banner {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, #102a2a 0%, #163836 60%, #0d4a45 100%);
   color: #ffffff;
-  padding: 28px 32px;
-  border-radius: 14px;
+  padding: 32px 36px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  margin-bottom: 28px;
+  box-shadow: 0 12px 32px -4px rgba(16, 42, 42, 0.16);
   box-sizing: border-box;
 }
 
 .staff-dashboard__role-badge {
-  background: rgba(255, 255, 255, 0.15);
-  color: #93c5fd;
+  background: rgba(15, 139, 130, 0.24);
+  color: #5eead4;
+  border: 1px solid rgba(94, 234, 212, 0.25);
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 11px;
   font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .staff-dashboard__title {
-  font-size: 24px;
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 26px;
   font-weight: 800;
   margin: 0 0 6px 0;
   color: #ffffff;
   line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
 .staff-dashboard__subtitle {
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 14px;
   color: #94a3b8;
   margin: 0;
-  line-height: 1.45;
-  max-width: 600px;
+  line-height: 1.5;
+  max-width: 580px;
 }
 
 .staff-dashboard__actions {
@@ -53,36 +65,46 @@
   gap: 12px;
   flex-wrap: wrap;
   flex-shrink: 0;
+  align-self: flex-end;
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, var(--craly-teal-dark, #0b6c64) 100%);
   color: #ffffff;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 10px 22px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 13.5px;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 139, 130, 0.28);
 }
 
 .btn-primary:hover {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #119c92 0%, #0f8b82 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 139, 130, 0.35);
+  color: #ffffff;
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 10px 20px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 13.5px;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
@@ -90,15 +112,17 @@
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
 }
 
-/* Metrics Row */
+/* ── Metrics Row ─────────────────────────────────────────────────────────── */
 .staff-dashboard__metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 @media (max-width: 1199px) {
@@ -116,24 +140,55 @@
 .staff-metric-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
   box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.staff-metric-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--craly-teal, #0f8b82);
+  box-shadow: 0 10px 24px -4px rgba(15, 139, 130, 0.12);
 }
 
 .staff-metric-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.staff-metric-card:hover .staff-metric-icon {
+  transform: scale(1.05);
+}
+
+.staff-metric-icon--teal {
+  background: rgba(15, 139, 130, 0.1);
+  color: #0f8b82;
+}
+
+.staff-metric-icon--blue {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+.staff-metric-icon--amber {
+  background: rgba(217, 119, 6, 0.1);
+  color: #d97706;
+}
+
+.staff-metric-icon--purple {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
 }
 
 .staff-metric-info {
@@ -143,22 +198,25 @@
 }
 
 .staff-metric-val {
-  font-size: 24px;
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 26px;
   font-weight: 800;
-  color: #0f172a;
-  line-height: 1.2;
+  color: var(--craly-navy, #102a2a);
+  line-height: 1.15;
 }
 
 .staff-metric-lbl {
-  font-size: 13px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: 2px;
 }
 
-/* Main Grid */
+/* ── Main Grid ───────────────────────────────────────────────────────────── */
 .staff-dashboard__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -174,10 +232,15 @@
 .staff-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
   box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.staff-card:hover {
+  border-color: #cbd5e1;
 }
 
 .staff-card__header {
@@ -186,96 +249,112 @@
   align-items: center;
   margin-bottom: 16px;
   border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 12px;
+  padding-bottom: 14px;
 }
 
 .staff-card__header h3 {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
   font-size: 16px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--craly-navy, #102a2a);
   margin: 0;
 }
 
 .staff-card__link {
+  font-family: var(--font-button, 'Poppins', sans-serif);
   font-size: 13px;
-  color: #2563eb;
+  color: var(--craly-teal, #0f8b82);
   font-weight: 600;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
 }
 
 .staff-card__link:hover {
-  text-decoration: underline;
+  color: var(--craly-teal-dark, #0b6c64);
+  transform: translateX(2px);
 }
 
 .staff-empty-text {
-  font-size: 14px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13.5px;
   color: #94a3b8;
   font-style: italic;
-  margin: 0;
+  margin: 12px 0;
 }
 
 .staff-recent-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .staff-recent-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
-  border-radius: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
   background: #f8fafc;
   border: 1px solid #f1f5f9;
   text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .staff-recent-item:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: #f0fdfa;
+  border-color: rgba(15, 139, 130, 0.3);
+  transform: translateX(2px);
 }
 
 .staff-recent-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
 .staff-recent-info strong {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
   font-size: 14px;
-  color: #0f172a;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .staff-recent-info span {
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 12px;
   color: #64748b;
+  display: inline-flex;
+  align-items: center;
 }
 
 .staff-recent-meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 5px;
   flex-shrink: 0;
 }
 
 .staff-avail-pill {
+  font-family: var(--font-button, 'Poppins', sans-serif);
   font-size: 11px;
   font-weight: 700;
-  background: #e2e8f0;
-  color: #334155;
-  padding: 2px 8px;
-  border-radius: 12px;
+  background: rgba(15, 139, 130, 0.08);
+  color: #0f8b82;
+  border: 1px solid rgba(15, 139, 130, 0.2);
+  padding: 2px 10px;
+  border-radius: var(--radius-full, 9999px);
   letter-spacing: 0.02em;
 }
 
 .staff-date {
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 11px;
   color: #94a3b8;
 }
@@ -283,20 +362,35 @@
 .staff-notification-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .staff-notification-item {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #f8fafc;
   border: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.staff-notification-item:hover {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .staff-notification-icon {
-  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -308,11 +402,14 @@
 }
 
 .staff-notification-body strong {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
   font-size: 13.5px;
-  color: #0f172a;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
 }
 
 .staff-notification-body p {
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 12.5px;
   color: #475569;
   margin: 0;
@@ -320,34 +417,8 @@
 }
 
 .staff-notification-time {
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 11px;
   color: #94a3b8;
   margin-top: 2px;
-}
-
-@media (max-width: 768px) {
-  .staff-dashboard__banner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px;
-    gap: 16px;
-  }
-
-  .staff-dashboard__title {
-    font-size: 20px;
-  }
-
-  .staff-dashboard__actions {
-    width: 100%;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    flex: 1;
-    text-align: center;
-  }
-
-  .staff-card {
-    padding: 16px;
-  }
 }

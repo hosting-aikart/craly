@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch } from '@/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/api';
 
 export interface StaffDashboardStats {
   totalContractors: number;
@@ -36,6 +36,10 @@ export interface StaffContractorItem {
   availability: string;
   availability_note: string | null;
   verification_status: string;
+  is_unlisted?: boolean;
+  unlisted_reason?: string | null;
+  unlisted_at?: string | null;
+  unlisted_by?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -150,11 +154,12 @@ export interface StaffVerificationDetail {
 export const getStaffDashboardStats = () =>
   apiGet<{ data: StaffDashboardStats }>('/staff/dashboard-stats');
 
-export const getStaffContractors = (params?: { q?: string; city?: string; availability?: string; page?: number; limit?: number }) => {
+export const getStaffContractors = (params?: { q?: string; city?: string; availability?: string; listingStatus?: string; page?: number; limit?: number }) => {
   const query = new URLSearchParams();
   if (params?.q) query.set('q', params.q);
   if (params?.city) query.set('city', params.city);
   if (params?.availability) query.set('availability', params.availability);
+  if (params?.listingStatus) query.set('listingStatus', params.listingStatus);
   if (params?.page) query.set('page', params.page.toString());
   if (params?.limit) query.set('limit', params.limit.toString());
   const str = query.toString();
@@ -171,6 +176,21 @@ export const getStaffContractorById = (id: string) =>
 
 export const updateStaffContractor = (id: string, input: Partial<CreateStaffContractorInput>) =>
   apiPatch<{ data: StaffContractorDetail; message: string }>(`/staff/contractors/${id}`, input);
+
+export const updateStaffContractorListingStatus = (id: string, isUnlisted: boolean, reason?: string) =>
+  apiPatch<{ data: StaffContractorDetail; message: string }>(`/staff/contractors/${id}/listing`, { isUnlisted, reason });
+
+export const updateAdminContractorListingStatus = (id: string, isUnlisted: boolean, reason?: string) =>
+  apiPatch<{ data: StaffContractorDetail; message: string }>(`/admin/contractors/${id}/listing`, { isUnlisted, reason });
+
+export const getStaffContractorDocuments = (contractorId: string) =>
+  apiGet<{ data: StaffVerificationDocumentItem[] }>(`/staff/contractors/${contractorId}/documents`);
+
+export const uploadStaffContractorDocument = (contractorId: string, formData: FormData) =>
+  apiPost<{ data: StaffVerificationDocumentItem; message?: string }>(`/staff/contractors/${contractorId}/documents`, formData);
+
+export const deleteStaffContractorDocument = (contractorId: string, documentId: string) =>
+  apiDelete<{ data: { id: string; deleted: boolean } }>(`/staff/contractors/${contractorId}/documents/${documentId}`);
 
 export const getStaffEngagements = () =>
   apiGet<{ data: StaffEngagementItem[] }>('/staff/engagements');

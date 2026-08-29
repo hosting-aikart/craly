@@ -4,6 +4,15 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getStaffDashboardStats, type StaffDashboardStats } from '@/lib/api/staff';
 import LoadingState from '@/components/ui/LoadingState';
+import {
+  IconBuilding,
+  IconClock,
+  IconUsers,
+  IconBell,
+  IconMapPin,
+  IconArrowRight,
+  IconPlus,
+} from '@/components/ui/Icons';
 import './staff-dashboard.css';
 
 export default function StaffDashboardPage() {
@@ -34,7 +43,7 @@ export default function StaffDashboardPage() {
         </div>
         <div className="staff-dashboard__actions">
           <Link href="/staff/contractors/new" className="btn-primary">
-            + Add Contractor
+            <IconPlus size={15} style={{ marginRight: 6 }} /> Add Contractor
           </Link>
           <Link href="/staff/contractors" className="btn-secondary">
             View Contractors
@@ -45,8 +54,8 @@ export default function StaffDashboardPage() {
       {/* Metrics Row */}
       <div className="staff-dashboard__metrics">
         <div className="staff-metric-card">
-          <div className="staff-metric-icon" style={{ background: '#eff6ff', color: '#2563eb' }}>
-            🏢
+          <div className="staff-metric-icon staff-metric-icon--teal">
+            <IconBuilding size={22} />
           </div>
           <div className="staff-metric-info">
             <span className="staff-metric-val">{stats.totalContractors}</span>
@@ -55,8 +64,8 @@ export default function StaffDashboardPage() {
         </div>
 
         <div className="staff-metric-card">
-          <div className="staff-metric-icon" style={{ background: '#ecfdf5', color: '#059669' }}>
-            ✨
+          <div className="staff-metric-icon staff-metric-icon--blue">
+            <IconClock size={22} />
           </div>
           <div className="staff-metric-info">
             <span className="staff-metric-val">{stats.recentlyAddedCount}</span>
@@ -65,8 +74,8 @@ export default function StaffDashboardPage() {
         </div>
 
         <div className="staff-metric-card">
-          <div className="staff-metric-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
-            🤝
+          <div className="staff-metric-icon staff-metric-icon--amber">
+            <IconUsers size={22} />
           </div>
           <div className="staff-metric-info">
             <span className="staff-metric-val">{stats.pendingEngagementsCount}</span>
@@ -75,8 +84,8 @@ export default function StaffDashboardPage() {
         </div>
 
         <div className="staff-metric-card">
-          <div className="staff-metric-icon" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
-            🔔
+          <div className="staff-metric-icon staff-metric-icon--purple">
+            <IconBell size={22} />
           </div>
           <div className="staff-metric-info">
             <span className="staff-metric-val">{stats.unreadNotificationsCount}</span>
@@ -92,7 +101,7 @@ export default function StaffDashboardPage() {
           <div className="staff-card__header">
             <h3>Recently Added Contractors</h3>
             <Link href="/staff/contractors" className="staff-card__link">
-              View All →
+              View All <IconArrowRight size={13} style={{ marginLeft: 2, verticalAlign: 'middle' }} />
             </Link>
           </div>
           {stats.recentContractors.length === 0 ? (
@@ -103,7 +112,10 @@ export default function StaffDashboardPage() {
                 <Link key={c.id} href={`/staff/contractors/${c.id}`} className="staff-recent-item">
                   <div className="staff-recent-info">
                     <strong>{c.company_name}</strong>
-                    <span>📍 {[c.city, c.state].filter(Boolean).join(', ') || 'No location'}</span>
+                    <span>
+                      <IconMapPin size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                      {[c.city, c.state].filter(Boolean).join(', ') || 'No location'}
+                    </span>
                   </div>
                   <div className="staff-recent-meta">
                     <span className="staff-avail-pill">{c.availability}</span>
@@ -120,7 +132,7 @@ export default function StaffDashboardPage() {
           <div className="staff-card__header">
             <h3>Recent System Notifications</h3>
             <Link href="/staff/notifications" className="staff-card__link">
-              View All →
+              View All <IconArrowRight size={13} style={{ marginLeft: 2, verticalAlign: 'middle' }} />
             </Link>
           </div>
           {stats.recentNotifications.length === 0 ? (
@@ -129,7 +141,9 @@ export default function StaffDashboardPage() {
             <div className="staff-notification-list">
               {stats.recentNotifications.map((n) => (
                 <div key={n.id} className="staff-notification-item">
-                  <div className="staff-notification-icon">🔔</div>
+                  <div className="staff-notification-icon">
+                    <IconBell size={18} />
+                  </div>
                   <div className="staff-notification-body">
                     <strong>{n.title}</strong>
                     <p>{n.message}</p>

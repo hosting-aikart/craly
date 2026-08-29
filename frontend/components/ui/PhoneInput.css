@@ -13,9 +13,8 @@
 /* ── Custom Dropdown Trigger ─────────────────────────────────────────────── */
 .phone-input__dropdown-wrap {
   position: relative;
-  flex: 0 0 auto;
-  max-width: 48%;
-  min-width: 155px;
+  flex: 0 0 110px;
+  width: 110px;
 }
 
 .phone-input__country-trigger {
@@ -23,15 +22,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 11px 16px;
+  gap: 6px;
+  padding: 11px 14px;
   border-radius: var(--radius-full, 9999px);
-  border: 1.5px solid #cbd5e1;
+  border: 1px solid #cbd5e1;
   font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 13px;
   font-weight: 600;
   color: var(--craly-navy, #102a2a);
-  background: #f8fafc;
+  background: #ffffff;
   cursor: pointer;
   outline: none;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);

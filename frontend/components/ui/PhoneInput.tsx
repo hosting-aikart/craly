@@ -117,7 +117,7 @@ export default function PhoneInput({ value, onChange, placeholder, required, id 
           aria-expanded={isOpen}
         >
           <span className="phone-input__country-text">
-            {selectedCountry.name} ({selectedCountry.dialCode})
+            {selectedCountry.code} ({selectedCountry.dialCode})
           </span>
           <IconChevronDown size={13} className={`phone-input__chevron ${isOpen ? 'open' : ''}`} />
         </button>
