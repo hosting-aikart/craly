@@ -128,3 +128,37 @@ button:not([class*="toggle"]):not([class*="checkbox"]):not([class*="radio"]):not
 .contractor-custom-cluster-btn {
   border-radius: var(--radius-full, 9999px) !important;
 }
+
+/* ── Google Translate: hide injected toolbar & prevent layout shift ── */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-text-highlight,
+div#goog-gt-,
+.goog-te-spinner-pos,
+.goog-te-ftab-frame {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
+.skiptranslate {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+html.translated-ltr,
+html.translated-rtl {
+  margin-top: 0 !important;
+}
+
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-l4eHX-hSRGPd {
+  display: none !important;
+}

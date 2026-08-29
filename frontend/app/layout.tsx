@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { AuthProvider } from '@/lib/auth/useAuth';
 import { SocketProvider } from '@/lib/socket/SocketContext';
+import GoogleTranslateScript from '@/components/language/GoogleTranslateScript';
 import Navbar from '@/components/Navbar';
 import './globals.css';
 
@@ -40,6 +41,7 @@ export default function RootLayout({
             <LanguageProvider>
               <Navbar />
               {children}
+              <GoogleTranslateScript />
             </LanguageProvider>
           </SocketProvider>
         </AuthProvider>
