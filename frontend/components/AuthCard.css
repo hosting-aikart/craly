@@ -1,11 +1,15 @@
 .auth-page {
+  /* The navbar (.cnav) is position: fixed and reserves no layout
+     space — top padding clears the floating pill (top: 16px + height:
+     74px ≈ 90px) instead of the stale in-flow-navbar offset; see
+     app/login/login.css for the full explanation. */
   position: relative;
   overflow: hidden;
-  min-height: calc(100vh - 68px);
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 130px 24px 48px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 

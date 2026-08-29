@@ -4,6 +4,15 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import './ContactVisual3D.css';
 
+function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl2') || canvas.getContext('webgl')));
+  } catch {
+    return false;
+  }
+}
+
 export default function ContactVisual3D() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -12,6 +21,11 @@ export default function ContactVisual3D() {
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
+
+    if (!isWebGLAvailable()) {
+      console.warn('WebGL is not available in this browser environment.');
+      return;
+    }
 
     let animationFrameId: number;
     let isDisposed = false;
@@ -27,12 +41,19 @@ export default function ContactVisual3D() {
     );
     camera.position.set(0, 0, 3.8);
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance',
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+      });
+    } catch (err) {
+      console.warn('WebGL context creation failed in ContactVisual3D:', err);
+      return;
+    }
+
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -201,7 +222,7 @@ export default function ContactVisual3D() {
           }
         }
       });
-      renderer.dispose();
+      renderer?.dispose();
     };
   }, []);
 

@@ -73,7 +73,6 @@ export default function BusinessSettingsPage() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
   };
 
   return (

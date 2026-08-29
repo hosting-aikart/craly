@@ -33,8 +33,10 @@
 }
 
 .workspace-sidebar__logo-img {
-  height: 60px;
+  height: 34px;
+  max-height: 34px;
   width: auto;
+  object-fit: contain;
   flex-shrink: 0;
 }
 

@@ -210,6 +210,17 @@ export async function createContractor(req: Request, res: Response, next: NextFu
     // Staff-added contractor must be able to sign in and use the
     // Contractor Portal themselves (apply to opportunities, manage KYC),
     // not just exist as a directory record Staff edits on their behalf.
+    //
+    // verification_status is 'verified' immediately (not 'pending') —
+    // unlike a self-signup contractor, Staff manually entering this
+    // profile IS the review: there's no separate approval step to wait
+    // on, so this contractor is listed and gets full marketplace access
+    // (opportunities, applying) right away. Contrast with
+    // pfContractorController.createPfContractor, which creates a
+    // staff-managed record with no login and deliberately stays
+    // unverified/unlisted until a later explicit verification step —
+    // that path is for field-collected leads that still need vetting,
+    // not for an account Staff is provisioning as already-trusted.
     const contractor = await sql.begin(async (tx) => {
       const [newUser] = await tx`
         INSERT INTO users (email, password_hash, role, is_active)
@@ -221,12 +232,12 @@ export async function createContractor(req: Request, res: Response, next: NextFu
         INSERT INTO contractor_profiles (
           user_id, company_name, phone, description, industry, skills, city, state, workforce_size,
           years_experience, service_areas, availability, notes,
-          verification_status, onboarding_complete, created_by
+          verification_status, onboarding_complete, last_verified_at, created_by
         )
         VALUES (
           ${newUser.id}, ${companyName}, ${phone || null}, ${null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
           ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
-          ${availability || 'AVAILABLE'}, ${notes || null}, 'pending', true, ${req.user!.sub}
+          ${availability || 'AVAILABLE'}, ${notes || null}, 'verified', true, now(), ${req.user!.sub}
         )
         RETURNING id, company_name, city, state, workforce_size, availability, created_at
       `;

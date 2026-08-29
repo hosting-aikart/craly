@@ -1,9 +1,16 @@
 .login-page {
-  min-height: calc(100vh - 68px);
+  /* The navbar (.cnav) floats as position: fixed — it reserves no space
+     in normal flow, so this page owns its own clearance instead of
+     subtracting a fixed navbar height. Top padding clears the floating
+     pill (top: 16px + height: 74px ≈ 90px) with a visible gap; the
+     smaller bottom padding lets flex centering settle the card slightly
+     below the navbar rather than dead-center, which is what avoids it
+     looking glued to the pill on shorter viewports. */
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 56px 24px;
+  padding: 130px 24px 56px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
@@ -339,6 +346,15 @@
     border-radius: 20px;
   }
 
+  /* .login-panel's flex: 1 1 380px is sized for the ROW layout above —
+     once the wrap stacks into a column, that same flex-grow makes the
+     panel stretch to fill leftover vertical space instead of sizing to
+     its content, leaving a large empty gap under the role cards. Pin it
+     to its content height here instead (same fix as signup.css). */
+  .login-panel {
+    flex: 0 0 auto;
+  }
+
   .login-panel__roles {
     grid-template-columns: 1fr 1fr;
   }
@@ -354,7 +370,8 @@
   }
 
   .login-page {
-    padding: 24px 16px;
+    /* Mobile navbar pill: top: 12px + height: 62px ≈ 74px */
+    padding: 100px 16px 24px;
     align-items: center;
   }
 
@@ -377,7 +394,7 @@
 
 @media (max-width: 600px) {
   .login-page {
-    padding: 20px 12px;
+    padding: 90px 12px 20px;
   }
 
   .login-form-panel {

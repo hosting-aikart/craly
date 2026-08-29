@@ -183,15 +183,6 @@ export const updateStaffContractorListingStatus = (id: string, isUnlisted: boole
 export const updateAdminContractorListingStatus = (id: string, isUnlisted: boolean, reason?: string) =>
   apiPatch<{ data: StaffContractorDetail; message: string }>(`/admin/contractors/${id}/listing`, { isUnlisted, reason });
 
-export const getStaffContractorDocuments = (contractorId: string) =>
-  apiGet<{ data: StaffVerificationDocumentItem[] }>(`/staff/contractors/${contractorId}/documents`);
-
-export const uploadStaffContractorDocument = (contractorId: string, formData: FormData) =>
-  apiPost<{ data: StaffVerificationDocumentItem; message?: string }>(`/staff/contractors/${contractorId}/documents`, formData);
-
-export const deleteStaffContractorDocument = (contractorId: string, documentId: string) =>
-  apiDelete<{ data: { id: string; deleted: boolean } }>(`/staff/contractors/${contractorId}/documents/${documentId}`);
-
 export const getStaffEngagements = () =>
   apiGet<{ data: StaffEngagementItem[] }>('/staff/engagements');
 
@@ -264,6 +255,7 @@ export interface StaffContractorDocumentItem {
   expiry_date: string | null;
   created_at: string;
   updated_at: string;
+  reviewer_note?: string | null;
   uploaded_by_email?: string | null;
 }
 
