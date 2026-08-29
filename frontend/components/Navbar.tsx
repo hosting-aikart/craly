@@ -385,14 +385,15 @@ const CNAV_CSS = `
 }
 /* Single logo image — fixed size, src swaps in React */
 .cnav-logo-img {
-  height: 38px;
+  height: 44px;
   width: auto;
+  max-width: 140px;
   object-fit: contain;
   display: block;
   flex-shrink: 0;
 }
 @media (max-width: 899px) {
-  .cnav-logo-img { height: 32px; }
+  .cnav-logo-img { height: 36px; max-width: 110px; }
 }
 
 /* ── Desktop center nav links ── */
