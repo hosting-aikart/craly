@@ -129,11 +129,12 @@ export default function Navbar() {
 
           {/* ── Logo ── */}
           <Link href="/" className="cnav-logo" aria-label="Craly home" onClick={closeAll}>
-            {/* Fixed-size wrapper — both logos overlap, opacity toggles to avoid layout shift */}
-            <span className="cnav-logo-wrap">
-              <img src="/assets/craly-logo.png"       alt="Craly" className="cnav-logo-img cnav-logo-dark" />
-              <img src="/assets/craly-logo-white.png" alt=""      className="cnav-logo-img cnav-logo-light" aria-hidden="true" />
-            </span>
+            {/* Single img — src swaps via React state; same element = zero size jump */}
+            <img
+              src={isDarkTheme ? '/assets/craly-logo-white.png' : '/assets/craly-logo.png'}
+              alt="Craly"
+              className="cnav-logo-img"
+            />
           </Link>
 
           {/* ── Desktop Center Nav Links ── */}
@@ -382,32 +383,17 @@ const CNAV_CSS = `
   flex-shrink: 0;
   justify-self: start;
 }
-/* Fixed-size container — both logos fill the same box, no size jump ever */
-.cnav-logo-wrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 120px;   /* fixed width — both logos fill this same box */
-  height: 44px;   /* fixed height */
+/* Single logo image — fixed size, src swaps in React */
+.cnav-logo-img {
+  height: 44px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  display: block;
   flex-shrink: 0;
 }
-.cnav-logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: left center;
-  display: block;
-  transition: opacity 0.35s ease;
-}
-/* Dark logo: visible by default, invisible on dark bg */
-.cnav-logo-dark  { opacity: 1; position: relative; }
-.cnav-logo-light { opacity: 0; position: absolute; inset: 0; }
-/* Swap on dark background */
-.cnav-dark .cnav-logo-dark  { opacity: 0; }
-.cnav-dark .cnav-logo-light { opacity: 1; }
 @media (max-width: 899px) {
-  .cnav-logo-wrap { width: 100px; height: 36px; }
+  .cnav-logo-img { height: 36px; max-width: 110px; }
 }
 
 /* ── Desktop center nav links ── */
