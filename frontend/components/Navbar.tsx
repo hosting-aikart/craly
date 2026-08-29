@@ -29,22 +29,36 @@ export default function Navbar() {
       const checkX = navRect.left + navRect.width / 2;
       const checkY = navRect.top + navRect.height / 2;
 
-      // ── Pass 1: explicit data-navbar-theme annotations ───────────────
+      // ── Pass 1: explicit data-navbar-theme annotations (vertical overlap) ──
       const annotated = document.querySelectorAll('[data-navbar-theme]');
       for (const el of Array.from(annotated)) {
         const r = el.getBoundingClientRect();
-        if (r.top <= checkY && r.bottom >= checkY && r.left <= checkX && r.right >= checkX) {
+        if (r.top <= checkY && r.bottom >= checkY) {
           const attr = el.getAttribute('data-navbar-theme');
           setIsDarkTheme(attr === 'dark');
           return;
         }
       }
 
-      // ── Pass 2: brightness of elements stacked under the navbar center ─
+      // ── Pass 2: check elements under the navbar point ──
       const elements = document.elementsFromPoint(checkX, checkY);
       let dark = false;
       for (const el of elements) {
         if (el.closest('.cnav')) continue;
+
+        const darkAttr = el.getAttribute('data-navbar-theme') || el.closest('[data-navbar-theme]')?.getAttribute('data-navbar-theme');
+        if (darkAttr === 'dark') { dark = true; break; }
+        if (darkAttr === 'light') { dark = false; break; }
+
+        if (
+          el.classList.contains('built-for') || el.closest('.built-for') ||
+          el.classList.contains('footer') || el.closest('.footer') ||
+          el.classList.contains('hero') || el.closest('.hero')
+        ) {
+          dark = true;
+          break;
+        }
+
         const bg = window.getComputedStyle(el).backgroundColor;
         if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
           const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);

@@ -8,7 +8,7 @@ export default function TrustSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="trust-section" id="trust">
+    <section className="trust-section" id="trust" data-navbar-theme="light">
       <p className="trust-eyebrow">{t.trust.eyebrow}</p>
       <h2 className="trust-heading">{t.trust.heading}</h2>
 
