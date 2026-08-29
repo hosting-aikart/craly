@@ -1,41 +1,46 @@
 /* ==========================================================================
-   Craly Industry Standard Navbar Styles
+   Craly Floating Glassmorphism Pill Navbar (Aikart Style)
    ========================================================================== */
 
 .craly-nav {
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 48px);
+  max-width: 1180px;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), inset 0 -1px 0 rgba(255, 255, 255, 0.6);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 255, 255, 0.48);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 9999px;
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .craly-nav--scrolled {
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border-bottom: 1px solid rgba(226, 233, 240, 0.7);
-  box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08), inset 0 -1px 0 rgba(255, 255, 255, 0.8);
+  top: 14px;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 20px 48px -8px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .craly-nav__container {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 24px;
-  height: 72px;
+  padding: 0 12px 0 24px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
+  gap: 20px;
+  position: relative;
 }
 
-/* ---------------- Brand ---------------- */
+/* ---------------- Brand Logo ---------------- */
 
 .craly-nav__brand {
   display: flex;
@@ -45,28 +50,31 @@
 }
 
 .craly-nav__logo-wordmark {
-  height: 70px;
+  height: 44px;
   width: auto;
   display: block;
 }
 
-/* ---------------- Desktop Navigation Links ---------------- */
+/* ---------------- Desktop Navigation Links (Centered) ---------------- */
 
 .craly-nav__menu {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 24px;
 }
 
 .craly-nav__link {
-  font-family: var(--font-body, sans-serif);
+  font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
   font-size: 14.5px;
   font-weight: 500;
-  color: #475569;
+  color: #1e293b;
   text-decoration: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  transition: all 0.18s ease;
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
   white-space: nowrap;
   background: none;
   border: none;
@@ -74,14 +82,13 @@
 }
 
 .craly-nav__link:hover {
-  color: #0f172a;
-  background: rgba(241, 245, 249, 0.8);
+  color: #0d9488;
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .craly-nav__link--active {
-  color: #0f766e;
+  color: #0d9488;
   font-weight: 600;
-  background: #f0fdfa;
 }
 
 /* ---------------- Right Controls ---------------- */
@@ -89,7 +96,7 @@
 .craly-nav__actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   flex-shrink: 0;
 }
 
@@ -103,23 +110,24 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 7px 12px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 6px 12px;
+  border-radius: 9999px;
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 500;
   color: #334155;
   cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
 }
 
 .craly-nav__lang-trigger:hover,
 .craly-nav__lang-trigger--active {
-  border-color: #cbd5e1;
   background: #ffffff;
   color: #0f172a;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 .craly-nav__lang-caret {
@@ -137,7 +145,7 @@
   right: 0;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 6px;
   box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.15);
   display: flex;
@@ -163,18 +171,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
   padding: 8px 12px;
-  border-radius: 6px;
-  border: none;
+  border-radius: 8px;
   background: none;
+  border: none;
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 500;
-  color: #334155;
+  color: #475569;
   cursor: pointer;
-  transition: all 0.15s ease;
   text-align: left;
+  transition: all 0.15s ease;
 }
 
 .craly-nav__lang-option:hover {
@@ -183,32 +190,16 @@
 }
 
 .craly-nav__lang-option--active {
+  background: #f0fdfa;
   color: #0f766e;
   font-weight: 600;
-  background: #f0fdfa;
 }
 
 .craly-nav__divider {
-  width: 1px;
-  height: 24px;
-  background: #e2e8f0;
+  display: none;
 }
 
-.craly-nav__link-secondary {
-  font-family: var(--font-body, sans-serif);
-  font-size: 14px;
-  font-weight: 500;
-  color: #475569;
-  text-decoration: none;
-  transition: color 0.2s ease;
-  white-space: nowrap;
-}
-
-.craly-nav__link-secondary:hover {
-  color: #0f766e;
-}
-
-/* ---------------- Auth Buttons ---------------- */
+/* Auth Buttons */
 
 .craly-nav__auth-group {
   display: flex;
@@ -217,77 +208,70 @@
 }
 
 .craly-nav__btn {
+  font-family: var(--font-body, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-family: var(--font-button, sans-serif);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 9px 18px;
-  border-radius: 9999px;
-  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  border: none;
-  cursor: pointer;
 }
 
 .craly-nav__btn--ghost {
-  color: #334155;
+  color: #1e293b;
+  padding: 8px 16px;
+  border-radius: 9999px;
   background: transparent;
-  padding: 9px 14px;
 }
 
 .craly-nav__btn--ghost:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: #0d9488;
+  background: rgba(255, 255, 255, 0.45);
 }
 
+/* White Pill Sign Up Button (Aikart style) */
 .craly-nav__btn--primary {
-  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.28);
+  background: #ffffff;
+  color: #0d9488;
+  border-radius: 9999px;
+  padding: 9px 24px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.9);
 }
 
 .craly-nav__btn--primary:hover {
-  background: linear-gradient(135deg, #0b5c56 0%, #0f766e 100%);
-  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.38);
-  transform: translateY(-1px);
+  background: #ffffff;
+  color: #0b6c64;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
 }
 
-.craly-nav__btn--primary:active {
-  transform: translateY(0);
-}
-
-/* ---------------- Mobile Hamburger Toggle ---------------- */
+/* Mobile Hamburger Toggle */
 
 .craly-nav__toggle {
   display: none;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 5px;
   width: 40px;
   height: 40px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
   padding: 0;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.craly-nav__toggle:hover {
-  background: #f1f5f9;
+  gap: 5px;
 }
 
 .craly-nav__toggle-bar {
   width: 18px;
   height: 2px;
-  background: #1e293b;
+  background-color: #0f172a;
   border-radius: 2px;
-  transition: transform 0.22s ease, opacity 0.22s ease;
+  transition: all 0.25s ease;
 }
 
 .craly-nav__toggle--active .craly-nav__toggle-bar:nth-child(1) {
@@ -302,41 +286,45 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ---------------- Mobile Drawer ---------------- */
+/* Mobile Drawer */
 
 .craly-nav__mobile-drawer {
-  display: none;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
-  animation: navDrawerSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.18);
+  animation: navDrawerSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes navDrawerSlide {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 .craly-nav__mobile-inner {
-  padding: 20px 24px 28px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 1280px;
-  margin: 0 auto;
 }
 
 .craly-nav__mobile-section-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: #94a3b8;
   margin-bottom: 8px;
   display: block;
@@ -346,17 +334,13 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  background: #f8fafc;
-  padding: 6px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
 }
 
 .craly-nav__mobile-lang-pill {
-  padding: 8px;
+  padding: 8px 12px;
   border-radius: 8px;
-  border: none;
-  background: none;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 500;
@@ -367,10 +351,10 @@
 }
 
 .craly-nav__mobile-lang-pill--active {
-  background: #ffffff;
+  background: #f0fdfa;
+  border-color: #0f766e;
   color: #0f766e;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  font-weight: 600;
 }
 
 .craly-nav__mobile-links {
@@ -385,81 +369,44 @@
   font-weight: 500;
   color: #1e293b;
   text-decoration: none;
-  padding: 12px 14px;
+  padding: 12px 16px;
   border-radius: 10px;
   transition: background 0.15s ease;
 }
 
 .craly-nav__mobile-link:hover {
-  background: #f8fafc;
-  color: #0f766e;
-}
-
-.craly-nav__mobile-link--special {
-  color: #0f766e;
-  font-weight: 600;
-  background: #f0fdfa;
+  background: #f1f5f9;
 }
 
 .craly-nav__mobile-auth {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #f1f5f9;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
 }
 
 .craly-nav__btn--full {
   width: 100%;
-  padding: 13px;
-  border-radius: 12px;
 }
 
-/* ---------------- Breakpoints ---------------- */
-
-@media (max-width: 1024px) {
-  .craly-nav__menu {
-    gap: 2px;
-  }
-  .craly-nav__link {
-    font-size: 13.5px;
-    padding: 6px 10px;
-  }
-}
-
+/* Responsive Adjustments */
 @media (max-width: 900px) {
+  .craly-nav {
+    width: calc(100% - 32px);
+    top: 12px;
+  }
+
   .craly-nav__menu {
     display: none;
   }
-  .craly-nav__lang-wrapper {
-    display: none;
-  }
-  .craly-nav__divider {
-    display: none;
-  }
-  .craly-nav__link-secondary {
-    display: none;
-  }
-  .craly-nav__auth-group {
-    display: none;
-  }
+
   .craly-nav__toggle {
     display: flex;
   }
-  .craly-nav__mobile-drawer {
-    display: block;
-  }
-}
 
-@media (max-width: 600px) {
-  .craly-nav__container {
-    padding: 0 16px;
-    height: 64px;
-  }
-  .craly-nav__logo-wordmark {
-    height: 50px;
-  }
-  .craly-nav__mobile-inner {
-    padding: 16px 16px 24px;
+  .craly-nav__lang-wrapper {
+    display: none;
   }
 }
