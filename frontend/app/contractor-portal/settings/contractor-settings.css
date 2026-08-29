@@ -1,55 +1,160 @@
+/* ==========================================================================
+   CONTRACTOR PORTAL - SETTINGS & SECURITY
+   Craly Design System - Modern Industrial High-Trust Theme
+   ========================================================================== */
+
 .contractor-settings-page {
-  padding: 24px;
-  max-width: 900px;
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
-.contractor-settings-header {
-  margin-bottom: 24px;
+/* ── Hero Banner ─────────────────────────────────────────────────────────── */
+.contractor-settings-hero {
+  position: relative;
+  background: linear-gradient(135deg, #102a2a 0%, #173b3a 45%, #0d544f 100%);
+  color: #ffffff;
+  padding: 28px 32px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 28px -4px rgba(16, 42, 42, 0.18);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.contractor-settings-title {
-  font-size: 24px;
+.contractor-settings-hero::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(15, 139, 130, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.contractor-settings-hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+}
+
+.contractor-settings-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  margin-bottom: 10px;
 }
 
-.contractor-settings-subtitle {
-  color: #64748b;
-  font-size: 14px;
-  margin: 0;
+.contractor-settings-hero h1 {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+  letter-spacing: -0.02em;
 }
 
-.contractor-settings-alert {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+.contractor-settings-hero p {
   font-size: 14px;
-  font-weight: 500;
+  color: #cbd5e1;
+  margin: 0 0 16px 0;
+  line-height: 1.55;
+}
+
+.contractor-settings-hero__highlights {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settings-highlight-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(4px);
+}
+
+/* ── Content Grid ────────────────────────────────────────────────────────── */
+.contractor-settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
 .contractor-settings-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  margin-bottom: 24px;
+  background: var(--craly-white, #ffffff);
+  border: 1px solid var(--craly-border, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px 28px;
+  box-shadow: 0 2px 10px -2px rgba(16, 42, 42, 0.04);
+  box-sizing: border-box;
 }
 
-.contractor-settings-section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 16px 0;
-  padding-bottom: 12px;
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
   border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 20px;
 }
 
+.settings-header-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-header-icon-box--amber {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.settings-card-title {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--craly-navy, #102a2a);
+  margin: 0 0 2px 0;
+}
+
+.settings-card-sub {
+  font-size: 12.5px;
+  color: var(--craly-text-muted, #64748b);
+}
+
+/* Info List */
 .contractor-settings-info-list {
   display: flex;
   flex-direction: column;
@@ -60,74 +165,192 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 16px;
 }
 
-.contractor-settings-info-item span {
-  color: #64748b;
+.contractor-settings-info-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-.contractor-settings-info-item strong {
-  color: #0f172a;
-}
-
-.contractor-settings-role-tag {
-  background: #f1f5f9;
-  color: #475569;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.contractor-settings-toggle {
+.settings-item-label {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  cursor: pointer;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.contractor-settings-toggle input {
-  margin-top: 4px;
-  width: 16px;
-  height: 16px;
+.settings-item-label span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
 }
 
-.contractor-settings-toggle strong {
-  display: block;
-  font-size: 14px;
-  color: #0f172a;
-  margin-bottom: 2px;
-}
-
-.contractor-settings-toggle p {
-  font-size: 13px;
-  color: #64748b;
+.settings-item-label p {
+  font-size: 12px;
+  color: var(--craly-text-muted, #64748b);
   margin: 0;
 }
 
-.contractor-settings-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.contractor-settings-save-btn {
-  background: #0f172a;
-  color: #ffffff;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
+.settings-item-val {
   font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  color: var(--craly-navy, #102a2a);
+  font-weight: 700;
 }
 
-.contractor-settings-save-btn:hover {
-  background: #1e293b;
+.contractor-settings-role-tag {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.contractor-settings-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.settings-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+/* Notice Banner */
+.settings-notice-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  padding: 14px 18px;
+  border-radius: var(--radius-md, 12px);
+  margin-bottom: 20px;
+}
+
+.settings-notice-icon {
+  color: #2563eb;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.settings-notice-banner strong {
+  font-size: 13px;
+  color: #1d4ed8;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.settings-notice-banner p {
+  font-size: 12.5px;
+  color: #1e3a8a;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Notifications Features */
+.settings-notifications-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.settings-feature-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.settings-feature-bullet {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.settings-feature-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-feature-content strong {
+  font-size: 13px;
+  color: var(--craly-navy, #102a2a);
+}
+
+.settings-feature-content span {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+/* Footer in Card */
+.settings-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.settings-footer-text {
+  font-size: 12.5px;
+  color: var(--craly-text-muted, #64748b);
+}
+
+.settings-footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--craly-teal-dark, #0b6c64);
+  font-weight: 700;
+  font-size: 13px;
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.settings-footer-link:hover {
+  color: var(--craly-teal, #0f8b82);
+  transform: translateX(2px);
 }
 
 @media (max-width: 640px) {
-  .contractor-settings-page {
-    padding: 16px;
+  .contractor-settings-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }

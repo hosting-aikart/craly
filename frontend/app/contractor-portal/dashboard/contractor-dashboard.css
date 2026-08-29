@@ -21,14 +21,13 @@
   position: relative;
   background: linear-gradient(135deg, #102a2a 0%, #173b3a 45%, #0f8b82 100%);
   color: #ffffff;
-  border-radius: var(--radius-md, 14px);
-  padding: 20px 24px;
+  border-radius: var(--radius-lg, 16px);
+  padding: 22px 28px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
+  flex-direction: column;
+  gap: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 25px -4px rgba(16, 42, 42, 0.2), 0 2px 8px rgba(16, 42, 42, 0.08);
+  box-shadow: 0 10px 28px -4px rgba(16, 42, 42, 0.2), 0 2px 8px rgba(16, 42, 42, 0.08);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -44,22 +43,13 @@
   pointer-events: none;
 }
 
-.contractor-dashboard__banner-info {
-  flex: 1;
-  min-width: 0;
+.contractor-dashboard__banner-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.contractor-dashboard__banner-top-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 2px;
+  width: 100%;
 }
 
 .contractor-dashboard__banner-badge {
@@ -69,8 +59,8 @@
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--craly-mint, #ddf7f2);
-  padding: 3px 10px;
-  border-radius: var(--radius-full, 999px);
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -93,28 +83,51 @@
 .contractor-dashboard__banner-loc {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: 12px;
-  color: #cbd5e1;
-  font-weight: 500;
+  color: #e2e8f0;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(4px);
+}
+
+.contractor-dashboard__banner-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+
+.contractor-dashboard__banner-info {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .contractor-dashboard__title {
   font-family: var(--font-heading, "Red Hat Display", sans-serif);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   margin: 0;
   color: #ffffff;
   letter-spacing: -0.01em;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .contractor-dashboard__subtitle {
   color: #cbd5e1;
-  font-size: 13px;
+  font-size: 13.5px;
   margin: 0;
-  line-height: 1.4;
-  max-width: 600px;
+  line-height: 1.45;
+  max-width: 620px;
 }
 
 .contractor-dashboard__banner-actions {
@@ -122,8 +135,6 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .contractor-btn-primary {
@@ -173,6 +184,21 @@
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .contractor-dashboard__banner-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .contractor-dashboard__banner-actions {
+    width: 100%;
+  }
+  .contractor-dashboard__banner-actions a {
+    flex: 1;
+    text-align: center;
+  }
 }
 
 .contractor-btn-secondary-dark {
