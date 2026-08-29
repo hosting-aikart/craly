@@ -6,6 +6,7 @@ import {
   createContractor,
   getContractorById,
   updateContractor,
+  updateContractorListingStatus,
   getStaffEngagements,
   updateEngagementStatus,
   getStaffNotifications,
@@ -15,6 +16,13 @@ import {
   reviewStaffDocument,
   updateStaffContractorVerificationStatus,
 } from '../controllers/staffController';
+import {
+  uploadDocument,
+  listDocuments,
+  getDocumentSignedUrl,
+  deleteDocument,
+  documentUpload,
+} from '../controllers/documentController';
 
 const router = Router();
 
@@ -31,11 +39,16 @@ router.get('/verification/contractors/:id/documents/:documentId/signed-url', get
 router.patch('/verification/contractors/:id/documents/:documentId/review', reviewStaffDocument);
 router.patch('/verification/contractors/:id/status', updateStaffContractorVerificationStatus);
 
-// Contractor management
+// Contractor management & documents & unlisting
 router.get('/contractors', getContractors);
 router.post('/contractors', createContractor);
 router.get('/contractors/:id', getContractorById);
 router.patch('/contractors/:id', updateContractor);
+router.patch('/contractors/:id/listing', updateContractorListingStatus);
+router.get('/contractors/:id/documents', listDocuments);
+router.post('/contractors/:id/documents', documentUpload, uploadDocument);
+router.get('/contractors/:id/documents/:documentId/signed-url', getDocumentSignedUrl);
+router.delete('/contractors/:id/documents/:documentId', deleteDocument);
 
 // Selection engagements
 router.get('/engagements', getStaffEngagements);

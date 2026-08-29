@@ -11,6 +11,7 @@ import {
   updateReportStatus,
   listAuditLogs,
 } from '../controllers/adminWorkspaceController';
+import { updateContractorListingStatus } from '../controllers/staffController';
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.patch('/verification/:id', reviewVerification);
 // listVerificationQueue, which already returns the full contractor list
 // when no ?status= filter is given.
 router.get('/contractors', listVerificationQueue);
+router.patch('/contractors/:id/listing', updateContractorListingStatus);
 
 router.get('/reports', listReports);
 router.patch('/reports/:id', updateReportStatus);
