@@ -129,18 +129,11 @@ export default function Navbar() {
 
           {/* ── Logo ── */}
           <Link href="/" className="cnav-logo" aria-label="Craly home" onClick={closeAll}>
-            {/* Dark logo shown on light backgrounds */}
-            <img
-              src="/assets/craly-logo.png"
-              alt="Craly"
-              className="cnav-logo-dark"
-            />
-            {/* White logo shown on dark backgrounds */}
-            <img
-              src="/assets/craly-logo-white.png"
-              alt="Craly"
-              className="cnav-logo-light"
-            />
+            {/* Fixed-size wrapper — both logos overlap, opacity toggles to avoid layout shift */}
+            <span className="cnav-logo-wrap">
+              <img src="/assets/craly-logo.png"       alt="Craly" className="cnav-logo-img cnav-logo-dark" />
+              <img src="/assets/craly-logo-white.png" alt=""      className="cnav-logo-img cnav-logo-light" aria-hidden="true" />
+            </span>
           </Link>
 
           {/* ── Desktop Center Nav Links ── */}
@@ -389,15 +382,31 @@ const CNAV_CSS = `
   flex-shrink: 0;
   justify-self: start;
 }
-/* Default: dark logo on light bg, white logo hidden */
-.cnav-logo-dark  { display: inline-block; height: 48px; width: auto; object-fit: contain; transition: opacity 0.3s ease; }
-.cnav-logo-light { display: none;         height: 48px; width: auto; object-fit: contain; transition: opacity 0.3s ease; }
-/* When over a dark section, swap logos */
-.cnav-dark .cnav-logo-dark  { display: none !important; }
-.cnav-dark .cnav-logo-light { display: inline-block !important; }
+/* Fixed-size container — holds both logos stacked; prevents size jump */
+.cnav-logo-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  height: 48px;          /* single source of truth for logo height */
+  flex-shrink: 0;
+}
+.cnav-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.35s ease;
+}
+/* Dark logo: visible by default, invisible on dark bg */
+.cnav-logo-dark  { opacity: 1; position: relative; }
+.cnav-logo-light { opacity: 0; position: absolute; top: 50%; left: 0; transform: translateY(-50%); }
+/* Swap on dark background */
+.cnav-dark .cnav-logo-dark  { opacity: 0; }
+.cnav-dark .cnav-logo-light { opacity: 1; }
 @media (max-width: 899px) {
-  .cnav-logo-dark  { height: 38px; }
-  .cnav-logo-light { height: 38px; }
+  .cnav-logo-wrap { height: 38px; }
+  .cnav-logo-img  { height: 38px; }
 }
 
 /* ── Desktop center nav links ── */
