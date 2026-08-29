@@ -17,6 +17,7 @@
 .req-breadcrumb-bar {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   margin-bottom: -8px;
 }
@@ -53,7 +54,7 @@
   box-shadow: 0 12px 32px -4px rgba(16, 42, 42, 0.22);
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 24px;
   overflow: hidden;
   box-sizing: border-box;
@@ -164,6 +165,8 @@
   z-index: 1;
   flex-shrink: 0;
   flex-wrap: wrap;
+  align-self: flex-end;
+  margin-top: auto;
 }
 
 .req-hero-btn {
