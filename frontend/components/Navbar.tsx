@@ -43,7 +43,6 @@ export default function Navbar() {
   // Trimmed to the links people actually use — the logo already goes home,
   // and "Why Craly" duplicated ground the homepage hero already covers.
   const navLinks = [
-    { href: '/contractors', label: t.nav.contractors },
     { href: '/#how', label: t.nav.howItWorks },
     { href: '/#faq', label: t.nav.faq },
   ];
