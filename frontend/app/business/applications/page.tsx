@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import {
@@ -14,7 +14,25 @@ import ApplicationCompareModal from '@/components/business/ApplicationCompareMod
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
-import { IconAlertTriangle, IconUsers, IconCalendar, IconRupee } from '@/components/ui/Icons';
+import {
+  IconAlertTriangle,
+  IconUsers,
+  IconCalendar,
+  IconRupee,
+  IconChevronDown,
+  IconCheck,
+  IconTarget,
+} from '@/components/ui/Icons';
+import './applications.css';
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'All Statuses', dotColor: '#64748b' },
+  { value: 'SUBMITTED', label: 'Submitted', dotColor: '#3b82f6' },
+  { value: 'UNDER_REVIEW', label: 'Under Review', dotColor: '#f59e0b' },
+  { value: 'SHORTLISTED', label: 'Shortlisted', dotColor: '#8b5cf6' },
+  { value: 'SELECTED', label: 'Selected', dotColor: '#10b981' },
+  { value: 'REJECTED', label: 'Rejected', dotColor: '#ef4444' },
+];
 
 export default function MasterApplicationsPage() {
   const [applications, setApplications] = useState<ApplicationReceived[]>([]);
@@ -28,6 +46,12 @@ export default function MasterApplicationsPage() {
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [error, setError] = useState('');
+
+  // Dropdown States
+  const [isReqOpen, setIsReqOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const reqDropdownRef = useRef<HTMLDivElement>(null);
+  const statusDropdownRef = useRef<HTMLDivElement>(null);
 
   const loadData = () => {
     setLoading(true);
@@ -46,6 +70,32 @@ export default function MasterApplicationsPage() {
   useEffect(() => {
     loadData();
   }, [selectedReqId, selectedStatus]);
+
+  // Click outside and Escape key handler for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (reqDropdownRef.current && !reqDropdownRef.current.contains(e.target as Node)) {
+        setIsReqOpen(false);
+      }
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(e.target as Node)) {
+        setIsStatusOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsReqOpen(false);
+        setIsStatusOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const handleToggleSelectForCompare = (appId: string) => {
     setSelectedForCompare((prev) =>
@@ -69,57 +119,150 @@ export default function MasterApplicationsPage() {
 
   const comparedApps = applications.filter((app) => selectedForCompare.includes(app.id));
 
+  // Current selections
+  const currentReq = requirements.find((r) => r.id === selectedReqId);
+  const currentStatus = STATUS_OPTIONS.find((s) => s.value === selectedStatus) || STATUS_OPTIONS[0];
+
   return (
-    <>
+    <div className="apps-page">
       <WorkspacePageHeader
         title="Applications Received"
         subtitle="Review contractor proposals across all your manpower requirements."
       />
 
       {feedbackMsg && (
-        <div style={{ padding: '14px 18px', background: '#dcfce7', border: '1px solid #bbf7d0', color: '#15803d', borderRadius: '10px', marginBottom: '20px', fontWeight: 600 }}>
+        <div className="apps-alert apps-alert--success">
           ✓ {feedbackMsg}
         </div>
       )}
 
       {error && (
-        <div style={{ padding: '14px 18px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '10px', marginBottom: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="apps-alert apps-alert--error">
           <IconAlertTriangle size={16} /> {error}
         </div>
       )}
 
       {/* Filters Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <select
-            value={selectedReqId}
-            onChange={(e) => setSelectedReqId(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--craly-border)', fontSize: '13px', background: 'var(--craly-white)' }}
-          >
-            <option value="">All Requirements</option>
-            {requirements.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.title}
-              </option>
-            ))}
-          </select>
+      <div className="apps-filter-bar">
+        <div className="apps-filter-group">
+          {/* Custom Smooth Requirements Dropdown */}
+          <div className="apps-custom-select-wrap" ref={reqDropdownRef}>
+            <button
+              type="button"
+              className={`apps-custom-select-trigger ${isReqOpen ? 'open' : ''}`}
+              onClick={() => {
+                setIsReqOpen(!isReqOpen);
+                setIsStatusOpen(false);
+              }}
+              aria-label="Filter by requirement"
+              aria-expanded={isReqOpen}
+            >
+              <span className="apps-custom-select-text">
+                {currentReq ? currentReq.title : 'All Requirements'}
+              </span>
+              <IconChevronDown size={13} className={`apps-custom-chevron ${isReqOpen ? 'open' : ''}`} />
+            </button>
 
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--craly-border)', fontSize: '13px', background: 'var(--craly-white)' }}
-          >
-            <option value="">All Statuses</option>
-            <option value="SUBMITTED">Submitted</option>
-            <option value="UNDER_REVIEW">Under Review</option>
-            <option value="SHORTLISTED">Shortlisted</option>
-            <option value="SELECTED">Selected</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
+            {isReqOpen && (
+              <div className="apps-custom-select-menu" role="listbox">
+                <button
+                  type="button"
+                  className={`apps-custom-option ${!selectedReqId ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSelectedReqId('');
+                    setIsReqOpen(false);
+                  }}
+                  role="option"
+                  aria-selected={!selectedReqId}
+                >
+                  <span className="apps-custom-option-label">All Requirements</span>
+                  {!selectedReqId && <IconCheck size={13} className="apps-custom-check" />}
+                </button>
+
+                {requirements.map((r) => {
+                  const isSelected = selectedReqId === r.id;
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      className={`apps-custom-option ${isSelected ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSelectedReqId(r.id);
+                        setIsReqOpen(false);
+                      }}
+                      role="option"
+                      aria-selected={isSelected}
+                    >
+                      <span className="apps-custom-option-label">{r.title}</span>
+                      {isSelected && <IconCheck size={13} className="apps-custom-check" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Custom Smooth Statuses Dropdown */}
+          <div className="apps-custom-select-wrap" ref={statusDropdownRef}>
+            <button
+              type="button"
+              className={`apps-custom-select-trigger ${isStatusOpen ? 'open' : ''}`}
+              onClick={() => {
+                setIsStatusOpen(!isStatusOpen);
+                setIsReqOpen(false);
+              }}
+              aria-label="Filter by status"
+              aria-expanded={isStatusOpen}
+            >
+              <div className="apps-trigger-status-val">
+                {currentStatus.value && (
+                  <span
+                    className="apps-trigger-status-dot"
+                    style={{ background: currentStatus.dotColor }}
+                  />
+                )}
+                <span className="apps-custom-select-text">{currentStatus.label}</span>
+              </div>
+              <IconChevronDown size={13} className={`apps-custom-chevron ${isStatusOpen ? 'open' : ''}`} />
+            </button>
+
+            {isStatusOpen && (
+              <div className="apps-custom-select-menu" role="listbox">
+                {STATUS_OPTIONS.map((s) => {
+                  const isSelected = selectedStatus === s.value;
+                  return (
+                    <button
+                      key={s.value}
+                      type="button"
+                      className={`apps-custom-option ${isSelected ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSelectedStatus(s.value);
+                        setIsStatusOpen(false);
+                      }}
+                      role="option"
+                      aria-selected={isSelected}
+                    >
+                      <div className="apps-option-status-wrap">
+                        {s.value && (
+                          <span
+                            className="apps-option-status-dot"
+                            style={{ background: s.dotColor }}
+                          />
+                        )}
+                        <span className="apps-custom-option-label">{s.label}</span>
+                      </div>
+                      {isSelected && <IconCheck size={13} className="apps-custom-check" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '13px', color: 'var(--craly-muted)', fontWeight: 600 }}>
+        {/* Compare Actions */}
+        <div className="apps-compare-actions">
+          <span className="apps-compare-count">
             {selectedForCompare.length} selected for compare
           </span>
           <Button
@@ -277,6 +420,6 @@ export default function MasterApplicationsPage() {
         }}
         selectingId={selectingId}
       />
-    </>
+    </div>
   );
 }
