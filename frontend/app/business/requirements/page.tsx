@@ -188,15 +188,8 @@ export default function BusinessRequirementsListPage() {
           )}
         </div>
 
-        {/* Sliding Tabs Bar */}
+        {/* Filter Tabs Bar */}
         <div className="reqs-tabs-container">
-          <div
-            className="reqs-tabs-glider"
-            style={{
-              width: `${100 / STATUS_TABS.length}%`,
-              transform: `translateX(${activeTabIndex * 100}%)`,
-            }}
-          />
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
@@ -294,7 +287,7 @@ export default function BusinessRequirementsListPage() {
                 <div className="reqs-matrix-cell">
                   <span className="reqs-matrix-label">Daily Budget</span>
                   <span className="reqs-matrix-val reqs-matrix-val--budget">
-                    <IconRupee size={14} /> {req.budget_min || req.budget_max ? `₹${req.budget_min || 0}-${req.budget_max || ''}` : 'Negotiable'}
+                    <IconRupee size={13} /> {req.budget_min || req.budget_max ? `₹${Math.round(Number(req.budget_min || 0))}-${Math.round(Number(req.budget_max || 0))}` : 'Negotiable'}
                   </span>
                 </div>
               </div>
