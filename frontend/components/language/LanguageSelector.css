@@ -196,12 +196,23 @@
 }
 
 .mobile-lang-selector__option--active {
-  background: #0d9488 !important;
-  border-color: #0d9488 !important;
+  background: var(--craly-teal, #0d9488) !important;
+  border-color: var(--craly-teal, #0d9488) !important;
 }
 
 .mobile-lang-selector__option--more {
   background: rgba(13, 148, 136, 0.2);
   border-color: rgba(13, 148, 136, 0.4);
   color: #2dd4bf;
+}
+
+@media (max-width: 768px) {
+  .lang-selector__trigger {
+    padding: 6px 8px;
+    gap: 3px;
+  }
+
+  .lang-selector__current {
+    display: none;
+  }
 }

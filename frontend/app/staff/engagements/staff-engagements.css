@@ -1,7 +1,14 @@
+/* ==========================================================================
+   CRALY STAFF ENGAGEMENTS COORDINATION
+   Strict Brand Palette: Craly Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
 .staff-engagements-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 8px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
 }
 
 .engagements-list {
@@ -13,135 +20,168 @@
 .engagement-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-radius: 18px;
+  padding: 22px 26px;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.engagement-card:hover {
+  border-color: rgba(15, 139, 130, 0.3);
+  box-shadow: 0 6px 20px -2px rgba(15, 139, 130, 0.08);
 }
 
 .engagement-card__header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 12px;
+  padding-bottom: 14px;
 }
 
 .engagement-requirement-loc {
-  font-size: 12px;
-  color: #64748b;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11.5px;
+  color: var(--craly-teal, #0f8b82);
+  background: rgba(15, 139, 130, 0.08);
+  border: 1px solid rgba(15, 139, 130, 0.18);
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 9999px);
   font-weight: 600;
-  display: inline-block;
-  margin-bottom: 2px;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 6px;
+  text-transform: capitalize;
 }
 
 .engagement-requirement-title {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--craly-navy, #102a2a);
   margin: 0;
+  line-height: 1.25;
 }
 
 .engagement-status-selector {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
-.status-badge {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 12px;
-  text-transform: uppercase;
-}
-
-.engagement-status--selected {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-.engagement-status--contacting {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.engagement-status--discussion {
-  background: #f5f3ff;
-  color: #7c3aed;
-}
-
-.engagement-status--confirmed {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-.engagement-status--closed {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.engagement-status--default {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.status-dropdown {
-  padding: 6px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+.engagement-status-label {
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 12px;
   font-weight: 600;
-  background: #ffffff;
-  cursor: pointer;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+.engagement-custom-select {
+  min-width: 175px !important;
+}
+
+.engagement-custom-select .custom-select__trigger {
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--craly-teal, #0f8b82);
+  background: rgba(15, 139, 130, 0.08);
+  border: 1px solid rgba(15, 139, 130, 0.22);
+  border-radius: var(--radius-full, 9999px);
+}
+
+.engagement-custom-select .custom-select__trigger:hover {
+  background: rgba(15, 139, 130, 0.14);
+  border-color: var(--craly-teal, #0f8b82);
+}
+
+/* ── Party Grid Box ──────────────────────────────────────────────────────── */
 .engagement-card__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  background: #f8fafc;
-  padding: 14px 16px;
-  border-radius: 8px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
 .engagement-party-box {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 5px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.engagement-party-box:hover {
+  background: #f0fdfa;
+  border-color: rgba(15, 139, 130, 0.25);
 }
 
 .party-lbl {
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 11px;
   color: #64748b;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .party-name {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
   font-size: 15px;
-  color: #0f172a;
+  color: var(--craly-navy, #102a2a);
   font-weight: 700;
+  line-height: 1.3;
 }
 
 .party-sub {
-  font-size: 12px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
   color: #475569;
+  display: inline-flex;
+  align-items: center;
 }
 
+/* ── Footer ──────────────────────────────────────────────────────────────── */
 .engagement-card__footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 12px;
   color: #94a3b8;
+  padding-top: 6px;
 }
 
-@media (max-width: 640px) {
+.engagement-req-id {
+  font-family: monospace;
+  font-size: 11.5px;
+  background: rgba(15, 139, 130, 0.06);
+  border: 1px solid rgba(15, 139, 130, 0.15);
+  color: var(--craly-teal, #0f8b82);
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 9999px);
+}
+
+@media (max-width: 900px) {
+  .engagement-card__grid {
+    grid-template-columns: 1fr;
+  }
+
   .engagement-card__header {
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .engagement-status-selector {

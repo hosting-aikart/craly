@@ -267,22 +267,62 @@
 
 @media (max-width: 991px) {
   .workspace-header {
-    padding: 0 16px;
-    height: 64px;
+    padding: 0 12px;
+    height: 56px;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .workspace-header__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .workspace-header__title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--craly-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+
+  .workspace-header__right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
   .workspace-header__mobile-toggle {
     display: flex;
+    padding: 5px 8px;
+    flex-shrink: 0;
   }
 
-  .workspace-header__subtitle {
-    display: none;
+  .workspace-header__user-wrapper {
+    flex-shrink: 0;
   }
 
   .workspace-header__user-pill {
-    padding: 4px 6px;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
+  .workspace-header__avatar {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .workspace-header__subtitle,
   .workspace-header__user-meta,
   .workspace-header__caret {
     display: none;

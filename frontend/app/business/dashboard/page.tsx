@@ -11,6 +11,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { IconSearch } from '@/components/ui/Icons';
 import '@/components/AuthForm.css';
 import '../../dashboard.css';
+import './dashboard-mobile.css';
 
 export default function BusinessDashboardPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function BusinessDashboardPage() {
         subtitle="Manage workforce requirements and review contractor applications."
       />
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+      <div className="dashboard-top-action" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <Button
           variant="primary"
           onClick={() => router.push('/business/requirements/new')}
@@ -160,7 +161,7 @@ export default function BusinessDashboardPage() {
                         Created on {new Date(item.timestamp).toLocaleDateString()}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="dashboard-activity-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span
                         className={`dashboard-status-pill dashboard-status-pill--${item.status.toLowerCase()}`}
                       >
