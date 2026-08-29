@@ -31,8 +31,8 @@ export default function Hero() {
         <p className="hero-subtext">{t.hero.subtext}</p>
 
         <div className="hero-cta">
-          <Link href="/contractors" className="hero-cta__btn hero-cta__btn--solid">
-            {t.hero.ctaFind}
+          <Link href="/signup?role=business" className="hero-cta__btn hero-cta__btn--solid">
+            Join as Manufacturer
           </Link>
           <Link href="/signup?role=contractor" className="hero-cta__btn hero-cta__btn--outline">
             {t.hero.ctaJoin}
