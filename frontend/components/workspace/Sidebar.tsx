@@ -18,6 +18,7 @@ import './Sidebar.css';
 interface SidebarProps {
   role: 'business' | 'contractor' | 'contractor-portal' | 'staff';
   companyName: string;
+  isVerified?: boolean;
 }
 
 interface NavItem {
@@ -25,6 +26,8 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   badge?: number;
+  locked?: boolean;
+  lockedHint?: string;
 }
 
 interface NavGroup {
@@ -32,7 +35,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
-export default function Sidebar({ role, companyName }: SidebarProps) {
+export default function Sidebar({ role, companyName, isVerified = true }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -159,37 +162,37 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     {
       group: 'OVERVIEW',
       items: [
-        { label: 'Dashboard', href: '/contractor-portal/dashboard', icon: IconDashboard },
+        { label: 'Dashboard', href: '/contractor-portal/dashboard', icon: IconDashboard, locked: !isVerified },
       ],
     },
     {
       group: 'COMPANY',
       items: [
-        { label: 'KYC & Onboarding', href: '/contractor-portal/profile?tab=kyc', icon: IconClipboard },
-        { label: 'Company Profile', href: '/contractor-portal/profile?tab=profile', icon: IconBuilding },
-        { label: 'Workforce & Skills', href: '/contractor-portal/profile?tab=workforce', icon: IconHardHat },
-        { label: 'Coverage', href: '/contractor-portal/profile?tab=coverage', icon: IconMapPin },
+        { label: 'KYC & Onboarding', href: '/contractor-portal/profile?tab=kyc', icon: IconClipboard, locked: !isVerified },
+        { label: 'Company Profile', href: '/contractor-portal/profile?tab=profile', icon: IconBuilding, locked: !isVerified },
+        { label: 'Workforce & Skills', href: '/contractor-portal/profile?tab=workforce', icon: IconHardHat, locked: !isVerified },
+        { label: 'Coverage', href: '/contractor-portal/profile?tab=coverage', icon: IconMapPin, locked: !isVerified },
       ],
     },
     {
       group: 'COMPLIANCE',
       items: [
-        { label: 'Documents', href: '/contractor-portal/profile?tab=documents', icon: IconFile },
-        { label: 'Verification', href: '/contractor-portal/profile?tab=verification', icon: IconShield },
+        { label: 'Documents', href: '/contractor-portal/profile?tab=documents', icon: IconFile, locked: !isVerified },
+        { label: 'Verification', href: '/contractor-portal/profile?tab=verification', icon: IconShield, locked: !isVerified },
       ],
     },
     {
       group: 'MARKETPLACE',
       items: [
-        { label: 'Opportunities', href: '/contractor-portal/opportunities', icon: IconTarget },
-        { label: 'Applications', href: '/contractor-portal/applications', icon: IconApplications },
+        { label: 'Opportunities', href: '/contractor-portal/opportunities', icon: IconTarget, locked: !isVerified },
+        { label: 'Applications', href: '/contractor-portal/applications', icon: IconApplications, locked: !isVerified },
       ],
     },
     {
       group: 'ACCOUNT',
       items: [
-        { label: 'Notifications', href: '/contractor-portal/notifications', icon: IconBell, badge: unreadNotificationCount },
-        { label: 'Settings', href: '/contractor-portal/settings', icon: IconSettings },
+        { label: 'Notifications', href: '/contractor-portal/notifications', icon: IconBell, badge: unreadNotificationCount, locked: !isVerified },
+        { label: 'Settings', href: '/contractor-portal/settings', icon: IconSettings, locked: !isVerified },
       ],
     },
   ];
@@ -222,13 +225,6 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     router.push('/login');
   };
 
-  const getBadgeLabel = () => {
-    if (role === 'business') return 'MANUFACTURER';
-    if (role === 'contractor-portal') return 'CONTRACTOR';
-    if (role === 'staff') return 'CRALY STAFF';
-    return 'CRALY STAFF';
-  };
-
   const getRoleUserText = () => {
     if (role === 'business') return 'Manufacturer Account';
     if (role === 'contractor-portal') return 'Contractor Account';
@@ -255,10 +251,16 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`workspace-sidebar__link ${active ? 'workspace-sidebar__link--active' : ''}`}
+                      className={`workspace-sidebar__link ${active ? 'workspace-sidebar__link--active' : ''} ${item.locked ? 'workspace-sidebar__link--locked' : ''}`}
+                      title={item.locked ? item.lockedHint : undefined}
                     >
                       <item.icon size={17} className="workspace-sidebar__icon" />
                       <span className="workspace-sidebar__label">{item.label}</span>
+                      {item.locked && (
+                        <span className="workspace-sidebar__lock-badge" title={item.lockedHint}>
+                          🔒
+                        </span>
+                      )}
                       {Boolean(item.badge && item.badge > 0) && (
                         <span className="workspace-sidebar__badge">{item.badge}</span>
                       )}

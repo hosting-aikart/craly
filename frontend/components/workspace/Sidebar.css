@@ -144,6 +144,23 @@
   border-radius: 10px;
 }
 
+.workspace-sidebar__lock-badge {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  filter: grayscale(0.2);
+}
+
+.workspace-sidebar__link--locked {
+  opacity: 0.72;
+}
+
+.workspace-sidebar__link--locked:hover {
+  opacity: 0.95;
+}
+
 .workspace-sidebar__footer {
   padding: 14px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
