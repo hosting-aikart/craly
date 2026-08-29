@@ -79,7 +79,7 @@ export default function ImageCarousel() {
               <img
                 src={slide.image}
                 alt={title}
-                style={slide.id === 'documents' ? { objectPosition: 'center top' } : undefined}
+                style={(slide.id === 'documents' || slide.id === 'projects') ? { objectPosition: 'center top' } : undefined}
               />
               <div className="overlay">
                 <h3>{title}</h3>
