@@ -93,25 +93,7 @@
   transition-delay: var(--delay, 0s);
 }
 
-/* Top Accent Line on Hover */
-.how-step-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20px;
-  right: 20px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #0d9488, transparent);
-  border-radius: 2px;
-  opacity: 0;
-  transform: scaleX(0.3);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
 
-.how-step-card:hover::before {
-  opacity: 1;
-  transform: scaleX(1);
-}
 
 .how-step-card:hover {
   transform: translateY(-5px);
