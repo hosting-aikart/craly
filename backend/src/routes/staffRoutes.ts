@@ -6,6 +6,7 @@ import {
   createContractor,
   getContractorById,
   updateContractor,
+  updateContractorListingStatus,
   getStaffEngagements,
   updateEngagementStatus,
   getStaffNotifications,
@@ -42,11 +43,16 @@ router.patch('/verification/contractors/:id/status', updateStaffContractorVerifi
 router.get('/verification/contractors/:id/messages', getStaffVerificationMessages);
 router.post('/verification/contractors/:id/messages', sendStaffVerificationMessage);
 
-// Contractor management
+// Contractor management & documents & unlisting
 router.get('/contractors', getContractors);
 router.post('/contractors', createContractor);
 router.get('/contractors/:id', getContractorById);
 router.patch('/contractors/:id', updateContractor);
+router.patch('/contractors/:id/listing', updateContractorListingStatus);
+router.get('/contractors/:id/documents', listDocuments);
+router.post('/contractors/:id/documents', documentUpload, uploadDocument);
+router.get('/contractors/:id/documents/:documentId/signed-url', getDocumentSignedUrl);
+router.delete('/contractors/:id/documents/:documentId', deleteDocument);
 
 // KYC Documents — reachable from Contractors → select contractor → KYC →
 // Documents, for BOTH newly-created and pre-existing contractors. Reuses

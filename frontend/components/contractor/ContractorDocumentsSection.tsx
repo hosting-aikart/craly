@@ -25,10 +25,33 @@ import {
 } from '@/components/ui/Icons';
 import './ContractorDocumentsSection.css';
 
+export const CONTRACTOR_DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  gst: 'GST Registration Certificate',
+  business_registration: 'Business / Company Registration',
+  pan: 'PAN Card (Tax Identification)',
+  aadhaar: 'Aadhaar Card (Authorized Signatory)',
+  labor_license: 'Labour License / Contract Labour Act',
+  msme: 'MSME / Udyam Registration',
+  pf_registration: 'EPF Registration Certificate',
+  esic_registration: 'ESIC Registration Certificate',
+  industry_license: 'Trade / Industry License',
+  safety_certification: 'Safety / ISO / Quality Certification',
+  compliance_certificate: 'Statutory Compliance Certificate',
+  other_certificate: 'Other Certificate',
+  other: 'Other Supporting Document',
+};
+
 const DOCUMENT_OPTIONS = [
   {
+    value: 'gst',
+    label: 'GST Registration Certificate',
+    badge: 'Required',
+    badgeType: 'required',
+    category: 'Statutory',
+  },
+  {
     value: 'business_registration',
-    label: 'Business Registration / GST Certificate',
+    label: 'Business Registration / Certificate',
     badge: 'Required',
     badgeType: 'required',
     category: 'Statutory',
@@ -48,8 +71,36 @@ const DOCUMENT_OPTIONS = [
     category: 'Identity',
   },
   {
+    value: 'labor_license',
+    label: 'Labour License (Contract Labour Act)',
+    badge: 'Recommended',
+    badgeType: 'recommended',
+    category: 'Licensing',
+  },
+  {
+    value: 'msme',
+    label: 'MSME / Udyam Registration',
+    badge: 'Optional',
+    badgeType: 'optional',
+    category: 'Statutory',
+  },
+  {
+    value: 'pf_registration',
+    label: 'EPF Registration Certificate',
+    badge: 'Recommended',
+    badgeType: 'recommended',
+    category: 'Compliance',
+  },
+  {
+    value: 'esic_registration',
+    label: 'ESIC Registration Certificate',
+    badge: 'Recommended',
+    badgeType: 'recommended',
+    category: 'Compliance',
+  },
+  {
     value: 'industry_license',
-    label: 'Industry / Trade License (Contract Labour Act)',
+    label: 'Trade / Industry License',
     badge: 'Recommended',
     badgeType: 'recommended',
     category: 'Licensing',
@@ -62,8 +113,22 @@ const DOCUMENT_OPTIONS = [
     category: 'Compliance',
   },
   {
+    value: 'compliance_certificate',
+    label: 'Statutory Compliance Certificate',
+    badge: 'Optional',
+    badgeType: 'optional',
+    category: 'Compliance',
+  },
+  {
     value: 'other_certificate',
-    label: 'Other Supporting Document / Award',
+    label: 'Other Certificate / Award',
+    badge: 'Optional',
+    badgeType: 'optional',
+    category: 'Supplemental',
+  },
+  {
+    value: 'other',
+    label: 'Other Supporting Document',
     badge: 'Optional',
     badgeType: 'optional',
     category: 'Supplemental',
@@ -71,12 +136,19 @@ const DOCUMENT_OPTIONS = [
 ] as const;
 
 const DOCUMENT_TYPE_LABELS: Record<string, { label: string; category: string }> = {
+  gst: { label: 'GST Registration Certificate', category: 'Statutory' },
   business_registration: { label: 'Business Registration / GST', category: 'Statutory' },
   pan: { label: 'PAN Card (Company / Proprietor)', category: 'Tax ID' },
   aadhaar: { label: 'Aadhaar Card (Authorized Signatory)', category: 'Identity' },
+  labor_license: { label: 'Labour License', category: 'Licensing' },
+  msme: { label: 'MSME / Udyam Registration', category: 'Statutory' },
+  pf_registration: { label: 'EPF Registration', category: 'Compliance' },
+  esic_registration: { label: 'ESIC Registration', category: 'Compliance' },
   industry_license: { label: 'Industry / Trade License', category: 'Licensing' },
   safety_certification: { label: 'Safety / ISO Certification', category: 'Compliance' },
+  compliance_certificate: { label: 'Compliance Certificate', category: 'Compliance' },
   other_certificate: { label: 'Other Certificate / Award', category: 'Supplemental' },
+  other: { label: 'Other Supporting Document', category: 'Supplemental' },
 };
 
 interface ContractorDocumentsSectionProps {
@@ -479,7 +551,7 @@ export default function ContractorDocumentsSection({
               <tbody>
                 {documents.map((doc) => {
                   const typeMeta = DOCUMENT_TYPE_LABELS[doc.document_type] || {
-                    label: doc.document_type,
+                    label: CONTRACTOR_DOCUMENT_TYPE_LABELS[doc.document_type] || doc.document_type,
                     category: 'Document',
                   };
                   return (

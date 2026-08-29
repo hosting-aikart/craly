@@ -125,6 +125,35 @@ export default function ContractorProfilePage() {
   const [workforceSize, setWorkforceSize] = useState<number | ''>('');
   const [availability, setAvailability] = useState('AVAILABLE');
   const [description, setDescription] = useState('');
+  const [profilePicture, setProfilePicture] = useState<string>('');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Profile picture must be smaller than 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setProfilePicture(base64);
+      if (profile?.id) {
+        localStorage.setItem(`contractor_avatar_${profile.id}`, base64);
+      }
+      setMessage({ type: 'success', text: 'Profile picture updated successfully!' });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    setProfilePicture('');
+    if (profile?.id) {
+      localStorage.removeItem(`contractor_avatar_${profile.id}`);
+    }
+    setMessage({ type: 'success', text: 'Profile picture removed.' });
+  };
 
   const loadProfile = () => {
     getMyProfile()
@@ -431,17 +460,62 @@ export default function ContractorProfilePage() {
       {activeTab === 'profile' && (
         <div className="contractor-tab-view">
           <div className="contractor-hero-banner">
-            <div>
-              <span className="contractor-hero-badge">
-                <IconBuilding size={12} /> Public Organization Identity
-              </span>
-              <h2>Detailed Company Profile</h2>
-              <p>
-                Maintain your business parameters and verified capabilities used by manufacturers during contractor discovery.
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+              <div className="contractor-avatar-preview-wrap">
+                {profilePicture ? (
+                  <img src={profilePicture} alt={profile.company_name} className="contractor-avatar-img" />
+                ) : (
+                  <div className="contractor-avatar-placeholder">
+                    {profile.company_name ? profile.company_name.charAt(0).toUpperCase() : 'C'}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="contractor-avatar-upload-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload / Change Profile Picture"
+                >
+                  📷
+                </button>
+              </div>
+
+              <div>
+                <span className="contractor-hero-badge">
+                  <IconBuilding size={12} /> Public Organization Identity
+                </span>
+                <h2>{profile.company_name || 'Detailed Company Profile'}</h2>
+                <p>
+                  Maintain your business parameters and verified capabilities used by manufacturers during contractor discovery.
+                </p>
+              </div>
             </div>
+
             <div className="contractor-hero-actions">
-              <button type="button" className="contractor-hero-btn-sec" onClick={() => setEditMode(!editMode)}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+              />
+              <button
+                type="button"
+                className="contractor-hero-btn-sec"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {profilePicture ? 'Change Photo' : 'Upload Photo'}
+              </button>
+              {profilePicture && (
+                <button
+                  type="button"
+                  className="contractor-hero-btn-sec"
+                  style={{ borderColor: 'rgba(239, 68, 68, 0.4)', color: '#fca5a5' }}
+                  onClick={handleRemoveAvatar}
+                >
+                  Remove Photo
+                </button>
+              )}
+              <button type="button" className="contractor-hero-btn-prim" onClick={() => setEditMode(!editMode)}>
                 {editMode ? 'Close Edit' : 'Edit Profile'}
               </button>
             </div>
@@ -458,6 +532,41 @@ export default function ContractorProfilePage() {
                 </div>
               </div>
               <div className="contractor-form-grid">
+                <div className="contractor-field contractor-field--full" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 18px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div className="contractor-avatar-preview-wrap" style={{ width: '60px', height: '60px' }}>
+                    {profilePicture ? (
+                      <img src={profilePicture} alt="Avatar" className="contractor-avatar-img" />
+                    ) : (
+                      <div className="contractor-avatar-placeholder" style={{ fontSize: '22px' }}>
+                        {companyName ? companyName.charAt(0).toUpperCase() : 'C'}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: '#0f172a' }}>Company Profile Picture / Logo</label>
+                    <p style={{ margin: '2px 0 8px 0', fontSize: '12px', color: '#64748b' }}>PNG, JPG or WEBP under 5MB</p>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        className="contractor-custom-cluster-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        {profilePicture ? 'Change Image' : 'Upload Image'}
+                      </button>
+                      {profilePicture && (
+                        <button
+                          type="button"
+                          className="contractor-btn-cancel"
+                          style={{ padding: '6px 14px', fontSize: '12px' }}
+                          onClick={handleRemoveAvatar}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="contractor-field">
                   <label>Company Name *</label>
                   <input type="text" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />

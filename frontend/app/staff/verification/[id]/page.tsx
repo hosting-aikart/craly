@@ -11,22 +11,15 @@ import {
   updateStaffContractorVerificationStatus,
   getStaffVerificationMessages,
   sendStaffVerificationMessage,
+  uploadStaffContractorDocument,
   type StaffVerificationDetail,
   type StaffVerificationDocumentItem,
   type StaffVerificationMessageItem,
 } from '@/lib/api/staff';
+import { CONTRACTOR_DOCUMENT_TYPE_LABELS as DOC_TYPE_LABELS } from '@/components/contractor/ContractorDocumentsSection';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
 import './staff-verification-detail.css';
-
-const DOC_TYPE_LABELS: Record<string, string> = {
-  aadhaar: 'Aadhaar Card (Identity)',
-  pan: 'PAN Card (Tax Registration)',
-  business_registration: 'Business Registration / GST',
-  industry_license: 'Industry / Trade License',
-  safety_certification: 'Safety / ISO Certification',
-  other_certificate: 'Other Certificate',
-};
 
 export default function StaffVerificationDetailPage() {
   const params = useParams<{ id: string }>();
@@ -81,6 +74,14 @@ export default function StaffVerificationDetailPage() {
     }
   };
 
+  // Direct Document Upload by Staff State
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [uploadDocType, setUploadDocType] = useState('gst');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadIssueDate, setUploadIssueDate] = useState('');
+  const [uploadExpiryDate, setUploadExpiryDate] = useState('');
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadDocError, setUploadDocError] = useState('');
   const fetchDetail = () => {
     if (!contractorId) return;
     setLoading(true);
@@ -157,6 +158,37 @@ export default function StaffVerificationDetailPage() {
       alert(err instanceof Error ? err.message : 'Failed to update overall status');
     } finally {
       setSubmittingOverall(false);
+    }
+  };
+
+  const handleStaffDocUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadFile) {
+      setUploadDocError('Please select a file to upload.');
+      return;
+    }
+
+    setUploadingDoc(true);
+    setUploadDocError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      formData.append('documentType', uploadDocType);
+      if (uploadIssueDate) formData.append('issueDate', uploadIssueDate);
+      if (uploadExpiryDate) formData.append('expiryDate', uploadExpiryDate);
+
+      await uploadStaffContractorDocument(contractorId, formData);
+      setActionSuccess('Document uploaded successfully on behalf of contractor!');
+      setUploadFile(null);
+      setUploadIssueDate('');
+      setUploadExpiryDate('');
+      setShowUploadForm(false);
+      fetchDetail();
+    } catch (err) {
+      setUploadDocError(err instanceof Error ? err.message : 'Failed to upload document.');
+    } finally {
+      setUploadingDoc(false);
     }
   };
 
@@ -250,9 +282,102 @@ export default function StaffVerificationDetailPage() {
 
       {/* KYC Documents Section */}
       <div className="staff-vd-card">
-        <div className="staff-vd-card-header">
+        <div className="staff-vd-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3>Uploaded KYC & Verification Documents ({documents.length})</h3>
+          <button
+            type="button"
+            className="staff-vd-btn staff-vd-btn--approve"
+            style={{ padding: '8px 14px', fontSize: '13px' }}
+            onClick={() => setShowUploadForm(!showUploadForm)}
+          >
+            {showUploadForm ? 'Cancel Upload' : '+ Upload Document'}
+          </button>
         </div>
+
+        {showUploadForm && (
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', margin: '0 20px 20px 20px' }}>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
+              Upload Document for {contractor.company_name}
+            </h4>
+            {uploadDocError && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', marginBottom: '12px' }}>
+                {uploadDocError}
+              </div>
+            )}
+            <form onSubmit={handleStaffDocUpload} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Document Type *</label>
+                <select
+                  value={uploadDocType}
+                  onChange={(e) => setUploadDocType(e.target.value)}
+                  style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', background: '#ffffff' }}
+                >
+                  <option value="gst">GST Registration Certificate</option>
+                  <option value="business_registration">Business / Company Registration</option>
+                  <option value="pan">PAN Card (Tax Identification)</option>
+                  <option value="aadhaar">Aadhaar Card (Authorized Signatory)</option>
+                  <option value="labor_license">Labour License / Contract Labour Act</option>
+                  <option value="msme">MSME / Udyam Registration</option>
+                  <option value="pf_registration">EPF Registration Certificate</option>
+                  <option value="esic_registration">ESIC Registration Certificate</option>
+                  <option value="industry_license">Industry / Trade License</option>
+                  <option value="safety_certification">Safety / ISO / Quality Certification</option>
+                  <option value="compliance_certificate">Statutory Compliance Certificate</option>
+                  <option value="other_certificate">Other Certificate</option>
+                  <option value="other">Other Supporting Document</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>File (PDF, PNG, JPG, WebP) *</label>
+                <input
+                  type="file"
+                  required
+                  accept=".pdf,.png,.jpg,.jpeg,.webp"
+                  onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                  style={{ width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', background: '#ffffff' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Issue Date</label>
+                <input
+                  type="date"
+                  value={uploadIssueDate}
+                  onChange={(e) => setUploadIssueDate(e.target.value)}
+                  style={{ width: '100%', padding: '7px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Expiry Date</label>
+                <input
+                  type="date"
+                  value={uploadExpiryDate}
+                  onChange={(e) => setUploadExpiryDate(e.target.value)}
+                  style={{ width: '100%', padding: '7px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                />
+              </div>
+
+              <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowUploadForm(false)}
+                  style={{ padding: '7px 14px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingDoc}
+                  style={{ padding: '7px 16px', borderRadius: '6px', border: 'none', background: '#0f172a', color: '#ffffff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  {uploadingDoc ? 'Uploading to R2 Storage…' : 'Upload Document'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {documents.length === 0 ? (
           <EmptyState
