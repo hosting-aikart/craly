@@ -3,7 +3,7 @@
 import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createStaffContractor } from '@/lib/api/staff';
+import { createStaffContractor, uploadStaffContractorDocument } from '@/lib/api/staff';
 import PhoneInput from '@/components/ui/PhoneInput';
 import CustomSelect, { type SelectOption } from '@/components/ui/CustomSelect';
 import { IconArrowLeft, IconCheck, IconAlertTriangle } from '@/components/ui/Icons';
@@ -17,11 +17,32 @@ const AVAILABILITY_OPTIONS: SelectOption[] = [
   { value: 'SUSPENDED', label: 'SUSPENDED' },
 ];
 
+const DOCUMENT_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'business_registration', label: 'Business Registration / GST' },
+  { value: 'industry_license', label: 'Industry / Trade License' },
+  { value: 'safety_certification', label: 'Safety / ISO Certification' },
+  { value: 'pan', label: 'PAN Card (Tax Registration)' },
+  { value: 'aadhaar', label: 'Aadhaar Card (Identity)' },
+  { value: 'other_certificate', label: 'Other Certificate' },
+];
+
 function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
   let out = '';
   for (let i = 0; i < 10; i++) out += chars[Math.floor(Math.random() * chars.length)];
   return out;
+}
+
+interface PendingDocRow {
+  key: string;
+  documentType: string;
+  file: File | null;
+}
+
+let docRowCounter = 0;
+function newDocRow(): PendingDocRow {
+  docRowCounter += 1;
+  return { key: `doc-${docRowCounter}`, documentType: 'business_registration', file: null };
 }
 
 export default function AddContractorPage() {
@@ -46,6 +67,18 @@ export default function AddContractorPage() {
   const [serviceAreasInput, setServiceAreasInput] = useState('');
   const [availability, setAvailability] = useState<'AVAILABLE' | 'CURRENTLY_AT_CAPACITY' | 'NOT_AVAILABLE' | 'PAUSED' | 'SUSPENDED'>('AVAILABLE');
   const [notes, setNotes] = useState('');
+
+  // Documents are entirely optional — see docRows below. Files are held in
+  // memory and only uploaded (one call per row, against the real
+  // contractor id) after the contractor is successfully created.
+  const [docRows, setDocRows] = useState<PendingDocRow[]>([newDocRow()]);
+  const [docWarning, setDocWarning] = useState('');
+
+  const updateDocRow = (key: string, patch: Partial<PendingDocRow>) => {
+    setDocRows((rows) => rows.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+  };
+  const addDocRow = () => setDocRows((rows) => [...rows, newDocRow()]);
+  const removeDocRow = (key: string) => setDocRows((rows) => (rows.length > 1 ? rows.filter((r) => r.key !== key) : rows));
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -88,6 +121,29 @@ export default function AddContractorPage() {
 
       setSuccess(res.message || 'Contractor profile created successfully!');
       setCreatedId(res.data.id);
+
+      // Documents are optional and uploaded only after the contractor
+      // itself was created successfully, against its real id — a failed
+      // upload here never undoes contractor creation, it's just reported.
+      const rowsWithFiles = docRows.filter((r) => r.file);
+      if (rowsWithFiles.length > 0) {
+        const failures: string[] = [];
+        for (const row of rowsWithFiles) {
+          try {
+            const formData = new FormData();
+            formData.append('file', row.file as File);
+            formData.append('documentType', row.documentType);
+            await uploadStaffContractorDocument(res.data.id, formData);
+          } catch (docErr) {
+            failures.push(`${row.file?.name ?? 'a document'}: ${docErr instanceof Error ? docErr.message : 'upload failed'}`);
+          }
+        }
+        if (failures.length > 0) {
+          setDocWarning(
+            `Contractor created, but ${failures.length} of ${rowsWithFiles.length} document upload(s) failed. You can retry from the contractor's KYC section. (${failures.join('; ')})`,
+          );
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create contractor profile');
     } finally {
@@ -124,6 +180,12 @@ export default function AddContractorPage() {
               <div><strong>Login Email:</strong> {email}</div>
               <div><strong>Initial Password:</strong> {password}</div>
             </div>
+            {docWarning && (
+              <div className="staff-new-form-alert staff-new-form-alert--error" style={{ marginTop: '12px' }}>
+                <IconAlertTriangle size={16} style={{ marginRight: 8, flexShrink: 0 }} />
+                <span>{docWarning}</span>
+              </div>
+            )}
             <div style={{ marginTop: '14px' }}>
               <button
                 type="button"
@@ -289,6 +351,48 @@ export default function AddContractorPage() {
                   placeholder="Internal audit notes, reference background, or operational remarks..."
                 />
               </div>
+            </div>
+
+            <div className="staff-new-docs-section">
+              <div className="staff-new-docs-section__header">
+                <h3>Documents (Optional)</h3>
+                <p>Attach KYC or verification documents now, or skip this and add them later from the contractor's KYC section.</p>
+              </div>
+
+              {docRows.map((row) => (
+                <div className="staff-new-doc-row" key={row.key}>
+                  <div className="staff-new-form-group">
+                    <label>Document Type</label>
+                    <CustomSelect
+                      options={DOCUMENT_TYPE_OPTIONS}
+                      value={row.documentType}
+                      onChange={(val) => updateDocRow(row.key, { documentType: val })}
+                    />
+                  </div>
+                  <div className="staff-new-form-group">
+                    <label>File (PDF, PNG, JPG)</label>
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      onChange={(e) => updateDocRow(row.key, { file: e.target.files?.[0] || null })}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="staff-new-doc-row__remove"
+                    onClick={() => removeDocRow(row.key)}
+                    disabled={docRows.length === 1}
+                    aria-label="Remove document row"
+                    title="Remove"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+
+              <button type="button" className="staff-new-btn-cancel staff-new-doc-row__add" onClick={addDocRow}>
+                + Add Another Document
+              </button>
             </div>
 
             <div className="staff-new-form-actions">

@@ -222,7 +222,6 @@ export default function Sidebar({ role, companyName, isVerified = true }: Sideba
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
   };
 
   const getRoleUserText = () => {

@@ -82,7 +82,6 @@ export default function AdminSidebar({ adminEmail }: AdminSidebarProps) {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
   };
 
   return (

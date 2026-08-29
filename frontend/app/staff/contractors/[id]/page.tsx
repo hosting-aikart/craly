@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState, FormEvent, use } from 'react';
 import Link from 'next/link';
-import { getStaffContractorById, updateStaffContractor, type StaffContractorDetail } from '@/lib/api/staff';
+import { getStaffContractorById, updateStaffContractor, updateStaffContractorListingStatus, type StaffContractorDetail } from '@/lib/api/staff';
 import LoadingState from '@/components/ui/LoadingState';
 import PhoneInput from '@/components/ui/PhoneInput';
+import UnlistContractorModal from '@/components/staff/UnlistContractorModal';
+import StaffContractorDocumentsSection from '@/components/staff/StaffContractorDocumentsSection';
 import './staff-contractor-detail.css';
 
 export default function StaffContractorDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,6 +16,9 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Unlist modal state
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Editable state
   const [companyName, setCompanyName] = useState('');
@@ -77,6 +82,17 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
     }
   };
 
+  const handleListingUpdateSuccess = (isUnlisted: boolean, reason?: string) => {
+    if (!contractor) return;
+    setContractor({
+      ...contractor,
+      is_unlisted: isUnlisted,
+      unlisted_reason: isUnlisted ? (reason || null) : null,
+      unlisted_at: isUnlisted ? new Date().toISOString() : null,
+    });
+    setSuccess(isUnlisted ? 'Contractor unlisted from public directory.' : 'Contractor relisted to public directory.');
+  };
+
   if (loading) {
     return <LoadingState label="Loading Contractor Profile…" />;
   }
@@ -100,6 +116,20 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
         ← Back to Contractors List
       </Link>
 
+      {contractor.is_unlisted && (
+        <div className="listing-banner-unlisted">
+          <div style={{ fontSize: '20px', lineHeight: 1 }}>🚫</div>
+          <div>
+            <strong>This contractor profile is currently UNLISTED.</strong>
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
+              It is hidden from the public directory, marketplace search, and direct links.
+              {contractor.unlisted_reason && <> <strong>Reason:</strong> {contractor.unlisted_reason}.</>}
+              {contractor.unlisted_at && <> (Unlisted on {new Date(contractor.unlisted_at).toLocaleDateString()})</>}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="profile-header-card">
         <div>
           <span className="profile-id-tag">ID: {contractor.id}</span>
@@ -115,6 +145,19 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
           <span className="verification-label">
             Verification: <strong>{contractor.verification_status.toUpperCase()}</strong>
           </span>
+          <Link href={`/staff/verification/${contractor.id}`} className="review-link">
+            Open Full Verification Review →
+          </Link>
+          <span className={`listing-badge ${contractor.is_unlisted ? 'listing-badge--unlisted' : 'listing-badge--listed'}`}>
+            {contractor.is_unlisted ? '🚫 Unlisted' : '🌐 Publicly Listed'}
+          </span>
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className={`btn-listing-action ${contractor.is_unlisted ? 'btn-listing-action--relist' : 'btn-listing-action--unlist'}`}
+          >
+            {contractor.is_unlisted ? 'Relist Profile' : 'Unlist Profile'}
+          </button>
         </div>
       </div>
 
@@ -228,6 +271,22 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
           </div>
         </form>
       </div>
+
+      <StaffContractorDocumentsSection
+        contractorId={contractor.id}
+        contractorName={contractor.company_name}
+      />
+
+      <UnlistContractorModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        contractorId={contractor.id}
+        companyName={contractor.company_name}
+        currentlyUnlisted={!!contractor.is_unlisted}
+        currentReason={contractor.unlisted_reason}
+        onSuccess={handleListingUpdateSuccess}
+        apiUpdateFn={updateStaffContractorListingStatus}
+      />
     </div>
   );
 }

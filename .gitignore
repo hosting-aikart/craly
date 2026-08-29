@@ -29,3 +29,14 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Test & Auth artifacts
+.auth/
+playwright-report/
+test-results/
+
+# Database backups (contain real user data — password hashes, emails, etc.
+# — see backend/scripts/export_db.ts / db:backup; never commit these)
+backend/*.sql
+craly_backup.sql

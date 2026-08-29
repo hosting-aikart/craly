@@ -216,6 +216,7 @@ export async function listVerificationQueue(req: Request, res: Response, next: N
     const rows = await sql`
       SELECT cp.id, cp.user_id, cp.company_name, cp.phone, cp.city, cp.state,
              cp.years_experience, cp.workforce_size, cp.verification_status, cp.verification_note,
+             cp.is_unlisted, cp.unlisted_reason, cp.unlisted_at,
              cp.created_at, u.email
       FROM contractor_profiles cp
       LEFT JOIN users u ON u.id = cp.user_id

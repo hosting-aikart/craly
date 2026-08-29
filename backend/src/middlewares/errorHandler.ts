@@ -34,7 +34,11 @@ export function errorHandler(
   const isUnexpected = err.statusCode === undefined;
   const clientMessage = isUnexpected ? GENERIC_MESSAGE : (err.message || GENERIC_MESSAGE);
 
-  console.error(`[error] ${statusCode} — ${err.message}`, err.stack);
+  if (isUnexpected || statusCode >= 500) {
+    console.error(`[error] ${statusCode} — ${err.message}`, err.stack);
+  } else {
+    console.error(`[error] ${statusCode} — ${err.message}`);
+  }
 
   res.status(statusCode).json({
     error: {

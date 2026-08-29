@@ -102,3 +102,19 @@ export const getMyDocumentSignedUrl = (documentId: string, intent: 'view' | 'dow
 
 export const deleteMyDocument = (documentId: string) =>
   apiDelete<{ data: { id: string; deleted: boolean } }>(`/contractor-portal/documents/${documentId}`);
+
+export interface VerificationMessageItem {
+  id: string;
+  contractor_id: string;
+  sender_id: string | null;
+  sender_role: 'contractor' | 'staff' | 'admin' | 'ops_head' | 'field_staff';
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export const getMyVerificationMessages = () =>
+  apiGet<{ data: VerificationMessageItem[] }>('/contractor-portal/verification/messages');
+
+export const sendMyVerificationMessage = (message: string) =>
+  apiPost<{ data: VerificationMessageItem }>('/contractor-portal/verification/messages', { message });

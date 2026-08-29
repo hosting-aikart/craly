@@ -64,7 +64,6 @@ export default function WorkspaceHeader({
   const handleLogout = async () => {
     setDropdownOpen(false);
     await logout();
-    router.push('/login');
   };
 
   const getRoleLabel = () => {

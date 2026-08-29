@@ -20,6 +20,7 @@ export default function Hero() {
     <section
       className="hero"
       style={{ backgroundImage: `url(${heroBg})` }}
+      data-navbar-theme="dark"
     >
       <div className={`hero-content ${visible ? 'hero-content--visible' : ''}`}>
         <h1 className="hero-headline">
@@ -31,8 +32,8 @@ export default function Hero() {
         <p className="hero-subtext">{t.hero.subtext}</p>
 
         <div className="hero-cta">
-          <Link href="/contractors" className="hero-cta__btn hero-cta__btn--solid">
-            {t.hero.ctaFind}
+          <Link href="/signup?role=business" className="hero-cta__btn hero-cta__btn--solid">
+            Join as Manufacturer
           </Link>
           <Link href="/signup?role=contractor" className="hero-cta__btn hero-cta__btn--outline">
             {t.hero.ctaJoin}

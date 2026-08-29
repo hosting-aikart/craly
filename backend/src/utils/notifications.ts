@@ -89,6 +89,7 @@ export async function notifyMatchingContractors(requirement: MatchableRequiremen
     JOIN users u ON u.id = cp.user_id
     WHERE u.is_active = true
       AND cp.onboarding_complete = true
+      AND cp.verification_status = 'verified'
       AND ${eligibility}
   `;
 

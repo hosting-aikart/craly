@@ -48,7 +48,7 @@ export default function FAQ() {
   const items = t.faq?.items && t.faq.items.length >= 4 ? t.faq.items : defaultItems;
 
   return (
-    <section className="faq-section" id="faq">
+    <section className="faq-section" id="faq" data-navbar-theme="light">
       <div className="faq-container">
         {/* Header Heading */}
         <div className="faq-header">

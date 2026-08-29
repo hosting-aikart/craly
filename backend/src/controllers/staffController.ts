@@ -46,6 +46,12 @@ const updateContractorSchema = z.object({
   verificationStatus: z.enum(['unverified', 'pending', 'verified']).optional(),
 });
 
+// Schema for unlisting / relisting a contractor
+const updateContractorListingSchema = z.object({
+  isUnlisted: z.boolean(),
+  reason: z.string().optional(),
+});
+
 // Schema for updating engagement status
 const updateEngagementStatusSchema = z.object({
   status: z.enum(['SELECTED', 'CONTACTING', 'IN_DISCUSSION', 'CONFIRMED', 'CLOSED']),
@@ -108,6 +114,7 @@ export async function getContractors(req: Request, res: Response, next: NextFunc
     const q = (req.query.q as string) || '';
     const city = (req.query.city as string) || '';
     const availability = (req.query.availability as string) || '';
+    const listingStatus = (req.query.listingStatus as string) || '';
     const page = parseInt((req.query.page as string) || '1', 10);
     const limit = parseInt((req.query.limit as string) || '20', 10);
     const offset = (page - 1) * limit;
@@ -124,12 +131,16 @@ export async function getContractors(req: Request, res: Response, next: NextFunc
         cp.availability,
         cp.availability_note,
         cp.verification_status,
+        cp.is_unlisted,
+        cp.unlisted_reason,
+        cp.unlisted_at,
         cp.created_at,
         cp.updated_at
       FROM contractor_profiles cp
       WHERE (${q} = '' OR cp.company_name ILIKE ${'%' + q + '%'} OR cp.city ILIKE ${'%' + q + '%'})
         AND (${city} = '' OR cp.city ILIKE ${'%' + city + '%'})
         AND (${availability} = '' OR cp.availability = ${availability})
+        AND (${listingStatus} = '' OR (${listingStatus} = 'unlisted' AND cp.is_unlisted = true) OR (${listingStatus} = 'listed' AND cp.is_unlisted = false))
       ORDER BY cp.created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
@@ -140,6 +151,7 @@ export async function getContractors(req: Request, res: Response, next: NextFunc
       WHERE (${q} = '' OR cp.company_name ILIKE ${'%' + q + '%'} OR cp.city ILIKE ${'%' + q + '%'})
         AND (${city} = '' OR cp.city ILIKE ${'%' + city + '%'})
         AND (${availability} = '' OR cp.availability = ${availability})
+        AND (${listingStatus} = '' OR (${listingStatus} = 'unlisted' AND cp.is_unlisted = true) OR (${listingStatus} = 'listed' AND cp.is_unlisted = false))
     `;
 
     res.json({
@@ -198,6 +210,17 @@ export async function createContractor(req: Request, res: Response, next: NextFu
     // Staff-added contractor must be able to sign in and use the
     // Contractor Portal themselves (apply to opportunities, manage KYC),
     // not just exist as a directory record Staff edits on their behalf.
+    //
+    // verification_status is 'verified' immediately (not 'pending') —
+    // unlike a self-signup contractor, Staff manually entering this
+    // profile IS the review: there's no separate approval step to wait
+    // on, so this contractor is listed and gets full marketplace access
+    // (opportunities, applying) right away. Contrast with
+    // pfContractorController.createPfContractor, which creates a
+    // staff-managed record with no login and deliberately stays
+    // unverified/unlisted until a later explicit verification step —
+    // that path is for field-collected leads that still need vetting,
+    // not for an account Staff is provisioning as already-trusted.
     const contractor = await sql.begin(async (tx) => {
       const [newUser] = await tx`
         INSERT INTO users (email, password_hash, role, is_active)
@@ -208,13 +231,13 @@ export async function createContractor(req: Request, res: Response, next: NextFu
       const [profile] = await tx`
         INSERT INTO contractor_profiles (
           user_id, company_name, phone, description, industry, skills, city, state, workforce_size,
-          years_experience, service_areas, availability, availability_note,
-          verification_status, onboarding_complete, created_by
+          years_experience, service_areas, availability, notes,
+          verification_status, onboarding_complete, last_verified_at, created_by
         )
         VALUES (
-          ${newUser.id}, ${companyName}, ${phone || null}, ${industry || null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
+          ${newUser.id}, ${companyName}, ${phone || null}, ${null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
           ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
-          ${availability || 'AVAILABLE'}, ${notes || null}, 'pending', true, ${req.user!.sub}
+          ${availability || 'AVAILABLE'}, ${notes || null}, 'verified', true, now(), ${req.user!.sub}
         )
         RETURNING id, company_name, city, state, workforce_size, availability, created_at
       `;
@@ -262,6 +285,10 @@ export async function getContractorById(req: Request, res: Response, next: NextF
         cp.service_areas,
         cp.verification_status,
         cp.verification_note,
+        cp.is_unlisted,
+        cp.unlisted_reason,
+        cp.unlisted_at,
+        cp.unlisted_by,
         cp.overall_rating,
         cp.created_at,
         cp.updated_at
@@ -338,6 +365,81 @@ export async function updateContractor(req: Request, res: Response, next: NextFu
     res.json({
       data: updated,
       message: 'Contractor profile updated successfully.',
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/staff/contractors/:id/listing
+ * Staff & Admin endpoint to unlist or relist a contractor profile.
+ */
+export async function updateContractorListingStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const parsed = updateContractorListingSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid listing status data');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const { isUnlisted, reason } = parsed.data;
+
+    const [existing] = await sql`
+      SELECT id, user_id, company_name, is_unlisted, unlisted_reason
+      FROM contractor_profiles
+      WHERE id = ${id}
+    `;
+    if (!existing) {
+      const err: AppError = new Error('Contractor not found');
+      err.statusCode = 404;
+      return next(err);
+    }
+
+    const [updated] = await sql`
+      UPDATE contractor_profiles
+      SET is_unlisted = ${isUnlisted},
+          unlisted_reason = ${isUnlisted ? (reason?.trim() || null) : null},
+          unlisted_at = ${isUnlisted ? sql`NOW()` : null},
+          unlisted_by = ${isUnlisted ? req.user!.sub : null},
+          updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING id, company_name, is_unlisted, unlisted_reason, unlisted_at, unlisted_by, updated_at
+    `;
+
+    // Audit log
+    await logAudit(
+      req.user!.sub,
+      isUnlisted ? 'contractor:unlisted' : 'contractor:relisted',
+      'contractor_profile',
+      id,
+      reason?.trim() || undefined,
+      {
+        previous: { is_unlisted: existing.is_unlisted, unlisted_reason: existing.unlisted_reason },
+        current: { is_unlisted: isUnlisted, unlisted_reason: reason?.trim() || null },
+      }
+    );
+
+    // Notify contractor user if associated
+    if (existing.user_id) {
+      await createNotification({
+        userId: existing.user_id,
+        type: isUnlisted ? 'CONTRACTOR_UNLISTED' : 'CONTRACTOR_RELISTED',
+        title: isUnlisted ? 'Contractor Profile Unlisted' : 'Contractor Profile Relisted',
+        message: isUnlisted
+          ? `Your contractor profile has been unlisted from public discovery.${reason?.trim() ? ` Reason: ${reason.trim()}` : ''}`
+          : 'Your contractor profile has been relisted and is now discoverable on the public directory.',
+        referenceId: id,
+      });
+    }
+
+    res.json({
+      data: updated,
+      message: isUnlisted
+        ? `Contractor "${existing.company_name}" has been unlisted.`
+        : `Contractor "${existing.company_name}" has been relisted and is now public.`,
     });
   } catch (err) {
     next(err);

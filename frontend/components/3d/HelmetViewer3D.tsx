@@ -14,6 +14,15 @@ interface HelmetViewer3DProps {
   interactive?: boolean;
 }
 
+function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl2') || canvas.getContext('webgl')));
+  } catch {
+    return false;
+  }
+}
+
 export default function HelmetViewer3D({
   modelUrl = '/assets/construction_helmet.glb',
   className = '',
@@ -33,6 +42,13 @@ export default function HelmetViewer3D({
     let animationFrameId: number;
     let isDisposed = false;
 
+    if (!isWebGLAvailable()) {
+      console.warn('WebGL is not available in this browser environment.');
+      setError('WebGL unavailable');
+      setLoading(false);
+      return;
+    }
+
     // --- Scene Setup ---
     const scene = new THREE.Scene();
 
@@ -44,12 +60,23 @@ export default function HelmetViewer3D({
     );
     camera.position.set(0, 0.05, 1.85);
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance',
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+      });
+    } catch (err) {
+      console.warn('WebGL context creation failed (Hardware Acceleration disabled in browser):', err);
+      if (!isDisposed) {
+        setError('WebGL unavailable');
+        setLoading(false);
+      }
+      return;
+    }
+
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -314,13 +341,13 @@ export default function HelmetViewer3D({
         }
       });
 
-      renderer.dispose();
+      renderer?.dispose();
     };
   }, [modelUrl, autoRotate, interactive]);
 
   return (
     <div ref={containerRef} className={`helmet-3d-wrapper ${className}`}>
-      {loading && (
+      {loading && !error && (
         <div className="helmet-3d-loading">
           <div className="helmet-3d-spinner" />
           <span>Loading 3D Helmet…</span>
@@ -328,13 +355,15 @@ export default function HelmetViewer3D({
       )}
 
       {error ? (
-        <div className="helmet-3d-error">
-          <p>{error}</p>
+        <div className="helmet-3d-fallback" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img
+            src="/assets/helmet.png"
+            alt="Craly Construction Helmet"
+            style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'drop-shadow(0 20px 30px rgba(0, 0, 0, 0.18))' }}
+          />
         </div>
       ) : (
-        <>
-          <canvas ref={canvasRef} className="helmet-3d-canvas" />
-        </>
+        <canvas ref={canvasRef} className="helmet-3d-canvas" />
       )}
     </div>
   );
