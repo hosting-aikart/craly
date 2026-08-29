@@ -24,6 +24,8 @@ import {
   IconArrowLeft,
   IconCheck,
   IconAlertTriangle,
+  IconBuilding,
+  IconApplications,
 } from '@/components/ui/Icons';
 import './requirement-detail.css';
 
@@ -95,7 +97,7 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="req-detail-page">
-      {/* ── Breadcrumb Back Navigation ──────────────────────────────── */}
+      {/* ── Top-Right Back Navigation ───────────────────────────────── */}
       <div className="req-breadcrumb-bar">
         <Link href="/business/requirements" className="req-back-link">
           <IconArrowLeft size={13} /> Back to Requirements
@@ -108,11 +110,12 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
         </div>
       )}
 
-      {/* ── Hero Banner ──────────────────────────────────────────────── */}
+      {/* ── Hero Banner Card ─────────────────────────────────────────── */}
       <div className="req-detail-hero">
         <div className="req-detail-hero-left">
           <div className="req-detail-badge-row">
             <span className={`req-status-pill req-status-pill--${requirement.status.toLowerCase()}`}>
+              <span className="req-status-dot" />
               {requirement.status.replace('_', ' ')}
             </span>
             <span className="req-id-pill">ID: {requirement.id.slice(0, 8)}</span>
@@ -123,7 +126,7 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
           <div className="req-detail-meta-row">
             {requirement.industry && (
               <span className="req-meta-item">
-                <IconBriefcase size={14} /> {requirement.industry}
+                <IconBuilding size={14} /> {requirement.industry}
               </span>
             )}
             <span className="req-meta-item">
@@ -135,7 +138,7 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
           </div>
         </div>
 
-        {/* Action Controls in Hero */}
+        {/* Lower-Right Action Controls */}
         <div className="req-detail-hero-actions">
           {isDraft && (
             <>
@@ -163,76 +166,85 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
             href={`/business/requirements/${requirement.id}/applications`}
             className="req-hero-btn req-hero-btn--view-apps"
           >
-            <IconUsers size={15} /> View Proposals ({requirement.applications_count}) →
+            <IconApplications size={15} /> View Proposals ({requirement.applications_count || 0}) →
           </Link>
         </div>
       </div>
 
-      {/* ── Key Parameters 4-Grid ────────────────────────────────────── */}
-      <div className="req-params-grid">
-        <div className="req-param-card">
-          <div className="req-param-icon req-param-icon--teal">
-            <IconUsers size={20} />
+      {/* ── Structured Cards Section ─────────────────────────────────── */}
+      <div className="req-cards-container">
+        {/* Card 1: Key Commercial & Operational Parameters */}
+        <div className="req-card">
+          <div className="req-card-header">
+            <div className="req-card-icon-box req-card-icon-box--teal">
+              <IconTarget size={18} />
+            </div>
+            <div>
+              <h3 className="req-card-title">Key Commercial & Deployment Parameters</h3>
+              <p className="req-card-subtitle">Operational requirements for contractor workforce dispatch</p>
+            </div>
           </div>
-          <div className="req-param-info">
-            <span className="req-param-label">Workforce Needed</span>
-            <span className="req-param-val">{requirement.workers_required} Workers</span>
+
+          <div className="req-params-grid">
+            <div className="req-param-tile">
+              <div className="req-param-icon req-param-icon--teal">
+                <IconUsers size={18} />
+              </div>
+              <div className="req-param-info">
+                <span className="req-param-label">Workforce Headcount</span>
+                <strong className="req-param-val">{requirement.workers_required} Workers</strong>
+              </div>
+            </div>
+
+            <div className="req-param-tile">
+              <div className="req-param-icon req-param-icon--blue">
+                <IconMapPin size={18} />
+              </div>
+              <div className="req-param-info">
+                <span className="req-param-label">Location / Hub</span>
+                <span className="req-param-val">{requirement.city ? `${requirement.city}, ${requirement.state || ''}` : requirement.location}</span>
+              </div>
+            </div>
+
+            <div className="req-param-tile">
+              <div className="req-param-icon req-param-icon--amber">
+                <IconClock size={18} />
+              </div>
+              <div className="req-param-info">
+                <span className="req-param-label">Duration</span>
+                <span className="req-param-val">{requirement.duration || 'Flexible'}</span>
+              </div>
+            </div>
+
+            <div className="req-param-tile">
+              <div className="req-param-icon req-param-icon--purple">
+                <IconRupee size={18} />
+              </div>
+              <div className="req-param-info">
+                <span className="req-param-label">Daily Budget Bracket</span>
+                <span className="req-param-val req-param-val--budget">
+                  {requirement.budget_min || requirement.budget_max
+                    ? `₹${Math.round(Number(requirement.budget_min || 0))} - ${Math.round(Number(requirement.budget_max || 0))} / day`
+                    : 'Negotiable'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="req-param-card">
-          <div className="req-param-icon req-param-icon--blue">
-            <IconMapPin size={20} />
-          </div>
-          <div className="req-param-info">
-            <span className="req-param-label">City Hub / Zone</span>
-            <span className="req-param-val">{requirement.city || requirement.location}</span>
-          </div>
-        </div>
-
-        <div className="req-param-card">
-          <div className="req-param-icon req-param-icon--amber">
-            <IconClock size={20} />
-          </div>
-          <div className="req-param-info">
-            <span className="req-param-label">Duration</span>
-            <span className="req-param-val">{requirement.duration || 'Flexible'}</span>
-          </div>
-        </div>
-
-        <div className="req-param-card">
-          <div className="req-param-icon req-param-icon--purple">
-            <IconRupee size={20} />
-          </div>
-          <div className="req-param-info">
-            <span className="req-param-label">Daily Rate Budget</span>
-            <span className="req-param-val">
-              {requirement.budget_min || requirement.budget_max
-                ? `₹${requirement.budget_min || 0} - ₹${requirement.budget_max || 'N/A'}`
-                : 'Negotiable'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Content & Scope Card ─────────────────────────────────────── */}
-      <div className="req-content-card">
-        {/* Description / Scope */}
-        {requirement.description && (
-          <div className="req-content-block">
-            <h3 className="req-block-heading">
-              <IconTarget size={18} /> Detailed Scope & Facility Specifications
-            </h3>
-            <p className="req-desc-text">{requirement.description}</p>
-          </div>
-        )}
-
-        {/* Required Skills */}
+        {/* Card 2: Required Trade Skills */}
         {requirement.required_skills && requirement.required_skills.length > 0 && (
-          <div className="req-content-block">
-            <h3 className="req-block-heading">
-              <IconTools size={18} /> Required Trade Skills & Certifications
-            </h3>
+          <div className="req-card">
+            <div className="req-card-header">
+              <div className="req-card-icon-box req-card-icon-box--green">
+                <IconTools size={18} />
+              </div>
+              <div>
+                <h3 className="req-card-title">Required Trade Skills & Certifications</h3>
+                <p className="req-card-subtitle">Mandatory skillsets expected from candidate tradesmen</p>
+              </div>
+            </div>
+
             <div className="req-skills-wrap">
               {requirement.required_skills.map((skill, idx) => (
                 <span key={idx} className="req-skill-pill">
@@ -243,12 +255,45 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
           </div>
         )}
 
-        {/* Audit Timestamps */}
-        <div className="req-footer-audit">
-          <span>📅 Created On: {new Date(requirement.created_at).toLocaleString()}</span>
+        {/* Card 3: Scope of Work & Facility Specifications */}
+        {requirement.description && (
+          <div className="req-card">
+            <div className="req-card-header">
+              <div className="req-card-icon-box req-card-icon-box--blue">
+                <IconBriefcase size={18} />
+              </div>
+              <div>
+                <h3 className="req-card-title">Scope of Work & Facility Specifications</h3>
+                <p className="req-card-subtitle">Detailed shifts, safety gear requirements, and site guidelines</p>
+              </div>
+            </div>
+
+            <div className="req-desc-text">
+              {requirement.description}
+            </div>
+          </div>
+        )}
+
+        {/* Card 4: Audit & Status Metadata */}
+        <div className="req-card req-card--meta">
+          <div className="req-audit-item">
+            <span className="req-audit-label">Created At</span>
+            <span className="req-audit-val">{new Date(requirement.created_at).toLocaleString()}</span>
+          </div>
+
           {requirement.published_at && (
-            <span>🚀 Published On: {new Date(requirement.published_at).toLocaleString()}</span>
+            <div className="req-audit-item">
+              <span className="req-audit-label">Published At</span>
+              <span className="req-audit-val">{new Date(requirement.published_at).toLocaleString()}</span>
+            </div>
           )}
+
+          <div className="req-audit-item">
+            <span className="req-audit-label">Proposals Received</span>
+            <span className="req-audit-val req-audit-val--teal">
+              {requirement.applications_count || 0} Submitted Applications
+            </span>
+          </div>
         </div>
       </div>
     </div>

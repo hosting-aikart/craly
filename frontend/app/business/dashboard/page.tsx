@@ -60,51 +60,62 @@ export default function BusinessDashboardPage() {
               marginBottom: '28px',
             }}
           >
-            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
-                ACTIVE REQUIREMENTS
-              </span>
-              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>
-                {stats?.activeRequirements ?? 0}
-              </strong>
-              <Link href="/business/requirements" style={{ fontSize: '12px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
-                View Requirements →
-              </Link>
-            </div>
-
-            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
-                APPLICATIONS RECEIVED
-              </span>
-              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>
-                {stats?.applicationsReceived ?? 0}
-              </strong>
-              <Link href="/business/applications" style={{ fontSize: '12px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
-                Review Applications →
-              </Link>
-            </div>
-
-            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
-                SELECTED CONTRACTORS
-              </span>
-              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>
-                {stats?.selectedContractors ?? 0}
-              </strong>
-              <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
-                Craly Staff Coordinated
-              </span>
-            </div>
-
-            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
-                QUICK ACTIONS
-              </span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-                <Link href="/business/requirements/new" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>
-                  + Post New Requirement
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                  ACTIVE REQUIREMENTS
+                </span>
+                <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)', lineHeight: 1.1 }}>
+                  {stats?.activeRequirements ?? 0}
+                </strong>
+              </div>
+              <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
+                <Link href="/business/requirements" className="dashboard-metric-btn">
+                  View Requirements →
                 </Link>
-                <Link href="/business/applications" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              </div>
+            </div>
+
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                  APPLICATIONS RECEIVED
+                </span>
+                <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)', lineHeight: 1.1 }}>
+                  {stats?.applicationsReceived ?? 0}
+                </strong>
+              </div>
+              <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
+                <Link href="/business/applications" className="dashboard-metric-btn">
+                  Review Applications →
+                </Link>
+              </div>
+            </div>
+
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                  SELECTED CONTRACTORS
+                </span>
+                <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)', lineHeight: 1.1 }}>
+                  {stats?.selectedContractors ?? 0}
+                </strong>
+              </div>
+              <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
+                <span className="dashboard-metric-tag">
+                  ● Craly Staff Coordinated
+                </span>
+              </div>
+            </div>
+
+            <div className="dashboard__card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>
+                  QUICK ACTIONS
+                </span>
+              </div>
+              <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
+                <Link href="/business/applications" className="dashboard-metric-btn">
                   <IconSearch size={13} /> Compare Proposals
                 </Link>
               </div>
@@ -126,16 +137,19 @@ export default function BusinessDashboardPage() {
                 subtitle="Click '+ Create Requirement' to publish your first manpower request."
               />
             ) : (
-              <ul className="dashboard__list">
+              <ul className="dashboard__list" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {stats.recentActivity.map((item) => (
                   <li
                     key={item.id}
+                    className="dashboard-activity-item"
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      padding: '14px 0',
-                      borderBottom: '1px solid var(--craly-border)',
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      transition: 'all 0.2s ease',
+                      background: 'transparent',
                     }}
                   >
                     <div>
@@ -146,21 +160,15 @@ export default function BusinessDashboardPage() {
                         Created on {new Date(item.timestamp).toLocaleDateString()}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span
-                        className={`status-badge status-badge--${item.status.toLowerCase()}`}
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          padding: '4px 10px',
-                          borderRadius: '9999px',
-                        }}
+                        className={`dashboard-status-pill dashboard-status-pill--${item.status.toLowerCase()}`}
                       >
-                        {item.status.replace('_', ' ')}
+                        ● {item.status.replace('_', ' ')}
                       </span>
                       <Link
                         href={`/business/requirements/${item.id}`}
-                        style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}
+                        className="dashboard-view-btn"
                       >
                         View →
                       </Link>

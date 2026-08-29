@@ -18,6 +18,13 @@ dns.lookup = function (hostname: any, options: any, callback: any) {
 } as typeof dns.lookup;
 
 try {
+  // Ensure DNS has reliable resolvers if local resolver is unavailable
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch {
+  // Ignore if unsupported
+}
+
+try {
   dns.setDefaultResultOrder('ipv4first');
 } catch {
   // Ignore if unsupported
