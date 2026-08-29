@@ -40,7 +40,7 @@
 
 .why-craly__stage {
   position: relative;
-  width: min(94vw, 1180px);
+  width: min(96vw, 1280px);
   height: clamp(480px, 58vh, 620px);
   margin: 0 auto;
   display: flex;
@@ -55,9 +55,10 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: min(560px, 58%);
-  height: min(460px, 90%);
+  width: min(600px, 58%);
+  height: min(500px, 90%);
   z-index: 5;
+  pointer-events: auto;
 }
 
 /* ---------------- Glass Badges ---------------- */
@@ -76,22 +77,23 @@
   font-weight: 600;
   color: #15803d;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow:
     0 10px 30px rgba(15, 23, 42, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  z-index: 20;
+  z-index: 30;
   transition: transform 0.22s ease, box-shadow 0.22s ease;
   user-select: none;
+  pointer-events: auto;
 }
 
 .why-craly__badge:hover {
   transform: translateY(-3px);
   box-shadow:
-    0 16px 36px rgba(15, 23, 42, 0.12),
+    0 16px 36px rgba(15, 23, 42, 0.14),
     inset 0 1px 0 #ffffff;
 }
 
@@ -105,32 +107,39 @@
 /* ---------------- Positions (% of stage box) ---------------- */
 
 .badge--top-left {
-  left: 16%;
+  left: 17%;
   top: 22%;
 }
 
 .badge--mid-left {
-  left: 12%;
-  top: 56%;
+  left: 8%;
+  top: 58%;
 }
 
 .badge--mid-right {
-  right: 14%;
+  right: 10%;
   top: 24%;
 }
 
 .badge--bottom-right {
-  right: 12%;
-  bottom: 18%;
+  right: 8%;
+  bottom: 20%;
 }
 
 /* ---------------- Responsive ---------------- */
 
+@media (max-width: 1100px) {
+  .badge--top-left { left: 12%; top: 20%; }
+  .badge--mid-right { right: 6%; top: 20%; }
+  .badge--mid-left { left: 5%; top: 60%; }
+  .badge--bottom-right { right: 5%; bottom: 16%; }
+}
+
 @media (max-width: 1024px) {
   .why-craly__badge {
     font-size: 14px;
-    height: 44px;
-    padding: 9px 18px;
+    height: 46px;
+    padding: 10px 18px;
   }
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import React, { useState, type FormEvent } from 'react';
 import { apiPost } from '@/lib/api';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import './ContactSection.css';
@@ -145,66 +145,65 @@ export default function ContactSection() {
           )}
         </div>
 
-        {/* ── Right: Craly process illustration (50%) ─────────────────
-            Manufacturer → Contract Requirement → Craly Matching →
-            Verified Contractor → Successful Engagement. Purely
-            supplementary (the same narrative is covered accessibly by
-            the How It Works section), so it stays aria-hidden. */}
-        <div className="contact-section__visual-col" aria-hidden="true">
-          <div className="contact-flow">
-            <span className="contact-flow__dot" />
-
-            <div className="contact-flow__step contact-flow__step--manufacturer">
-              <span className="contact-flow__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 21V10l6 4v-4l6 4V6l6 4v11H3Z" />
-                  <path d="M7 21v-4M12 21v-4M17 21v-4" />
-                </svg>
-              </span>
-              <span className="contact-flow__label">Manufacturer</span>
+        {/* ── Right: Executive Contact Info & Support Card (50%) ────── */}
+        <div className="contact-section__visual-col">
+          <div className="contact-info-card">
+            <div className="contact-info-card__header">
+              <div className="contact-info-card__badge">
+                <span className="contact-info-card__dot" />
+                <span>Live Support & Sales Inquiry</span>
+              </div>
+              <h3 className="contact-info-card__title">We're here to help your business scale</h3>
+              <p className="contact-info-card__desc">
+                Have a custom requirement, need contractor onboarding assistance, or want a platform demo? Reach out directly to our team.
+              </p>
             </div>
 
-            <div className="contact-flow__step contact-flow__step--requirement">
-              <span className="contact-flow__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="5" y="3" width="14" height="18" rx="2" />
-                  <path d="M9 8h6M9 12h6M9 16h3" />
-                </svg>
-              </span>
-              <span className="contact-flow__label">Contract Requirement</span>
+            <div className="contact-info-card__channels">
+              <div className="contact-channel">
+                <div className="contact-channel__icon contact-channel__icon--email">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="3" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="contact-channel__label">Direct Email</span>
+                  <a href="mailto:support@craly.co" className="contact-channel__value">support@craly.co</a>
+                </div>
+              </div>
+
+              <div className="contact-channel">
+                <div className="contact-channel__icon contact-channel__icon--time">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="contact-channel__label">Response Time</span>
+                  <span className="contact-channel__value">Under 2 Hours</span>
+                </div>
+              </div>
+
+              <div className="contact-channel">
+                <div className="contact-channel__icon contact-channel__icon--location">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="contact-channel__label">Headquarters</span>
+                  <span className="contact-channel__value">India • Nationwide Contractor Coverage</span>
+                </div>
+              </div>
             </div>
 
-            <div className="contact-flow__step contact-flow__step--matching">
-              <span className="contact-flow__icon contact-flow__icon--hero">
-                <span className="contact-flow__icon-ring" />
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z" />
-                  <path d="M9 12l2 2 4-4" />
-                </svg>
-              </span>
-              <span className="contact-flow__label contact-flow__label--hero">Craly Matching</span>
-            </div>
-
-            <div className="contact-flow__step contact-flow__step--contractor">
-              <span className="contact-flow__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 18a7 7 0 0 1 14 0" />
-                  <path d="M9 18v-2" />
-                  <path d="M12 6v2" />
-                  <rect x="2" y="17" width="20" height="3" rx="1" />
-                </svg>
-              </span>
-              <span className="contact-flow__label">Verified Contractor</span>
-            </div>
-
-            <div className="contact-flow__step contact-flow__step--engagement">
-              <span className="contact-flow__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 12l4-3 4 2 3-2 3 1 4-3" />
-                  <path d="M4 12v3.5a1 1 0 0 0 .4.8l3.6 2.7a1.2 1.2 0 0 0 1.6-.1l.4-.4a1.2 1.2 0 0 1 1.7 0l.3.3a1.2 1.2 0 0 0 1.7 0l3.9-3.8" />
-                </svg>
-              </span>
-              <span className="contact-flow__label">Successful Engagement</span>
+            <div className="contact-info-card__trust">
+              <div className="trust-pill">✓ 5,000+ Verified Contractors</div>
+              <div className="trust-pill">✓ Enterprise Security & NDA</div>
+              <div className="trust-pill">✓ Dedicated Support Manager</div>
             </div>
           </div>
         </div>

@@ -42,7 +42,7 @@ export default function HelmetViewer3D({
       0.1,
       100
     );
-    camera.position.set(0, 0.04, 1.85);
+    camera.position.set(0, 0.05, 1.85);
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -84,9 +84,9 @@ export default function HelmetViewer3D({
     const modelGroup = new THREE.Group();
     scene.add(modelGroup);
 
-    // Initial slight angle for aesthetic presentation
-    modelGroup.rotation.y = THREE.MathUtils.degToRad(-30);
-    modelGroup.rotation.x = THREE.MathUtils.degToRad(14);
+    // Upright presentation angle for clean 360 rotation without steep top-down tilt
+    modelGroup.rotation.y = THREE.MathUtils.degToRad(-25);
+    modelGroup.rotation.x = THREE.MathUtils.degToRad(5);
 
     // --- Interaction & Physics State ---
     let isDragging = false;
@@ -116,9 +116,9 @@ export default function HelmetViewer3D({
         root.position.y = -center.y;
         root.position.z = -center.z;
 
-        // Scale to fit prominently with no clipping
+        // Scale to fit prominently with no clipping at any rotation angle
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 1.95 / (maxDim || 1);
+        const scale = 1.75 / (maxDim || 1);
         root.scale.setScalar(scale);
 
         root.traverse((node) => {
@@ -207,8 +207,8 @@ export default function HelmetViewer3D({
         const normY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
 
         // Gentle, relaxed hover parallax
-        mouseTargetX = normX * 0.18;
-        mouseTargetY = normY * 0.14;
+        mouseTargetX = normX * 0.14;
+        mouseTargetY = normY * 0.06;
       } else {
         // Outside the region -> smoothly return mouse tilt offset to neutral 0
         mouseTargetX = 0;
@@ -222,10 +222,10 @@ export default function HelmetViewer3D({
 
         // Slower, more controlled drag responsiveness
         targetRotationY += deltaX * 0.0045;
-        targetRotationX += deltaY * 0.0045;
+        targetRotationX += deltaY * 0.003;
 
-        // Clamp vertical pitch
-        targetRotationX = Math.max(-0.65, Math.min(0.65, targetRotationX));
+        // Clamp vertical pitch to keep helmet upright and prevent bottom clipping
+        targetRotationX = Math.max(-0.25, Math.min(0.25, targetRotationX));
 
         previousPointer = { x: e.clientX, y: e.clientY };
       }
