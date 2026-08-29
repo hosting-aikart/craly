@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { LANGUAGES } from '@/lib/i18n/translations';
 import { useAuth } from '@/lib/auth/useAuth';
+import ContactModal from './ContactModal';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -14,6 +15,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
@@ -40,9 +42,10 @@ export default function Navbar() {
     return null;
   }
 
-  // Trimmed to the links people actually use — the logo already goes home,
-  // and "Why Craly" duplicated ground the homepage hero already covers.
-  const navLinks: { href: string; label: string }[] = [];
+  const navLinks = [
+    { href: '/#faq', label: 'FAQ' },
+    { href: '#contact', label: 'Contact Us', isContact: true },
+  ];
 
   const currentLangObj = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0];
 
@@ -52,31 +55,47 @@ export default function Navbar() {
   };
 
   return (
-    <header className={`craly-nav ${scrolled ? 'craly-nav--scrolled' : ''} ${menuOpen ? 'craly-nav--menu-open' : ''}`}>
-      <div className="craly-nav__container">
-        
-        {/* ── Brand Logo ── */}
-        <Link href="/" className="craly-nav__brand" onClick={closeAll}>
-          <img src="/assets/craly-logo.png" alt="Craly" className="craly-nav__logo-wordmark" />
-        </Link>
+    <>
+      <header className={`craly-nav ${scrolled ? 'craly-nav--scrolled' : ''} ${menuOpen ? 'craly-nav--menu-open' : ''}`}>
+        <div className="craly-nav__container">
+          
+          {/* ── Brand Logo ── */}
+          <Link href="/" className="craly-nav__brand" onClick={closeAll}>
+            <img src="/assets/craly-logo.png" alt="Craly" className="craly-nav__logo-wordmark" />
+          </Link>
 
-        {/* ── Desktop Center Navigation ── */}
-        {navLinks.length > 0 && (
+          {/* ── Desktop Center Navigation ── */}
           <nav className="craly-nav__menu" aria-label="Main Navigation">
             {navLinks.map((link) => {
+              if (link.isContact) {
+                return (
+                  <button
+                    key={link.label}
+                    type="button"
+                    className="craly-nav__link"
+                    onClick={() => {
+                      closeAll();
+                      setIsContactOpen(true);
+                    }}
+                  >
+                    {link.label}
+                  </button>
+                );
+              }
+
               const isActive = !link.href.includes('#') && pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={`craly-nav__link ${isActive ? 'craly-nav__link--active' : ''}`}
+                  onClick={closeAll}
                 >
                   {link.label}
                 </Link>
               );
             })}
           </nav>
-        )}
 
         {/* ── Desktop Right Controls ── */}
         <div className="craly-nav__actions">
@@ -178,9 +197,25 @@ export default function Navbar() {
             </div>
 
             {/* Navigation Links */}
-            {navLinks.length > 0 && (
-              <div className="craly-nav__mobile-links">
-                {navLinks.map((link) => (
+            <div className="craly-nav__mobile-links">
+              {navLinks.map((link) => {
+                if (link.isContact) {
+                  return (
+                    <button
+                      key={link.label}
+                      type="button"
+                      className="craly-nav__mobile-link"
+                      style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
+                      onClick={() => {
+                        closeAll();
+                        setIsContactOpen(true);
+                      }}
+                    >
+                      {link.label}
+                    </button>
+                  );
+                }
+                return (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -189,9 +224,9 @@ export default function Navbar() {
                   >
                     {link.label}
                   </Link>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
 
             {/* Mobile Auth CTAs */}
             <div className="craly-nav__mobile-auth">
@@ -219,5 +254,8 @@ export default function Navbar() {
         </div>
       )}
     </header>
+
+    <ContactModal open={isContactOpen} onClose={() => setIsContactOpen(false)} />
+  </>
   );
 }
