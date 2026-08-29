@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Craly Floating Glassmorphism Pill Navbar (Aikart Style)
+   Craly Premium Luminous Glass Floating Pill Navbar (Aikart Style)
    ========================================================================== */
 
 .craly-nav {
@@ -10,22 +10,27 @@
   width: calc(100% - 48px);
   max-width: 1180px;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.48);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.32);
   border-radius: 9999px;
-  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .craly-nav--scrolled {
   top: 14px;
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(36px) saturate(200%);
   -webkit-backdrop-filter: blur(36px) saturate(200%);
   border-color: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 20px 48px -8px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 20px 48px -8px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .craly-nav__container {
@@ -49,10 +54,16 @@
   flex-shrink: 0;
 }
 
-.craly-nav__logo-wordmark {
+.craly-nav .craly-nav__logo-wordmark {
   height: 44px;
   width: auto;
   display: block;
+  filter: brightness(0) invert(1);
+  transition: filter 0.3s ease;
+}
+
+.craly-nav--scrolled .craly-nav__logo-wordmark {
+  filter: none;
 }
 
 /* ---------------- Desktop Navigation Links (Centered) ---------------- */
@@ -66,29 +77,36 @@
   gap: 24px;
 }
 
-.craly-nav__link {
+.craly-nav .craly-nav__link {
   font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
   font-size: 14.5px;
   font-weight: 500;
-  color: #1e293b;
+  color: rgba(255, 255, 255, 0.92);
   text-decoration: none;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 20px;
   transition: all 0.2s ease;
   white-space: nowrap;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-.craly-nav__link:hover {
-  color: #0d9488;
-  background: rgba(255, 255, 255, 0.45);
+.craly-nav .craly-nav__link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
-.craly-nav__link--active {
+.craly-nav--scrolled .craly-nav__link {
+  color: #1e293b;
+  text-shadow: none;
+}
+
+.craly-nav--scrolled .craly-nav__link:hover {
   color: #0d9488;
-  font-weight: 600;
+  background: rgba(13, 148, 136, 0.08);
 }
 
 /* ---------------- Right Controls ---------------- */
@@ -106,33 +124,49 @@
   position: relative;
 }
 
-.craly-nav__lang-trigger {
+.craly-nav .craly-nav__lang-trigger {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 6px 14px;
   border-radius: 9999px;
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 500;
-  color: #334155;
+  color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
-.craly-nav__lang-trigger:hover,
-.craly-nav__lang-trigger--active {
+.craly-nav--scrolled .craly-nav__lang-trigger {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(226, 232, 240, 0.9);
+  color: #334155;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.craly-nav .craly-nav__lang-trigger:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+}
+
+.craly-nav--scrolled .craly-nav__lang-trigger:hover {
   background: #ffffff;
   color: #0f172a;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 .craly-nav__lang-caret {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.8);
   transition: transform 0.2s ease;
+}
+
+.craly-nav--scrolled .craly-nav__lang-caret {
+  color: #94a3b8;
 }
 
 .craly-nav__lang-caret--up {
@@ -141,13 +175,15 @@
 
 .craly-nav__lang-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   right: 0;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
   padding: 6px;
-  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.2);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -172,7 +208,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: none;
   border: none;
   font-family: var(--font-body, sans-serif);
@@ -195,16 +231,12 @@
   font-weight: 600;
 }
 
-.craly-nav__divider {
-  display: none;
-}
-
 /* Auth Buttons */
 
 .craly-nav__auth-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .craly-nav__btn {
@@ -219,39 +251,50 @@
   white-space: nowrap;
 }
 
-.craly-nav__btn--ghost {
-  color: #1e293b;
-  padding: 8px 16px;
+.craly-nav .craly-nav__btn--ghost {
+  color: #ffffff;
+  padding: 8px 18px;
   border-radius: 9999px;
   background: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-.craly-nav__btn--ghost:hover {
+.craly-nav .craly-nav__btn--ghost:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.craly-nav--scrolled .craly-nav__btn--ghost {
+  color: #1e293b;
+  text-shadow: none;
+}
+
+.craly-nav--scrolled .craly-nav__btn--ghost:hover {
   color: #0d9488;
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(13, 148, 136, 0.08);
 }
 
-/* White Pill Sign Up Button (Aikart style) */
-.craly-nav__btn--primary {
+/* White Sign Up Pill Button (Aikart style) */
+.craly-nav .craly-nav__btn--primary {
   background: #ffffff;
   color: #0d9488;
   border-radius: 9999px;
   padding: 9px 24px;
   font-weight: 600;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.9);
 }
 
-.craly-nav__btn--primary:hover {
+.craly-nav .craly-nav__btn--primary:hover {
   background: #ffffff;
   color: #0b6c64;
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  transform: translateY(-1.5px) scale(1.02);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
 }
 
 /* Mobile Hamburger Toggle */
 
-.craly-nav__toggle {
+.craly-nav .craly-nav__toggle {
   display: none;
   flex-direction: column;
   justify-content: center;
@@ -259,19 +302,28 @@
   width: 40px;
   height: 40px;
   padding: 0;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
   cursor: pointer;
   gap: 5px;
 }
 
-.craly-nav__toggle-bar {
+.craly-nav--scrolled .craly-nav__toggle {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+.craly-nav .craly-nav__toggle-bar {
   width: 18px;
   height: 2px;
-  background-color: #0f172a;
+  background-color: #ffffff;
   border-radius: 2px;
   transition: all 0.25s ease;
+}
+
+.craly-nav--scrolled .craly-nav__toggle-bar {
+  background-color: #0f172a;
 }
 
 .craly-nav__toggle--active .craly-nav__toggle-bar:nth-child(1) {
@@ -290,16 +342,16 @@
 
 .craly-nav__mobile-drawer {
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% + 14px);
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 24px;
   padding: 24px;
-  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.22);
   animation: navDrawerSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -402,7 +454,7 @@
     display: none;
   }
 
-  .craly-nav__toggle {
+  .craly-nav .craly-nav__toggle {
     display: flex;
   }
 
