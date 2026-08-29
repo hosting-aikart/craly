@@ -4,9 +4,11 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import { apiGet } from '@/lib/api';
+import { updateAdminContractorListingStatus } from '@/lib/api/staff';
 import SearchBar from '@/components/SearchBar';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
+import UnlistContractorModal from '@/components/staff/UnlistContractorModal';
 import {
   IconBuilding,
   IconMapPin,
@@ -25,6 +27,9 @@ interface AdminContractorItem {
   state: string | null;
   verification_status: string;
   verification_note: string | null;
+  is_unlisted?: boolean;
+  unlisted_reason?: string | null;
+  unlisted_at?: string | null;
   created_at: string;
   email: string;
 }
@@ -42,6 +47,10 @@ export default function AdminContractorsPage() {
     opacity: 0,
   });
   const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  // Unlist modal state
+  const [selectedContractor, setSelectedContractor] = useState<AdminContractorItem | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const updateIndicator = () => {
@@ -72,6 +81,27 @@ export default function AdminContractorsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleOpenUnlistModal = (contractor: AdminContractorItem) => {
+    setSelectedContractor(contractor);
+    setModalOpen(true);
+  };
+
+  const handleListingUpdateSuccess = (isUnlisted: boolean, reason?: string) => {
+    if (!selectedContractor) return;
+    setContractors((prev) =>
+      prev.map((item) =>
+        item.id === selectedContractor.id
+          ? {
+              ...item,
+              is_unlisted: isUnlisted,
+              unlisted_reason: isUnlisted ? (reason || null) : null,
+              unlisted_at: isUnlisted ? new Date().toISOString() : null,
+            }
+          : item,
+      ),
+    );
+  };
+
   const filtered = useMemo(() => {
     return contractors.filter((c) => {
       // Tab filter
@@ -85,7 +115,7 @@ export default function AdminContractorsPage() {
       const q = query.toLowerCase();
       return (
         c.company_name.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
         (c.city && c.city.toLowerCase().includes(q))
       );
     });
@@ -118,7 +148,7 @@ export default function AdminContractorsPage() {
     <div className="admin-contractors-page">
       <WorkspacePageHeader
         title="Contractor Operations"
-        subtitle="Monitor contractor listings, workforce capacities, and verification compliance."
+        subtitle="Monitor contractor listings, directory visibility, workforce capacities, and verification compliance."
       />
 
       {/* Toolbar: Search & Status Filter Tabs */}
@@ -182,11 +212,12 @@ export default function AdminContractorsPage() {
         <div className="admin-contractors-table-card">
           <table className="admin-contractors-table">
             <colgroup>
-              <col style={{ width: '28%' }} />
-              <col style={{ width: '25%' }} />
-              <col style={{ width: '18%' }} />
-              <col style={{ width: '15%' }} />
+              <col style={{ width: '24%' }} />
+              <col style={{ width: '22%' }} />
+              <col style={{ width: '16%' }} />
               <col style={{ width: '14%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '12%' }} />
             </colgroup>
             <thead>
               <tr>
@@ -194,6 +225,7 @@ export default function AdminContractorsPage() {
                 <th>Contact Email</th>
                 <th>Location</th>
                 <th>Verification</th>
+                <th>Directory</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
@@ -209,7 +241,7 @@ export default function AdminContractorsPage() {
                     </div>
                   </td>
                   <td>
-                    <span className="contractor-email-text">{c.email}</span>
+                    <span className="contractor-email-text">{c.email || '—'}</span>
                   </td>
                   <td>
                     <span className="contractor-location-text">
@@ -218,16 +250,52 @@ export default function AdminContractorsPage() {
                     </span>
                   </td>
                   <td>{getStatusBadge(c.verification_status)}</td>
+                  <td>
+                    {c.is_unlisted ? (
+                      <span
+                        className="admin-status-pill admin-status-pill--unlisted"
+                        title={c.unlisted_reason ? `Reason: ${c.unlisted_reason}` : 'Hidden from public directory'}
+                      >
+                        🚫 Unlisted
+                      </span>
+                    ) : (
+                      <span className="admin-status-pill admin-status-pill--listed">
+                        🌐 Listed
+                      </span>
+                    )}
+                  </td>
                   <td style={{ textAlign: 'right' }}>
-                    <Link href={`/admin/verification/${c.id}`} className="admin-review-btn">
-                      Review <IconArrowRight size={12} />
-                    </Link>
+                    <div className="admin-actions-cell">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenUnlistModal(c)}
+                        className={`admin-unlist-btn ${c.is_unlisted ? 'admin-unlist-btn--success' : 'admin-unlist-btn--danger'}`}
+                      >
+                        {c.is_unlisted ? 'Relist' : 'Unlist'}
+                      </button>
+                      <Link href={`/admin/verification/${c.id}`} className="admin-review-btn">
+                        Review <IconArrowRight size={12} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {selectedContractor && (
+        <UnlistContractorModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          contractorId={selectedContractor.id}
+          companyName={selectedContractor.company_name}
+          currentlyUnlisted={!!selectedContractor.is_unlisted}
+          currentReason={selectedContractor.unlisted_reason}
+          onSuccess={handleListingUpdateSuccess}
+          apiUpdateFn={updateAdminContractorListingStatus}
+        />
       )}
     </div>
   );
