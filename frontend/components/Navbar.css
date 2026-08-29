@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Craly 3D Water Drop Glassmorphism Floating Pill Navbar
+   Craly Fixed Luminous Glass Floating Pill Navbar (Consistent Always)
    ========================================================================== */
 
 .craly-nav {
@@ -10,72 +10,45 @@
   width: calc(100% - 40px);
   max-width: 1180px;
   z-index: 1000;
-  background: linear-gradient(
-    135deg,
-    rgba(15, 23, 42, 0.65) 0%,
-    rgba(15, 23, 42, 0.52) 50%,
-    rgba(2, 6, 23, 0.72) 100%
-  );
-  backdrop-filter: blur(36px) saturate(220%) contrast(110%);
-  -webkit-backdrop-filter: blur(36px) saturate(220%) contrast(110%);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 9999px;
   box-shadow: 
-    0 18px 40px rgba(0, 0, 0, 0.45),
-    0 6px 14px rgba(0, 0, 0, 0.25),
-    inset 2px 3px 6px rgba(255, 255, 255, 0.45),
-    inset -2px -3px 6px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.5);
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    0 20px 48px -10px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s ease;
   overflow: hidden;
-}
-
-/* Water Droplet Top Lens Gloss Sheen */
-.craly-nav::before {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 24px;
-  right: 24px;
-  height: 45%;
-  border-radius: 9999px 9999px 60px 60px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.25) 0%,
-    rgba(255, 255, 255, 0.03) 80%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Scrolled Water Drop Black Glass Shading */
-.craly-nav--scrolled {
-  top: 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(15, 23, 42, 0.78) 0%,
-    rgba(15, 23, 42, 0.70) 50%,
-    rgba(2, 6, 23, 0.85) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow: 
-    0 22px 50px rgba(0, 0, 0, 0.55),
-    0 8px 18px rgba(0, 0, 0, 0.3),
-    inset 2px 4px 8px rgba(255, 255, 255, 0.5),
-    inset -2px -4px 8px rgba(0, 0, 0, 0.6);
 }
 
 .craly-nav__container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 0 16px 0 24px;
-  height: 64px;
+  padding: 0 14px 0 24px;
+  height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   position: relative;
+}
+
+/* Watery sheen top highlight */
+.craly-nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 50%;
+  border-radius: 9999px 9999px 0 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
 }
 
 /* ---------------- Brand Logo ---------------- */
@@ -90,11 +63,11 @@
 }
 
 .craly-nav .craly-nav__logo-wordmark {
-  height: 52px;
+  height: 36px;
   width: auto;
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  filter: none !important;
 }
 
 /* ---------------- Desktop Navigation Links (Centered) ---------------- */
@@ -113,7 +86,7 @@
   font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
   font-size: 14.5px;
   font-weight: 600;
-  color: #ffffff;
+  color: #ffffff !important;
   text-decoration: none;
   padding: 7px 16px;
   border-radius: 20px;
@@ -126,10 +99,8 @@
 }
 
 .craly-nav .craly-nav__link:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.22);
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.18);
 }
 
 /* ---------------- Right Controls ---------------- */
@@ -143,7 +114,7 @@
   z-index: 2;
 }
 
-/* Language Selector Dropdown (Water Droplet Pill) */
+/* Language Selector Dropdown */
 
 .craly-nav__lang-wrapper {
   position: relative;
@@ -154,30 +125,27 @@
   align-items: center;
   gap: 6px;
   background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 6px 14px;
   border-radius: 9999px;
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
+  color: #ffffff !important;
   cursor: pointer;
   backdrop-filter: blur(12px);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 1px 1.5px 3px rgba(255, 255, 255, 0.7),
-    inset -1px -1.5px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   transition: all 0.2s ease;
 }
 
 .craly-nav .craly-nav__lang-trigger:hover {
   background: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .craly-nav__lang-caret {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.85);
   transition: transform 0.2s ease;
 }
 
@@ -192,7 +160,7 @@
   background: rgba(15, 23, 42, 0.92);
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 18px;
   padding: 6px;
   box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.45);
@@ -264,7 +232,7 @@
 }
 
 .craly-nav .craly-nav__btn--ghost {
-  color: #ffffff;
+  color: #ffffff !important;
   padding: 8px 18px;
   border-radius: 9999px;
   background: transparent;
@@ -272,28 +240,26 @@
 }
 
 .craly-nav .craly-nav__btn--ghost:hover {
-  color: #ffffff;
+  color: #ffffff !important;
   background: rgba(255, 255, 255, 0.18);
 }
 
-/* Sign Up Button (Crisp Water Droplet Pill) */
+/* White Sign Up Pill Button (Aikart style) */
 .craly-nav .craly-nav__btn--primary {
-  background: #ffffff;
-  color: #0d9488;
+  background: #ffffff !important;
+  color: #0d9488 !important;
   border-radius: 9999px;
   padding: 9px 24px;
   font-weight: 700;
-  box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.25),
-    inset 1px 1.5px 2px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
   border: 1px solid rgba(255, 255, 255, 0.95);
 }
 
 .craly-nav .craly-nav__btn--primary:hover {
-  background: #ffffff;
-  color: #0b6c64;
+  background: #ffffff !important;
+  color: #0b6c64 !important;
   transform: translateY(-1.5px) scale(1.03);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
 }
 
 /* Mobile Hamburger Toggle */
@@ -306,8 +272,8 @@
   width: 40px;
   height: 40px;
   padding: 0;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
   cursor: pointer;
   gap: 5px;
@@ -343,7 +309,7 @@
   background: rgba(15, 23, 42, 0.94);
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 24px;
   padding: 24px;
   box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.45);
