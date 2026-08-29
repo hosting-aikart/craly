@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Craly Smoked Black Glassmorphism Floating Pill Navbar
+   Craly 3D Water Drop Glassmorphism Floating Pill Navbar
    ========================================================================== */
 
 .craly-nav {
@@ -10,29 +10,60 @@
   width: calc(100% - 40px);
   max-width: 1180px;
   z-index: 1000;
-  background: rgba(15, 23, 42, 0.48);
-  backdrop-filter: blur(32px) saturate(200%) contrast(108%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%) contrast(108%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.06) 45%,
+    rgba(15, 23, 42, 0.38) 100%
+  );
+  backdrop-filter: blur(36px) saturate(220%) contrast(110%);
+  -webkit-backdrop-filter: blur(36px) saturate(220%) contrast(110%);
+  border: 1px solid rgba(255, 255, 255, 0.48);
   border-radius: 9999px;
   box-shadow: 
-    0 20px 48px -10px rgba(0, 0, 0, 0.42),
-    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.35),
-    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.2);
+    0 18px 40px rgba(0, 0, 0, 0.28),
+    0 6px 14px rgba(0, 0, 0, 0.18),
+    inset 2px 3px 6px rgba(255, 255, 255, 0.85),
+    inset -2px -3px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
-/* Scrolled State — Smoked Dark Glass Tint for White Backgrounds */
+/* Water Droplet Top Lens Gloss Sheen */
+.craly-nav::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 24px;
+  right: 24px;
+  height: 45%;
+  border-radius: 9999px 9999px 60px 60px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0.05) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Scrolled Water Drop Shading */
 .craly-nav--scrolled {
   top: 12px;
-  background: rgba(15, 23, 42, 0.68);
-  backdrop-filter: blur(36px) saturate(200%);
-  -webkit-backdrop-filter: blur(36px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(15, 23, 42, 0.42) 50%,
+    rgba(15, 23, 42, 0.62) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow: 
-    0 20px 48px -8px rgba(0, 0, 0, 0.5),
-    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.45);
+    0 22px 50px rgba(0, 0, 0, 0.35),
+    0 8px 18px rgba(0, 0, 0, 0.2),
+    inset 2px 4px 8px rgba(255, 255, 255, 0.9),
+    inset -2px -4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .craly-nav__container {
@@ -45,23 +76,6 @@
   justify-content: space-between;
   gap: 20px;
   position: relative;
-}
-
-/* Watery sheen top highlight */
-.craly-nav::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20px;
-  right: 20px;
-  height: 50%;
-  border-radius: 9999px 9999px 0 0;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  pointer-events: none;
 }
 
 /* ---------------- Brand Logo ---------------- */
@@ -113,8 +127,9 @@
 
 .craly-nav .craly-nav__link:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 /* ---------------- Right Controls ---------------- */
@@ -128,7 +143,7 @@
   z-index: 2;
 }
 
-/* Language Selector Dropdown */
+/* Language Selector Dropdown (Water Droplet Pill) */
 
 .craly-nav__lang-wrapper {
   position: relative;
@@ -138,8 +153,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   padding: 6px 14px;
   border-radius: 9999px;
   font-family: var(--font-body, sans-serif);
@@ -148,13 +163,16 @@
   color: #ffffff;
   cursor: pointer;
   backdrop-filter: blur(12px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 1px 1.5px 3px rgba(255, 255, 255, 0.7),
+    inset -1px -1.5px 3px rgba(0, 0, 0, 0.2);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   transition: all 0.2s ease;
 }
 
 .craly-nav .craly-nav__lang-trigger:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.3);
   color: #ffffff;
 }
 
@@ -258,14 +276,16 @@
   background: rgba(255, 255, 255, 0.18);
 }
 
-/* Sign Up Button (Crisp White Pill) */
+/* Sign Up Button (Crisp Water Droplet Pill) */
 .craly-nav .craly-nav__btn--primary {
   background: #ffffff;
   color: #0d9488;
   border-radius: 9999px;
   padding: 9px 24px;
   font-weight: 700;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.25),
+    inset 1px 1.5px 2px rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.95);
 }
 
