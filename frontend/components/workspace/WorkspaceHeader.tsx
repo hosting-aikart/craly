@@ -14,7 +14,7 @@ import './WorkspaceHeader.css';
 interface WorkspaceHeaderProps {
   title?: string;
   subtitle?: string;
-  userRole: 'business' | 'contractor' | 'contractor-portal' | 'staff';
+  userRole: 'business' | 'contractor' | 'contractor-portal' | 'staff' | 'admin';
   companyName: string;
   onMobileMenuToggle?: () => void;
   action?: React.ReactNode;
@@ -68,9 +68,11 @@ export default function WorkspaceHeader({
   };
 
   const getRoleLabel = () => {
+    if (userRole === 'admin') return 'System Administrator';
+    if (userRole === 'staff') return 'Internal Staff';
+    if (userRole === 'contractor-portal' || userRole === 'contractor') return 'Contractor Account';
     if (userRole === 'business') return 'Manufacturer Account';
-    if (userRole === 'contractor-portal') return 'Contractor Account';
-    return 'Internal Staff';
+    return 'Administrator';
   };
 
   return (

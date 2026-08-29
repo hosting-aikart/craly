@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import { apiGet } from '@/lib/api';
@@ -8,6 +8,14 @@ import SearchBar from '@/components/SearchBar';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
 import { formatDate } from '@/lib/util/date';
+import {
+  IconUsers,
+  IconBuilding,
+  IconShield,
+  IconArrowRight,
+  IconSearch,
+} from '@/components/ui/Icons';
+import './admin-users.css';
 
 interface PlatformUser {
   id: string;
@@ -25,6 +33,13 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 4,
+    width: 0,
+    opacity: 0,
+  });
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const loadUsers = () => {
     setLoading(true);
@@ -45,72 +60,154 @@ export default function AdminUsersPage() {
     loadUsers();
   }, [roleFilter]);
 
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeKey = roleFilter || 'ALL';
+      const activeEl = tabRefs.current[activeKey];
+      if (activeEl) {
+        setIndicatorStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.offsetWidth,
+          opacity: 1,
+        });
+      }
+    };
+
+    updateIndicator();
+    const timeout = setTimeout(updateIndicator, 50);
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [roleFilter, users]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     loadUsers();
   };
 
+  const getRoleBadge = (role: string) => {
+    if (role === 'admin') {
+      return <span className="admin-role-badge admin-role-badge--admin">Admin</span>;
+    }
+    if (role === 'contractor') {
+      return <span className="admin-role-badge admin-role-badge--contractor">Contractor</span>;
+    }
+    return <span className="admin-role-badge admin-role-badge--business">Manufacturer</span>;
+  };
+
   return (
-    <>
+    <div className="admin-users-page">
       <WorkspacePageHeader
         title="User Management"
-        subtitle={`Search and monitor all registered accounts (${total} total users).`}
+        subtitle={`Search and monitor all registered accounts (${total} platform users).`}
       />
-      {/* Search & Filter Header */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <form onSubmit={handleSearchSubmit} style={{ flex: 1, minWidth: '280px', display: 'flex', gap: '8px' }}>
-          <SearchBar value={query} onChange={setQuery} placeholder="Search user by email or company name..." />
-          <button type="submit" className="btn btn--primary">Search</button>
+
+      {/* Search & Sliding Role Tabs Toolbar */}
+      <div className="admin-users-toolbar">
+        <form onSubmit={handleSearchSubmit} className="admin-users-search-form">
+          <SearchBar value={query} onChange={setQuery} placeholder="Search by email or company name..." />
+          <button type="submit" className="admin-search-btn">
+            Search
+          </button>
         </form>
 
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--craly-border)', fontSize: '13.5px', background: 'var(--craly-white)' }}
-        >
-          <option value="">All Roles</option>
-          <option value="business">Business</option>
-          <option value="contractor">Contractor</option>
-          <option value="admin">Admin</option>
-        </select>
+        <div className="admin-users-tabs">
+          <div
+            className="admin-users-sliding-indicator"
+            style={{
+              transform: `translateX(${indicatorStyle.left}px)`,
+              width: `${indicatorStyle.width}px`,
+              opacity: indicatorStyle.opacity,
+            }}
+          />
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['ALL'] = el; }}
+            className={`admin-user-tab-btn ${roleFilter === '' ? 'active' : ''}`}
+            onClick={() => setRoleFilter('')}
+          >
+            All Roles
+          </button>
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['business'] = el; }}
+            className={`admin-user-tab-btn ${roleFilter === 'business' ? 'active' : ''}`}
+            onClick={() => setRoleFilter('business')}
+          >
+            Manufacturers
+          </button>
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['contractor'] = el; }}
+            className={`admin-user-tab-btn ${roleFilter === 'contractor' ? 'active' : ''}`}
+            onClick={() => setRoleFilter('contractor')}
+          >
+            Contractors
+          </button>
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['admin'] = el; }}
+            className={`admin-user-tab-btn ${roleFilter === 'admin' ? 'active' : ''}`}
+            onClick={() => setRoleFilter('admin')}
+          >
+            Admins
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <LoadingState label="Loading users…" />
       ) : users.length === 0 ? (
-        <EmptyState title="No users found" subtitle="No registered accounts match your search filters." />
+        <EmptyState
+          icon={<IconUsers size={32} />}
+          title="No users found"
+          subtitle="No registered accounts match your search query or role filter."
+        />
       ) : (
-        <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '16px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px' }}>
+        <div className="admin-users-table-card">
+          <table className="admin-users-table">
+            <colgroup>
+              <col style={{ width: '28%' }} />
+              <col style={{ width: '16%' }} />
+              <col style={{ width: '26%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '15%' }} />
+            </colgroup>
             <thead>
-              <tr style={{ background: 'var(--craly-off-white)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px', color: 'var(--craly-muted)', textAlign: 'left' }}>
-                <th style={{ padding: '12px 16px' }}>User Email</th>
-                <th style={{ padding: '12px 16px' }}>Role</th>
-                <th style={{ padding: '12px 16px' }}>Company Name</th>
-                <th style={{ padding: '12px 16px' }}>Joined Date</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</th>
+              <tr>
+                <th>User Email</th>
+                <th>Role</th>
+                <th>Company Name</th>
+                <th>Joined Date</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--craly-border)' }}>
-                  <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--craly-navy)' }}>{u.email}</td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <span style={{
-                      fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase',
-                      background: u.role === 'admin' ? '#ffe4e6' : u.role === 'contractor' ? 'var(--craly-mint)' : '#e0f2fe',
-                      color: u.role === 'admin' ? '#9f1239' : u.role === 'contractor' ? 'var(--craly-teal-dark)' : '#0369a1'
-                    }}>
-                      {u.role}
+                <tr key={u.id}>
+                  <td>
+                    <div className="user-email-cell">
+                      <div className="user-avatar">
+                        {u.email.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="user-email-text">{u.email}</span>
+                    </div>
+                  </td>
+                  <td>{getRoleBadge(u.role)}</td>
+                  <td>
+                    <span className="user-company-text">
+                      {u.business_company || u.contractor_company || '—'}
                     </span>
                   </td>
-                  <td style={{ padding: '14px 16px', color: 'var(--craly-text)' }}>
-                    {u.business_company || u.contractor_company || '—'}
+                  <td>
+                    <span className="user-date-text">{formatDate(u.created_at)}</span>
                   </td>
-                  <td style={{ padding: '14px 16px', color: 'var(--craly-muted)' }}>{formatDate(u.created_at)}</td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Link href={`/admin/users/${u.id}`} className="btn btn--ghost btn--sm">
-                      Inspect Account →
+                  <td style={{ textAlign: 'right' }}>
+                    <Link href={`/admin/users/${u.id}`} className="admin-inspect-btn">
+                      Inspect <IconArrowRight size={12} />
                     </Link>
                   </td>
                 </tr>
@@ -119,6 +216,6 @@ export default function AdminUsersPage() {
           </table>
         </div>
       )}
-    </>
+    </div>
   );
 }

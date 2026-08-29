@@ -1,0 +1,238 @@
+/* ==========================================================================
+   CRALY ADMIN CONTRACTORS DIRECTORY
+   Strict Brand Palette: Craly Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
+.admin-contractors-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* ── Search & Filter Controls ────────────────────────────────────────────── */
+.admin-contractors-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-contractors-search {
+  flex: 1;
+  max-width: 440px;
+  min-width: 260px;
+}
+
+.admin-contractors-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: var(--radius-full, 9999px);
+  box-sizing: border-box;
+}
+
+.admin-contractors-sliding-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: var(--radius-full, 9999px);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.1);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.admin-tab-btn {
+  position: relative;
+  z-index: 2;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-tab-btn:hover {
+  color: var(--craly-navy, #102a2a);
+}
+
+.admin-tab-btn.active {
+  color: var(--craly-navy, #102a2a);
+  font-weight: 700;
+}
+
+/* ── Table Card ──────────────────────────────────────────────────────────── */
+.admin-contractors-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
+  box-sizing: border-box;
+}
+
+.admin-contractors-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13.5px;
+}
+
+.admin-contractors-table thead tr {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-contractors-table th {
+  padding: 14px 18px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
+.admin-contractors-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+}
+
+.admin-contractors-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-contractors-table tbody tr:hover {
+  background: #f0fdfa;
+}
+
+.admin-contractors-table td {
+  padding: 14px 18px;
+  color: #334155;
+  vertical-align: middle;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contractor-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contractor-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(15, 139, 130, 0.1);
+  color: var(--craly-teal, #0f8b82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.contractor-company-text {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  font-size: 14px;
+}
+
+.contractor-email-text {
+  color: #475569;
+  font-size: 13px;
+}
+
+.contractor-location-text {
+  color: #64748b;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Status Badges ───────────────────────────────────────────────────────── */
+.admin-status-pill {
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full, 9999px);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.admin-status-pill--verified {
+  background: rgba(15, 139, 130, 0.1);
+  color: var(--craly-teal, #0f8b82);
+  border: 1px solid rgba(15, 139, 130, 0.22);
+}
+
+.admin-status-pill--pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.admin-status-pill--unverified {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* ── Action Buttons ──────────────────────────────────────────────────────── */
+.admin-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: var(--craly-navy, #102a2a);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-review-btn:hover {
+  background: var(--craly-teal, #0f8b82);
+  border-color: var(--craly-teal, #0f8b82);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 139, 130, 0.25);
+}
+
+@media (max-width: 860px) {
+  .admin-contractors-table {
+    table-layout: auto;
+  }
+}

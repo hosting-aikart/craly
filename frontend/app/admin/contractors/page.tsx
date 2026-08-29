@@ -1,12 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import { apiGet } from '@/lib/api';
 import SearchBar from '@/components/SearchBar';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
+import {
+  IconBuilding,
+  IconMapPin,
+  IconShield,
+  IconAlertTriangle,
+  IconArrowRight,
+  IconUsers,
+} from '@/components/ui/Icons';
+import './admin-contractors.css';
 
 interface AdminContractorItem {
   id: string;
@@ -20,10 +29,41 @@ interface AdminContractorItem {
   email: string;
 }
 
+type FilterTab = 'ALL' | 'VERIFIED' | 'PENDING' | 'UNVERIFIED';
+
 export default function AdminContractorsPage() {
   const [contractors, setContractors] = useState<AdminContractorItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<FilterTab>('ALL');
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 4,
+    width: 0,
+    opacity: 0,
+  });
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = tabRefs.current[activeTab];
+      if (activeEl) {
+        setIndicatorStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.offsetWidth,
+          opacity: 1,
+        });
+      }
+    };
+
+    updateIndicator();
+    const timeout = setTimeout(updateIndicator, 50);
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [activeTab, contractors]);
 
   useEffect(() => {
     apiGet<{ data: AdminContractorItem[] }>('/admin/contractors')
@@ -32,56 +72,155 @@ export default function AdminContractorsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = contractors.filter((c) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return c.company_name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || (c.city && c.city.toLowerCase().includes(q));
-  });
+  const filtered = useMemo(() => {
+    return contractors.filter((c) => {
+      // Tab filter
+      const status = (c.verification_status || '').toLowerCase();
+      if (activeTab === 'VERIFIED' && status !== 'verified') return false;
+      if (activeTab === 'PENDING' && status !== 'pending') return false;
+      if (activeTab === 'UNVERIFIED' && (status === 'verified' || status === 'pending')) return false;
+
+      // Query filter
+      if (!query.trim()) return true;
+      const q = query.toLowerCase();
+      return (
+        c.company_name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        (c.city && c.city.toLowerCase().includes(q))
+      );
+    });
+  }, [contractors, query, activeTab]);
+
+  const getStatusBadge = (status: string) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'verified') {
+      return (
+        <span className="admin-status-pill admin-status-pill--verified">
+          <IconShield size={11} /> Verified
+        </span>
+      );
+    }
+    if (s === 'pending') {
+      return (
+        <span className="admin-status-pill admin-status-pill--pending">
+          <IconAlertTriangle size={11} /> Pending
+        </span>
+      );
+    }
+    return (
+      <span className="admin-status-pill admin-status-pill--unverified">
+        Unverified
+      </span>
+    );
+  };
 
   return (
-    <>
+    <div className="admin-contractors-page">
       <WorkspacePageHeader
         title="Contractor Operations"
-        subtitle="Monitor contractor listings, workforce capacities, and verification statuses."
+        subtitle="Monitor contractor listings, workforce capacities, and verification compliance."
       />
-      <div style={{ marginBottom: '24px', maxWidth: '480px' }}>
-        <SearchBar value={query} onChange={setQuery} placeholder="Filter contractors by name, email, or city..." />
+
+      {/* Toolbar: Search & Status Filter Tabs */}
+      <div className="admin-contractors-toolbar">
+        <div className="admin-contractors-search">
+          <SearchBar value={query} onChange={setQuery} placeholder="Search by name, email, or city..." />
+        </div>
+        <div className="admin-contractors-tabs">
+          <div
+            className="admin-contractors-sliding-indicator"
+            style={{
+              transform: `translateX(${indicatorStyle.left}px)`,
+              width: `${indicatorStyle.width}px`,
+              opacity: indicatorStyle.opacity,
+            }}
+          />
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['ALL'] = el; }}
+            className={`admin-tab-btn ${activeTab === 'ALL' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ALL')}
+          >
+            All ({contractors.length})
+          </button>
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['VERIFIED'] = el; }}
+            className={`admin-tab-btn ${activeTab === 'VERIFIED' ? 'active' : ''}`}
+            onClick={() => setActiveTab('VERIFIED')}
+          >
+            Verified ({contractors.filter((c) => (c.verification_status || '').toLowerCase() === 'verified').length})
+          </button>
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['PENDING'] = el; }}
+            className={`admin-tab-btn ${activeTab === 'PENDING' ? 'active' : ''}`}
+            onClick={() => setActiveTab('PENDING')}
+          >
+            Pending ({contractors.filter((c) => (c.verification_status || '').toLowerCase() === 'pending').length})
+          </button>
+          <button
+            type="button"
+            ref={(el) => { tabRefs.current['UNVERIFIED'] = el; }}
+            className={`admin-tab-btn ${activeTab === 'UNVERIFIED' ? 'active' : ''}`}
+            onClick={() => setActiveTab('UNVERIFIED')}
+          >
+            Unverified ({contractors.filter((c) => !['verified', 'pending'].includes((c.verification_status || '').toLowerCase())).length})
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <LoadingState label="Loading contractors list…" />
       ) : filtered.length === 0 ? (
-        <EmptyState title="No contractors found" subtitle="No contractor profiles match your query." />
+        <EmptyState
+          icon={<IconUsers size={32} />}
+          title="No contractors found"
+          subtitle="No contractor profiles match your search criteria or filter tab."
+        />
       ) : (
-        <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '16px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px' }}>
+        <div className="admin-contractors-table-card">
+          <table className="admin-contractors-table">
+            <colgroup>
+              <col style={{ width: '28%' }} />
+              <col style={{ width: '25%' }} />
+              <col style={{ width: '18%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '14%' }} />
+            </colgroup>
             <thead>
-              <tr style={{ background: 'var(--craly-off-white)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px', color: 'var(--craly-muted)', textAlign: 'left' }}>
-                <th style={{ padding: '12px 16px' }}>Company Name</th>
-                <th style={{ padding: '12px 16px' }}>Contact Email</th>
-                <th style={{ padding: '12px 16px' }}>Location</th>
-                <th style={{ padding: '12px 16px' }}>Verification</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</th>
+              <tr>
+                <th>Company Name</th>
+                <th>Contact Email</th>
+                <th>Location</th>
+                <th>Verification</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((c) => (
-                <tr key={c.id} style={{ borderBottom: '1px solid var(--craly-border)' }}>
-                  <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--craly-navy)' }}>{c.company_name}</td>
-                  <td style={{ padding: '14px 16px' }}>{c.email}</td>
-                  <td style={{ padding: '14px 16px', color: 'var(--craly-text)' }}>{[c.city, c.state].filter(Boolean).join(', ') || '—'}</td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <span style={{
-                      fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase',
-                      background: c.verification_status === 'verified' ? 'var(--craly-mint)' : c.verification_status === 'pending' ? '#fffbe8' : '#fef2f2',
-                      color: c.verification_status === 'verified' ? 'var(--craly-teal-dark)' : c.verification_status === 'pending' ? '#b45309' : '#991b1b'
-                    }}>
-                      {c.verification_status}
+                <tr key={c.id}>
+                  <td>
+                    <div className="contractor-name-cell">
+                      <div className="contractor-avatar">
+                        {c.company_name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="contractor-company-text">{c.company_name}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="contractor-email-text">{c.email}</span>
+                  </td>
+                  <td>
+                    <span className="contractor-location-text">
+                      <IconMapPin size={12} style={{ marginRight: 4, color: 'var(--craly-teal, #0f8b82)', flexShrink: 0 }} />
+                      {[c.city, c.state].filter(Boolean).join(', ') || '—'}
                     </span>
                   </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Link href={`/admin/verification/${c.id}`} className="btn btn--ghost btn--sm">
-                      Review Verification →
+                  <td>{getStatusBadge(c.verification_status)}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <Link href={`/admin/verification/${c.id}`} className="admin-review-btn">
+                      Review <IconArrowRight size={12} />
                     </Link>
                   </td>
                 </tr>
@@ -90,6 +229,6 @@ export default function AdminContractorsPage() {
           </table>
         </div>
       )}
-    </>
+    </div>
   );
 }

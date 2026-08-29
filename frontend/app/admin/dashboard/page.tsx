@@ -7,6 +7,15 @@ import { apiGet } from '@/lib/api';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
 import { formatDate } from '@/lib/util/date';
+import {
+  IconUsers,
+  IconShield,
+  IconAlertTriangle,
+  IconMessage,
+  IconArrowRight,
+  IconTrending,
+} from '@/components/ui/Icons';
+import './admin-dashboard.css';
 
 interface AdminDashboardData {
   totalUsers: number;
@@ -31,11 +40,28 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <>
+    <div className="admin-dashboard-container">
       <WorkspacePageHeader
         title="Admin Control Center"
-        subtitle="Operational platform metrics, contractor verification queue, and audit trail."
+        subtitle="Operational platform metrics, contractor verification queue, and system audit trail."
       />
+
+      {/* Welcome Banner */}
+      <div className="admin-dashboard__banner">
+        <div>
+          <span className="admin-dashboard__role-badge">Craly Platform Governance</span>
+          <h1 className="admin-dashboard__title">Master Control Center</h1>
+          <p className="admin-dashboard__subtitle">
+            Oversee contractor verification lifecycle, monitor engagement conversations, and review audit activity.
+          </p>
+        </div>
+        <div className="admin-dashboard__actions">
+          <Link href="/admin/verification" className="admin-btn-primary">
+            <IconShield size={15} style={{ marginRight: 6 }} /> Review KYC Queue
+          </Link>
+        </div>
+      </div>
+
       {loading ? (
         <LoadingState label="Loading admin dashboard…" />
       ) : !data ? (
@@ -43,82 +69,115 @@ export default function AdminDashboardPage() {
       ) : (
         <>
           {/* Metrics Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
-            <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>TOTAL PLATFORM USERS</span>
-              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{data.totalUsers}</strong>
-              <span style={{ fontSize: '12px', color: 'var(--craly-teal)' }}>{data.totalBusinesses} Businesses • {data.totalContractors} Contractors</span>
+          <div className="admin-metrics-grid">
+            <div className="admin-metric-card">
+              <div className="admin-metric-top">
+                <span className="admin-metric-lbl">Total Users</span>
+                <div className="admin-metric-icon admin-metric-icon--teal">
+                  <IconUsers size={18} />
+                </div>
+              </div>
+              <strong className="admin-metric-val">{data.totalUsers}</strong>
+              <span className="admin-metric-sub">
+                {data.totalBusinesses} Businesses • {data.totalContractors} Contractors
+              </span>
             </div>
 
-            <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>VERIFIED CONTRACTORS</span>
-              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{data.verifiedContractors}</strong>
-              <span style={{ fontSize: '12px', color: 'var(--craly-teal)' }}>Out of {data.totalContractors} total contractors</span>
+            <div className="admin-metric-card">
+              <div className="admin-metric-top">
+                <span className="admin-metric-lbl">Verified Contractors</span>
+                <div className="admin-metric-icon admin-metric-icon--teal">
+                  <IconShield size={18} />
+                </div>
+              </div>
+              <strong className="admin-metric-val">{data.verifiedContractors}</strong>
+              <span className="admin-metric-sub">
+                Out of {data.totalContractors} total registered
+              </span>
             </div>
 
-            <div style={{
-              background: data.pendingVerifications > 0 ? '#fffbe8' : 'var(--craly-white)',
-              border: data.pendingVerifications > 0 ? '1px solid #f59e0b' : '1px solid var(--craly-border)',
-              borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '6px'
-            }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: data.pendingVerifications > 0 ? '#b45309' : 'var(--craly-muted)', letterSpacing: '0.5px' }}>PENDING VERIFICATIONS</span>
-              <strong style={{ fontSize: '28px', color: data.pendingVerifications > 0 ? '#b45309' : 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{data.pendingVerifications}</strong>
-              <Link href="/admin/verification" style={{ fontSize: '12px', color: data.pendingVerifications > 0 ? '#b45309' : 'var(--craly-teal)', fontWeight: 700, textDecoration: 'none' }}>Review Queue →</Link>
+            <div className={`admin-metric-card ${data.pendingVerifications > 0 ? 'admin-metric-card--alert' : ''}`}>
+              <div className="admin-metric-top">
+                <span className="admin-metric-lbl">Pending KYC Review</span>
+                <div className="admin-metric-icon admin-metric-icon--amber">
+                  <IconAlertTriangle size={18} />
+                </div>
+              </div>
+              <strong className="admin-metric-val" style={{ color: data.pendingVerifications > 0 ? '#d97706' : 'var(--craly-navy)' }}>
+                {data.pendingVerifications}
+              </strong>
+              <Link href="/admin/verification" className="admin-metric-link">
+                Review Queue <IconArrowRight size={12} style={{ marginLeft: 3 }} />
+              </Link>
             </div>
 
-            <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', letterSpacing: '0.5px' }}>ENQUIRIES & CONVERSATIONS</span>
-              <strong style={{ fontSize: '28px', color: 'var(--craly-navy)', fontFamily: 'var(--font-heading)' }}>{data.totalEnquiries}</strong>
-              <span style={{ fontSize: '12px', color: 'var(--craly-teal)' }}>{data.activeConversations} Accepted chats</span>
+            <div className="admin-metric-card">
+              <div className="admin-metric-top">
+                <span className="admin-metric-lbl">Enquiries & Chats</span>
+                <div className="admin-metric-icon admin-metric-icon--teal">
+                  <IconMessage size={18} />
+                </div>
+              </div>
+              <strong className="admin-metric-val">{data.totalEnquiries}</strong>
+              <span className="admin-metric-sub">
+                {data.activeConversations} Active conversations
+              </span>
             </div>
           </div>
 
-          {/* Activity Trail & Shortcuts */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
-            <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '16px', padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--craly-navy)' }}>Recent Audit Activity</h3>
-                <Link href="/admin/audit-logs" style={{ fontSize: '12px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600 }}>View All Logs →</Link>
+          {/* Activity Trail & Operational Actions */}
+          <div className="admin-main-grid">
+            <div className="admin-card">
+              <div className="admin-card__header">
+                <h3>Recent System Audit Logs</h3>
+                <Link href="/admin/audit-logs" className="admin-card__link">
+                  View All Logs <IconArrowRight size={12} style={{ marginLeft: 3 }} />
+                </Link>
               </div>
 
               {data.recentActivity.length === 0 ? (
                 <EmptyState title="No audit logs recorded yet" subtitle="Administrative actions will appear here." />
               ) : (
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <ul className="admin-activity-list">
                   {data.recentActivity.map((act) => (
-                    <li key={act.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--craly-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <strong style={{ fontSize: '13px', color: 'var(--craly-navy)', display: 'block' }}>{act.action}</strong>
-                        <span style={{ fontSize: '12px', color: 'var(--craly-muted)' }}>By {act.admin_email}</span>
+                    <li key={act.id} className="admin-activity-item">
+                      <div className="admin-activity-info">
+                        <strong className="admin-activity-action">{act.action}</strong>
+                        <span className="admin-activity-meta">By {act.admin_email}</span>
                       </div>
-                      <span style={{ fontSize: '11px', color: 'var(--craly-muted)' }}>{formatDate(act.created_at)}</span>
+                      <span className="admin-activity-time">{formatDate(act.created_at)}</span>
                     </li>
                   ))}
                 </ul>
               )}
             </div>
 
-            <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--craly-navy)' }}>Operational Control Center</h3>
-              <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--craly-muted)' }}>
-                Perform administrative review, audit platform user activity, and balance regional contractor supply vs business demand.
+            <div className="admin-card">
+              <div className="admin-card__header">
+                <h3>Operational Control Center</h3>
+              </div>
+              <p className="admin-card-desc">
+                Execute platform oversight, verify contractor compliance, and inspect marketplace metrics.
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px' }}>
-                <Link href="/admin/verification" className="btn btn--primary" style={{ textDecoration: 'none', textAlign: 'center' }}>
-                  🛡️ Review Contractor Verification Queue ({data.pendingVerifications})
+              <div className="admin-action-list">
+                <Link href="/admin/verification" className="admin-action-btn admin-action-btn--primary">
+                  <span>Review Contractor KYC Queue ({data.pendingVerifications})</span>
+                  <IconArrowRight size={14} />
                 </Link>
-                <Link href="/admin/users" className="btn btn--secondary" style={{ textDecoration: 'none', textAlign: 'center' }}>
-                  👥 Search & Manage Users
+                <Link href="/admin/users" className="admin-action-btn admin-action-btn--secondary">
+                  <span>Manage Platform Users</span>
+                  <IconArrowRight size={14} />
                 </Link>
-                <Link href="/admin/analytics" className="btn btn--ghost" style={{ textDecoration: 'none', textAlign: 'center' }}>
-                  📈 View Marketplace Supply vs Demand Analytics
+                <Link href="/admin/analytics" className="admin-action-btn admin-action-btn--ghost">
+                  <span>Marketplace Supply vs Demand</span>
+                  <IconTrending size={14} />
                 </Link>
               </div>
             </div>
           </div>
         </>
       )}
-    </>
+    </div>
   );
 }

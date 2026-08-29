@@ -1,0 +1,387 @@
+/* ==========================================================================
+   CRALY ADMIN CONTROL CENTER DASHBOARD
+   Strict Brand Palette: Craly Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
+.admin-dashboard-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+/* ── Welcome Banner ──────────────────────────────────────────────────────── */
+.admin-dashboard__banner {
+  background: linear-gradient(135deg, #102a2a 0%, #163836 60%, #0d4a45 100%);
+  color: #ffffff;
+  padding: 28px 32px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  box-shadow: 0 12px 32px -4px rgba(16, 42, 42, 0.16);
+  box-sizing: border-box;
+}
+
+.admin-dashboard__role-badge {
+  background: rgba(15, 139, 130, 0.24);
+  color: #5eead4;
+  border: 1px solid rgba(94, 234, 212, 0.25);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.admin-dashboard__title {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  color: #ffffff;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.admin-dashboard__subtitle {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13.5px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.45;
+  max-width: 600px;
+}
+
+.admin-dashboard__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.admin-btn-primary {
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, var(--craly-teal-dark, #0b6c64) 100%);
+  color: #ffffff;
+  padding: 9px 20px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 4px 14px rgba(15, 139, 130, 0.28);
+}
+
+.admin-btn-primary:hover {
+  background: linear-gradient(135deg, #119c92 0%, #0f8b82 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 139, 130, 0.35);
+  color: #ffffff;
+}
+
+/* ── Metrics Grid ────────────────────────────────────────────────────────── */
+.admin-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1199px) {
+  .admin-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-metric-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-metric-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--craly-teal, #0f8b82);
+  box-shadow: 0 10px 24px -4px rgba(15, 139, 130, 0.12);
+}
+
+.admin-metric-card--alert {
+  background: #fffdf5;
+  border-color: #fde68a;
+}
+
+.admin-metric-card--alert:hover {
+  border-color: #f59e0b;
+}
+
+.admin-metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-metric-lbl {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.admin-metric-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-metric-icon--teal {
+  background: rgba(15, 139, 130, 0.1);
+  color: #0f8b82;
+}
+
+.admin-metric-icon--amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.admin-metric-val {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--craly-navy, #102a2a);
+  line-height: 1.15;
+}
+
+.admin-metric-sub {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  color: var(--craly-teal, #0f8b82);
+  font-weight: 600;
+}
+
+.admin-metric-link {
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12px;
+  color: #d97706;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  transition: transform 0.15s ease;
+}
+
+.admin-metric-link:hover {
+  transform: translateX(2px);
+  color: #b45309;
+}
+
+/* ── Main Activity Grid ─────────────────────────────────────────────────── */
+.admin-main-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 991px) {
+  .admin-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.admin-card__header h3 {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  margin: 0;
+}
+
+.admin-card__link {
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12.5px;
+  color: var(--craly-teal, #0f8b82);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.admin-card__link:hover {
+  color: var(--craly-teal-dark, #0b6c64);
+  transform: translateX(2px);
+}
+
+.admin-card-desc {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ── Activity List ───────────────────────────────────────────────────────── */
+.admin-activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-activity-item {
+  padding: 11px 14px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s ease;
+}
+
+.admin-activity-item:hover {
+  background: #f0fdfa;
+  border-color: rgba(15, 139, 130, 0.25);
+}
+
+.admin-activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.admin-activity-action {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+}
+
+.admin-activity-meta {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.admin-activity-time {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Control Center Action Buttons ───────────────────────────────────────── */
+.admin-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.admin-action-btn--primary {
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, var(--craly-teal-dark, #0b6c64) 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(15, 139, 130, 0.25);
+}
+
+.admin-action-btn--primary:hover {
+  background: linear-gradient(135deg, #119c92 0%, #0f8b82 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 139, 130, 0.35);
+  color: #ffffff;
+}
+
+.admin-action-btn--secondary {
+  background: #f8fafc;
+  color: var(--craly-navy, #102a2a);
+  border: 1px solid #e2e8f0;
+}
+
+.admin-action-btn--secondary:hover {
+  background: #f0fdfa;
+  border-color: rgba(15, 139, 130, 0.3);
+  color: var(--craly-teal, #0f8b82);
+  transform: translateX(2px);
+}
+
+.admin-action-btn--ghost {
+  background: transparent;
+  color: #475569;
+  border: 1px dashed #cbd5e1;
+}
+
+.admin-action-btn--ghost:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+  transform: translateX(2px);
+}

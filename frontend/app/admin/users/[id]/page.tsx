@@ -8,6 +8,15 @@ import { apiGet } from '@/lib/api';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
 import { formatDate } from '@/lib/util/date';
+import {
+  IconArrowLeft,
+  IconShield,
+  IconBuilding,
+  IconUsers,
+  IconMail,
+  IconClock,
+} from '@/components/ui/Icons';
+import './admin-user-detail.css';
 
 interface UserDetail {
   id: string;
@@ -36,14 +45,25 @@ export default function AdminUserDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const getRoleBadge = (role: string) => {
+    if (role === 'admin') {
+      return <span className="admin-detail-badge admin-detail-badge--admin">Platform Admin</span>;
+    }
+    if (role === 'contractor') {
+      return <span className="admin-detail-badge admin-detail-badge--contractor">Contractor Account</span>;
+    }
+    return <span className="admin-detail-badge admin-detail-badge--business">Manufacturer Account</span>;
+  };
+
   return (
-    <>
+    <div className="admin-user-detail-page">
       <WorkspacePageHeader
         title="User Account Overview"
-        subtitle={user ? `Inspecting ${user.email} (${user.role.toUpperCase()})` : 'User Detail'}
+        subtitle={user ? `Inspecting account profile for ${user.email}` : 'User Detail'}
       />
-      <Link href="/admin/users" style={{ fontSize: '13px', color: 'var(--craly-teal)', textDecoration: 'none', fontWeight: 600, display: 'inline-block', marginBottom: '20px' }}>
-        ← Back to Users
+
+      <Link href="/admin/users" className="admin-detail-back">
+        <IconArrowLeft size={14} /> Back to Users Directory
       </Link>
 
       {loading ? (
@@ -51,54 +71,111 @@ export default function AdminUserDetailPage() {
       ) : !user ? (
         <EmptyState title="User not found" subtitle="The requested account does not exist." />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-          {/* Account Profile Card */}
-          <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--craly-navy)', borderBottom: '1px solid var(--craly-border)', paddingBottom: '12px' }}>Account Metadata</h3>
+        <>
+          {/* Hero Profile Card */}
+          <div className="admin-user-hero">
+            <div className="admin-user-hero-left">
+              <div className="admin-user-large-avatar">
+                {user.email.charAt(0).toUpperCase()}
+              </div>
+              <div className="admin-user-hero-info">
+                <h2 className="admin-user-hero-email">{user.email}</h2>
+                <span className="admin-user-hero-company">
+                  {user.business_company || user.contractor_company || 'Independent Profile'}
+                  {user.industry ? ` • ${user.industry}` : ''}
+                </span>
+              </div>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
-              <div>
-                <span style={{ color: 'var(--craly-muted)', display: 'block', fontSize: '12px' }}>User ID</span>
-                <strong style={{ color: 'var(--craly-navy)' }}>{user.id}</strong>
-              </div>
-              <div>
-                <span style={{ color: 'var(--craly-muted)', display: 'block', fontSize: '12px' }}>Email Address</span>
-                <strong style={{ color: 'var(--craly-navy)' }}>{user.email}</strong>
-              </div>
-              <div>
-                <span style={{ color: 'var(--craly-muted)', display: 'block', fontSize: '12px' }}>Account Role</span>
-                <strong style={{ color: 'var(--craly-teal-dark)', textTransform: 'uppercase' }}>{user.role}</strong>
-              </div>
-              <div>
-                <span style={{ color: 'var(--craly-muted)', display: 'block', fontSize: '12px' }}>Company Name</span>
-                <strong style={{ color: 'var(--craly-navy)' }}>{user.business_company || user.contractor_company || 'Not set'}</strong>
-              </div>
-              <div>
-                <span style={{ color: 'var(--craly-muted)', display: 'block', fontSize: '12px' }}>Registration Date</span>
-                <strong style={{ color: 'var(--craly-navy)' }}>{formatDate(user.created_at)}</strong>
-              </div>
+            <div className="admin-user-hero-badges">
+              {getRoleBadge(user.role)}
+              {user.verification_status && (
+                <span className="admin-detail-badge admin-detail-badge--contractor">
+                  <IconShield size={11} style={{ marginRight: 4 }} />
+                  {user.verification_status.toUpperCase()}
+                </span>
+              )}
             </div>
           </div>
 
-          {/* Audit History Card */}
-          <div style={{ background: 'var(--craly-white)', border: '1px solid var(--craly-border)', borderRadius: '16px', padding: '24px' }}>
-            <h3 style={{ margin: '0 0 12px', fontSize: '16px', color: 'var(--craly-navy)', borderBottom: '1px solid var(--craly-border)', paddingBottom: '12px' }}>Administrative History</h3>
+          {/* Details & Audit History Grid */}
+          <div className="admin-user-detail-grid">
+            {/* Account Metadata Card */}
+            <div className="admin-user-card">
+              <div className="admin-user-card__header">
+                <h3 className="admin-user-card__title">Account Metadata</h3>
+              </div>
 
-            {user.auditHistory.length === 0 ? (
-              <EmptyState title="No admin actions recorded" subtitle="No status modifications have been performed on this user." />
-            ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {user.auditHistory.map((h) => (
-                  <li key={h.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--craly-border)' }}>
-                    <strong style={{ fontSize: '13px', color: 'var(--craly-navy)' }}>{h.action}</strong>
-                    <span style={{ fontSize: '12px', color: 'var(--craly-muted)', display: 'block' }}>{formatDate(h.created_at)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+              <div className="admin-meta-list">
+                <div className="admin-meta-item">
+                  <span className="admin-meta-label">User Identifier</span>
+                  <span className="admin-meta-id">{user.id}</span>
+                </div>
+
+                <div className="admin-meta-item">
+                  <span className="admin-meta-label">Email Address</span>
+                  <span className="admin-meta-value">{user.email}</span>
+                </div>
+
+                <div className="admin-meta-item">
+                  <span className="admin-meta-label">Registered Company</span>
+                  <span className="admin-meta-value">
+                    {user.business_company || user.contractor_company || 'None recorded'}
+                  </span>
+                </div>
+
+                {user.industry && (
+                  <div className="admin-meta-item">
+                    <span className="admin-meta-label">Primary Industry</span>
+                    <span className="admin-meta-value">{user.industry}</span>
+                  </div>
+                )}
+
+                <div className="admin-meta-item">
+                  <span className="admin-meta-label">Joined Timestamp</span>
+                  <span className="admin-meta-value">{formatDate(user.created_at)}</span>
+                </div>
+
+                {user.updated_at && (
+                  <div className="admin-meta-item">
+                    <span className="admin-meta-label">Last Activity / Update</span>
+                    <span className="admin-meta-value">{formatDate(user.updated_at)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Audit Trail Card */}
+            <div className="admin-user-card">
+              <div className="admin-user-card__header">
+                <h3 className="admin-user-card__title">Administrative Audit Trail</h3>
+              </div>
+
+              {user.auditHistory.length === 0 ? (
+                <EmptyState
+                  icon={<IconClock size={28} />}
+                  title="No admin actions recorded"
+                  subtitle="No status changes or administrative modifications have been performed on this user account."
+                />
+              ) : (
+                <ul className="admin-audit-list">
+                  {user.auditHistory.map((h) => (
+                    <li key={h.id} className="admin-audit-item">
+                      <div>
+                        <strong className="admin-audit-action">{h.action}</strong>
+                        <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                          {h.admin_email ? `By ${h.admin_email}` : 'System Event'}
+                        </span>
+                      </div>
+                      <span className="admin-audit-time">{formatDate(h.created_at)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
-    </>
+    </div>
   );
 }
