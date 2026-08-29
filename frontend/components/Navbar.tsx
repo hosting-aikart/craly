@@ -42,10 +42,7 @@ export default function Navbar() {
 
   // Trimmed to the links people actually use — the logo already goes home,
   // and "Why Craly" duplicated ground the homepage hero already covers.
-  const navLinks = [
-    { href: '/#how', label: t.nav.howItWorks },
-    { href: '/#faq', label: t.nav.faq },
-  ];
+  const navLinks: { href: string; label: string }[] = [];
 
   const currentLangObj = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0];
 
@@ -64,20 +61,22 @@ export default function Navbar() {
         </Link>
 
         {/* ── Desktop Center Navigation ── */}
-        <nav className="craly-nav__menu" aria-label="Main Navigation">
-          {navLinks.map((link) => {
-            const isActive = !link.href.includes('#') && pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`craly-nav__link ${isActive ? 'craly-nav__link--active' : ''}`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {navLinks.length > 0 && (
+          <nav className="craly-nav__menu" aria-label="Main Navigation">
+            {navLinks.map((link) => {
+              const isActive = !link.href.includes('#') && pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`craly-nav__link ${isActive ? 'craly-nav__link--active' : ''}`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
 
         {/* ── Desktop Right Controls ── */}
         <div className="craly-nav__actions">
@@ -127,19 +126,13 @@ export default function Navbar() {
 
           <div className="craly-nav__divider" aria-hidden="true" />
 
-          {/* Contractors self-register now (see docs/open-decisions.md) —
-              this used to point at /list-your-company's lead form. */}
-          <Link href="/signup?role=contractor" className="craly-nav__link-secondary">
-            {t.auth.joinAsContractor}
-          </Link>
-
           {/* Auth Buttons */}
           <div className="craly-nav__auth-group">
             <Link href="/login" className="craly-nav__btn craly-nav__btn--ghost">
               {t.nav.login}
             </Link>
             <Link href="/signup?role=business" className="craly-nav__btn craly-nav__btn--primary">
-              <span>{t.nav.getStarted}</span>
+              <span>Sign Up</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />
@@ -185,25 +178,20 @@ export default function Navbar() {
             </div>
 
             {/* Navigation Links */}
-            <div className="craly-nav__mobile-links">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="craly-nav__mobile-link"
-                  onClick={closeAll}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <Link
-                href="/signup?role=contractor"
-                className="craly-nav__mobile-link craly-nav__mobile-link--special"
-                onClick={closeAll}
-              >
-                {t.auth.joinAsContractor} →
-              </Link>
-            </div>
+            {navLinks.length > 0 && (
+              <div className="craly-nav__mobile-links">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="craly-nav__mobile-link"
+                    onClick={closeAll}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
 
             {/* Mobile Auth CTAs */}
             <div className="craly-nav__mobile-auth">
@@ -219,7 +207,7 @@ export default function Navbar() {
                 className="craly-nav__btn craly-nav__btn--primary craly-nav__btn--full"
                 onClick={closeAll}
               >
-                <span>{t.nav.getStarted}</span>
+                <span>Sign Up</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
