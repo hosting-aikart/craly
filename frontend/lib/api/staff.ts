@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch } from '@/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '@/lib/api';
 
 export interface StaffDashboardStats {
   totalContractors: number;
@@ -227,3 +227,36 @@ export const getStaffVerificationMessages = (contractorId: string) =>
 
 export const sendStaffVerificationMessage = (contractorId: string, message: string) =>
   apiPost<{ data: StaffVerificationMessageItem }>(`/staff/verification/contractors/${contractorId}/messages`, { message });
+
+// ─── Contractor KYC Documents (Contractors → select contractor → KYC) ──────
+// Reachable from the general contractor detail page, for both newly
+// created and pre-existing contractors — see documentController.ts /
+// staffRoutes.ts. This is deliberately the same document store used by
+// the Verification Review queue and the contractor's own self-upload.
+export interface StaffContractorDocumentItem {
+  id: string;
+  document_type: string;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  status: 'pending' | 'approved' | 'rejected' | 'replacement_requested';
+  issue_date: string | null;
+  expiry_date: string | null;
+  created_at: string;
+  updated_at: string;
+  uploaded_by_email?: string | null;
+}
+
+export const getStaffContractorDocuments = (contractorId: string) =>
+  apiGet<{ data: StaffContractorDocumentItem[] }>(`/staff/contractors/${contractorId}/documents`);
+
+export const uploadStaffContractorDocument = (contractorId: string, formData: FormData) =>
+  apiUpload<{ data: StaffContractorDocumentItem }>(`/staff/contractors/${contractorId}/documents`, formData);
+
+export const getStaffContractorDocumentSignedUrl = (contractorId: string, documentId: string, intent: 'view' | 'download' = 'view') =>
+  apiGet<{ data: { url: string; expiresInSeconds: number } }>(
+    `/staff/contractors/${contractorId}/documents/${documentId}/signed-url?intent=${intent}`,
+  );
+
+export const deleteStaffContractorDocument = (contractorId: string, documentId: string) =>
+  apiDelete<{ data: { id: string; deleted: boolean } }>(`/staff/contractors/${contractorId}/documents/${documentId}`);

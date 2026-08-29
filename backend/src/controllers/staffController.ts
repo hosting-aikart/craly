@@ -208,11 +208,11 @@ export async function createContractor(req: Request, res: Response, next: NextFu
       const [profile] = await tx`
         INSERT INTO contractor_profiles (
           user_id, company_name, phone, description, industry, skills, city, state, workforce_size,
-          years_experience, service_areas, availability, availability_note,
+          years_experience, service_areas, availability, notes,
           verification_status, onboarding_complete, created_by
         )
         VALUES (
-          ${newUser.id}, ${companyName}, ${phone || null}, ${industry || null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
+          ${newUser.id}, ${companyName}, ${phone || null}, ${null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
           ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
           ${availability || 'AVAILABLE'}, ${notes || null}, 'pending', true, ${req.user!.sub}
         )

@@ -16,6 +16,14 @@ import {
   updateStaffContractorVerificationStatus,
 } from '../controllers/staffController';
 import { getStaffVerificationMessages, sendStaffVerificationMessage } from '../controllers/verificationMessageController';
+import {
+  uploadDocument,
+  listDocuments,
+  getDocumentSignedUrl,
+  reviewDocument,
+  deleteDocument,
+  documentUpload,
+} from '../controllers/documentController';
 
 const router = Router();
 
@@ -39,6 +47,17 @@ router.get('/contractors', getContractors);
 router.post('/contractors', createContractor);
 router.get('/contractors/:id', getContractorById);
 router.patch('/contractors/:id', updateContractor);
+
+// KYC Documents — reachable from Contractors → select contractor → KYC →
+// Documents, for BOTH newly-created and pre-existing contractors. Reuses
+// the exact same document storage/controller (R2, contractor_documents)
+// as the internal (Ops Head/Field Staff) and contractor-portal
+// self-upload paths — see documentController.ts.
+router.get('/contractors/:id/documents', listDocuments);
+router.post('/contractors/:id/documents', documentUpload, uploadDocument);
+router.get('/contractors/:id/documents/:documentId/signed-url', getDocumentSignedUrl);
+router.patch('/contractors/:id/documents/:documentId/review', reviewDocument);
+router.delete('/contractors/:id/documents/:documentId', deleteDocument);
 
 // Selection engagements
 router.get('/engagements', getStaffEngagements);

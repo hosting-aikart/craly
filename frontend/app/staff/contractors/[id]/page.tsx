@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getStaffContractorById, updateStaffContractor, type StaffContractorDetail } from '@/lib/api/staff';
 import LoadingState from '@/components/ui/LoadingState';
 import PhoneInput from '@/components/ui/PhoneInput';
+import StaffContractorDocuments from '@/components/staff/StaffContractorDocuments';
 import './staff-contractor-detail.css';
 
 export default function StaffContractorDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -115,6 +116,9 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
           <span className="verification-label">
             Verification: <strong>{contractor.verification_status.toUpperCase()}</strong>
           </span>
+          <Link href={`/staff/verification/${contractor.id}`} className="review-link">
+            Open Full Verification Review →
+          </Link>
         </div>
       </div>
 
@@ -227,6 +231,16 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="kyc-section">
+        <h3 className="section-title">KYC — Documents</h3>
+        <p className="section-subtitle">
+          Works for both newly created and existing contractors. Uploading here does not by itself change the
+          verification decision — approve, reject, or request changes from the{' '}
+          <Link href={`/staff/verification/${contractor.id}`}>Verification Review</Link> page.
+        </p>
+        <StaffContractorDocuments contractorId={contractor.id} />
       </div>
     </div>
   );
