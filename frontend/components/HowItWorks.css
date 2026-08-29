@@ -50,7 +50,7 @@
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-style: normal;
   font-size: clamp(32px, 4.5vw, 48px);
-  font-weight: 400;
+  font-weight: 400 !important;
   text-align: center;
   color: #111827;
   margin: 0;
