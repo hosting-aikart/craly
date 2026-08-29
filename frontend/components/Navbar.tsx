@@ -382,31 +382,32 @@ const CNAV_CSS = `
   flex-shrink: 0;
   justify-self: start;
 }
-/* Fixed-size container — holds both logos stacked; prevents size jump */
+/* Fixed-size container — both logos fill the same box, no size jump ever */
 .cnav-logo-wrap {
   position: relative;
   display: inline-flex;
   align-items: center;
-  width: auto;
-  height: 48px;          /* single source of truth for logo height */
+  justify-content: center;
+  width: 120px;   /* fixed width — both logos fill this same box */
+  height: 44px;   /* fixed height */
   flex-shrink: 0;
 }
 .cnav-logo-img {
-  height: 48px;
-  width: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  object-position: left center;
   display: block;
   transition: opacity 0.35s ease;
 }
 /* Dark logo: visible by default, invisible on dark bg */
 .cnav-logo-dark  { opacity: 1; position: relative; }
-.cnav-logo-light { opacity: 0; position: absolute; top: 50%; left: 0; transform: translateY(-50%); }
+.cnav-logo-light { opacity: 0; position: absolute; inset: 0; }
 /* Swap on dark background */
 .cnav-dark .cnav-logo-dark  { opacity: 0; }
 .cnav-dark .cnav-logo-light { opacity: 1; }
 @media (max-width: 899px) {
-  .cnav-logo-wrap { height: 38px; }
-  .cnav-logo-img  { height: 38px; }
+  .cnav-logo-wrap { width: 100px; height: 36px; }
 }
 
 /* ── Desktop center nav links ── */
