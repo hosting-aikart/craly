@@ -43,6 +43,7 @@ export default function Navbar() {
   }
 
   const navLinks = [
+    { href: '/#why', label: 'Why Craly' },
     { href: '/#faq', label: 'FAQ' },
     { href: '#contact', label: 'Contact Us', isContact: true },
   ];
