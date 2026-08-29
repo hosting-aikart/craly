@@ -82,7 +82,11 @@ export default function ContractorPortalLayout({ children }: { children: React.R
           />
         )}
 
-        <Sidebar role="contractor-portal" companyName={companyName} />
+        <Sidebar
+          role="contractor-portal"
+          companyName={companyName}
+          isVerified={contractorProfile?.verification_status === 'verified'}
+        />
 
         <div className="workspace-main">
           <WorkspaceHeader
@@ -105,6 +109,7 @@ export default function ContractorPortalLayout({ children }: { children: React.R
           companyName={companyName}
           isOpen={mobileDrawerOpen}
           onClose={() => setMobileDrawerOpen(false)}
+          isVerified={contractorProfile?.verification_status === 'verified'}
         />
       </div>
     </WorkspaceHeaderProvider>

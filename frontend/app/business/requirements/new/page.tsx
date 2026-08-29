@@ -2,10 +2,25 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import { createBusinessRequirement, updateBusinessRequirement, type CreateRequirementInput } from '@/lib/api/businessPortal';
 import Button from '@/components/ui/Button';
-import '@/components/AuthForm.css';
+import {
+  IconBriefcase,
+  IconTarget,
+  IconMapPin,
+  IconUsers,
+  IconCalendar,
+  IconRupee,
+  IconTools,
+  IconClock,
+  IconShield,
+  IconCheck,
+  IconAlertTriangle,
+  IconArrowRight,
+} from '@/components/ui/Icons';
+import './requirement-form.css';
 
 export default function CreateRequirementPage() {
   const router = useRouter();
@@ -48,19 +63,19 @@ export default function CreateRequirementPage() {
       return;
     }
     if (!formData.location.trim()) {
-      setError('Location is required');
+      setError('Location / Plant area is required');
       return;
     }
     if (!formData.city.trim()) {
-      setError('City is required');
+      setError('City is required for contractor matching');
       return;
     }
     if (!formData.state.trim()) {
-      setError('State is required');
+      setError('State jurisdiction is required');
       return;
     }
     if (!formData.startDate) {
-      setError('Start date is required');
+      setError('Project start date is required');
       return;
     }
     if (!formData.workersRequired || formData.workersRequired < 1) {
@@ -94,71 +109,138 @@ export default function CreateRequirementPage() {
   };
 
   return (
-    <>
-      <WorkspacePageHeader
-        title="Create Manpower Requirement"
-        subtitle="Specify workforce counts, required skills, and timelines for contractors."
-      />
+    <div className="req-create-page">
+      {/* ── Hero Banner ──────────────────────────────────────────────── */}
+      <div className="req-hero-banner">
+        <div className="req-hero-content">
+          <span className="req-hero-badge">
+            <IconBriefcase size={12} /> Enterprise Manpower Tender
+          </span>
+          <h1>Post Manpower Requirement</h1>
+          <p>
+            Specify industrial trade skills, workforce headcount, mobilization zones, and commercial parameters
+            to receive verified contractor proposals instantly.
+          </p>
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', background: 'var(--craly-white)', padding: '28px', borderRadius: '16px', border: '1px solid var(--craly-border)' }}>
-        {error && (
-          <div style={{ padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
-            {error}
+          <div className="req-hero-highlights">
+            <span className="req-highlight-tag">
+              <IconShield size={12} /> Verified Contractors Only
+            </span>
+            <span className="req-highlight-tag">
+              <IconTarget size={12} /> Algorithmic Matching
+            </span>
+            <span className="req-highlight-tag">
+              <IconCheck size={12} /> Escrow Protected
+            </span>
           </div>
-        )}
+        </div>
+      </div>
 
-        <form onSubmit={(e) => e.preventDefault()} style={{ display: 'grid', gap: '20px' }}>
-          <div>
-            <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-              Requirement Title *
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="e.g. 25 Automotive Assembly Line Technicians"
-              required
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
-            />
-          </div>
+      {error && (
+        <div className="req-alert req-alert--error">
+          <IconAlertTriangle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+      {/* ── Main Form Container ──────────────────────────────────────── */}
+      <form onSubmit={(e) => e.preventDefault()} className="req-form-card">
+        {/* Section 1: Role Overview */}
+        <div className="req-section">
+          <div className="req-section-head">
+            <div className="req-section-icon">
+              <IconTarget size={18} />
+            </div>
             <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Industry / Domain
-              </label>
+              <h3 className="req-section-title">1. Role & Trade Profile</h3>
+              <p className="req-section-hint">Primary trade title, industry vertical, and job description</p>
+            </div>
+          </div>
+
+          <div className="req-grid req-grid--full">
+            <div className="req-field">
+              <label>Requirement Title *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="e.g. 25 Automotive Assembly Line Technicians"
+                required
+              />
+              <span className="req-field-hint">A clear, descriptive title to attract qualified contractors</span>
+            </div>
+          </div>
+
+          <div className="req-grid req-grid--2col" style={{ marginTop: '16px' }}>
+            <div className="req-field">
+              <label>Industry / Domain</label>
               <input
                 type="text"
                 name="industry"
                 value={formData.industry}
                 onChange={handleChange}
-                placeholder="e.g. Automotive, Manufacturing, Logistics"
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
+                placeholder="e.g. Automotive, Manufacturing, EPC"
               />
+              <span className="req-field-hint">Primary industrial sector for category filtering</span>
             </div>
 
+            <div className="req-field">
+              <label>Required Trade Skills</label>
+              <input
+                type="text"
+                name="requiredSkills"
+                value={typeof formData.requiredSkills === 'string' ? formData.requiredSkills : formData.requiredSkills?.join(', ')}
+                onChange={handleChange}
+                placeholder="e.g. MIG Welding, CNC Operation, Assembly"
+              />
+              <span className="req-field-hint">Comma separated specific trades or certifications</span>
+            </div>
+          </div>
+
+          <div className="req-field" style={{ marginTop: '16px' }}>
+            <label>Detailed Scope & Facility Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Provide plant shift timings, specific safety gear requirements, accommodation details, and work environment notes..."
+            />
+            <span className="req-field-hint">Clear scope details help contractors propose accurate commercial terms</span>
+          </div>
+        </div>
+
+        {/* Section 2: Mobilization Location */}
+        <div className="req-section">
+          <div className="req-section-head">
+            <div className="req-section-icon req-section-icon--blue">
+              <IconMapPin size={18} />
+            </div>
             <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Location (Area/Locality) *
-              </label>
+              <h3 className="req-section-title">2. Mobilization & Plant Location</h3>
+              <p className="req-section-hint">Geographical area used to match nearby contractor pools</p>
+            </div>
+          </div>
+
+          <div className="req-grid req-grid--full">
+            <div className="req-field">
+              <label>Plant / Locality Address *</label>
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                placeholder="e.g. Chakan, Pune, Maharashtra"
+                placeholder="e.g. Chakan Industrial Area, Phase II, Pune"
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
+              <span className="req-field-hint">Exact facility address or MIDC / industrial corridor</span>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                City *
-              </label>
+          <div className="req-grid req-grid--2col" style={{ marginTop: '16px' }}>
+            <div className="req-field">
+              <label>City / Hub *</label>
               <input
                 type="text"
                 name="city"
@@ -166,17 +248,12 @@ export default function CreateRequirementPage() {
                 onChange={handleChange}
                 placeholder="e.g. Pune"
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
-              <p style={{ fontSize: '12px', color: 'var(--craly-muted, #888)', marginTop: '4px' }}>
-                Used to match contractors — must match a contractor&apos;s base city or one of their service areas exactly.
-              </p>
+              <span className="req-field-hint">Used for matching contractors within reachable dispatch range</span>
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                State *
-              </label>
+            <div className="req-field">
+              <label>State *</label>
               <input
                 type="text"
                 name="state"
@@ -184,34 +261,41 @@ export default function CreateRequirementPage() {
                 onChange={handleChange}
                 placeholder="e.g. Maharashtra"
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
-              <p style={{ fontSize: '12px', color: 'var(--craly-muted, #888)', marginTop: '4px' }}>
-                Used to match contractors — must match a contractor&apos;s state exactly.
-              </p>
+              <span className="req-field-hint">State jurisdiction for statutory wage & ESIC compliance</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Workforce Capacity & Schedule */}
+        <div className="req-section">
+          <div className="req-section-head">
+            <div className="req-section-icon req-section-icon--amber">
+              <IconUsers size={18} />
+            </div>
+            <div>
+              <h3 className="req-section-title">3. Workforce Capacity & Timelines</h3>
+              <p className="req-section-hint">Quantity, deployment schedule, and duration</p>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Workers Required *
-              </label>
+          <div className="req-grid req-grid--2col">
+            <div className="req-field">
+              <label>Workers Required *</label>
               <input
                 type="number"
                 name="workersRequired"
                 value={formData.workersRequired || ''}
                 onChange={handleChange}
                 min="1"
+                placeholder="e.g. 25"
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
+              <span className="req-field-hint">Total headcount needed for this requirement</span>
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Experience Required (Years)
-              </label>
+            <div className="req-field">
+              <label>Experience Required (Years)</label>
               <input
                 type="number"
                 name="experienceRequired"
@@ -219,121 +303,105 @@ export default function CreateRequirementPage() {
                 onChange={handleChange}
                 min="0"
                 placeholder="e.g. 2"
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
+              <span className="req-field-hint">Minimum years of relevant industrial trade experience</span>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Start Date *
-              </label>
+          <div className="req-grid req-grid--2col" style={{ marginTop: '16px' }}>
+            <div className="req-field">
+              <label>Deployment Start Date *</label>
               <input
                 type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
+              <span className="req-field-hint">Expected date for workforce to mobilize on site</span>
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Duration *
-              </label>
+            <div className="req-field">
+              <label>Engagement Duration *</label>
               <input
                 type="text"
                 name="duration"
                 value={formData.duration}
                 onChange={handleChange}
-                placeholder="e.g. 3 Months, 6 Months"
+                placeholder="e.g. 3 Months, 6 Months, Long-term"
                 required
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
+              <span className="req-field-hint">Estimated project duration or contract period</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 4: Budget & Commercials */}
+        <div className="req-section">
+          <div className="req-section-head">
+            <div className="req-section-icon req-section-icon--green">
+              <IconRupee size={18} />
+            </div>
+            <div>
+              <h3 className="req-section-title">4. Commercial Budget (Optional)</h3>
+              <p className="req-section-hint">Set rate expectations to guide contractor proposals</p>
             </div>
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-              Required Skills (comma separated)
-            </label>
-            <input
-              type="text"
-              name="requiredSkills"
-              value={typeof formData.requiredSkills === 'string' ? formData.requiredSkills : formData.requiredSkills?.join(', ')}
-              onChange={handleChange}
-              placeholder="e.g. Welding, Assembly, Machine Operation, QC"
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Budget Min (₹ per worker/day)
-              </label>
+          <div className="req-grid req-grid--2col">
+            <div className="req-field">
+              <label>Budget Min (₹ / worker / day)</label>
               <input
                 type="number"
                 name="budgetMin"
                 value={formData.budgetMin ?? ''}
                 onChange={handleChange}
                 placeholder="e.g. 700"
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
               />
+              <span className="req-field-hint">Minimum daily commercial rate bracket</span>
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-                Budget Max (₹ per worker/day)
-              </label>
+            <div className="req-field">
+              <label>Budget Max (₹ / worker / day)</label>
               <input
                 type="number"
                 name="budgetMax"
                 value={formData.budgetMax ?? ''}
                 onChange={handleChange}
-                placeholder="e.g. 1000"
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
+                placeholder="e.g. 950"
               />
+              <span className="req-field-hint">Maximum approved budget per worker</span>
             </div>
           </div>
+        </div>
 
-          <div>
-            <label style={{ display: 'block', fontWeight: 600, fontSize: '14px', marginBottom: '6px', color: 'var(--craly-navy)' }}>
-              Detailed Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={4}
-              placeholder="Provide work shift timings, specific project requirements, and facility information..."
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--craly-border)' }}
-            />
-          </div>
+        {/* Form Actions Footer */}
+        <div className="req-form-footer">
+          <Link href="/business/requirements" className="req-btn-cancel">
+            Cancel
+          </Link>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-            <Button
+          <div className="req-form-footer-right">
+            <button
               type="button"
-              variant="outline"
+              className="req-btn-draft"
               onClick={() => handleSubmit('draft')}
               disabled={submitting}
             >
-              {submitting ? 'Saving…' : 'Save Draft'}
-            </Button>
+              {submitting ? 'Saving…' : 'Save as Draft'}
+            </button>
 
-            <Button
+            <button
               type="button"
-              variant="primary"
+              className="req-btn-publish"
               onClick={() => handleSubmit('publish')}
               disabled={submitting}
             >
-              {submitting ? 'Publishing…' : 'Publish Requirement'}
-            </Button>
+              {submitting ? 'Publishing…' : 'Publish Requirement →'}
+            </button>
           </div>
-        </form>
-      </div>
-    </>
+        </div>
+      </form>
+    </div>
   );
 }

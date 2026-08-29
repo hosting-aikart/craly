@@ -2,16 +2,17 @@ import type { Metadata } from 'next';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { AuthProvider } from '@/lib/auth/useAuth';
 import { SocketProvider } from '@/lib/socket/SocketContext';
+import GoogleTranslateScript from '@/components/language/GoogleTranslateScript';
 import Navbar from '@/components/Navbar';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Craly — Smarter Way to Hire Labour Contractors',
+  title: 'Craly Smarter Way to Hire Labour Contractors',
   description:
     'Craly is a contractor verification platform that helps businesses evaluate labour contractors through verified business information, work history, and compliance details before hiring.',
   keywords: 'contractor verification, labour contractor, hiring, India, EPC, manufacturing',
   openGraph: {
-    title: 'Craly — Smarter Way to Hire Labour Contractors',
+    title: 'Craly Smarter Way to Hire Labour Contractors',
     description:
       'Verified contractor profiles for modern businesses. Build trust before the first phone call.',
     type: 'website',
@@ -40,6 +41,7 @@ export default function RootLayout({
             <LanguageProvider>
               <Navbar />
               {children}
+              <GoogleTranslateScript />
             </LanguageProvider>
           </SocketProvider>
         </AuthProvider>

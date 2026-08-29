@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 80" fill="none">
+  <!-- Bold "Craly" wordmark, dark charcoal, matching the brand image -->
+  <text
+    x="0"
+    y="62"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-size="72"
+    font-weight="800"
+    fill="#1a1a1a"
+    letter-spacing="-3"
+  >Craly</text>
+  <!-- Gold triangle accent under the "y" -->
+  <polygon points="184,70 200,70 192,58" fill="#F5A623"/>
+</svg>

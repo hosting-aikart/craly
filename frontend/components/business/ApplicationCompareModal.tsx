@@ -3,6 +3,7 @@
 import React from 'react';
 import { type ApplicationReceived } from '@/lib/api/businessPortal';
 import Button from '@/components/ui/Button';
+import { IconUsers, IconCalendar, IconRupee, IconMapPin } from '@/components/ui/Icons';
 import './ApplicationCompareModal.css';
 
 interface ApplicationCompareModalProps {
@@ -60,28 +61,28 @@ export default function ApplicationCompareModal({
                     <div className="compare-card__section">
                       <span className="compare-card__label">Workforce Offered</span>
                       <strong className="compare-card__value compare-card__value--highlight">
-                        👥 {app.proposed_workforce} Workers
+                        <IconUsers size={14} className="inline-icon" /> {app.proposed_workforce} Workers
                       </strong>
                     </div>
 
                     <div className="compare-card__section">
                       <span className="compare-card__label">Availability Date</span>
                       <span className="compare-card__value">
-                        📅 {new Date(app.availability_date).toLocaleDateString()}
+                        <IconCalendar size={14} className="inline-icon" /> {new Date(app.availability_date).toLocaleDateString()}
                       </span>
                     </div>
 
                     <div className="compare-card__section">
                       <span className="compare-card__label">Proposed Rate</span>
                       <span className="compare-card__value">
-                        💰 {app.proposed_rate ? `₹${app.proposed_rate}` : 'Negotiable'}
+                        <IconRupee size={14} className="inline-icon" /> {app.proposed_rate ? `₹${app.proposed_rate}` : 'Negotiable'}
                       </span>
                     </div>
 
                     <div className="compare-card__section">
                       <span className="compare-card__label">Location / Experience</span>
                       <span className="compare-card__value">
-                        📍 {app.contractor_city || app.contractor_state || 'Not specified'}
+                        <IconMapPin size={14} className="inline-icon" /> {app.contractor_city || app.contractor_state || 'Not specified'}
                         {app.contractor_experience_years ? ` • ${app.contractor_experience_years} yrs exp` : ''}
                       </span>
                     </div>

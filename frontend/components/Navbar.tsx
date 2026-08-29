@@ -8,8 +8,6 @@ import { LANGUAGES } from '@/lib/i18n/translations';
 import { useAuth } from '@/lib/auth/useAuth';
 import './Navbar.css';
 
-const helmetLogo = '/assets/helmet.png';
-
 export default function Navbar() {
   const { language, setLanguage, t } = useLanguage();
   const { user } = useAuth();
@@ -63,10 +61,7 @@ export default function Navbar() {
         
         {/* ── Brand Logo ── */}
         <Link href="/" className="craly-nav__brand" onClick={closeAll}>
-          <div className="craly-nav__logo-box">
-            <img src={helmetLogo} alt="Craly" className="craly-nav__logo" />
-          </div>
-          <span className="craly-nav__brand-name">Craly</span>
+          <img src="/assets/craly-logo.png" alt="Craly" className="craly-nav__logo-wordmark" />
         </Link>
 
         {/* ── Desktop Center Navigation ── */}

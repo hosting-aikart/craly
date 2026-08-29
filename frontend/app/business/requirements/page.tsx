@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
@@ -13,6 +13,24 @@ import {
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
+import {
+  IconMapPin,
+  IconUsers,
+  IconClock,
+  IconArrowRight,
+  IconApplications,
+  IconBuilding,
+  IconPlus,
+  IconSearch,
+  IconBriefcase,
+  IconTarget,
+  IconRupee,
+  IconCalendar,
+  IconShield,
+  IconCheck,
+  IconAlertTriangle,
+} from '@/components/ui/Icons';
+import './requirements.css';
 
 const STATUS_TABS = [
   { label: 'All Requirements', value: '' },
@@ -27,14 +45,48 @@ export default function BusinessRequirementsListPage() {
   const [requirements, setRequirements] = useState<RequirementItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStatus, setActiveStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  // Sliding tab indicator state & refs
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 4,
+    width: 0,
+    opacity: 0,
+  });
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = tabRefs.current[activeStatus];
+      if (activeEl) {
+        setIndicatorStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.offsetWidth,
+          opacity: 1,
+        });
+      }
+    };
+
+    updateIndicator();
+    const timeout = setTimeout(updateIndicator, 50);
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [activeStatus]);
 
   const fetchRequirements = (statusFilter: string) => {
     setLoading(true);
     getBusinessRequirements(statusFilter)
-      .then(({ data }) => setRequirements(data))
-      .catch((err) => setError(err.message || 'Failed to fetch requirements'))
+      .then(({ data }) => setRequirements(Array.isArray(data) ? data : []))
+      .catch((err) => {
+        setError(err.message || 'Failed to fetch requirements');
+        setRequirements([]);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -67,207 +119,280 @@ export default function BusinessRequirementsListPage() {
     }
   };
 
-  return (
-    <>
-      <WorkspacePageHeader
-        title="Manpower Requirements"
-        subtitle="Post manpower needs, view active listings, and track contractor applications."
-      />
+  // Filtered by Search Query
+  const filteredRequirements = useMemo(() => {
+    if (!searchQuery.trim()) return requirements;
+    const q = searchQuery.toLowerCase();
+    return requirements.filter((r) => {
+      const titleMatch = r.title.toLowerCase().includes(q);
+      const locMatch = (r.location || '').toLowerCase().includes(q) || (r.city || '').toLowerCase().includes(q);
+      const indMatch = (r.industry || '').toLowerCase().includes(q);
+      const skillsMatch = Array.isArray(r.required_skills)
+        ? r.required_skills.some((s) => s.toLowerCase().includes(q))
+        : false;
+      return titleMatch || locMatch || indMatch || skillsMatch;
+    });
+  }, [requirements, searchQuery]);
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+  // Metric Intelligence calculations
+  const totalCount = requirements.length;
+  const publishedCount = requirements.filter((r) => r.status === 'PUBLISHED').length;
+  const totalApplicationsCount = requirements.reduce((acc, r) => acc + (r.applications_count || 0), 0);
+
+  const getStatusBadgeClass = (status: string) => {
+    const s = status.toUpperCase();
+    if (s === 'PUBLISHED') return 'reqs-badge--published';
+    if (s === 'SELECTED') return 'reqs-badge--selected';
+    if (s === 'CLOSED') return 'reqs-badge--closed';
+    return 'reqs-badge--draft';
+  };
+
+  const getStatusBadgeLabel = (status: string) => {
+    const s = status.toUpperCase();
+    if (s === 'PUBLISHED') return 'Published';
+    if (s === 'SELECTED') return 'Contractor Selected';
+    if (s === 'CLOSED') return 'Closed';
+    return 'Draft';
+  };
+
+  const activeTabIndex = STATUS_TABS.findIndex((t) => t.value === activeStatus);
+
+  return (
+    <div className="reqs-page">
+      {/* ── Hero Banner & Intelligence Header ────────────────────────── */}
+      <div className="reqs-hero-banner">
+        <div className="reqs-hero-top">
+          <div className="reqs-hero-text">
+            <span className="reqs-hero-badge">
+              <IconBriefcase size={12} /> Enterprise Manpower Management
+            </span>
+            <h1>Manpower Requirements & Tenders</h1>
+            <p>
+              Post your workforce requirements, receive matching bids from verified industrial contractors,
+              and manage proposals in real-time.
+            </p>
+          </div>
+
+          <Link href="/business/requirements/new" className="reqs-hero-create-btn">
+            <IconPlus size={16} /> Create Requirement
+          </Link>
+        </div>
+
+        {/* 3-Metric Intelligence Row */}
+        <div className="reqs-metrics-row">
+          <div className="reqs-metric-card">
+            <span className="reqs-metric-label">Total Requirements</span>
+            <strong className="reqs-metric-val">{totalCount}</strong>
+          </div>
+          <div className="reqs-metric-card">
+            <span className="reqs-metric-label">Active Published Tenders</span>
+            <strong className="reqs-metric-val">{publishedCount}</strong>
+          </div>
+          <div className="reqs-metric-card">
+            <span className="reqs-metric-label">Total Proposals Received</span>
+            <strong className="reqs-metric-val reqs-metric-val--teal">{totalApplicationsCount}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Search & Filter Controls ─────────────────────────────────── */}
+      <div className="reqs-controls-bar">
+        {/* Instant Search Field */}
+        <div className="reqs-search-box">
+          <IconSearch size={15} className="reqs-search-icon" />
+          <input
+            type="text"
+            className="reqs-search-input"
+            placeholder="Search requirements by trade, city, skills, or industry..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="reqs-search-clear"
+              onClick={() => setSearchQuery('')}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Filter Tabs Bar with Sliding Pill */}
+        <div className="reqs-tabs-container">
+          <div
+            className="reqs-sliding-indicator"
+            style={{
+              transform: `translateX(${indicatorStyle.left}px)`,
+              width: `${indicatorStyle.width}px`,
+              opacity: indicatorStyle.opacity,
+            }}
+          />
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
+              ref={(el) => {
+                tabRefs.current[tab.value] = el;
+              }}
               type="button"
               onClick={() => setActiveStatus(tab.value)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: '1px solid',
-                borderColor: activeStatus === tab.value ? 'var(--craly-teal)' : 'var(--craly-border)',
-                background: activeStatus === tab.value ? 'var(--craly-teal)' : 'var(--craly-white)',
-                color: activeStatus === tab.value ? '#ffffff' : 'var(--craly-navy)',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+              className={`reqs-tab-item ${activeStatus === tab.value ? 'active' : ''}`}
             >
               {tab.label}
             </button>
           ))}
         </div>
-
-        <Button variant="primary" onClick={() => router.push('/business/requirements/new')}>
-          + Create Requirement
-        </Button>
       </div>
 
+      {/* ── Content Grid ─────────────────────────────────────────────── */}
       {loading ? (
         <LoadingState label="Loading manpower requirements…" />
       ) : error ? (
-        <div style={{ color: '#ef4444', padding: '16px', background: '#fef2f2', borderRadius: '8px' }}>
-          {error}
+        <div className="reqs-error-banner">
+          <IconAlertTriangle size={18} />
+          <p>{error}</p>
+          <button type="button" onClick={() => fetchRequirements(activeStatus)} className="reqs-retry-btn">
+            Retry
+          </button>
         </div>
-      ) : requirements.length === 0 ? (
+      ) : filteredRequirements.length === 0 ? (
         <EmptyState
-          title="No requirements found"
-          subtitle={activeStatus ? `No requirements with status '${activeStatus}'` : 'Create your first requirement to start receiving contractor proposals.'}
+          title={searchQuery ? 'No matching requirements' : 'No requirements found'}
+          subtitle={
+            searchQuery
+              ? `No requirements match "${searchQuery}". Try a different keyword.`
+              : activeStatus
+              ? `You have no requirements currently under '${STATUS_TABS.find((t) => t.value === activeStatus)?.label}'.`
+              : 'Create your first workforce requirement to start receiving matched proposals from verified contractors.'
+          }
           action={
-            <Button variant="primary" onClick={() => router.push('/business/requirements/new')}>
-              + Create Requirement
-            </Button>
+            <Link href="/business/requirements/new" className="reqs-empty-create-btn">
+              <IconPlus size={15} /> Create Requirement
+            </Link>
           }
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-          {requirements.map((req) => (
-            <div
-              key={req.id}
-              style={{
-                background: 'var(--craly-white)',
-                border: '1px solid var(--craly-border)',
-                borderRadius: '12px',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', color: 'var(--craly-navy)' }}>
-                    <Link href={`/business/requirements/${req.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                      {req.title}
-                    </Link>
-                  </h3>
-                  <div style={{ fontSize: '13px', color: 'var(--craly-muted)', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <span>📍 {req.location}</span>
-                    <span>🏢 {req.industry || 'General Industry'}</span>
-                    <span>👥 {req.workers_required} Workers</span>
-                    <span>📅 Starts {new Date(req.start_date).toLocaleDateString()}</span>
-                  </div>
+        <div className="reqs-cards-grid">
+          {filteredRequirements.map((req) => (
+            <div key={req.id} className="reqs-grid-card">
+              {/* Card Top: Badges & Title */}
+              <div className="reqs-card-top">
+                <div className="reqs-badge-row">
+                  <span className={`reqs-status-badge ${getStatusBadgeClass(req.status)}`}>
+                    <span className="reqs-status-dot" />
+                    {getStatusBadgeLabel(req.status)}
+                  </span>
+
+                  {req.industry && (
+                    <span className="reqs-industry-tag">
+                      <IconBuilding size={11} /> {req.industry}
+                    </span>
+                  )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span
-                    style={{
-                      padding: '4px 12px',
-                      borderRadius: '9999px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.4px',
-                      background: req.status === 'PUBLISHED' ? '#dcfce7' : req.status === 'SELECTED' ? '#e0e7ff' : '#f1f5f9',
-                      color: req.status === 'PUBLISHED' ? '#15803d' : req.status === 'SELECTED' ? '#4338ca' : '#64748b',
-                    }}
-                  >
-                    {req.status.replace('_', ' ')}
+                <h3 className="reqs-card-title">
+                  <Link href={`/business/requirements/${req.id}`}>
+                    {req.title}
+                  </Link>
+                </h3>
+
+                <div className="reqs-location-row">
+                  <IconMapPin size={13} className="reqs-loc-icon" />
+                  <span>{req.city ? `${req.city}, ${req.state || ''}` : req.location}</span>
+                </div>
+              </div>
+
+              {/* Parameter Matrix: 4 Metrics Grid */}
+              <div className="reqs-matrix-grid">
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Headcount</span>
+                  <strong className="reqs-matrix-val">
+                    <IconUsers size={14} /> {req.workers_required}
+                  </strong>
+                </div>
+
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Starts</span>
+                  <span className="reqs-matrix-val">
+                    <IconCalendar size={14} /> {new Date(req.start_date).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Duration</span>
+                  <span className="reqs-matrix-val">
+                    <IconClock size={14} /> {req.duration || 'Flexible'}
+                  </span>
+                </div>
+
+                <div className="reqs-matrix-cell">
+                  <span className="reqs-matrix-label">Daily Budget</span>
+                  <span className="reqs-matrix-val reqs-matrix-val--budget">
+                    <IconRupee size={13} /> {req.budget_min || req.budget_max ? `₹${Math.round(Number(req.budget_min || 0))}-${Math.round(Number(req.budget_max || 0))}` : 'Negotiable'}
                   </span>
                 </div>
               </div>
 
-              {req.description && (
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--craly-text)', lineHeight: '1.5' }}>
-                  {req.description.length > 180 ? `${req.description.slice(0, 180)}…` : req.description}
-                </p>
-              )}
-
+              {/* Skills Pills */}
               {req.required_skills && req.required_skills.length > 0 && (
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {req.required_skills.map((skill, idx) => (
-                    <span
-                      key={idx}
-                      style={{
-                        background: 'var(--craly-surface)',
-                        border: '1px solid var(--craly-border)',
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        color: 'var(--craly-navy)',
-                      }}
-                    >
+                <div className="reqs-skills-row">
+                  {req.required_skills.slice(0, 3).map((skill, idx) => (
+                    <span key={idx} className="reqs-skill-chip">
                       {skill}
                     </span>
                   ))}
+                  {req.required_skills.length > 3 && (
+                    <span className="reqs-skill-chip reqs-skill-chip--more">
+                      +{req.required_skills.length - 3} more
+                    </span>
+                  )}
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--craly-border)', flexWrap: 'wrap', gap: '12px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--craly-teal)' }}>
-                  📥 {req.applications_count} {req.applications_count === 1 ? 'Application' : 'Applications'} Received
-                </span>
+              {/* Card Footer: Proposal count and Action Buttons */}
+              <div className="reqs-card-bottom">
+                <div className="reqs-proposals-pill">
+                  <IconApplications size={14} />
+                  <span>
+                    <strong>{req.applications_count || 0}</strong> {req.applications_count === 1 ? 'Proposal' : 'Proposals'}
+                  </span>
+                </div>
 
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="reqs-actions-group">
                   {req.status === 'DRAFT' && (
                     <>
                       <button
                         type="button"
                         onClick={() => handlePublishDraft(req.id)}
                         disabled={actionId === req.id}
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          color: '#ffffff',
-                          background: 'var(--craly-teal)',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                        }}
+                        className="reqs-btn reqs-btn--publish"
                       >
-                        {actionId === req.id ? 'Publishing…' : 'Publish Now'}
+                        {actionId === req.id ? 'Publishing…' : 'Publish'}
                       </button>
 
                       <button
                         type="button"
                         onClick={() => handleDeleteDraft(req.id)}
                         disabled={actionId === req.id}
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          color: '#dc2626',
-                          background: '#fef2f2',
-                          border: '1px solid #fecaca',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                        }}
+                        className="reqs-btn reqs-btn--delete"
                       >
-                        Delete Draft
+                        Delete
                       </button>
                     </>
                   )}
 
                   <Link
                     href={`/business/requirements/${req.id}`}
-                    style={{
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: 'var(--craly-navy)',
-                      textDecoration: 'none',
-                      padding: '6px 12px',
-                      border: '1px solid var(--craly-border)',
-                      borderRadius: '6px',
-                    }}
+                    className="reqs-btn reqs-btn--detail"
                   >
-                    View Details
+                    Details
                   </Link>
 
                   <Link
                     href={`/business/requirements/${req.id}/applications`}
-                    style={{
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#ffffff',
-                      background: req.status === 'DRAFT' ? 'var(--craly-navy)' : 'var(--craly-teal)',
-                      textDecoration: 'none',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                    }}
+                    className="reqs-btn reqs-btn--primary"
                   >
-                    Applications ({req.applications_count}) →
+                    Proposals ({req.applications_count || 0}) <IconArrowRight size={13} />
                   </Link>
                 </div>
               </div>
@@ -275,6 +400,6 @@ export default function BusinessRequirementsListPage() {
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }

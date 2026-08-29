@@ -10,8 +10,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import LoadingState from '@/components/ui/LoadingState';
 import './login.css';
-
-const helmetLogo = '/assets/helmet.png';
+import './login-mobile.css';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -98,8 +97,7 @@ export default function LoginPage() {
         <div className="login-panel">
           <div>
             <div className="login-panel__brand">
-              <img src={helmetLogo} alt="" />
-              <span>Craly</span>
+              <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '78px', width: 'auto' }} />
             </div>
 
             <p className="login-panel__eyebrow">{t.auth.networkEyebrow}</p>
@@ -140,8 +138,7 @@ export default function LoginPage() {
         {/* ── Right: white form panel ───────────────────────────────── */}
         <div className="login-form-panel">
           <div className="login-mobile-brand">
-            <img src={helmetLogo} alt="Craly" />
-            <span>Craly</span>
+            <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '78px', width: 'auto' }} />
           </div>
           <p className="login-form-panel__eyebrow">{t.auth.welcomeBackEyebrow}</p>
           <h1 className="login-form-panel__heading">{t.auth.logInTitle}</h1>

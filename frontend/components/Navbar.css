@@ -37,39 +37,14 @@
 .craly-nav__brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
 }
 
-.craly-nav__logo-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
-  border: 1px solid rgba(15, 118, 110, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.craly-nav__brand:hover .craly-nav__logo-box {
-  transform: scale(1.05);
-}
-
-.craly-nav__logo {
-  width: 22px;
-  height: auto;
+.craly-nav__logo-wordmark {
+  height: 70px;
+  width: auto;
   display: block;
-}
-
-.craly-nav__brand-name {
-  font-family: var(--font-display, sans-serif);
-  font-size: 21px;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.5px;
 }
 
 /* ---------------- Desktop Navigation Links ---------------- */
@@ -475,8 +450,8 @@
     padding: 0 16px;
     height: 64px;
   }
-  .craly-nav__brand-name {
-    font-size: 19px;
+  .craly-nav__logo-wordmark {
+    height: 50px;
   }
   .craly-nav__mobile-inner {
     padding: 16px 16px 24px;

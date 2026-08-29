@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useState, Suspense, type FormEvent } from 'react';
+import { useEffect, useState, Suspense, useRef, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import './signup.css';
+import './signup-mobile.css';
 import { signup, sendSignupOtp, verifySignupOtp } from '@/lib/api/auth';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
 import { COUNTRIES, DEFAULT_COUNTRY, type CountryOption } from '@/lib/util/countries';
-
-const helmetLogo = '/assets/helmet.png';
+import DialCodeSelect from '@/components/ui/DialCodeSelect';
+import CountrySelect from '@/components/ui/CountrySelect';
 
 /**
  * Manufacturer + Contractor sign-up. Contractors self-register, complete
@@ -45,6 +46,36 @@ function SignupForm() {
   const [emailError, setEmailError] = useState('');
   const [mobileError, setMobileError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Sliding role toggle indicator
+  const [roleIndicatorStyle, setRoleIndicatorStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 4,
+    width: 0,
+    opacity: 0,
+  });
+  const roleTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = roleTabRefs.current[role];
+      if (activeEl) {
+        setRoleIndicatorStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.offsetWidth,
+          opacity: 1,
+        });
+      }
+    };
+
+    updateIndicator();
+    const timeout = setTimeout(updateIndicator, 50);
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [role]);
 
   // Signup is a two-step flow: collect the form, send an email OTP, then
   // require it to be verified before the account is actually created (see
@@ -201,8 +232,7 @@ function SignupForm() {
         <div className="signup-panel">
           <div>
             <div className="signup-panel__brand">
-              <img src={helmetLogo} alt="" />
-              <span>Craly</span>
+              <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '78px', width: 'auto' }} />
             </div>
 
             <p className="signup-panel__eyebrow">{t.auth.createAccountEyebrow}</p>
@@ -252,17 +282,25 @@ function SignupForm() {
         {/* ── Right: white form panel ───────────────────────────────── */}
         <div className="signup-form-panel">
           <div className="signup-mobile-brand">
-            <img src={helmetLogo} alt="Craly" />
-            <span>Craly</span>
+            <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '78px', width: 'auto' }} />
           </div>
           <p className="signup-form-panel__eyebrow">{t.auth.createAccountEyebrow}</p>
           <h1 className="signup-form-panel__heading">
             {role === 'business' ? t.auth.joinTitle : t.auth.contractorRoleTitle}
           </h1>
 
-          {/* Role toggle — mirrors the left panel's cards, for mobile / quick switching */}
+          {/* Role toggle with sliding indicator */}
           <div className="signup-role-toggle" role="tablist" aria-label="Account type">
+            <div
+              className="signup-sliding-indicator"
+              style={{
+                transform: `translateX(${roleIndicatorStyle.left}px)`,
+                width: `${roleIndicatorStyle.width}px`,
+                opacity: roleIndicatorStyle.opacity,
+              }}
+            />
             <button
+              ref={(el) => { roleTabRefs.current['business'] = el; }}
               type="button"
               role="tab"
               aria-selected={role === 'business'}
@@ -272,6 +310,7 @@ function SignupForm() {
               {t.auth.businessRoleTitle}
             </button>
             <button
+              ref={(el) => { roleTabRefs.current['contractor'] = el; }}
               type="button"
               role="tab"
               aria-selected={role === 'contractor'}
@@ -319,27 +358,15 @@ function SignupForm() {
             <label className="signup-field">
               <span>Phone / Mobile Number</span>
               <div className="signup-phone-group">
-                <select
-                  className="signup-country-code-select"
-                  value={selectedCountry.code}
-                  onChange={(e) => {
-                    const found = COUNTRIES.find((c) => c.code === e.target.value);
-                    if (found) {
-                      setSelectedCountry(found);
-                      if (mobileError) validateMobile(phoneNumber, found);
-                    }
+                <DialCodeSelect
+                  value={selectedCountry}
+                  onChange={(c) => {
+                    setSelectedCountry(c);
+                    if (mobileError) validateMobile(phoneNumber, c);
                   }}
-                  aria-label="Country Code"
-                >
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.flag} {c.code} ({c.dialCode})
-                    </option>
-                  ))}
-                </select>
+                />
 
                 <div className="signup-field__input signup-phone-input">
-                  <span className="signup-dial-code-prefix">{selectedCountry.dialCode}</span>
                   <input
                     type="tel"
                     required
@@ -358,29 +385,16 @@ function SignupForm() {
             </label>
 
             <div className="signup-location-row">
-              <label className="signup-field signup-location-col">
+              <div className="signup-field signup-location-col">
                 <span>Country / Region</span>
-                <div className="signup-field__input signup-select-wrap">
-                  <select
-                    value={selectedCountry.code}
-                    onChange={(e) => {
-                      const found = COUNTRIES.find((c) => c.code === e.target.value);
-                      if (found) {
-                        setSelectedCountry(found);
-                        if (mobileError) validateMobile(phoneNumber, found);
-                      }
-                    }}
-                    className="signup-country-select"
-                    aria-label="Country or Region"
-                  >
-                    {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.flag} {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </label>
+                <CountrySelect
+                  value={selectedCountry}
+                  onChange={(c) => {
+                    setSelectedCountry(c);
+                    if (mobileError) validateMobile(phoneNumber, c);
+                  }}
+                />
+              </div>
 
               <label className="signup-field signup-location-col">
                 <span>City / State</span>

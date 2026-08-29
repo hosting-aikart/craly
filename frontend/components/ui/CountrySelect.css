@@ -1,0 +1,201 @@
+/* ==========================================================================
+   CUSTOM COUNTRY SELECT COMPONENT
+   Smooth, rounded custom popover select
+   ========================================================================== */
+
+.custom-country-select {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.custom-country-select__trigger {
+  width: 100%;
+  min-height: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 18px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.custom-country-select__trigger:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.custom-country-select__trigger.open {
+  border-color: var(--craly-teal, #0f8b82);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(15, 139, 130, 0.12);
+}
+
+.custom-country-select__value {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-country-select__chevron {
+  color: #64748b;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.custom-country-select__chevron.open {
+  transform: rotate(180deg);
+  color: var(--craly-teal, #0f8b82);
+}
+
+/* ── Floating Popover Menu ────────────────────────────────────────── */
+.custom-country-select__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 14px 36px -4px rgba(16, 42, 42, 0.16), 0 4px 12px rgba(0, 0, 0, 0.04);
+  padding: 8px;
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: countryDropdownFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+@keyframes countryDropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.custom-country-select__search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 2px;
+}
+
+.custom-country-select__search-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.custom-country-select__search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.custom-country-select__search-input::placeholder {
+  color: #94a3b8;
+}
+
+.custom-country-select__list {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 4px;
+}
+
+/* Smooth custom scrollbar */
+.custom-country-select__list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-country-select__list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.custom-country-select__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #334155;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.custom-country-select__item:hover {
+  background: #f1f5f9;
+  color: var(--craly-navy, #102a2a);
+}
+
+.custom-country-select__item.selected {
+  background: rgba(15, 139, 130, 0.08);
+  color: var(--craly-teal, #0f8b82);
+  font-weight: 600;
+}
+
+.custom-country-select__item-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-country-select__item-code {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 2px 6px;
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.custom-country-select__check {
+  color: var(--craly-teal, #0f8b82);
+  flex-shrink: 0;
+}
+
+.custom-country-select__no-results {
+  padding: 16px;
+  text-align: center;
+  font-size: 12.5px;
+  color: #94a3b8;
+  font-family: var(--font-body, 'Inter', sans-serif);
+}

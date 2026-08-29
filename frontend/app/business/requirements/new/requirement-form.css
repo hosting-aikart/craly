@@ -1,0 +1,364 @@
+/* ==========================================================================
+   MANUFACTURER PORTAL - CREATE REQUIREMENT FORM
+   Craly Design System - Modern Industrial High-Trust Theme
+   ========================================================================== */
+
+.req-create-page {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Hero Banner ─────────────────────────────────────────────────────────── */
+.req-hero-banner {
+  position: relative;
+  background: linear-gradient(135deg, #102a2a 0%, #173b3a 45%, #0d544f 100%);
+  color: #ffffff;
+  padding: 28px 32px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 28px -4px rgba(16, 42, 42, 0.18);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.req-hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(15, 139, 130, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.req-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+}
+
+.req-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  margin-bottom: 10px;
+}
+
+.req-hero-banner h1 {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.req-hero-banner p {
+  font-size: 14px;
+  color: #cbd5e1;
+  margin: 0 0 16px 0;
+  line-height: 1.55;
+}
+
+.req-hero-highlights {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.req-highlight-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(4px);
+}
+
+/* ── Error Banner ────────────────────────────────────────────────────────── */
+.req-alert {
+  padding: 14px 18px;
+  border-radius: var(--radius-md, 12px);
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.req-alert--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+/* ── Main Form Card ──────────────────────────────────────────────────────── */
+.req-form-card {
+  background: var(--craly-white, #ffffff);
+  border: 1px solid var(--craly-border, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: 0 4px 20px -4px rgba(16, 42, 42, 0.06);
+  overflow: hidden;
+}
+
+.req-section {
+  padding: 28px 32px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.req-section:last-of-type {
+  border-bottom: none;
+}
+
+.req-section-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.req-section-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.req-section-icon--blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.req-section-icon--amber {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.req-section-icon--green {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.req-section-title {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 16.5px;
+  font-weight: 800;
+  color: var(--craly-navy, #102a2a);
+  margin: 0 0 2px 0;
+}
+
+.req-section-hint {
+  font-size: 12.5px;
+  color: var(--craly-text-muted, #64748b);
+  margin: 0;
+}
+
+/* ── Grids & Fields ──────────────────────────────────────────────────────── */
+.req-grid--full {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.req-grid--2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 720px) {
+  .req-grid--2col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .req-section {
+    padding: 20px;
+  }
+}
+
+.req-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.req-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  letter-spacing: -0.01em;
+}
+
+.req-field input,
+.req-field select {
+  width: 100%;
+  padding: 11px 20px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 13.5px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.req-field textarea {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 13.5px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  resize: vertical;
+  min-height: 100px;
+  box-sizing: border-box;
+  line-height: 1.55;
+}
+
+.req-field input:hover,
+.req-field textarea:hover,
+.req-field select:hover {
+  border-color: #94a3b8;
+  background: #ffffff;
+}
+
+.req-field input:focus,
+.req-field textarea:focus,
+.req-field select:focus {
+  border-color: var(--craly-teal, #0f8b82);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(15, 139, 130, 0.14);
+}
+
+.req-field input::placeholder,
+.req-field textarea::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.req-field-hint {
+  font-size: 11.5px;
+  color: var(--craly-text-muted, #64748b);
+  font-weight: 500;
+  margin-top: 2px;
+  padding-left: 8px;
+}
+
+/* ── Form Actions Footer ─────────────────────────────────────────────────── */
+.req-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 32px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.req-form-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.req-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  text-decoration: none;
+  padding: 9px 18px;
+  border-radius: var(--radius-full, 9999px);
+  transition: all 0.15s ease;
+}
+
+.req-btn-cancel:hover {
+  background: #e2e8f0;
+  color: var(--craly-navy, #102a2a);
+}
+
+.req-btn-draft {
+  background: #ffffff;
+  color: var(--craly-navy, #102a2a);
+  border: 1.5px solid #cbd5e1;
+  padding: 10px 22px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.req-btn-draft:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.req-btn-publish {
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, var(--craly-teal-dark, #0b6c64) 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 26px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(15, 139, 130, 0.35);
+}
+
+.req-btn-publish:hover:not(:disabled) {
+  background: var(--craly-teal-dark, #0b6c64);
+  box-shadow: 0 6px 18px rgba(15, 139, 130, 0.45);
+  transform: translateY(-1px);
+}
+
+.req-btn-draft:disabled,
+.req-btn-publish:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}

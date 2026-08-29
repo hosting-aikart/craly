@@ -1,82 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import './HowItWorks.css';
-
-interface StepMeta {
-  id: string;
-  color: string;
-  icon: ReactNode;
-}
-
-const iconProps = {
-  viewBox: '0 0 48 48',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 2.5,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-};
-
-function ProfileIcon() {
-  return (
-    <svg {...iconProps}>
-      <rect x="6" y="9" width="36" height="30" rx="5" />
-      <circle cx="17" cy="21" r="5" />
-      <path d="M10 33c0-4.4 3.6-7 7-7s7 2.6 7 7" />
-      <path d="M27 17h9M27 24h6" />
-    </svg>
-  );
-}
-
-function VerifyIcon() {
-  return (
-    <svg {...iconProps}>
-      <circle cx="20" cy="20" r="12" />
-      <path d="M15 20l3.5 3.5L26 15" />
-      <path d="M28.5 28.5L40 40" />
-    </svg>
-  );
-}
-
-function BadgeIcon() {
-  return (
-    <svg {...iconProps}>
-      <circle cx="24" cy="17" r="10" />
-      <path d="M19 15.5l3.2 3.2L29 12" />
-      <path d="M17.5 25.5L13 41l11-6 11 6-4.5-15.5" />
-    </svg>
-  );
-}
-
-function HandshakeIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M5 21l8-7 7 3 6-4 8 6-5 6" />
-      <path d="M13 14l7 6-4 4.5" />
-      <path d="M20 20l7 6-4 4" />
-      <path d="M27 22l6 5-3.5 4" />
-      <path d="M5 21l4 10 5 3" />
-      <path d="M43 21l-4 9-4.5 3" />
-    </svg>
-  );
-}
-
-const stepMeta: StepMeta[] = [
-  { id: 'profile', color: '#F87531', icon: <ProfileIcon /> },
-  { id: 'verify', color: '#2563eb', icon: <VerifyIcon /> },
-  { id: 'trust', color: '#eab308', icon: <BadgeIcon /> },
-  { id: 'hire', color: '#7c3aed', icon: <HandshakeIcon /> },
-];
 
 export default function HowItWorks() {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // One-time reveal when the section scrolls into view — no scroll-jacking,
-  // no pinning, just a discrete animation triggered by IntersectionObserver.
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -84,58 +16,95 @@ export default function HowItWorks() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisible(true);
+          setIsVisible(true);
           observer.disconnect();
         }
       },
-      { threshold: 0.2 },
+      { threshold: 0.15 }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
+  const steps = [
+    {
+      number: '01',
+      title: t.howItWorks?.steps?.[0]?.title || 'Contractor Creates Profile',
+      text: t.howItWorks?.steps?.[0]?.text || 'Contractors register their business and submit company information.',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      ),
+    },
+    {
+      number: '02',
+      title: t.howItWorks?.steps?.[1]?.title || 'Information Gets Verified',
+      text: t.howItWorks?.steps?.[1]?.text || 'Business details, documents, and compliance information are reviewed and verified.',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      ),
+    },
+    {
+      number: '03',
+      title: t.howItWorks?.steps?.[2]?.title || 'Build a Trusted Profile',
+      text: t.howItWorks?.steps?.[2]?.text || 'Verified contractor profiles showcase business information, experience, and work history.',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="8" r="7" />
+          <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+        </svg>
+      ),
+    },
+    {
+      number: '04',
+      title: t.howItWorks?.steps?.[3]?.title || 'Hire With Confidence',
+      text: t.howItWorks?.steps?.[3]?.text || 'Businesses review verified profiles and reach out to the right contractor with confidence.',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <polyline points="16 11 18 13 22 9" />
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <section
       ref={sectionRef}
+      className={`how-section ${isVisible ? 'how-section--visible' : ''}`}
       id="how"
-      className={`how-it-works ${visible ? 'how-it-works--visible' : ''}`}
     >
-      <div className="how-it-works__glow how-it-works__glow--a" aria-hidden="true" />
-      <div className="how-it-works__glow how-it-works__glow--b" aria-hidden="true" />
+      <div className="how-container">
+        {/* Section Header */}
+        <div className="how-header">
+          <span className="how-eyebrow">{t.howItWorks?.eyebrow || 'HOW IT WORKS'}</span>
+          <h2 className="how-title">{t.howItWorks?.heading || 'A Simple Verification Process'}</h2>
+        </div>
 
-      <div className="how-it-works__intro">
-        <p className="how-it-works__eyebrow">{t.howItWorks.eyebrow}</p>
-        <h2 className="how-it-works__heading">{t.howItWorks.heading}</h2>
-      </div>
-
-      <div className="how-grid">
-        {/* Desktop: one line through all 4. Phone (2×2 grid): row1 connects
-            steps 1-2, row2 (below) connects steps 3-4 — row2 is hidden on
-            desktop via CSS. */}
-        <span className="how-flow-line" aria-hidden="true">
-          <span className="how-flow-line__pulse" />
-        </span>
-        <span className="how-flow-line how-flow-line--row2" aria-hidden="true">
-          <span className="how-flow-line__pulse" style={{ animationDelay: '2s' }} />
-        </span>
-
-        {stepMeta.map((step, i) => (
-          <div
-            key={step.id}
-            className="how-card"
-            style={{ '--accent': step.color, transitionDelay: `${i * 0.12}s` } as CSSProperties}
-          >
-            <div className="how-card__icon-wrap">
-              <span className="how-card__ring" style={{ animationDelay: `${i * 0.4}s` }} />
-              <span className="how-card__icon">{step.icon}</span>
-              <span className="how-card__number">{i + 1}</span>
+        {/* Steps Grid Flow */}
+        <div className="how-steps-grid">
+          {steps.map((step, idx) => (
+            <div
+              key={idx}
+              className="how-step-card"
+              style={{ '--delay': `${idx * 0.12}s` } as React.CSSProperties}
+            >
+              <div className="how-step-top">
+                <div className="how-step-icon">{step.icon}</div>
+                <span className="how-step-number">{step.number}</span>
+              </div>
+              <h3 className="how-step-title">{step.title}</h3>
+              <p className="how-step-text">{step.text}</p>
             </div>
-
-            <h3 className="how-card__title">{t.howItWorks.steps[i].title}</h3>
-            <p className="how-card__text">{t.howItWorks.steps[i].text}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

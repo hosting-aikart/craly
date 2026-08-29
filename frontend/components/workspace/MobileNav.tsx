@@ -6,18 +6,21 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LanguageSelector from '@/components/language/LanguageSelector';
+import {
+  IconDashboard, IconRequirements, IconApplications, IconMenu, IconBell,
+  IconBuilding, IconSettings, IconUser, IconLogout,
+} from '@/components/ui/Icons';
 import './MobileNav.css';
-
-const helmetLogo = '/assets/helmet.png';
 
 interface MobileNavProps {
   role: 'business' | 'contractor' | 'admin' | 'contractor-portal' | 'staff';
   companyName: string;
   isOpen?: boolean;
   onClose?: () => void;
+  isVerified?: boolean;
 }
 
-export default function MobileNav({ role, companyName, isOpen, onClose }: MobileNavProps) {
+export default function MobileNav({ role, companyName, isOpen, onClose, isVerified = true }: MobileNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
@@ -65,7 +68,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
           href={dashboardPath}
           className={`mobile-nav__item ${isActive(dashboardPath) ? 'mobile-nav__item--active' : ''}`}
         >
-          <span className="mobile-nav__icon">📊</span>
+          <span className="mobile-nav__icon"><IconDashboard size={18} /></span>
           <span className="mobile-nav__label">{t.nav.home}</span>
         </Link>
 
@@ -75,14 +78,14 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
               href="/business/requirements"
               className={`mobile-nav__item ${isActive('/business/requirements') ? 'mobile-nav__item--active' : ''}`}
             >
-              <span className="mobile-nav__icon">📝</span>
+              <span className="mobile-nav__icon"><IconRequirements size={18} /></span>
               <span className="mobile-nav__label">Requirements</span>
             </Link>
             <Link
               href="/business/applications"
               className={`mobile-nav__item ${isActive('/business/applications') ? 'mobile-nav__item--active' : ''}`}
             >
-              <span className="mobile-nav__icon">📥</span>
+              <span className="mobile-nav__icon"><IconApplications size={18} /></span>
               <span className="mobile-nav__label">Applications</span>
             </Link>
           </>
@@ -93,7 +96,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
           className={`mobile-nav__item ${drawerOpen ? 'mobile-nav__item--active' : ''}`}
           onClick={openDrawer}
         >
-          <span className="mobile-nav__icon">☰</span>
+          <span className="mobile-nav__icon"><IconMenu size={18} /></span>
           <span className="mobile-nav__label">Menu</span>
         </button>
       </nav>
@@ -104,7 +107,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
           <div className="mobile-drawer__content" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-drawer__header">
               <div className="mobile-drawer__brand">
-                <img src={helmetLogo} alt="Craly" className="mobile-drawer__logo-img" />
+                <img src="/assets/craly-logo-white.png" alt="Craly" className="mobile-drawer__logo-img" />
               </div>
               <button className="mobile-drawer__close" onClick={closeDrawer} aria-label="Close menu">×</button>
             </div>
@@ -124,7 +127,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
                 className={`mobile-drawer__link ${isActive(dashboardPath) ? 'mobile-drawer__link--active' : ''}`}
                 onClick={closeDrawer}
               >
-                📊 {t.nav.dashboard}
+                <IconDashboard size={16} /> {t.nav.dashboard}
               </Link>
 
               {role === 'business' && (
@@ -134,14 +137,14 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
                     className={`mobile-drawer__link ${isActive('/business/requirements') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    📝 Requirements
+                    <IconRequirements size={16} /> Requirements
                   </Link>
                   <Link
                     href="/business/applications"
                     className={`mobile-drawer__link ${isActive('/business/applications') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    📥 Applications
+                    <IconApplications size={16} /> Applications
                   </Link>
                 </>
               )}
@@ -152,7 +155,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
                   className={`mobile-drawer__link ${isActive(notificationsPath) ? 'mobile-drawer__link--active' : ''}`}
                   onClick={closeDrawer}
                 >
-                  🔔 {t.notifications.pageTitle || 'Notifications'}
+                  <IconBell size={16} /> {t.notifications.pageTitle || 'Notifications'}
                 </Link>
               )}
 
@@ -164,14 +167,14 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
                     className={`mobile-drawer__link ${isActive('/business/profile') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    🏢 {t.nav.companyProfile || 'Company Profile'}
+                    <IconBuilding size={16} /> {t.nav.companyProfile || 'Company Profile'}
                   </Link>
                   <Link
                     href="/business/settings"
                     className={`mobile-drawer__link ${isActive('/settings') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    ⚙️ {t.nav.settings || 'Settings'}
+                    <IconSettings size={16} /> {t.nav.settings || 'Settings'}
                   </Link>
                 </>
               )}
@@ -184,14 +187,14 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
                     className={`mobile-drawer__link ${isActive('/contractor/profile') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    👤 {t.fieldStaff.nav.profile}
+                    <IconUser size={16} /> {t.fieldStaff.nav.profile}
                   </Link>
                   <Link
                     href="/contractor/settings"
                     className={`mobile-drawer__link ${isActive('/contractor/settings') ? 'mobile-drawer__link--active' : ''}`}
                     onClick={closeDrawer}
                   >
-                    ⚙️ {t.fieldStaff.nav.settings}
+                    <IconSettings size={16} /> {t.fieldStaff.nav.settings}
                   </Link>
                 </>
               )}
@@ -201,7 +204,7 @@ export default function MobileNav({ role, companyName, isOpen, onClose }: Mobile
               </div>
 
               <button type="button" className="mobile-drawer__link mobile-drawer__link--logout" onClick={handleLogout}>
-                🚪 {t.nav.logout || 'Log Out'}
+                <IconLogout size={16} /> {t.nav.logout || 'Log Out'}
               </button>
             </div>
           </div>

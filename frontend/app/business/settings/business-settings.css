@@ -1,0 +1,376 @@
+/* ==========================================================================
+   Business Settings Page Styles (Compact & Animated Sliding Switch)
+   Theme: Craly Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
+.bs-wrapper {
+  width: 100%;
+  max-width: 1140px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---- Header Card ---- */
+.bs-header-card {
+  background: linear-gradient(135deg, #102a2a 0%, #173f3e 50%, #0d544f 100%);
+  color: #ffffff;
+  padding: 24px 32px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px -4px rgba(16, 42, 42, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bs-header-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bs-header-card__title {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.bs-header-card__sub {
+  font-size: 13.5px;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.bs-header-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 5px 14px;
+  border-radius: var(--radius-full, 9999px);
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  flex-shrink: 0;
+}
+
+/* ---- Sliding Switch Nav Tabs ---- */
+.bs-nav-tabs-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.bs-nav-tabs {
+  position: relative;
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--craly-white, #ffffff);
+  border: 1px solid var(--craly-border, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
+  box-shadow: 0 1px 4px rgba(16, 42, 42, 0.04);
+}
+
+.bs-sliding-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: var(--radius-full, 9999px);
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, #0d7971 100%);
+  box-shadow: 0 2px 8px rgba(15, 139, 130, 0.32);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bs-nav-tab {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  border-radius: var(--radius-full, 9999px);
+  border: none;
+  background: transparent;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--craly-text-muted, #5b6b6a);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.bs-nav-tab:hover {
+  color: var(--craly-navy, #102a2a);
+}
+
+.bs-nav-tab--active {
+  color: #ffffff !important;
+}
+
+/* ---- Main Content Card with Entrance Animation ---- */
+.bs-panel-card {
+  background: var(--craly-white, #ffffff);
+  border: 1px solid var(--craly-border, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px 32px;
+  box-shadow: 0 2px 12px -2px rgba(16, 42, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: bsTabFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@keyframes bsTabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bs-panel-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--craly-border, #e2e8f0);
+}
+
+.bs-panel-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--craly-mint, #ddf7f2);
+  color: var(--craly-teal-dark, #0b6c64);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bs-panel-card__title {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  margin: 0;
+}
+
+/* ---- Compact Key-Value Rows (Curved Pill Style) ---- */
+.bs-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 22px;
+  background: var(--craly-off-white, #f8f9f6);
+  border: 1px solid var(--craly-border, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
+  gap: 12px;
+  transition: all 0.15s ease;
+}
+
+.bs-row__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--craly-text-muted, #5b6b6a);
+  white-space: nowrap;
+}
+
+.bs-row__value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--craly-navy, #102a2a);
+  text-align: right;
+  word-break: break-all;
+}
+
+/* ---- Language Selector (Compact Curved) ---- */
+.bs-lang-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.bs-lang-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 18px;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid var(--craly-border, #cbd5e1);
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bs-lang-btn:hover {
+  border-color: var(--craly-teal, #0f8b82);
+  background: var(--craly-mint, #ddf7f2);
+}
+
+.bs-lang-btn--active {
+  border-color: var(--craly-teal, #0f8b82);
+  background: #f0fdfa;
+  box-shadow: 0 2px 6px rgba(15, 139, 130, 0.15);
+}
+
+.bs-lang-btn__name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+}
+
+.bs-lang-btn__code {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.bs-lang-btn--active .bs-lang-btn__code {
+  color: var(--craly-teal, #0f8b82);
+}
+
+/* ---- Security & Privacy List ---- */
+.bs-sec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bs-sec-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 18px;
+  background: var(--craly-off-white, #f8f9f6);
+  border: 1px solid var(--craly-border, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
+}
+
+.bs-sec-icon {
+  color: var(--craly-teal, #0f8b82);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.bs-sec-text {
+  font-size: 12.5px;
+  color: var(--craly-text, #17202a);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.bs-sec-text strong {
+  color: var(--craly-navy, #102a2a);
+}
+
+/* ---- Danger Zone / Sign Out ---- */
+.bs-logout-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: var(--radius-full, 9999px);
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.bs-logout-strip__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bs-logout-strip__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0;
+}
+
+.bs-logout-strip__desc {
+  font-size: 11.5px;
+  color: #7f1d1d;
+  margin: 0;
+}
+
+.bs-logout-btn-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ef4444;
+  color: #ffffff;
+  padding: 7px 14px;
+  border-radius: var(--radius-full, 9999px);
+  border: none;
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.bs-logout-btn-compact:hover {
+  background: #dc2626;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .bs-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bs-lang-compact {
+    grid-template-columns: 1fr;
+  }
+
+  .bs-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .bs-row__value {
+    text-align: left;
+  }
+
+  .bs-logout-strip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

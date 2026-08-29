@@ -7,6 +7,7 @@ import { useSocket } from '@/lib/socket/SocketContext';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { IconAlertTriangle, IconLock } from '@/components/ui/Icons';
 import './Conversation.css';
 
 interface ConversationProps {
@@ -175,15 +176,15 @@ export default function Conversation({
 
       {contactBlockedError && (
         <div style={{ marginTop: '12px', padding: '14px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', color: '#991b1b', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <strong>⚠️ Contact Details Blocked</strong>
+          <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconAlertTriangle size={14} /> Contact Details Blocked</strong>
           <span>{error}</span>
         </div>
       )}
 
       {!contactBlockedError && error && <p className="conversation__error">{error}</p>}
 
-      <p className="conversation__closed-note" style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '8px' }}>
-        🔒 Privacy Guard: Direct contact info is restricted. Craly staff will coordinate calls and meetings on your behalf.
+      <p className="conversation__closed-note" style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '8px', display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+        <IconLock size={13} style={{ flexShrink: 0, marginTop: '2px' }} /> Privacy Guard: Direct contact info is restricted. Craly staff will coordinate calls and meetings on your behalf.
       </p>
     </div>
   );

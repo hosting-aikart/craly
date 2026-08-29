@@ -31,19 +31,13 @@
 .signup-panel__brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   margin-bottom: 48px;
 }
 
 .signup-panel__brand img {
-  width: 26px;
-  height: auto;
-}
-
-.signup-panel__brand span {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
+  height: 32px;
+  width: auto;
+  filter: brightness(0) invert(1);
 }
 
 .signup-panel__eyebrow {

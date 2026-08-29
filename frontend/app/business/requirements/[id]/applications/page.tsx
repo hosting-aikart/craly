@@ -14,6 +14,7 @@ import ApplicationCompareModal from '@/components/business/ApplicationCompareMod
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
+import { IconMapPin, IconBuilding, IconStar, IconUsers, IconCalendar, IconRupee, IconAlertTriangle } from '@/components/ui/Icons';
 
 export default function RequirementApplicationsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -81,8 +82,8 @@ export default function RequirementApplicationsPage({ params }: { params: Promis
       )}
 
       {error && (
-        <div style={{ padding: '14px 18px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '10px', marginBottom: '20px', fontWeight: 600 }}>
-          ⚠️ {error}
+        <div style={{ padding: '14px 18px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '10px', marginBottom: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconAlertTriangle size={16} /> {error}
         </div>
       )}
 
@@ -147,12 +148,17 @@ export default function RequirementApplicationsPage({ params }: { params: Promis
                         {app.contractor_name}
                       </h3>
                       <div style={{ fontSize: '13px', color: 'var(--craly-muted)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <span>📍 {app.contractor_city || 'City N/A'}</span>
-                        {app.contractor_industry && <span>🏭 {app.contractor_industry}</span>}
-                        {app.contractor_experience_years != null && <span>⭐ {app.contractor_experience_years} Yrs Exp</span>}
-                        {app.contractor_workforce_size != null && <span>👥 {app.contractor_workforce_size} Total Workforce</span>}
-                        {app.contractor_availability && <span>🟢 {app.contractor_availability.replace(/_/g, ' ')}</span>}
-                        <span>📅 Submitted {new Date(app.submitted_at).toLocaleDateString()}</span>
+                        <span><IconMapPin size={13} className="inline-icon" /> {app.contractor_city || 'City N/A'}</span>
+                        {app.contractor_industry && <span><IconBuilding size={13} className="inline-icon" /> {app.contractor_industry}</span>}
+                        {app.contractor_experience_years != null && <span><IconStar size={13} className="inline-icon" /> {app.contractor_experience_years} Yrs Exp</span>}
+                        {app.contractor_workforce_size != null && <span><IconUsers size={13} className="inline-icon" /> {app.contractor_workforce_size} Total Workforce</span>}
+                        {app.contractor_availability && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+                            {app.contractor_availability.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                        <span><IconCalendar size={13} className="inline-icon" /> Submitted {new Date(app.submitted_at).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -168,7 +174,7 @@ export default function RequirementApplicationsPage({ params }: { params: Promis
                       Workforce Offered
                     </span>
                     <strong style={{ fontSize: '16px', color: 'var(--craly-teal)' }}>
-                      👥 {app.proposed_workforce} Workers
+                      <IconUsers size={14} className="inline-icon" /> {app.proposed_workforce} Workers
                     </strong>
                   </div>
 
@@ -176,8 +182,8 @@ export default function RequirementApplicationsPage({ params }: { params: Promis
                     <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
                       Availability Date
                     </span>
-                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)' }}>
-                      📅 {new Date(app.availability_date).toLocaleDateString()}
+                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <IconCalendar size={14} /> {new Date(app.availability_date).toLocaleDateString()}
                     </span>
                   </div>
 
@@ -185,8 +191,8 @@ export default function RequirementApplicationsPage({ params }: { params: Promis
                     <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
                       Proposed Rate
                     </span>
-                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)' }}>
-                      💰 {app.proposed_rate ? `₹${app.proposed_rate}` : 'Negotiable'}
+                    <span style={{ fontSize: '14px', color: 'var(--craly-navy)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <IconRupee size={14} /> {app.proposed_rate ? `₹${app.proposed_rate}` : 'Negotiable'}
                     </span>
                   </div>
                 </div>

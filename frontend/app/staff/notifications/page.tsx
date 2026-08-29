@@ -2,10 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import { getStaffNotifications } from '@/lib/api/staff';
 import { markNotificationRead } from '@/lib/api/notifications';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
+import { IconBell, IconArrowRight } from '@/components/ui/Icons';
 import './staff-notifications.css';
 
 interface StaffNotification {
@@ -48,18 +50,14 @@ export default function StaffNotificationsPage() {
 
   return (
     <div className="staff-notifications-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Staff System Notifications</h1>
-          <p className="page-subtitle">
-            Receive operational alerts when a Manufacturer selects a Contractor or submits a requirement.
-          </p>
-        </div>
-      </div>
+      <WorkspacePageHeader
+        title="Staff System Notifications"
+        subtitle="Operational alerts for manufacturer contractor selections, requirement submissions, and verification queues."
+      />
 
       {notifications.length === 0 ? (
         <EmptyState
-          icon="🔔"
+          icon={<IconBell size={32} />}
           title="No Notifications"
           subtitle="There are no system notifications for Craly Staff at this time."
         />
@@ -72,18 +70,30 @@ export default function StaffNotificationsPage() {
               onClick={() => handleClick(n)}
               style={{ cursor: n.type === 'CONTRACTOR_SELECTED' ? 'pointer' : 'default' }}
             >
-              <div className="notification-icon">🔔</div>
+              <div className={`notification-icon-wrapper ${!n.is_read ? 'notification-icon-wrapper--unread' : ''}`}>
+                <IconBell size={18} />
+              </div>
               <div className="notification-content">
                 <div className="notification-header">
-                  <h3 className="notification-title">{n.title}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 className="notification-title">{n.title}</h3>
+                    {!n.is_read && <span className="notification-unread-dot" />}
+                  </div>
                   <span className="notification-time">
                     {new Date(n.created_at).toLocaleString()}
                   </span>
                 </div>
                 <p className="notification-message">{n.message}</p>
-                {n.reference_id && (
-                  <span className="notification-ref">Ref ID: {n.reference_id}</span>
-                )}
+                <div className="notification-meta-row">
+                  {n.reference_id && (
+                    <span className="notification-ref">Ref ID: {n.reference_id}</span>
+                  )}
+                  {n.type === 'CONTRACTOR_SELECTED' && (
+                    <button type="button" className="notification-action-btn">
+                      View Engagement <IconArrowRight size={12} style={{ marginLeft: 3 }} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

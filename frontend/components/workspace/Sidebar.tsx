@@ -8,18 +8,26 @@ import { useSocket } from '@/lib/socket/SocketContext';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { listEnquiries, type Enquiry } from '@/lib/api/enquiries';
 import { listNotifications } from '@/lib/api/notifications';
+import {
+  IconDashboard, IconRequirements, IconApplications, IconBell, IconBuilding, IconSettings,
+  IconLogout, IconTools, IconClock, IconClipboard, IconMessage, IconUser, IconMapPin,
+  IconFile, IconTarget, IconPlus, IconHandshake, IconShield, IconHardHat,
+} from '@/components/ui/Icons';
 import './Sidebar.css';
 
 interface SidebarProps {
   role: 'business' | 'contractor' | 'contractor-portal' | 'staff';
   companyName: string;
+  isVerified?: boolean;
 }
 
 interface NavItem {
   label: string;
   href: string;
-  icon: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   badge?: number;
+  locked?: boolean;
+  lockedHint?: string;
 }
 
 interface NavGroup {
@@ -27,9 +35,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const helmetLogo = '/assets/helmet.png';
-
-export default function Sidebar({ role, companyName }: SidebarProps) {
+export default function Sidebar({ role, companyName, isVerified = true }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -106,22 +112,22 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     {
       group: t.sidebarGroups.main,
       items: [
-        { label: t.nav.dashboard, href: '/business/dashboard', icon: '📊' },
-        { label: 'Requirements', href: '/business/requirements', icon: '📝' },
-        { label: 'Applications', href: '/business/applications', icon: '📥' },
+        { label: t.nav.dashboard, href: '/business/dashboard', icon: IconDashboard },
+        { label: 'Requirements', href: '/business/requirements', icon: IconRequirements },
+        { label: 'Applications', href: '/business/applications', icon: IconApplications },
       ],
     },
     {
       group: t.sidebarGroups.work,
       items: [
-        { label: t.notifications.pageTitle, href: '/business/notifications', icon: '🔔', badge: unreadNotificationCount },
+        { label: t.notifications.pageTitle, href: '/business/notifications', icon: IconBell, badge: unreadNotificationCount },
       ],
     },
     {
       group: t.sidebarGroups.account,
       items: [
-        { label: t.nav.companyProfile, href: '/business/profile', icon: '🏢' },
-        { label: t.nav.settings, href: '/business/settings', icon: '⚙️' },
+        { label: t.nav.companyProfile, href: '/business/profile', icon: IconBuilding },
+        { label: t.nav.settings, href: '/business/settings', icon: IconSettings },
       ],
     },
   ];
@@ -130,24 +136,24 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     {
       group: t.sidebarGroups.main,
       items: [
-        { label: t.fieldStaff.nav.dashboard, href: '/contractor/dashboard', icon: '📊' },
-        { label: t.fieldStaff.nav.requests, href: '/contractor/requests', icon: '📝' },
-        { label: t.fieldStaff.nav.contractors, href: '/contractor/contractors', icon: '🛠️' },
-        { label: t.fieldStaff.nav.activity, href: '/contractor/activity', icon: '🕒' },
+        { label: t.fieldStaff.nav.dashboard, href: '/contractor/dashboard', icon: IconDashboard },
+        { label: t.fieldStaff.nav.requests, href: '/contractor/requests', icon: IconRequirements },
+        { label: t.fieldStaff.nav.contractors, href: '/contractor/contractors', icon: IconTools },
+        { label: t.fieldStaff.nav.activity, href: '/contractor/activity', icon: IconClock },
       ],
     },
     {
       group: t.sidebarGroups.work,
       items: [
-        { label: t.nav.enquiries, href: '/contractor/enquiries', icon: '📋', badge: pendingEnquiryCount },
-        { label: t.nav.inbox, href: '/contractor/inbox', icon: '💬', badge: unreadMessageCount },
+        { label: t.nav.enquiries, href: '/contractor/enquiries', icon: IconClipboard, badge: pendingEnquiryCount },
+        { label: t.nav.inbox, href: '/contractor/inbox', icon: IconMessage, badge: unreadMessageCount },
       ],
     },
     {
       group: t.sidebarGroups.account,
       items: [
-        { label: t.fieldStaff.nav.profile, href: '/contractor/profile', icon: '👤' },
-        { label: t.fieldStaff.nav.settings, href: '/contractor/settings', icon: '⚙️' },
+        { label: t.fieldStaff.nav.profile, href: '/contractor/profile', icon: IconUser },
+        { label: t.fieldStaff.nav.settings, href: '/contractor/settings', icon: IconSettings },
       ],
     },
   ];
@@ -156,37 +162,37 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     {
       group: 'OVERVIEW',
       items: [
-        { label: 'Dashboard', href: '/contractor-portal/dashboard', icon: '📊' },
+        { label: 'Dashboard', href: '/contractor-portal/dashboard', icon: IconDashboard, locked: !isVerified },
       ],
     },
     {
       group: 'COMPANY',
       items: [
-        { label: 'KYC & Onboarding', href: '/contractor-portal/profile?tab=kyc', icon: '📋' },
-        { label: 'Company Profile', href: '/contractor-portal/profile?tab=profile', icon: '🏢' },
-        { label: 'Workforce & Skills', href: '/contractor-portal/profile?tab=workforce', icon: '⛑️' },
-        { label: 'Coverage', href: '/contractor-portal/profile?tab=coverage', icon: '📍' },
+        { label: 'KYC & Onboarding', href: '/contractor-portal/profile?tab=kyc', icon: IconClipboard, locked: !isVerified },
+        { label: 'Company Profile', href: '/contractor-portal/profile?tab=profile', icon: IconBuilding, locked: !isVerified },
+        { label: 'Workforce & Skills', href: '/contractor-portal/profile?tab=workforce', icon: IconHardHat, locked: !isVerified },
+        { label: 'Coverage', href: '/contractor-portal/profile?tab=coverage', icon: IconMapPin, locked: !isVerified },
       ],
     },
     {
       group: 'COMPLIANCE',
       items: [
-        { label: 'Documents', href: '/contractor-portal/profile?tab=documents', icon: '📄' },
-        { label: 'Verification', href: '/contractor-portal/profile?tab=verification', icon: '🛡️' },
+        { label: 'Documents', href: '/contractor-portal/profile?tab=documents', icon: IconFile, locked: !isVerified },
+        { label: 'Verification', href: '/contractor-portal/profile?tab=verification', icon: IconShield, locked: !isVerified },
       ],
     },
     {
       group: 'MARKETPLACE',
       items: [
-        { label: 'Opportunities', href: '/contractor-portal/opportunities', icon: '🎯' },
-        { label: 'Applications', href: '/contractor-portal/applications', icon: '📥' },
+        { label: 'Opportunities', href: '/contractor-portal/opportunities', icon: IconTarget, locked: !isVerified },
+        { label: 'Applications', href: '/contractor-portal/applications', icon: IconApplications, locked: !isVerified },
       ],
     },
     {
       group: 'ACCOUNT',
       items: [
-        { label: 'Notifications', href: '/contractor-portal/notifications', icon: '🔔', badge: unreadNotificationCount },
-        { label: 'Settings', href: '/contractor-portal/settings', icon: '⚙️' },
+        { label: 'Notifications', href: '/contractor-portal/notifications', icon: IconBell, badge: unreadNotificationCount, locked: !isVerified },
+        { label: 'Settings', href: '/contractor-portal/settings', icon: IconSettings, locked: !isVerified },
       ],
     },
   ];
@@ -195,12 +201,12 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     {
       group: t.sidebarGroups.main,
       items: [
-        { label: t.nav.dashboard, href: '/staff/dashboard', icon: '📊' },
-        { label: 'KYC / Verification', href: '/staff/verification', icon: '🛡️' },
-        { label: 'Contractors', href: '/staff/contractors', icon: '🏢' },
-        { label: '+ Add Contractor', href: '/staff/contractors/new', icon: '➕' },
-        { label: 'Engagements', href: '/staff/engagements', icon: '🤝' },
-        { label: 'Notifications', href: '/staff/notifications', icon: '🔔' },
+        { label: t.nav.dashboard, href: '/staff/dashboard', icon: IconDashboard },
+        { label: 'KYC / Verification', href: '/staff/verification', icon: IconShield },
+        { label: 'Contractors', href: '/staff/contractors', icon: IconBuilding },
+        { label: 'Add Contractor', href: '/staff/contractors/new', icon: IconPlus },
+        { label: 'Engagements', href: '/staff/engagements', icon: IconHandshake },
+        { label: 'Notifications', href: '/staff/notifications', icon: IconBell },
       ],
     },
   ];
@@ -219,13 +225,6 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     router.push('/login');
   };
 
-  const getBadgeLabel = () => {
-    if (role === 'business') return 'MANUFACTURER';
-    if (role === 'contractor-portal') return 'CONTRACTOR';
-    if (role === 'staff') return 'CRALY STAFF';
-    return 'CRALY STAFF';
-  };
-
   const getRoleUserText = () => {
     if (role === 'business') return 'Manufacturer Account';
     if (role === 'contractor-portal') return 'Contractor Account';
@@ -236,11 +235,8 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
     <aside className="workspace-sidebar">
       <div className="workspace-sidebar__brand">
         <Link href="/" className="workspace-sidebar__logo">
-          <img src={helmetLogo} alt="Craly" className="workspace-sidebar__logo-img" />
-          <div className="workspace-sidebar__logo-text-group">
-            <span className="workspace-sidebar__logo-craly">Craly</span>
-            <span className="workspace-sidebar__logo-sub">Verified Workforce Network</span>
-          </div>
+          <img src="/assets/craly-logo-white.png" alt="Craly" className="workspace-sidebar__logo-img" />
+          <span className="workspace-sidebar__logo-sub">Verified Workforce Network</span>
         </Link>
       </div>
 
@@ -255,10 +251,16 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`workspace-sidebar__link ${active ? 'workspace-sidebar__link--active' : ''}`}
+                      className={`workspace-sidebar__link ${active ? 'workspace-sidebar__link--active' : ''} ${item.locked ? 'workspace-sidebar__link--locked' : ''}`}
+                      title={item.locked ? item.lockedHint : undefined}
                     >
-                      <span className="workspace-sidebar__icon">{item.icon}</span>
+                      <item.icon size={17} className="workspace-sidebar__icon" />
                       <span className="workspace-sidebar__label">{item.label}</span>
+                      {item.locked && (
+                        <span className="workspace-sidebar__lock-badge" title={item.lockedHint}>
+                          🔒
+                        </span>
+                      )}
                       {Boolean(item.badge && item.badge > 0) && (
                         <span className="workspace-sidebar__badge">{item.badge}</span>
                       )}
@@ -287,7 +289,7 @@ export default function Sidebar({ role, companyName }: SidebarProps) {
           className="workspace-sidebar__logout-btn"
           title="Log Out"
         >
-          🚪
+          <IconLogout size={16} />
         </button>
       </div>
     </aside>

@@ -1,0 +1,188 @@
+/* ==========================================================================
+   Craly Mobile Login Styles (Strictly for screens <= 768px)
+   Theme: Craly Navy (#102a2a) & Brand Teal (#0f766e)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .login-page {
+    min-height: calc(100vh - 68px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: var(--craly-off-white, #f8f9fa);
+    box-sizing: border-box;
+  }
+
+  .login-page__wrap {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 36px -6px rgba(16, 42, 42, 0.09);
+    overflow: hidden;
+  }
+
+  .login-panel {
+    display: none !important;
+  }
+
+  /* Hide duplicate logo since navbar already shows it */
+  .login-mobile-brand {
+    display: none !important;
+  }
+
+  .login-form-panel {
+    padding: 32px 24px;
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+  }
+
+  /* Left-aligned clean header */
+  .login-form-panel__eyebrow {
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--craly-teal, #0f766e);
+    margin: 0 0 6px 0;
+    text-transform: uppercase;
+  }
+
+  .login-form-panel__heading {
+    text-align: left;
+    font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--craly-navy, #102a2a);
+    margin: 0 0 24px 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* Form Fields */
+  .login-fields {
+    gap: 16px;
+  }
+
+  .login-field {
+    gap: 6px;
+  }
+
+  .login-field span {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #475569;
+    margin-left: 2px;
+  }
+
+  .login-field__input {
+    min-height: 48px;
+    padding: 12px 18px;
+    border-radius: var(--radius-full, 9999px);
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .login-field__input:focus-within {
+    background: #ffffff;
+    border-color: var(--craly-teal, #0f766e);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+  }
+
+  .login-field__input input {
+    font-size: 14.5px;
+    color: #0f172a;
+  }
+
+  .login-field__input svg {
+    color: var(--craly-teal, #0f766e);
+  }
+
+  .login-forgot {
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-top: 2px;
+    color: var(--craly-teal, #0f766e);
+  }
+
+  /* Submit Button */
+  .login-submit {
+    min-height: 48px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: var(--radius-full, 9999px);
+    margin-top: 6px;
+    background: linear-gradient(135deg, #0f766e 0%, #0b5c56 100%);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.25);
+    transition: all 0.2s ease;
+  }
+
+  .login-submit:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  /* New to Craly Card */
+  .login-new {
+    margin-top: 24px;
+    padding: 18px 16px;
+    border-radius: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  .login-new p {
+    text-align: left;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--craly-navy, #102a2a);
+    margin: 0 0 12px 0;
+  }
+
+  .login-new__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .login-new__chip {
+    padding: 11px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-full, 9999px);
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+  }
+
+  .login-new__chip svg {
+    color: var(--craly-teal, #0f766e);
+  }
+
+  .login-new__chip:active {
+    background: #f0fdfa;
+    border-color: #0f766e;
+    transform: scale(0.99);
+  }
+}
+
+@media (max-width: 420px) {
+  .login-page {
+    padding: 16px 12px;
+  }
+
+  .login-form-panel {
+    padding: 26px 18px;
+  }
+
+  .login-form-panel__heading {
+    font-size: 24px;
+  }
+}

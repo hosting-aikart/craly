@@ -1,6 +1,11 @@
+/* ==========================================================================
+   Workspace Sidebar Styles
+   Theme: Signature Craly Forest Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
 .workspace-sidebar {
   width: 250px;
-  background: #0b132b;
+  background: linear-gradient(180deg, #102a2a 0%, #173b3a 45%, #0f3533 100%);
   color: #ffffff;
   height: 100vh;
   position: fixed;
@@ -8,8 +13,8 @@
   left: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 4px 0 24px rgba(10, 45, 42, 0.22);
   z-index: 90;
   box-sizing: border-box;
 }
@@ -21,49 +26,43 @@
 
 .workspace-sidebar__logo {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   text-decoration: none;
 }
 
 .workspace-sidebar__logo-img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #ffffff;
-  padding: 4px;
+  height: 60px;
+  width: auto;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.workspace-sidebar__logo-text-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.workspace-sidebar__logo-craly {
-  font-family: var(--font-heading);
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-  color: #ffffff;
-  line-height: 1.1;
 }
 
 .workspace-sidebar__logo-sub {
   font-size: 10.5px;
-  color: #94a3b8;
-  font-weight: 500;
+  color: #5eead4;
+  opacity: 0.85;
+  font-weight: 600;
   line-height: 1.2;
+  letter-spacing: 0.02em;
 }
 
 .workspace-sidebar__nav {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding: 16px 12px 24px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+.workspace-sidebar__nav::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .workspace-sidebar__group {
@@ -75,10 +74,11 @@
 .workspace-sidebar__group-title {
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
-  padding: 4px 12px;
+  color: #5eead4;
+  opacity: 0.9;
+  padding: 4px 14px;
 }
 
 .workspace-sidebar__list {
@@ -87,38 +87,40 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .workspace-sidebar__link {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
-  border-radius: 8px;
-  color: #94a3b8;
+  padding: 10px 16px;
+  border-radius: var(--radius-full, 9999px);
+  color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
   font-family: var(--font-body);
   font-size: 13.5px;
   font-weight: 500;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
 }
 
 .workspace-sidebar__link:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
 }
 
 .workspace-sidebar__link--active {
-  background: #ffffff !important;
-  color: #0f172a !important;
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, var(--craly-teal-dark, #0b6c64) 100%) !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 14px rgba(15, 139, 130, 0.35);
 }
 
 .workspace-sidebar__link--active .workspace-sidebar__icon {
-  color: #10b981;
+  color: #ffffff;
 }
 
 .workspace-sidebar__icon {
@@ -126,6 +128,7 @@
   display: flex;
   align-items: center;
   color: inherit;
+  flex-shrink: 0;
 }
 
 .workspace-sidebar__label {
@@ -141,6 +144,23 @@
   border-radius: 10px;
 }
 
+.workspace-sidebar__lock-badge {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  filter: grayscale(0.2);
+}
+
+.workspace-sidebar__link--locked {
+  opacity: 0.72;
+}
+
+.workspace-sidebar__link--locked:hover {
+  opacity: 0.95;
+}
+
 .workspace-sidebar__footer {
   padding: 14px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -148,7 +168,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .workspace-sidebar__user {
@@ -162,7 +182,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #10b981;
+  background: linear-gradient(135deg, #14b8a6 0%, #0f8b82 100%);
   color: #ffffff;
   font-weight: 700;
   font-size: 13px;
@@ -170,6 +190,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
 }
 
 .workspace-sidebar__user-info {
@@ -189,17 +210,22 @@
 
 .workspace-sidebar__user-role {
   font-size: 11px;
-  color: #94a3b8;
-  font-weight: 500;
+  color: #5eead4;
+  font-weight: 600;
 }
 
 .workspace-sidebar__logout-btn {
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 15px;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   color: #ffffff;
   transition: all 0.15s ease;
 }
