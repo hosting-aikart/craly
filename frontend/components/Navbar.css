@@ -156,17 +156,17 @@
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: 18px;
   padding: 6px;
-  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 20px 48px -10px rgba(15, 23, 42, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 130px;
+  min-width: 140px;
   z-index: 1010;
   animation: navDropdownFade 0.15s ease-out;
 }
@@ -186,27 +186,27 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border-radius: 10px;
+  padding: 9px 14px;
+  border-radius: 12px;
   background: none;
   border: none;
   font-family: var(--font-body, sans-serif);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  color: #1e293b;
   cursor: pointer;
   text-align: left;
   transition: all 0.15s ease;
 }
 
 .craly-nav__lang-option:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.6);
+  color: #0f172a;
 }
 
 .craly-nav__lang-option--active {
-  background: rgba(13, 148, 136, 0.35);
-  color: #ffffff;
+  background: rgba(13, 148, 136, 0.15);
+  color: #0d9488;
   font-weight: 600;
 }
 
