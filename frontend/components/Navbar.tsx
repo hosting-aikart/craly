@@ -343,34 +343,34 @@ const CNAV_CSS = `
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 16px;
-  height: 66px;
-  max-width: 1300px;
+  gap: 20px;
+  height: 74px;
+  max-width: 1340px;
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 32px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow:
     0 4px 30px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.30);
-  transition: background 0.3s ease, border-color 0.3s ease;
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 @media (max-width: 899px) {
   .cnav-in {
     display: flex;
     justify-content: space-between;
-    height: 58px;
+    height: 62px;
     padding: 0 18px;
     border-radius: 9999px;
   }
 }
-/* Dark hero — darker tint so white text reads well */
+/* Dark hero — deeper tint so white content pops */
 .cnav-in.cnav-dark {
-  background: rgba(5, 10, 24, 0.40);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(5, 10, 24, 0.42);
+  border-color: rgba(255, 255, 255, 0.20);
 }
 
 /* ── Logo ── */
@@ -382,14 +382,14 @@ const CNAV_CSS = `
   justify-self: start;
 }
 /* Default: dark logo on light bg, white logo hidden */
-.cnav-logo-dark  { display: inline-block; height: 40px; width: auto; object-fit: contain; }
-.cnav-logo-light { display: none;         height: 40px; width: auto; object-fit: contain; }
+.cnav-logo-dark  { display: inline-block; height: 48px; width: auto; object-fit: contain; transition: opacity 0.3s ease; }
+.cnav-logo-light { display: none;         height: 48px; width: auto; object-fit: contain; transition: opacity 0.3s ease; }
 /* When over a dark section, swap logos */
 .cnav-dark .cnav-logo-dark  { display: none !important; }
 .cnav-dark .cnav-logo-light { display: inline-block !important; }
 @media (max-width: 899px) {
-  .cnav-logo-dark  { height: 34px; }
-  .cnav-logo-light { height: 34px; }
+  .cnav-logo-dark  { height: 38px; }
+  .cnav-logo-light { height: 38px; }
 }
 
 /* ── Desktop center nav links ── */
@@ -403,17 +403,17 @@ const CNAV_CSS = `
 @media (min-width: 900px) { .cnav-links { display: flex; } }
 
 .cnav-link {
-  font-size: 14.5px;
+  font-size: 15.5px;
   font-weight: 500;
   color: #0f172a;
   text-decoration: none;
-  padding: 7px 16px;
+  padding: 8px 18px;
   border-radius: 9999px;
   background: transparent;
   border: none;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.25s ease, background 0.25s ease;
+  transition: color 0.35s ease, background 0.25s ease, text-shadow 0.35s ease;
   font-family: inherit;
   text-shadow: none;
 }
@@ -421,12 +421,12 @@ const CNAV_CSS = `
 .cnav-link-active { color: #0d9488 !important; font-weight: 600; }
 .cnav-contact-btn { font-family: inherit; }
 
-/* On dark sections — all nav text becomes white */
+/* On dark sections — all nav text goes white */
 .cnav-dark .cnav-link {
-  color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  color: #ffffff !important;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
-.cnav-dark .cnav-link:hover { background: rgba(255,255,255,0.15); color: #ffffff; }
+.cnav-dark .cnav-link:hover { background: rgba(255,255,255,0.15); color: #ffffff !important; }
 .cnav-dark .cnav-link-active { color: #5eead4 !important; }
 
 /* ── Right controls ── */
@@ -528,39 +528,39 @@ const CNAV_CSS = `
 @media (min-width: 640px) { .cnav-auth { display: flex; } }
 
 .cnav-login {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: #0f172a;
   text-decoration: none;
-  padding: 8px 6px;
-  transition: color 0.2s ease;
+  padding: 8px 8px;
+  transition: color 0.35s ease, text-shadow 0.35s ease;
   white-space: nowrap;
   text-shadow: none;
 }
 .cnav-login:hover { color: #0d9488; }
-.cnav-dark .cnav-login { color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
-.cnav-dark .cnav-login:hover { color: #5eead4; }
+.cnav-dark .cnav-login { color: #ffffff !important; text-shadow: 0 1px 3px rgba(0,0,0,0.45); }
+.cnav-dark .cnav-login:hover { color: #5eead4 !important; }
 
 .cnav-signup {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 9px 26px;
+  padding: 11px 30px;
   background: #ffffff;
   color: #0d9488;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   font-family: inherit;
   border-radius: 9999px;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.13);
-  border: 1px solid rgba(255,255,255,0.9);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  border: 1px solid rgba(255,255,255,0.95);
   transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 .cnav-signup:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.20);
   color: #0b6c64;
 }
 
