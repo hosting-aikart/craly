@@ -20,6 +20,7 @@ export default function Hero() {
     <section
       className="hero"
       style={{ backgroundImage: `url(${heroBg})` }}
+      data-navbar-theme="dark"
     >
       <div className={`hero-content ${visible ? 'hero-content--visible' : ''}`}>
         <h1 className="hero-headline">

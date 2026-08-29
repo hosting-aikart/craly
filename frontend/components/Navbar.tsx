@@ -25,18 +25,26 @@ export default function Navbar() {
     function checkTheme() {
       const navIn = document.querySelector('.cnav-in');
       if (!navIn) return;
-      const rect = navIn.getBoundingClientRect();
-      const checkX = rect.left + rect.width / 2;
-      const checkY = rect.top + rect.height / 2;
+      const navRect = navIn.getBoundingClientRect();
+      const checkX = navRect.left + navRect.width / 2;
+      const checkY = navRect.top + navRect.height / 2;
+
+      // ── Pass 1: explicit data-navbar-theme annotations ───────────────
+      const annotated = document.querySelectorAll('[data-navbar-theme]');
+      for (const el of Array.from(annotated)) {
+        const r = el.getBoundingClientRect();
+        if (r.top <= checkY && r.bottom >= checkY && r.left <= checkX && r.right >= checkX) {
+          const attr = el.getAttribute('data-navbar-theme');
+          setIsDarkTheme(attr === 'dark');
+          return;
+        }
+      }
+
+      // ── Pass 2: brightness of elements stacked under the navbar center ─
       const elements = document.elementsFromPoint(checkX, checkY);
       let dark = false;
       for (const el of elements) {
         if (el.closest('.cnav')) continue;
-        const darkAttr =
-          el.getAttribute('data-navbar-theme') ||
-          el.closest('[data-navbar-theme]')?.getAttribute('data-navbar-theme');
-        if (darkAttr === 'dark') { dark = true; break; }
-        if (darkAttr === 'light') { dark = false; break; }
         const bg = window.getComputedStyle(el).backgroundColor;
         if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
           const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
