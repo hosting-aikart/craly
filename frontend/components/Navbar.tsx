@@ -62,7 +62,11 @@ export default function Navbar() {
           
           {/* ── Brand Logo ── */}
           <Link href="/" className="craly-nav__brand" onClick={closeAll}>
-            <img src="/assets/craly-logo-white.png" alt="Craly" className="craly-nav__logo-wordmark" />
+            <img
+              src={scrolled ? '/assets/craly-logo.png' : '/assets/craly-logo-white.png'}
+              alt="Craly"
+              className="craly-nav__logo-wordmark"
+            />
           </Link>
 
           {/* ── Desktop Center Navigation ── */}
