@@ -11,8 +11,21 @@ import {
   type RequirementItem,
 } from '@/lib/api/businessPortal';
 import LoadingState from '@/components/ui/LoadingState';
-import Button from '@/components/ui/Button';
-import { IconUsers, IconMapPin, IconCalendar, IconRupee } from '@/components/ui/Icons';
+import {
+  IconUsers,
+  IconMapPin,
+  IconCalendar,
+  IconRupee,
+  IconBriefcase,
+  IconTarget,
+  IconTools,
+  IconClock,
+  IconShield,
+  IconArrowLeft,
+  IconCheck,
+  IconAlertTriangle,
+} from '@/components/ui/Icons';
+import './requirement-detail.css';
 
 export default function RequirementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -70,8 +83,10 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
 
   if (error || !requirement) {
     return (
-      <div style={{ padding: '24px', background: '#fef2f2', color: '#dc2626', borderRadius: '12px' }}>
-        {error || 'Requirement not found'}
+      <div className="req-detail-page">
+        <div style={{ padding: '24px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '14px', fontWeight: 600 }}>
+          ⚠️ {error || 'Requirement not found'}
+        </div>
       </div>
     );
   }
@@ -79,177 +94,163 @@ export default function RequirementDetailPage({ params }: { params: Promise<{ id
   const isDraft = requirement.status === 'DRAFT';
 
   return (
-    <>
-      <WorkspacePageHeader
-        title={requirement.title}
-        subtitle={`Requirement ID: ${requirement.id}`}
-      />
+    <div className="req-detail-page">
+      {/* ── Breadcrumb Back Navigation ──────────────────────────────── */}
+      <div className="req-breadcrumb-bar">
+        <Link href="/business/requirements" className="req-back-link">
+          <IconArrowLeft size={13} /> Back to Requirements
+        </Link>
+      </div>
 
       {successMsg && (
-        <div style={{ padding: '14px 18px', background: '#dcfce7', color: '#15803d', borderRadius: '10px', marginBottom: '20px', fontWeight: 600 }}>
-          ✓ {successMsg}
+        <div style={{ padding: '14px 20px', background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', borderRadius: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconCheck size={16} /> {successMsg}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', maxWidth: '900px' }}>
-        {/* Detail Card */}
-        <div
-          style={{
-            background: 'var(--craly-white)',
-            border: '1px solid var(--craly-border)',
-            borderRadius: '16px',
-            padding: '28px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-            <div>
-              <span
-                style={{
-                  display: 'inline-block',
-                  padding: '4px 12px',
-                  borderRadius: '9999px',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '8px',
-                  background: isDraft ? '#f1f5f9' : requirement.status === 'PUBLISHED' ? '#dcfce7' : '#e0e7ff',
-                  color: isDraft ? '#64748b' : requirement.status === 'PUBLISHED' ? '#15803d' : '#4338ca',
-                }}
-              >
-                {requirement.status.replace('_', ' ')}
-              </span>
-              <h2 style={{ margin: 0, fontSize: '24px', color: 'var(--craly-navy)' }}>{requirement.title}</h2>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              {isDraft && (
-                <>
-                  <Button
-                    variant="primary"
-                    onClick={handlePublish}
-                    disabled={publishing || deleting}
-                  >
-                    {publishing ? 'Publishing…' : 'Publish Requirement'}
-                  </Button>
-
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    disabled={publishing || deleting}
-                    style={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#dc2626',
-                      background: '#fef2f2',
-                      border: '1px solid #fecaca',
-                      padding: '10px 18px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {deleting ? 'Deleting…' : 'Delete Draft'}
-                  </button>
-                </>
-              )}
-
-              <Link
-                href={`/business/requirements/${requirement.id}/applications`}
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#ffffff',
-                  background: 'var(--craly-teal)',
-                  textDecoration: 'none',
-                  padding: '10px 18px',
-                  borderRadius: '8px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-              >
-                View Applications ({requirement.applications_count}) →
-              </Link>
-            </div>
+      {/* ── Hero Banner ──────────────────────────────────────────────── */}
+      <div className="req-detail-hero">
+        <div className="req-detail-hero-left">
+          <div className="req-detail-badge-row">
+            <span className={`req-status-pill req-status-pill--${requirement.status.toLowerCase()}`}>
+              {requirement.status.replace('_', ' ')}
+            </span>
+            <span className="req-id-pill">ID: {requirement.id.slice(0, 8)}</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', background: 'var(--craly-surface)', padding: '16px', borderRadius: '12px', border: '1px solid var(--craly-border)' }}>
-            <div>
-              <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
-                Workers Required
-              </span>
-              <strong style={{ fontSize: '18px', color: 'var(--craly-navy)' }}><IconUsers size={15} className="inline-icon" /> {requirement.workers_required}</strong>
-            </div>
+          <h1 className="req-detail-title">{requirement.title}</h1>
 
-            <div>
-              <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
-                Location
+          <div className="req-detail-meta-row">
+            {requirement.industry && (
+              <span className="req-meta-item">
+                <IconBriefcase size={14} /> {requirement.industry}
               </span>
-              <span style={{ fontSize: '15px', color: 'var(--craly-navy)' }}><IconMapPin size={14} className="inline-icon" /> {requirement.location}</span>
-            </div>
-
-            <div>
-              <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
-                Start Date & Duration
-              </span>
-              <span style={{ fontSize: '15px', color: 'var(--craly-navy)' }}>
-                <IconCalendar size={14} className="inline-icon" /> {new Date(requirement.start_date).toLocaleDateString()} ({requirement.duration})
-              </span>
-            </div>
-
-            <div>
-              <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--craly-muted)', textTransform: 'uppercase' }}>
-                Budget Range
-              </span>
-              <span style={{ fontSize: '15px', color: 'var(--craly-navy)' }}>
-                <IconRupee size={14} className="inline-icon" /> {requirement.budget_min || requirement.budget_max ? `₹${requirement.budget_min || 0} - ₹${requirement.budget_max || 'N/A'}` : 'Negotiable'}
-              </span>
-            </div>
-          </div>
-
-          {requirement.description && (
-            <div>
-              <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--craly-navy)' }}>Description</h4>
-              <p style={{ margin: 0, fontSize: '14px', color: 'var(--craly-text)', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
-                {requirement.description}
-              </p>
-            </div>
-          )}
-
-          {requirement.required_skills && requirement.required_skills.length > 0 && (
-            <div>
-              <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--craly-navy)' }}>Required Skills</h4>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {requirement.required_skills.map((skill, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      background: 'var(--craly-surface)',
-                      border: '1px solid var(--craly-border)',
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      color: 'var(--craly-navy)',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid var(--craly-border)', fontSize: '12px', color: 'var(--craly-muted)' }}>
-            <span>Created: {new Date(requirement.created_at).toLocaleString()}</span>
-            {requirement.published_at && (
-              <span>Published: {new Date(requirement.published_at).toLocaleString()}</span>
             )}
+            <span className="req-meta-item">
+              <IconMapPin size={14} /> {requirement.location}
+            </span>
+            <span className="req-meta-item">
+              <IconCalendar size={14} /> Starts {new Date(requirement.start_date).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Action Controls in Hero */}
+        <div className="req-detail-hero-actions">
+          {isDraft && (
+            <>
+              <button
+                type="button"
+                className="req-hero-btn req-hero-btn--primary"
+                onClick={handlePublish}
+                disabled={publishing || deleting}
+              >
+                {publishing ? 'Publishing…' : 'Publish Requirement →'}
+              </button>
+
+              <button
+                type="button"
+                className="req-hero-btn req-hero-btn--delete"
+                onClick={handleDelete}
+                disabled={publishing || deleting}
+              >
+                {deleting ? 'Deleting…' : 'Delete Draft'}
+              </button>
+            </>
+          )}
+
+          <Link
+            href={`/business/requirements/${requirement.id}/applications`}
+            className="req-hero-btn req-hero-btn--view-apps"
+          >
+            <IconUsers size={15} /> View Proposals ({requirement.applications_count}) →
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Key Parameters 4-Grid ────────────────────────────────────── */}
+      <div className="req-params-grid">
+        <div className="req-param-card">
+          <div className="req-param-icon req-param-icon--teal">
+            <IconUsers size={20} />
+          </div>
+          <div className="req-param-info">
+            <span className="req-param-label">Workforce Needed</span>
+            <span className="req-param-val">{requirement.workers_required} Workers</span>
+          </div>
+        </div>
+
+        <div className="req-param-card">
+          <div className="req-param-icon req-param-icon--blue">
+            <IconMapPin size={20} />
+          </div>
+          <div className="req-param-info">
+            <span className="req-param-label">City Hub / Zone</span>
+            <span className="req-param-val">{requirement.city || requirement.location}</span>
+          </div>
+        </div>
+
+        <div className="req-param-card">
+          <div className="req-param-icon req-param-icon--amber">
+            <IconClock size={20} />
+          </div>
+          <div className="req-param-info">
+            <span className="req-param-label">Duration</span>
+            <span className="req-param-val">{requirement.duration || 'Flexible'}</span>
+          </div>
+        </div>
+
+        <div className="req-param-card">
+          <div className="req-param-icon req-param-icon--purple">
+            <IconRupee size={20} />
+          </div>
+          <div className="req-param-info">
+            <span className="req-param-label">Daily Rate Budget</span>
+            <span className="req-param-val">
+              {requirement.budget_min || requirement.budget_max
+                ? `₹${requirement.budget_min || 0} - ₹${requirement.budget_max || 'N/A'}`
+                : 'Negotiable'}
+            </span>
           </div>
         </div>
       </div>
-    </>
+
+      {/* ── Content & Scope Card ─────────────────────────────────────── */}
+      <div className="req-content-card">
+        {/* Description / Scope */}
+        {requirement.description && (
+          <div className="req-content-block">
+            <h3 className="req-block-heading">
+              <IconTarget size={18} /> Detailed Scope & Facility Specifications
+            </h3>
+            <p className="req-desc-text">{requirement.description}</p>
+          </div>
+        )}
+
+        {/* Required Skills */}
+        {requirement.required_skills && requirement.required_skills.length > 0 && (
+          <div className="req-content-block">
+            <h3 className="req-block-heading">
+              <IconTools size={18} /> Required Trade Skills & Certifications
+            </h3>
+            <div className="req-skills-wrap">
+              {requirement.required_skills.map((skill, idx) => (
+                <span key={idx} className="req-skill-pill">
+                  <IconCheck size={13} /> {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Audit Timestamps */}
+        <div className="req-footer-audit">
+          <span>📅 Created On: {new Date(requirement.created_at).toLocaleString()}</span>
+          {requirement.published_at && (
+            <span>🚀 Published On: {new Date(requirement.published_at).toLocaleString()}</span>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
