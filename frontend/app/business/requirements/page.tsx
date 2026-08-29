@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
@@ -48,6 +48,36 @@ export default function BusinessRequirementsListPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  // Sliding tab indicator state & refs
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 4,
+    width: 0,
+    opacity: 0,
+  });
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = tabRefs.current[activeStatus];
+      if (activeEl) {
+        setIndicatorStyle({
+          left: activeEl.offsetLeft,
+          width: activeEl.offsetWidth,
+          opacity: 1,
+        });
+      }
+    };
+
+    updateIndicator();
+    const timeout = setTimeout(updateIndicator, 50);
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [activeStatus]);
 
   const fetchRequirements = (statusFilter: string) => {
     setLoading(true);
@@ -188,11 +218,22 @@ export default function BusinessRequirementsListPage() {
           )}
         </div>
 
-        {/* Filter Tabs Bar */}
+        {/* Filter Tabs Bar with Sliding Pill */}
         <div className="reqs-tabs-container">
+          <div
+            className="reqs-sliding-indicator"
+            style={{
+              transform: `translateX(${indicatorStyle.left}px)`,
+              width: `${indicatorStyle.width}px`,
+              opacity: indicatorStyle.opacity,
+            }}
+          />
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
+              ref={(el) => {
+                tabRefs.current[tab.value] = el;
+              }}
               type="button"
               onClick={() => setActiveStatus(tab.value)}
               className={`reqs-tab-item ${activeStatus === tab.value ? 'active' : ''}`}

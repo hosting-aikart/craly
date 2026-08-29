@@ -10,6 +10,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import LoadingState from '@/components/ui/LoadingState';
 import './login.css';
+import './login-mobile.css';
 
 export default function LoginPage() {
   const router = useRouter();
