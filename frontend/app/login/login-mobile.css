@@ -1,0 +1,240 @@
+/* ==========================================================================
+   Craly Mobile Login Styles (Strictly for screens <= 768px)
+   Inspired by Modern Bottom-Sheet & Card App Reference
+   Theme: Craly Deep Forest (#0d4a45) & Brand Teal (#0f766e)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .login-page {
+    min-height: calc(100vh - 68px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0;
+    background: linear-gradient(180deg, #edf5f3 0%, #e2ece9 40%, #f1f5f4 100%);
+    box-sizing: border-box;
+  }
+
+  .login-page__wrap {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .login-panel {
+    display: none !important;
+  }
+
+  /* ── Top Brand Hero Area ────────────────────────────────────────── */
+  .login-mobile-brand {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px 24px;
+    gap: 8px;
+  }
+
+  .login-mobile-brand img {
+    height: 48px !important;
+    width: auto !important;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(15, 118, 110, 0.12));
+  }
+
+  /* ── Bottom Sheet Form Card ─────────────────────────────────────── */
+  .login-form-panel {
+    background: #ffffff;
+    border-radius: 32px 32px 0 0;
+    padding: 32px 24px 44px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 -12px 40px rgba(16, 42, 42, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.8);
+    flex: 1;
+    min-height: calc(100vh - 180px);
+  }
+
+  .login-form-panel__eyebrow {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #0f766e;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+  }
+
+  .login-form-panel__heading {
+    text-align: center;
+    font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+    font-size: 23px;
+    font-weight: 800;
+    color: #102a2a;
+    margin: 0 0 24px 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Inputs & Labels ─────────────────────────────────────────────── */
+  .login-fields {
+    gap: 16px;
+  }
+
+  .login-field {
+    gap: 6px;
+  }
+
+  .login-field span {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    margin-left: 2px;
+  }
+
+  .login-field__input {
+    min-height: 52px;
+    padding: 12px 18px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .login-field__input svg {
+    color: #0f766e;
+    margin-right: 2px;
+  }
+
+  .login-field__input:focus-within {
+    background: #ffffff;
+    border-color: #0f766e;
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+  }
+
+  .login-field__input input {
+    font-size: 14.5px;
+    color: #0f172a;
+  }
+
+  .login-field__input input::placeholder {
+    color: #94a3b8;
+    font-size: 13.5px;
+  }
+
+  .login-field__input .password-toggle {
+    color: #94a3b8;
+    padding: 6px;
+  }
+
+  .login-field__input .password-toggle:hover {
+    color: #0f766e;
+  }
+
+  .login-forgot {
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-top: 4px;
+    color: #0f766e;
+  }
+
+  /* ── Primary Submit Button ──────────────────────────────────────── */
+  .login-submit {
+    min-height: 52px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 14px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #0f766e 0%, #0b544e 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 118, 110, 0.28);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.02em;
+  }
+
+  .login-submit:active:not(:disabled) {
+    transform: scale(0.98);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+  }
+
+  /* ── Role Signup Cards (New to Craly) ────────────────────────────── */
+  .login-new {
+    margin-top: 26px;
+    padding: 18px 16px;
+    border-radius: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  .login-new p {
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #102a2a;
+    margin: 0 0 12px 0;
+  }
+
+  .login-new__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .login-new__chip {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+  }
+
+  .login-new__chip svg {
+    color: #0f766e;
+  }
+
+  .login-new__chip:active {
+    background: #f0fdfa;
+    border-color: #0f766e;
+    color: #0f766e;
+    transform: scale(0.99);
+  }
+}
+
+@media (max-width: 420px) {
+  .login-mobile-brand {
+    padding: 24px 16px 18px;
+  }
+
+  .login-mobile-brand img {
+    height: 42px !important;
+  }
+
+  .login-form-panel {
+    padding: 26px 18px 36px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .login-form-panel__heading {
+    font-size: 21px;
+  }
+
+  .login-field__input {
+    min-height: 48px;
+  }
+
+  .login-submit {
+    min-height: 48px;
+  }
+}
