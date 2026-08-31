@@ -167,10 +167,6 @@ export default function BusinessRequirementsListPage() {
               <IconBriefcase size={12} /> Enterprise Manpower Management
             </span>
             <h1>Manpower Requirements & Tenders</h1>
-            <p>
-              Post your workforce requirements, receive matching bids from verified industrial contractors,
-              and manage proposals in real-time.
-            </p>
           </div>
 
           <Link href="/business/requirements/new" className="reqs-hero-create-btn">

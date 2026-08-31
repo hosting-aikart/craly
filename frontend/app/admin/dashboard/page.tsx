@@ -52,7 +52,7 @@ export default function AdminDashboardPage() {
           <span className="admin-dashboard__role-badge">Craly Platform Governance</span>
           <h1 className="admin-dashboard__title">Master Control Center</h1>
           <p className="admin-dashboard__subtitle">
-            Oversee contractor verification lifecycle, monitor engagement conversations, and review audit activity.
+            Manage verifications, engagements, and platform audit activity.
           </p>
         </div>
         <div className="admin-dashboard__actions">

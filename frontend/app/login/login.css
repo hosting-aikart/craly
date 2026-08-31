@@ -68,33 +68,45 @@
 .login-panel__roles {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 12px;
 }
 
 .login-panel__role-card {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50px !important;
+  padding: 12px 14px;
   color: #ffffff;
+  box-sizing: border-box;
 }
 
-.login-panel__role-card svg {
-  margin-bottom: 10px;
-}
-
-.login-panel__role-card h4 {
+.login-panel__role-card span {
   font-family: var(--font-display);
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 600;
-  margin: 0 0 4px;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
-.login-panel__role-card p {
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.65);
-  line-height: 1.5;
+.login-panel__role-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.login-panel__role-icon svg {
+  color: #5eead4;
   margin: 0;
 }
 

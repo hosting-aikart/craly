@@ -63,7 +63,7 @@ export default function AdminAnalyticsPage() {
           <span className="admin-analytics__role-badge">Marketplace Intelligence</span>
           <h1 className="admin-analytics__title">Platform Supply & Demand Analytics</h1>
           <p className="admin-analytics__subtitle">
-            Track real-time conversion funnels from manufacturer requirement submission through contractor confirmation and meeting handoffs.
+            Track conversion funnels from requirement submissions to contractor handoffs.
           </p>
         </div>
       </div>

@@ -111,7 +111,7 @@ a {
    Global Curved Button System
    All primary, secondary, and interactive buttons use smooth rounded curves (pill shape)
    ========================================================================== */
-button:not([class*="toggle"]):not([class*="checkbox"]):not([class*="radio"]):not([class*="close"]):not([class*="icon"]):not([class*="subtab"]):not([class*="tab"]):not([class*="menu"]),
+button:not([class*="toggle"]):not([class*="checkbox"]):not([class*="radio"]):not([class*="close"]):not([class*="icon"]):not([class*="subtab"]):not([class*="tab"]):not([class*="menu"]):not([class*="item"]):not([class*="notif"]):not([class*="list"]):not([class*="row"]):not([class*="cell"]):not([class*="option"]):not([class*="mark"]):not([class*="accordion"]),
 .btn,
 .btn-primary,
 .btn-secondary,

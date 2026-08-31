@@ -76,18 +76,18 @@
   font-weight: 700;
 }
 
-/* ── Table Card ──────────────────────────────────────────────────────────── */
 .admin-contractors-table-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
   box-sizing: border-box;
 }
 
 .admin-contractors-table {
   width: 100%;
+  min-width: 900px;
   table-layout: fixed;
   border-collapse: collapse;
   font-family: var(--font-body, 'Inter', sans-serif);
@@ -217,11 +217,17 @@
   border: 1px solid #fecaca;
 }
 
+.admin-contractors-table td:last-child {
+  overflow: visible;
+}
+
 /* ── Action Buttons ──────────────────────────────────────────────────────── */
 .admin-actions-cell {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .admin-unlist-btn {
