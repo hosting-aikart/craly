@@ -1,94 +1,112 @@
-'use client';
+import type { Metadata } from 'next';
+import { getApiUrl } from '@/lib/api';
+import type { ContractorDetail } from '@/lib/api/contractors';
+import ContractorProfileClient from '@/components/contractors/ContractorProfileClient';
+import {
+  generateContractorSchema,
+  generateBreadcrumbSchema,
+} from '@/lib/seo/structuredData';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { getContractor, type ContractorDetail } from '@/lib/api/contractors';
-import { useAuth } from '@/lib/auth/useAuth';
-import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
-import EmptyState from '@/components/ui/EmptyState';
-import LoadingState from '@/components/ui/LoadingState';
-import Button from '@/components/ui/Button';
-import ContractorProfileCard from '@/components/contractors/ContractorProfileCard';
-import { useLanguage } from '@/lib/i18n/LanguageContext';
-import '../contractors.css';
-import './profile.css';
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-export default function ContractorProfilePage() {
-  const router = useRouter();
-  const params = useParams<{ id: string }>();
-  const id = params?.id ?? '';
-  const { user, loading: authLoading } = useAuth();
-  const { t } = useLanguage();
-  const [contractor, setContractor] = useState<ContractorDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+async function fetchContractor(id: string): Promise<ContractorDetail | null> {
+  try {
+    const url = getApiUrl(`/contractors/${id}`);
+    const res = await fetch(url, {
+      next: { revalidate: 60 }, // ISR cache for 60 seconds
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data ?? null;
+  } catch {
+    return null;
+  }
+}
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (user && id) {
-      if (user.role === 'business') {
-        // /business/contractors/[id] is deactivated (direct-contact bypass)
-        // — send Manufacturers to the real, requirement-driven flow instead.
-        router.replace('/business/requirements');
-      } else if (user.role === 'admin') {
-        router.replace('/admin/dashboard');
-      } else {
-        router.replace(getRoleDefaultDashboard(user.role));
-      }
-    }
-  }, [user, authLoading, id, router]);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const contractor = await fetchContractor(id);
 
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    setNotFound(false);
+  if (!contractor) {
+    return {
+      title: 'Contractor Profile',
+      description: 'Verified contractor profile on Craly.',
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
 
-    getContractor(id)
-      .then(({ data }) => setContractor(data))
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
-  }, [id]);
+  const location = [contractor.city, contractor.state].filter(Boolean).join(', ');
+  const categoryNames = contractor.categories?.map((c) => c.name).join(', ');
+  const title = `${contractor.company_name} - Verified Labour Contractor in ${contractor.city || 'India'}`;
+  const description = `${contractor.company_name} is a verified labour contractor${
+    location ? ` in ${location}` : ''
+  }${
+    categoryNames ? ` specializing in ${categoryNames}` : ''
+  }${
+    contractor.years_experience ? ` with ${contractor.years_experience}+ years of experience` : ''
+  }. View verified details on Craly.`;
 
-  if (loading) {
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/contractors/${id}`,
+    },
+    openGraph: {
+      title: `${title} | Craly`,
+      description,
+      url: `https://craly.co/contractors/${id}`,
+      type: 'profile',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | Craly`,
+      description,
+    },
+  };
+}
+
+export default async function ContractorProfilePage({ params }: PageProps) {
+  const { id } = await params;
+  const contractor = await fetchContractor(id);
+
+  if (!contractor) {
     return (
-      <div className="directory">
-        <LoadingState label={t.common.loading} />
-      </div>
+      <ContractorProfileClient
+        id={id}
+        initialContractor={null}
+        initialNotFound={true}
+      />
     );
   }
 
-  if (notFound || !contractor) {
-    return (
-      <div className="directory">
-        <EmptyState
-          title={t.contractors.noResultsTitle}
-          subtitle={t.contractors.noResultsDesc}
-          action={<Button href="/contractors" variant="secondary" size="sm">{t.contractorDetail.backToDirectory}</Button>}
-        />
-      </div>
-    );
-  }
+  const contractorSchema = generateContractorSchema(contractor);
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Contractors', url: '/contractors' },
+    { name: contractor.company_name, url: `/contractors/${id}` },
+  ]);
 
   return (
-    <ContractorProfileCard
-      contractor={contractor}
-      backHref="/contractors"
-      backLabel={t.contractorDetail.backToDirectory}
-      cta={
-        // Business users are redirected away above before this can render
-        // for them (see the effect) — the only CTA left to show here is the
-        // login prompt for anonymous visitors. Direct contact for logged-in
-        // Manufacturers is deactivated; publishing a requirement is the
-        // only supported path now.
-        !user ? (
-          <>
-            <Button href="/login" variant="primary">{t.auth.logInTitle}</Button>
-            <p className="profile-card__cta-note">
-              {t.contractorDetail.contactModalSub}
-            </p>
-          </>
-        ) : undefined
-      }
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contractorSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <ContractorProfileClient
+        id={id}
+        initialContractor={contractor}
+        initialNotFound={false}
+      />
+    </>
   );
 }

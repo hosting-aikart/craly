@@ -1,49 +1,26 @@
-'use client';
+import type { Metadata } from 'next';
+import HomeClient from '@/components/home/HomeClient';
+import { generateWebSiteSchema } from '@/lib/seo/structuredData';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth/useAuth';
-import Hero from '@/components/Hero';
-import RoleSelect from '@/components/RoleSelect';
-import TrustSection from '@/components/TrustSection';
-import WhyCraly from '@/components/WhyCraly';
-import HowItWorks from '@/components/HowItWorks';
-import BuiltFor from '@/components/BuiltFor';
-import FAQ from '@/components/FAQ';
-import Foot from '@/components/Foot';
-import LoadingState from '@/components/ui/LoadingState';
-
-import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
+export const metadata: Metadata = {
+  title: 'Craly | Smarter Way to Hire Labour Contractors',
+  description:
+    'Evaluate and hire verified labour contractors for manufacturing, EPC, and industrial projects with transparent work history and compliance details.',
+  alternates: {
+    canonical: '/',
+  },
+};
 
 export default function HomePage() {
-  const router = useRouter();
-  const { user, loading } = useAuth();
-
-  useEffect(() => {
-    if (loading) return;
-    if (user) {
-      router.replace(getRoleDefaultDashboard(user.role));
-    }
-  }, [user, loading, router]);
-
-  if (loading || user) {
-    return (
-      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <LoadingState label="Redirecting to workspace…" />
-      </div>
-    );
-  }
+  const websiteSchema = generateWebSiteSchema();
 
   return (
-    <main>
-      <Hero />
-      <RoleSelect />
-      <TrustSection />
-      <WhyCraly />
-      <HowItWorks />
-      <BuiltFor />
-      <FAQ />
-      <Foot />
-    </main>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <HomeClient />
+    </>
   );
 }

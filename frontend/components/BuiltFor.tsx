@@ -31,7 +31,7 @@ export default function BuiltFor() {
           <img
             key={currentImg}
             src={currentImg}
-            alt=""
+            alt={currentSlide?.title || 'Craly target industry'}
             className="built-for__image"
           />
         </div>
