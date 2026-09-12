@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '@/lib/api';
 
 export interface StaffDashboardStats {
   totalContractors: number;
@@ -183,15 +183,6 @@ export const updateStaffContractorListingStatus = (id: string, isUnlisted: boole
 export const updateAdminContractorListingStatus = (id: string, isUnlisted: boolean, reason?: string) =>
   apiPatch<{ data: StaffContractorDetail; message: string }>(`/admin/contractors/${id}/listing`, { isUnlisted, reason });
 
-export const getStaffContractorDocuments = (contractorId: string) =>
-  apiGet<{ data: StaffVerificationDocumentItem[] }>(`/staff/contractors/${contractorId}/documents`);
-
-export const uploadStaffContractorDocument = (contractorId: string, formData: FormData) =>
-  apiPost<{ data: StaffVerificationDocumentItem; message?: string }>(`/staff/contractors/${contractorId}/documents`, formData);
-
-export const deleteStaffContractorDocument = (contractorId: string, documentId: string) =>
-  apiDelete<{ data: { id: string; deleted: boolean } }>(`/staff/contractors/${contractorId}/documents/${documentId}`);
-
 export const getStaffEngagements = () =>
   apiGet<{ data: StaffEngagementItem[] }>('/staff/engagements');
 
@@ -230,3 +221,54 @@ export const updateStaffContractorVerificationStatus = (contractorId: string, st
     `/staff/verification/contractors/${contractorId}/status`,
     { status, note },
   );
+
+export interface StaffVerificationMessageItem {
+  id: string;
+  contractor_id: string;
+  sender_id: string | null;
+  sender_role: 'contractor' | 'staff' | 'admin' | 'ops_head' | 'field_staff';
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  sender_email: string | null;
+}
+
+export const getStaffVerificationMessages = (contractorId: string) =>
+  apiGet<{ data: StaffVerificationMessageItem[] }>(`/staff/verification/contractors/${contractorId}/messages`);
+
+export const sendStaffVerificationMessage = (contractorId: string, message: string) =>
+  apiPost<{ data: StaffVerificationMessageItem }>(`/staff/verification/contractors/${contractorId}/messages`, { message });
+
+// ─── Contractor KYC Documents (Contractors → select contractor → KYC) ──────
+// Reachable from the general contractor detail page, for both newly
+// created and pre-existing contractors — see documentController.ts /
+// staffRoutes.ts. This is deliberately the same document store used by
+// the Verification Review queue and the contractor's own self-upload.
+export interface StaffContractorDocumentItem {
+  id: string;
+  document_type: string;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  status: 'pending' | 'approved' | 'rejected' | 'replacement_requested';
+  issue_date: string | null;
+  expiry_date: string | null;
+  created_at: string;
+  updated_at: string;
+  reviewer_note?: string | null;
+  uploaded_by_email?: string | null;
+}
+
+export const getStaffContractorDocuments = (contractorId: string) =>
+  apiGet<{ data: StaffContractorDocumentItem[] }>(`/staff/contractors/${contractorId}/documents`);
+
+export const uploadStaffContractorDocument = (contractorId: string, formData: FormData) =>
+  apiUpload<{ data: StaffContractorDocumentItem }>(`/staff/contractors/${contractorId}/documents`, formData);
+
+export const getStaffContractorDocumentSignedUrl = (contractorId: string, documentId: string, intent: 'view' | 'download' = 'view') =>
+  apiGet<{ data: { url: string; expiresInSeconds: number } }>(
+    `/staff/contractors/${contractorId}/documents/${documentId}/signed-url?intent=${intent}`,
+  );
+
+export const deleteStaffContractorDocument = (contractorId: string, documentId: string) =>
+  apiDelete<{ data: { id: string; deleted: boolean } }>(`/staff/contractors/${contractorId}/documents/${documentId}`);

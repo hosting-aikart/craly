@@ -43,11 +43,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refresh();
+
+    const handleUnauthorized = () => {
+      setUser(null);
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/signup')) {
+        window.location.href = '/login';
+      }
+    };
+
+    window.addEventListener('craly:unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('craly:unauthorized', handleUnauthorized);
+    };
   }, [refresh]);
 
   const logout = useCallback(async () => {
-    await logoutRequest().catch(() => {});
-    setUser(null);
+    try {
+      await logoutRequest();
+    } catch {
+      // Ignore errors on logout request to proceed with clearing state
+    } finally {
+      setUser(null);
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
   }, []);
 
   return (

@@ -275,7 +275,28 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
  * POST /api/auth/logout
  */
 export function logout(_req: Request, res: Response): void {
+  const isProd = config.nodeEnv === 'production';
+  const sameSiteValue: 'none' | 'lax' = isProd ? 'none' : 'lax';
+
+  if (isProd) {
+    res.clearCookie(AUTH_COOKIE_NAME, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      domain: '.craly.co',
+    });
+  }
+
+  res.clearCookie(AUTH_COOKIE_NAME, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: sameSiteValue,
+    path: '/',
+  });
+
   res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+
   res.json({ data: { success: true } });
 }
 

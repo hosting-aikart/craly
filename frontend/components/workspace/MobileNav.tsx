@@ -58,7 +58,6 @@ export default function MobileNav({ role, companyName, isOpen, onClose, isVerifi
   const handleLogout = async () => {
     closeDrawer();
     await logout();
-    router.push('/login');
   };
 
   return (

@@ -5,11 +5,14 @@
 
 @media (max-width: 768px) {
   .login-page {
-    min-height: calc(100vh - 68px);
+    /* The navbar (.cnav) is position: fixed and reserves no layout
+       space — top padding clears the floating pill (top: 12px +
+       height: 62px ≈ 74px) instead of the stale in-flow-navbar offset. */
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
+    padding: 100px 16px 24px;
     background: var(--craly-off-white, #f8f9fa);
     box-sizing: border-box;
   }
@@ -175,7 +178,7 @@
 
 @media (max-width: 420px) {
   .login-page {
-    padding: 16px 12px;
+    padding: 90px 12px 16px;
   }
 
   .login-form-panel {

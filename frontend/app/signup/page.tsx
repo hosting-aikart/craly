@@ -47,36 +47,6 @@ function SignupForm() {
   const [mobileError, setMobileError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Sliding role toggle indicator
-  const [roleIndicatorStyle, setRoleIndicatorStyle] = useState<{ left: number; width: number; opacity: number }>({
-    left: 4,
-    width: 0,
-    opacity: 0,
-  });
-  const roleTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
-
-  useEffect(() => {
-    const updateIndicator = () => {
-      const activeEl = roleTabRefs.current[role];
-      if (activeEl) {
-        setRoleIndicatorStyle({
-          left: activeEl.offsetLeft,
-          width: activeEl.offsetWidth,
-          opacity: 1,
-        });
-      }
-    };
-
-    updateIndicator();
-    const timeout = setTimeout(updateIndicator, 50);
-    window.addEventListener('resize', updateIndicator);
-
-    return () => {
-      clearTimeout(timeout);
-      window.removeEventListener('resize', updateIndicator);
-    };
-  }, [role]);
-
   // Signup is a two-step flow: collect the form, send an email OTP, then
   // require it to be verified before the account is actually created (see
   // authController.signup — it rejects signup unless the matching
@@ -242,30 +212,34 @@ function SignupForm() {
               <button
                 type="button"
                 className={`signup-panel__role-card ${role === 'business' ? 'signup-panel__role-card--active' : ''}`}
+                style={{ borderRadius: '50px' }}
                 onClick={() => setRole('business')}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="4" y="3" width="16" height="18" rx="1" />
-                  <path d="M9 8h1M14 8h1M9 12h1M14 12h1" />
-                  <path d="M10 21v-4h4v4" />
-                </svg>
-                <h4>{t.auth.businessRoleTitle}</h4>
-                <p>{t.auth.businessRoleDesc}</p>
+                <div className="signup-panel__role-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="4" y="3" width="16" height="18" rx="1" />
+                    <path d="M9 8h1M14 8h1M9 12h1M14 12h1" />
+                    <path d="M10 21v-4h4v4" />
+                  </svg>
+                </div>
+                <span>{t.auth.businessRoleTitle}</span>
               </button>
 
               <button
                 type="button"
                 className={`signup-panel__role-card ${role === 'contractor' ? 'signup-panel__role-card--active' : ''}`}
+                style={{ borderRadius: '50px' }}
                 onClick={() => setRole('contractor')}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 18a7 7 0 0 1 14 0" />
-                  <path d="M9 18v-2" />
-                  <path d="M12 6v2" />
-                  <rect x="2" y="17" width="20" height="3" rx="1" />
-                </svg>
-                <h4>{t.auth.contractorRoleTitle}</h4>
-                <p>{t.auth.contractorRoleDesc}</p>
+                <div className="signup-panel__role-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 18a7 7 0 0 1 14 0" />
+                    <path d="M9 18v-2" />
+                    <path d="M12 6v2" />
+                    <rect x="2" y="17" width="20" height="3" rx="1" />
+                  </svg>
+                </div>
+                <span>{t.auth.contractorRoleTitle}</span>
               </button>
             </div>
           </div>
@@ -289,18 +263,9 @@ function SignupForm() {
             {role === 'business' ? t.auth.joinTitle : t.auth.contractorRoleTitle}
           </h1>
 
-          {/* Role toggle with sliding indicator */}
+          {/* Role toggle */}
           <div className="signup-role-toggle" role="tablist" aria-label="Account type">
-            <div
-              className="signup-sliding-indicator"
-              style={{
-                transform: `translateX(${roleIndicatorStyle.left}px)`,
-                width: `${roleIndicatorStyle.width}px`,
-                opacity: roleIndicatorStyle.opacity,
-              }}
-            />
             <button
-              ref={(el) => { roleTabRefs.current['business'] = el; }}
               type="button"
               role="tab"
               aria-selected={role === 'business'}
@@ -310,7 +275,6 @@ function SignupForm() {
               {t.auth.businessRoleTitle}
             </button>
             <button
-              ref={(el) => { roleTabRefs.current['contractor'] = el; }}
               type="button"
               role="tab"
               aria-selected={role === 'contractor'}

@@ -1,0 +1,261 @@
+/* ==========================================================================
+   CRALY ADMIN USER MANAGEMENT DIRECTORY
+   Strict Brand Palette: Craly Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
+.admin-users-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* ── Toolbar: Search & Sliding Role Tabs ─────────────────────────────────── */
+.admin-users-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-users-search-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 460px;
+  min-width: 280px;
+}
+
+.admin-search-btn {
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, var(--craly-teal-dark, #0b6c64) 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(15, 139, 130, 0.22);
+}
+
+.admin-search-btn:hover {
+  background: linear-gradient(135deg, #119c92 0%, #0f8b82 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 139, 130, 0.32);
+}
+
+.admin-users-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: var(--radius-full, 9999px);
+  box-sizing: border-box;
+}
+
+.admin-users-sliding-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: var(--radius-full, 9999px);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.1);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.admin-user-tab-btn {
+  position: relative;
+  z-index: 2;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-user-tab-btn:hover {
+  color: var(--craly-navy, #102a2a);
+}
+
+.admin-user-tab-btn.active {
+  color: var(--craly-navy, #102a2a);
+  font-weight: 700;
+}
+
+/* ── Table Card ──────────────────────────────────────────────────────────── */
+.admin-users-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
+  box-sizing: border-box;
+}
+
+.admin-users-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13.5px;
+}
+
+.admin-users-table thead tr {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-users-table th {
+  padding: 14px 18px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
+.admin-users-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+}
+
+.admin-users-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-users-table tbody tr:hover {
+  background: #f0fdfa;
+}
+
+.admin-users-table td {
+  padding: 14px 18px;
+  color: #334155;
+  vertical-align: middle;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-email-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(16, 42, 42, 0.07);
+  color: var(--craly-navy, #102a2a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.user-email-text {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  font-size: 13.5px;
+}
+
+.user-company-text {
+  color: #475569;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.user-date-text {
+  color: #64748b;
+  font-size: 12.5px;
+}
+
+/* ── Role Badges ─────────────────────────────────────────────────────────── */
+.admin-role-badge {
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full, 9999px);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.admin-role-badge--admin {
+  background: rgba(16, 42, 42, 0.08);
+  color: var(--craly-navy, #102a2a);
+  border: 1px solid rgba(16, 42, 42, 0.18);
+}
+
+.admin-role-badge--contractor {
+  background: rgba(15, 139, 130, 0.1);
+  color: var(--craly-teal, #0f8b82);
+  border: 1px solid rgba(15, 139, 130, 0.22);
+}
+
+.admin-role-badge--business {
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+/* ── Action Button ───────────────────────────────────────────────────────── */
+.admin-inspect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 9999px);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: var(--craly-navy, #102a2a);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-inspect-btn:hover {
+  background: var(--craly-teal, #0f8b82);
+  border-color: var(--craly-teal, #0f8b82);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 139, 130, 0.25);
+}
+
+@media (max-width: 860px) {
+  .admin-users-table {
+    table-layout: auto;
+  }
+}

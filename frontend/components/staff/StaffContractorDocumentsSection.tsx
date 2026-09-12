@@ -6,7 +6,7 @@ import {
   uploadStaffContractorDocument,
   deleteStaffContractorDocument,
   getStaffDocumentSignedUrl,
-  type StaffVerificationDocumentItem,
+  type StaffContractorDocumentItem,
 } from '@/lib/api/staff';
 import { CONTRACTOR_DOCUMENT_TYPE_LABELS } from '@/components/contractor/ContractorDocumentsSection';
 import LoadingState from '@/components/ui/LoadingState';
@@ -22,7 +22,7 @@ export default function StaffContractorDocumentsSection({
   contractorId,
   contractorName,
 }: StaffContractorDocumentsSectionProps) {
-  const [documents, setDocuments] = useState<StaffVerificationDocumentItem[]>([]);
+  const [documents, setDocuments] = useState<StaffContractorDocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upload Form State

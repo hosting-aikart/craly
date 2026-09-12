@@ -19,7 +19,7 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
         SELECT cp.id, cp.company_name, cp.phone, cp.description, cp.city, cp.state, cp.years_experience,
                cp.workforce_size, cp.industry, cp.skills, cp.service_areas, cp.availability,
                cp.verification_status, cp.verification_note, cp.onboarding_complete,
-               cp.last_verified_at, cp.updated_at, u.email AS user_email
+               cp.last_verified_at, cp.updated_at, cp.created_at, u.email AS user_email
         FROM contractor_profiles cp
         JOIN users u ON u.id = cp.user_id
         WHERE cp.user_id = ${userId}

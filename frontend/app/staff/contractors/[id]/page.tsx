@@ -145,6 +145,9 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
           <span className="verification-label">
             Verification: <strong>{contractor.verification_status.toUpperCase()}</strong>
           </span>
+          <Link href={`/staff/verification/${contractor.id}`} className="review-link">
+            Open Full Verification Review →
+          </Link>
           <span className={`listing-badge ${contractor.is_unlisted ? 'listing-badge--unlisted' : 'listing-badge--listed'}`}>
             {contractor.is_unlisted ? '🚫 Unlisted' : '🌐 Publicly Listed'}
           </span>

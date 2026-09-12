@@ -12,7 +12,10 @@
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "seed": "ts-node --transpile-only scripts/seed.ts",
-    "seed:admin": "ts-node --transpile-only scripts/seedAdmin.ts"
+    "seed:admin": "ts-node --transpile-only scripts/seedAdmin.ts",
+    "db:export": "ts-node --transpile-only scripts/export_db.ts",
+    "db:import": "ts-node --transpile-only scripts/import_db.ts",
+    "db:backup": "ts-node --transpile-only scripts/export_db.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1115.0",

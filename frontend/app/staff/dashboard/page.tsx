@@ -38,7 +38,7 @@ export default function StaffDashboardPage() {
           <span className="staff-dashboard__role-badge">Craly Internal Operations</span>
           <h1 className="staff-dashboard__title">Staff Operations Dashboard</h1>
           <p className="staff-dashboard__subtitle">
-            Manage contractor onboarding, track manufacturer selections, and coordinate engagements.
+            Manage contractor onboarding, selections, and engagements.
           </p>
         </div>
         <div className="staff-dashboard__actions">

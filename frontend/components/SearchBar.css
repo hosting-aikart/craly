@@ -4,17 +4,22 @@
   gap: 10px;
   flex: 1;
   min-width: 220px;
-  background: var(--craly-white);
-  border: 1px solid var(--craly-border);
-  border-radius: var(--radius-md);
-  padding: 13px 16px;
-  color: var(--craly-text-faint);
-  transition: border-color 0.18s ease;
+  background: var(--craly-white, #ffffff);
+  border: 1px solid var(--craly-border, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
+  padding: 10px 18px;
+  color: var(--craly-text-faint, #94a3b8);
+  transition: all 0.2s ease;
+}
+
+.search-bar:hover {
+  border-color: #cbd5e1;
 }
 
 .search-bar:focus-within {
-  border-color: var(--craly-teal);
-  color: var(--craly-teal-dark);
+  border-color: var(--craly-teal, #0f8b82);
+  box-shadow: 0 0 0 3px rgba(15, 139, 130, 0.14);
+  color: var(--craly-teal, #0f8b82);
 }
 
 .search-bar input {

@@ -1,9 +1,16 @@
 .login-page {
-  min-height: calc(100vh - 68px);
+  /* The navbar (.cnav) floats as position: fixed — it reserves no space
+     in normal flow, so this page owns its own clearance instead of
+     subtracting a fixed navbar height. Top padding clears the floating
+     pill (top: 16px + height: 74px ≈ 90px) with a visible gap; the
+     smaller bottom padding lets flex centering settle the card slightly
+     below the navbar rather than dead-center, which is what avoids it
+     looking glued to the pill on shorter viewports. */
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 56px 24px;
+  padding: 130px 24px 56px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
@@ -61,33 +68,45 @@
 .login-panel__roles {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 12px;
 }
 
 .login-panel__role-card {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50px !important;
+  padding: 12px 14px;
   color: #ffffff;
+  box-sizing: border-box;
 }
 
-.login-panel__role-card svg {
-  margin-bottom: 10px;
-}
-
-.login-panel__role-card h4 {
+.login-panel__role-card span {
   font-family: var(--font-display);
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 600;
-  margin: 0 0 4px;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
-.login-panel__role-card p {
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.65);
-  line-height: 1.5;
+.login-panel__role-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.login-panel__role-icon svg {
+  color: #5eead4;
   margin: 0;
 }
 
@@ -339,6 +358,15 @@
     border-radius: 20px;
   }
 
+  /* .login-panel's flex: 1 1 380px is sized for the ROW layout above —
+     once the wrap stacks into a column, that same flex-grow makes the
+     panel stretch to fill leftover vertical space instead of sizing to
+     its content, leaving a large empty gap under the role cards. Pin it
+     to its content height here instead (same fix as signup.css). */
+  .login-panel {
+    flex: 0 0 auto;
+  }
+
   .login-panel__roles {
     grid-template-columns: 1fr 1fr;
   }
@@ -354,7 +382,8 @@
   }
 
   .login-page {
-    padding: 24px 16px;
+    /* Mobile navbar pill: top: 12px + height: 62px ≈ 74px */
+    padding: 100px 16px 24px;
     align-items: center;
   }
 
@@ -377,7 +406,7 @@
 
 @media (max-width: 600px) {
   .login-page {
-    padding: 20px 12px;
+    padding: 90px 12px 20px;
   }
 
   .login-form-panel {

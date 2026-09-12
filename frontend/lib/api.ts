@@ -51,6 +51,9 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   });
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined' && !path.includes('/auth/login') && !path.includes('/auth/me')) {
+      window.dispatchEvent(new CustomEvent('craly:unauthorized'));
+    }
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(parseErrorMessage(errorBody, `Request failed: ${res.status} ${res.statusText}`));
   }

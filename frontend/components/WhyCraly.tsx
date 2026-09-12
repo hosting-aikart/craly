@@ -20,6 +20,7 @@ export default function WhyCraly() {
       id="why"
       className="why-craly"
       style={{ backgroundImage: `url(${glitterBg})` }}
+      data-navbar-theme="light"
     >
       <p className="why-craly__eyebrow">{t.whyCraly.eyebrow}</p>
       <h2 className="why-craly__heading">{t.whyCraly.heading}</h2>

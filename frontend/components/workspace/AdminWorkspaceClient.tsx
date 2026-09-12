@@ -45,7 +45,7 @@ export default function AdminWorkspaceClient({ children }: { children: React.Rea
 
         <div className="workspace-main">
           <WorkspaceHeader
-            userRole="business"
+            userRole="admin"
             companyName={companyName}
             onMobileMenuToggle={() => setMobileDrawerOpen(true)}
           />

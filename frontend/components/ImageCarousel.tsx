@@ -76,7 +76,11 @@ export default function ImageCarousel() {
               }}
               onClick={() => setCurrent(i)}
             >
-              <img src={slide.image} alt={title} />
+              <img
+                src={slide.image}
+                alt={title}
+                style={(slide.id === 'documents' || slide.id === 'projects') ? { objectPosition: 'center top' } : undefined}
+              />
               <div className="overlay">
                 <h3>{title}</h3>
               </div>

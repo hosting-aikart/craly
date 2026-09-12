@@ -80,6 +80,7 @@ export default function HowItWorks() {
       ref={sectionRef}
       className={`how-section ${isVisible ? 'how-section--visible' : ''}`}
       id="how"
+      data-navbar-theme="light"
     >
       <div className="how-container">
         {/* Section Header */}

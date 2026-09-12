@@ -1,0 +1,232 @@
+/* ==========================================================================
+   CRALY ADMIN VERIFICATION QUEUE
+   Strict Brand Palette: Craly Navy (#102a2a) & Brand Teal (#0f8b82)
+   ========================================================================== */
+
+.admin-verif-queue-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* ── Toolbar & Sliding Filter Tabs ───────────────────────────────────────── */
+.admin-verif-queue-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-verif-queue-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: var(--radius-full, 9999px);
+  box-sizing: border-box;
+}
+
+.admin-verif-queue-sliding-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: var(--radius-full, 9999px);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.1);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.admin-verif-queue-tab-btn {
+  position: relative;
+  z-index: 2;
+  padding: 6px 16px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-verif-queue-tab-btn:hover {
+  color: var(--craly-navy, #102a2a);
+}
+
+.admin-verif-queue-tab-btn.active {
+  color: var(--craly-navy, #102a2a);
+  font-weight: 700;
+}
+
+/* ── Verification Cards Grid ─────────────────────────────────────────────── */
+.admin-verif-queue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.admin-verif-queue-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(16, 42, 42, 0.04);
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-verif-queue-card:hover {
+  border-color: rgba(15, 139, 130, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px -2px rgba(15, 139, 130, 0.1);
+}
+
+.admin-verif-queue-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-verif-queue-company {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-verif-queue-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(15, 139, 130, 0.1);
+  color: var(--craly-teal, #0f8b82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-weight: 800;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.admin-verif-queue-title {
+  font-family: var(--font-heading, 'Red Hat Display', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--craly-navy, #102a2a);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.admin-verif-queue-email {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+/* ── Details Box ─────────────────────────────────────────────────────────── */
+.admin-verif-queue-details {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12.5px;
+  color: #334155;
+}
+
+.admin-verif-queue-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-verif-queue-detail-icon {
+  color: var(--craly-teal, #0f8b82);
+  flex-shrink: 0;
+}
+
+.admin-verif-queue-date {
+  font-size: 11px;
+  color: #94a3b8;
+  padding-top: 4px;
+  border-top: 1px dashed #e2e8f0;
+  margin-top: 2px;
+}
+
+/* ── Status Pill ─────────────────────────────────────────────────────────── */
+.admin-queue-status-pill {
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 9999px);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.admin-queue-status-pill--verified {
+  background: rgba(15, 139, 130, 0.1);
+  color: var(--craly-teal, #0f8b82);
+  border: 1px solid rgba(15, 139, 130, 0.22);
+}
+
+.admin-queue-status-pill--pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.admin-queue-status-pill--rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+/* ── Action Button ───────────────────────────────────────────────────────── */
+.admin-queue-review-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--craly-teal, #0f8b82) 0%, var(--craly-teal-dark, #0b6c64) 100%);
+  color: #ffffff;
+  padding: 9px 18px;
+  border-radius: var(--radius-full, 9999px);
+  font-family: var(--font-button, 'Poppins', sans-serif);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(15, 139, 130, 0.22);
+}
+
+.admin-queue-review-btn:hover {
+  background: linear-gradient(135deg, #119c92 0%, #0f8b82 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(15, 139, 130, 0.32);
+  color: #ffffff;
+}

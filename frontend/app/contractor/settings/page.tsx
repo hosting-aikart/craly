@@ -29,7 +29,6 @@ export default function FieldStaffSettingsPage() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
   };
 
   return (

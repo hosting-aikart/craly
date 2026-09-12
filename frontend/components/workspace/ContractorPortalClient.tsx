@@ -9,6 +9,7 @@ import WorkspaceHeader from '@/components/workspace/WorkspaceHeader';
 import MobileNav from '@/components/workspace/MobileNav';
 import LoadingState from '@/components/ui/LoadingState';
 import ContractorProfileModal from '@/components/contractor/ContractorProfileModal';
+import ApplicationReviewStatus from '@/components/contractor/ApplicationReviewStatus';
 import { WorkspaceHeaderProvider } from '@/components/workspace/WorkspaceHeaderContext';
 import '@/components/workspace/WorkspaceLayout.css';
 import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
@@ -57,6 +58,10 @@ export default function ContractorPortalClient({ children }: { children: React.R
     ? !contractorProfile.onboarding_complete || contractorProfile.workforce_size === null
     : false;
 
+  const isAwaitingApproval = Boolean(
+    contractorProfile && !isProfileIncomplete && contractorProfile.verification_status !== 'verified',
+  );
+
   return (
     <WorkspaceHeaderProvider>
       <div className="workspace-container">
@@ -81,7 +86,13 @@ export default function ContractorPortalClient({ children }: { children: React.R
             onMobileMenuToggle={() => setMobileDrawerOpen(true)}
           />
 
-          <main className="workspace-content">{children}</main>
+          <main className="workspace-content">
+            {isAwaitingApproval && contractorProfile ? (
+              <ApplicationReviewStatus profile={contractorProfile} />
+            ) : (
+              children
+            )}
+          </main>
         </div>
 
         <MobileNav

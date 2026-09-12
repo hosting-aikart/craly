@@ -126,10 +126,12 @@
   white-space: nowrap;
 }
 
-.faq-get-in-touch-btn:hover {
-  background: #000000;
+.faq-get-in-touch-btn:hover,
+.faq-get-in-touch-btn:active {
+  background: #0d9488;
+  color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(24, 24, 27, 0.32);
+  box-shadow: 0 12px 28px rgba(13, 148, 136, 0.35);
 }
 
 .faq-get-in-touch-btn:active {
@@ -202,13 +204,18 @@
   transition: all 0.25s ease;
 }
 
-.faq-card-item:hover .faq-toggle-circle {
-  background: #000000;
-  transform: scale(1.05);
+.faq-card-item:hover .faq-toggle-circle,
+.faq-card-question:hover .faq-toggle-circle {
+  background: #0d9488;
+  color: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
 }
 
 .faq-card-item--open .faq-toggle-circle {
-  background: #18181b;
+  background: #0d9488;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
 }
 
 /* Answer Body */

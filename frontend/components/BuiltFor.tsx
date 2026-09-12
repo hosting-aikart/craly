@@ -22,7 +22,7 @@ export default function BuiltFor() {
   const currentSlide = t.builtFor.slides[index];
 
   return (
-    <section className="built-for">
+    <section className="built-for" data-navbar-theme="dark">
       <p className="built-for__eyebrow">{t.builtFor.eyebrow}</p>
       <h2 className="built-for__heading">{t.builtFor.heading}</h2>
 

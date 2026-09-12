@@ -8,7 +8,7 @@ export default function RoleSelect() {
   const { t } = useLanguage();
 
   return (
-    <section className="role-select">
+    <section className="role-select" data-navbar-theme="light">
       <div className="role-select__inner">
       <p className="role-select__eyebrow">{t.roleSelect.eyebrow}</p>
       <h2 className="role-select__heading">{t.roleSelect.heading}</h2>

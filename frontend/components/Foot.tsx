@@ -62,7 +62,7 @@ export default function Foot() {
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
-    <footer className="footer">
+    <footer className="footer" data-navbar-theme="dark">
       <div className="footer-container">
         {/* Main Grid */}
         <div className="footer-grid">
