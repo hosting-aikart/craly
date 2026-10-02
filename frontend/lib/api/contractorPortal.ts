@@ -118,3 +118,6 @@ export const getMyVerificationMessages = () =>
 
 export const sendMyVerificationMessage = (message: string) =>
   apiPost<{ data: VerificationMessageItem }>('/contractor-portal/verification/messages', { message });
+
+export * from './worksitePhotos';
+
