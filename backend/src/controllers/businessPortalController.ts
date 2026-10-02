@@ -3,6 +3,7 @@ import sql from '../db/index';
 import { z } from 'zod';
 import { createNotification, notifyUsersByRole, notifyMatchingContractors } from '../utils/notifications';
 import { toPgTextArrayLiteral } from '../utils/pgArray';
+import { calculateOpportunityMatch, type ContractorFullProfile } from './contractorPortalController';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -415,9 +416,10 @@ export async function getRequirementApplications(req: Request, res: Response, ne
     const { id } = req.params;
     const manufacturer = await getManufacturerProfile(req.user!.sub);
 
-    // Ensure requirement belongs to caller
+    // Ensure requirement belongs to caller and fetch its matching fields
     const [reqRow] = await sql`
-      SELECT id, title FROM manpower_requirements WHERE id = ${id} AND manufacturer_id = ${manufacturer.id}
+      SELECT id, title, industry, city, state, workers_required, required_skills, experience_required
+      FROM manpower_requirements WHERE id = ${id} AND manufacturer_id = ${manufacturer.id}
     `;
 
     if (!reqRow) {
@@ -449,14 +451,49 @@ export async function getRequirementApplications(req: Request, res: Response, ne
         cp.workforce_size AS contractor_workforce_size,
         cp.years_experience AS contractor_experience_years,
         cp.availability AS contractor_availability,
-        cp.service_areas AS contractor_service_areas
+        cp.service_areas AS contractor_service_areas,
+        cp.skills AS contractor_skills,
+        cp.overall_rating AS contractor_overall_rating,
+        cp.ghosting_count AS contractor_ghosting_count,
+        cp.repeat_engagement_count AS contractor_repeat_engagement_count,
+        cp.certification_status AS contractor_certification_status
       FROM applications app
       JOIN contractor_profiles cp ON cp.id = app.contractor_id
       WHERE app.requirement_id = ${id}
       ORDER BY app.created_at DESC
     `;
 
-    res.json({ data: applications });
+    // Compute match scores for each applicant against the requirement
+    const data = applications.map((app) => {
+      const contractorForScoring: ContractorFullProfile = {
+        id: app.contractor_id,
+        company_name: app.contractor_name,
+        workforce_size: app.contractor_workforce_size,
+        industry: app.contractor_industry,
+        years_experience: app.contractor_experience_years,
+        city: app.contractor_city,
+        state: app.contractor_state,
+        service_areas: app.contractor_service_areas,
+        skills: app.contractor_skills,
+        availability: app.contractor_availability,
+        onboarding_complete: true,
+        verification_status: 'verified',
+        overall_rating: app.contractor_overall_rating,
+        ghosting_count: app.contractor_ghosting_count ?? 0,
+        repeat_engagement_count: app.contractor_repeat_engagement_count ?? 0,
+        certification_status: app.contractor_certification_status ?? 'none',
+        created_at: '',
+      };
+      const match = calculateOpportunityMatch(reqRow, contractorForScoring);
+      return {
+        ...app,
+        match_score: match.match_score,
+        match_level: match.match_level,
+        match_reasons: match.match_reasons,
+      };
+    });
+
+    res.json({ data });
   } catch (err) {
     next(err);
   }

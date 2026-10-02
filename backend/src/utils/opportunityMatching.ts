@@ -17,10 +17,12 @@ import { toPgTextArrayLiteral } from './pgArray';
  *   4. AND contractor.city == requirement.city, OR requirement.city is one
  *      of contractor.service_areas (exact match, case/whitespace
  *      insensitive).
- *
- * Deliberately simple by request: workforce count, industry, and
- * location-or-coverage only. Experience and availability are NOT checked
- * here (they used to be) — this is intentional, not an oversight.
+ *   5. contractor.availability must NOT be 'NOT_AVAILABLE' or 'SUSPENDED'
+ *      — don't show jobs to contractors who can't take work right now.
+ *      'CURRENTLY_AT_CAPACITY' and 'PAUSED' are allowed (they may free up).
+ *   6. If the requirement specifies experience_required, the contractor
+ *      must have at least 50% of it (soft gate — allows near-matches
+ *      through while filtering clearly underqualified contractors).
  *
  * A NULL/blank requirement city or state is treated as "no constraint" —
  * this only matters for requirements published before the city/state
@@ -34,6 +36,8 @@ export interface MatchContractorProfile {
   city: string | null;
   state: string | null;
   service_areas: string[] | null;
+  availability: string | null;
+  years_experience: number | null;
 }
 
 export interface MatchRequirement {
@@ -41,6 +45,7 @@ export interface MatchRequirement {
   industry: string | null;
   city: string | null;
   state: string | null;
+  experience_required: number | null;
 }
 
 /**
@@ -55,6 +60,7 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   const industry = cp.industry || '';
   const city = cp.city || '';
   const state = cp.state || '';
+  const yearsExperience = cp.years_experience ?? 0;
   // sql.array() is unreliable inside a dynamic query fragment like this one
   // (same issue documented on toPgTextArrayLiteral in pgArray.ts — it can
   // send the parameter as a plain comma-joined string instead of a proper
@@ -85,6 +91,11 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
         WHERE LOWER(TRIM(sa)) = LOWER(TRIM(mr.city))
       )
     )
+    -- 5. Experience soft gate: contractor needs at least 50% of required
+    AND (
+      mr.experience_required IS NULL OR mr.experience_required = 0
+      OR ${yearsExperience} >= CEIL(mr.experience_required * 0.5)
+    )
   )`;
 }
 
@@ -101,6 +112,7 @@ export function contractorEligibilityCondition(mr: MatchRequirement) {
   const industry = mr.industry || '';
   const city = mr.city || '';
   const state = mr.state || '';
+  const experienceRequired = mr.experience_required ?? 0;
 
   return sql`(
     -- 1. Worker capacity
@@ -124,6 +136,16 @@ export function contractorEligibilityCondition(mr: MatchRequirement) {
         SELECT 1 FROM unnest(COALESCE(cp.service_areas, ARRAY[]::text[])) sa
         WHERE LOWER(TRIM(sa)) = LOWER(TRIM(${city}))
       )
+    )
+    -- 5. Availability: don't match contractors who can't take work
+    AND (
+      cp.availability IS NULL
+      OR cp.availability NOT IN ('NOT_AVAILABLE', 'SUSPENDED')
+    )
+    -- 6. Experience soft gate: contractor needs at least 50% of required
+    AND (
+      ${experienceRequired} = 0
+      OR (COALESCE(cp.years_experience, 0) >= CEIL(${experienceRequired} * 0.5))
     )
   )`;
 }
