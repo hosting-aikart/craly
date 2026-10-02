@@ -198,6 +198,55 @@ export async function sendOtpEmail(input: OtpEmailInput): Promise<void> {
   }
 }
 
+export interface PasswordResetEmailInput {
+  to: string;
+  otp: string;
+  name?: string;
+}
+
+/**
+ * Sends a 6-digit password reset OTP to the user.
+ * Same delivery mechanics as sendOtpEmail: throws on any failure so the
+ * caller never silently pretends the mail went out. Falls back to console
+ * in non-production when RESEND_API_KEY is absent.
+ */
+export async function sendPasswordResetEmail(input: PasswordResetEmailInput): Promise<void> {
+  if (!resend) {
+    if (config.nodeEnv === 'production') {
+      throw new Error('Email service is not configured (RESEND_API_KEY is missing)');
+    }
+    console.warn('[mailer] DEV MODE: RESEND_API_KEY not set — logging password reset OTP instead of emailing.');
+    console.log(`[DEV PASSWORD RESET OTP] To: ${input.to}  Code: ${input.otp}  (valid 15 minutes)`);
+    return;
+  }
+
+  const greeting = input.name ? `Hi ${escapeHtml(input.name)},` : 'Hello,';
+
+  const { error } = await resend.emails.send({
+    from: config.contactEmailFrom,
+    to: input.to,
+    subject: `Your Craly password reset code is ${input.otp}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+        <h2 style="color: #0f766e; margin-top: 0; font-size: 22px;">Reset your Craly password</h2>
+        <p style="color: #475569; font-size: 15px; line-height: 1.5;">${greeting}</p>
+        <p style="color: #475569; font-size: 15px; line-height: 1.5;">We received a request to reset the password for your Craly account. Use the 6-digit code below to continue. This code expires in <strong>15 minutes</strong>.</p>
+        <div style="margin: 28px 0; text-align: center;">
+          <span style="display: inline-block; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #0f766e; background: #f0fdfa; padding: 14px 28px; border-radius: 8px; border: 1px solid #99f6e4;">
+            ${input.otp}
+          </span>
+        </div>
+        <p style="color: #475569; font-size: 14px; line-height: 1.5;">If you did not request a password reset, you can safely ignore this email — your password will remain unchanged.</p>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 0;">For security, this code can only be used once.</p>
+      </div>
+    `,
+  });
+
+  if (error) {
+    throw new Error(`Resend failed to send password reset email: ${error.message}`);
+  }
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')

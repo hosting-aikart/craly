@@ -47,3 +47,8 @@ export const logout = () => apiPost<{ data: { success: true } }>('/auth/logout',
 
 export const me = () => apiGet<{ data: AuthUser }>('/auth/me');
 
+export const forgotPassword = (input: { email: string }) =>
+  apiPost<{ data: { message: string } }>('/auth/forgot-password', input);
+
+export const resetPassword = (input: { email: string; otp: string; newPassword: string }) =>
+  apiPost<{ data: { message: string } }>('/auth/reset-password', input);

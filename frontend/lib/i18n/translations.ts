@@ -270,6 +270,22 @@ export interface Translations {
     joinAsBusiness: string;
     iamContractor: string;
     iamBusiness: string;
+    // Forgot / reset password modal
+    requestResetTitle: string;
+    enterEmailLabel: string;
+    sendResetCode: string;
+    sendingResetCode: string;
+    checkEmail: string;
+    enterCodeAndPassword: string;
+    resetCode: string;
+    resetCodePlaceholder: string;
+    newPasswordLabel: string;
+    newPasswordPlaceholder: string;
+    resetPasswordBtn: string;
+    resettingPassword: string;
+    passwordResetSuccess: string;
+    backToLogin: string;
+    resendCode: string;
   };
   contractors: {
     pageTitle: string;
@@ -749,6 +765,22 @@ const en: Translations = {
     joinAsBusiness: 'Join as Manufacturer',
     iamContractor: "I'm a Contractor",
     iamBusiness: "I'm a Manufacturer",
+    // Forgot / reset password modal
+    requestResetTitle: 'Reset your password',
+    enterEmailLabel: 'Enter your account email to receive a reset code.',
+    sendResetCode: 'Send Reset Code',
+    sendingResetCode: 'Sending…',
+    checkEmail: 'Check your email',
+    enterCodeAndPassword: 'Enter the 6-digit code we sent and choose a new password.',
+    resetCode: 'Reset Code',
+    resetCodePlaceholder: '123456',
+    newPasswordLabel: 'New Password',
+    newPasswordPlaceholder: 'Minimum 8 characters',
+    resetPasswordBtn: 'Reset Password',
+    resettingPassword: 'Resetting…',
+    passwordResetSuccess: 'Password reset! You can now log in with your new password.',
+    backToLogin: 'Back to login',
+    resendCode: 'Resend code',
   },
   contractors: {
     pageTitle: 'Discover Labour Contractors',
@@ -1228,6 +1260,22 @@ const hi: Translations = {
     joinAsBusiness: 'व्यवसाय के रूप में जुड़ें',
     iamContractor: 'मैं एक ठेकेदार हूं',
     iamBusiness: 'मैं एक व्यवसाय हूं',
+    // Forgot / reset password modal
+    requestResetTitle: 'अपना पासवर्ड रीसेट करें',
+    enterEmailLabel: 'रीसेट कोड पाने के लिए अपना खाता ईमेल दर्ज करें।',
+    sendResetCode: 'रीसेट कोड भेजें',
+    sendingResetCode: 'भेजा जा रहा है…',
+    checkEmail: 'अपना ईमेल जांचें',
+    enterCodeAndPassword: 'भेजा गया 6-अंकीय कोड दर्ज करें और नया पासवर्ड चुनें।',
+    resetCode: 'रीसेट कोड',
+    resetCodePlaceholder: '123456',
+    newPasswordLabel: 'नया पासवर्ड',
+    newPasswordPlaceholder: 'न्यूनतम 8 अक्षर',
+    resetPasswordBtn: 'पासवर्ड रीसेट करें',
+    resettingPassword: 'रीसेट हो रहा है…',
+    passwordResetSuccess: 'पासवर्ड रीसेट हो गया! अब आप अपने नए पासवर्ड से लॉग इन कर सकते हैं।',
+    backToLogin: 'लॉगिन पर वापस जाएं',
+    resendCode: 'कोड पुनः भेजें',
   },
   contractors: {
     pageTitle: 'श्रम ठेकेदारों को खोजें',
@@ -1707,6 +1755,22 @@ const mr: Translations = {
     joinAsBusiness: 'व्यवसाय म्हणून सामील व्हा',
     iamContractor: 'मी एक ठेकेदार आहे',
     iamBusiness: 'मी एक व्यवसाय आहे',
+    // Forgot / reset password modal
+    requestResetTitle: 'तुमचा पासवर्ड रीसेट करा',
+    enterEmailLabel: 'रीसेट कोड मिळवण्यासाठी तुमचा खाते ईमेल ड्या.',
+    sendResetCode: 'रीसेट कोड पाठवा',
+    sendingResetCode: 'पाठवत आहे…',
+    checkEmail: 'तुमचा ईमेल तपासा',
+    enterCodeAndPassword: 'पाठवलेला 6-अंकी कोड टाका आणि नवा पासवर्ड निवडा.',
+    resetCode: 'रीसेट कोड',
+    resetCodePlaceholder: '123456',
+    newPasswordLabel: 'नवीन पासवर्ड',
+    newPasswordPlaceholder: 'किमान 8 अक्षरे',
+    resetPasswordBtn: 'पासवर्ड रीसेट करा',
+    resettingPassword: 'रीसेट होत आहे…',
+    passwordResetSuccess: 'पासवर्ड रीसेट झाले! आता तुम्ही नव्या पासवर्डने लॉग इन करू शकता.',
+    backToLogin: 'लॉगइनवर परत जा',
+    resendCode: 'कोड पुन्हा पाठवा',
   },
   contractors: {
     pageTitle: 'कामगार ठेकेदार शोधा',
