@@ -392,6 +392,16 @@ export default function OpportunitiesPage() {
                     </div>
 
                     <div className="opp-param-box">
+                      <span className="opp-param-lbl">Minimum Experience</span>
+                      <strong className="opp-param-val">
+                        <IconBriefcase size={13} className="opp-param-icon" />
+                        {op.experience_required && op.experience_required > 0
+                          ? `${op.experience_required} ${op.experience_required === 1 ? 'Year' : 'Years'}`
+                          : 'No experience requirement specified'}
+                      </strong>
+                    </div>
+
+                    <div className="opp-param-box">
                       <span className="opp-param-lbl">Start Date</span>
                       <strong className="opp-param-val">
                         <IconClock size={13} className="opp-param-icon" />

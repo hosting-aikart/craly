@@ -314,7 +314,7 @@ export async function updateRequirement(req: Request, res: Response, next: NextF
         required_skills = COALESCE(${data.requiredSkills !== undefined ? toPgTextArrayLiteral(data.requiredSkills) : null}::text[], required_skills),
         start_date = COALESCE(${data.startDate ?? null}, start_date),
         duration = COALESCE(${data.duration ?? null}, duration),
-        experience_required = COALESCE(${data.experienceRequired ?? null}, experience_required),
+        experience_required = ${data.experienceRequired !== undefined ? (data.experienceRequired ?? null) : sql`experience_required`},
         budget_min = COALESCE(${data.budgetMin ?? null}, budget_min),
         budget_max = COALESCE(${data.budgetMax ?? null}, budget_max),
         status = ${nextStatus},

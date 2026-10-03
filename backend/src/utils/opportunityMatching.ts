@@ -20,9 +20,10 @@ import { toPgTextArrayLiteral } from './pgArray';
  *   5. contractor.availability must NOT be 'NOT_AVAILABLE' or 'SUSPENDED'
  *      — don't show jobs to contractors who can't take work right now.
  *      'CURRENTLY_AT_CAPACITY' and 'PAUSED' are allowed (they may free up).
- *   6. If the requirement specifies experience_required, the contractor
- *      must have at least 50% of it (soft gate — allows near-matches
- *      through while filtering clearly underqualified contractors).
+ *   6. If the requirement specifies experience_required (> 0), the contractor
+ *      must have at least the required experience (contractor.years_experience
+ *      >= requirement.experience_required). Missing/null contractor experience
+ *      is rejected if experience is required.
  *
  * A NULL/blank requirement city or state is treated as "no constraint" —
  * this only matters for requirements published before the city/state
@@ -75,7 +76,8 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   const industry = cp.industry || '';
   const city = cp.city || '';
   const state = cp.state || '';
-  const yearsExperience = cp.years_experience ?? 0;
+  const yearsExperience = cp.years_experience;
+  const hasExperience = yearsExperience !== null && yearsExperience !== undefined;
   // sql.array() is unreliable inside a dynamic query fragment like this one
   // (same issue documented on toPgTextArrayLiteral in pgArray.ts — it can
   // send the parameter as a plain comma-joined string instead of a proper
@@ -113,10 +115,10 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
         WHERE LOWER(TRIM(sa)) = LOWER(TRIM(mr.city))
       )
     )
-    -- 5. Experience soft gate: contractor needs at least 50% of required
+    -- 5. Experience hard requirement: contractor must meet or exceed required experience
     AND (
-      mr.experience_required IS NULL OR mr.experience_required = 0
-      OR ${yearsExperience} >= CEIL(mr.experience_required * 0.5)
+      mr.experience_required IS NULL OR mr.experience_required <= 0
+      OR (${hasExperience} AND ${yearsExperience ?? 0} >= mr.experience_required)
     )
   )`;
 }
@@ -171,10 +173,10 @@ export function contractorEligibilityCondition(mr: MatchRequirement) {
       cp.availability IS NULL
       OR cp.availability NOT IN ('NOT_AVAILABLE', 'SUSPENDED')
     )
-    -- 6. Experience soft gate: contractor needs at least 50% of required
+    -- 6. Experience hard requirement: contractor must meet or exceed required experience
     AND (
-      ${experienceRequired} = 0
-      OR (COALESCE(cp.years_experience, 0) >= CEIL(${experienceRequired} * 0.5))
+      ${experienceRequired} <= 0
+      OR (cp.years_experience IS NOT NULL AND cp.years_experience >= ${experienceRequired})
     )
   )`;
 }

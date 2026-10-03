@@ -238,19 +238,15 @@ function scoreExperienceFit(
   const exp = contractorExperience ?? 0;
 
   if (exp >= experienceRequired * 1.5) {
-    reasons.push(`${exp} years experience vs ${experienceRequired} required — highly experienced`);
+    reasons.push(`Minimum Experience: ${experienceRequired} years (${exp} yrs available — highly experienced)`);
     return { weight: 15, score: 1.0, reasons };
   }
   if (exp >= experienceRequired) {
-    reasons.push(`${exp} years experience vs ${experienceRequired} required — meets requirement`);
-    return { weight: 15, score: 0.8, reasons };
+    reasons.push(`Minimum Experience: ${experienceRequired} years (${exp} yrs available — meets requirement)`);
+    return { weight: 15, score: 1.0, reasons };
   }
-  // Linear scale 0.0–0.8 for below-requirement (the hard filter already
-  // gates at 50%, so values here will be between 50%–100% of required).
-  const ratio = exp / experienceRequired;
-  const scaledScore = Math.min(ratio * 0.8, 0.8);
-  reasons.push(`${exp} years experience vs ${experienceRequired} required — below requirement`);
-  return { weight: 15, score: Math.round(scaledScore * 100) / 100, reasons };
+  reasons.push(`Minimum Experience: ${experienceRequired} years (${exp} yrs available — below requirement)`);
+  return { weight: 15, score: 0, reasons };
 }
 
 function scoreIndustryMatch(
