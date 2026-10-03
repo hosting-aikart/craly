@@ -49,6 +49,21 @@ export interface MatchRequirement {
 }
 
 /**
+ * Splits an industry string into lowercase keywords, stripping common
+ * connective words and punctuation (e.g. "Construction & Infrastructure"
+ * -> ["construction", "infrastructure"]).
+ */
+export function extractIndustryKeywords(ind: string | null | undefined): string[] {
+  if (!ind) return [];
+  const stopWords = new Set(['and', '&', 'or', 'the', 'in', 'of', 'for', 'to', 'a', 'an']);
+  return ind
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 3 && !stopWords.has(w));
+}
+
+/**
  * Builds the WHERE-clause fragment for querying `manpower_requirements`
  * rows (must be aliased `mr` in the surrounding query) against a single,
  * already-known contractor profile supplied as plain JS values. Used by
@@ -68,14 +83,21 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   // opportunities query throw for any contractor with service_areas set).
   // Building the literal ourselves and casting it explicitly sidesteps that.
   const serviceAreasLiteral = toPgTextArrayLiteral(cp.service_areas || []);
+  const industryKeywords = extractIndustryKeywords(cp.industry);
+  const industryKeywordsLiteral = toPgTextArrayLiteral(industryKeywords);
 
   return sql`(
     -- 1. Worker capacity
     (${workforce} >= mr.workers_required)
-    -- 2. Industry
+    -- 2. Industry: exact match or keyword overlap (e.g. "Construction & Infrastructure" matches "Infrastructure and construction")
     AND (
       mr.industry IS NULL OR TRIM(mr.industry) = ''
+      OR ${industryKeywords.length} = 0
       OR (${industry} != '' AND LOWER(TRIM(${industry})) = LOWER(TRIM(mr.industry)))
+      OR EXISTS (
+        SELECT 1 FROM unnest(${industryKeywordsLiteral}::text[]) kw
+        WHERE LOWER(mr.industry) LIKE '%' || kw || '%'
+      )
     )
     -- 3. State must match exactly
     AND (
@@ -113,15 +135,22 @@ export function contractorEligibilityCondition(mr: MatchRequirement) {
   const city = mr.city || '';
   const state = mr.state || '';
   const experienceRequired = mr.experience_required ?? 0;
+  const industryKeywords = extractIndustryKeywords(mr.industry);
+  const industryKeywordsLiteral = toPgTextArrayLiteral(industryKeywords);
 
   return sql`(
     -- 1. Worker capacity
     cp.workforce_size IS NOT NULL
     AND cp.workforce_size >= ${workersRequired}
-    -- 2. Industry
+    -- 2. Industry: exact match or keyword overlap
     AND (
-      ${industry} = ''
-      OR (cp.industry IS NOT NULL AND TRIM(cp.industry) != '' AND LOWER(TRIM(cp.industry)) = LOWER(TRIM(${industry})))
+      ${industryKeywords.length} = 0
+      OR (cp.industry IS NULL OR TRIM(cp.industry) = '')
+      OR (LOWER(TRIM(cp.industry)) = LOWER(TRIM(${industry})))
+      OR EXISTS (
+        SELECT 1 FROM unnest(${industryKeywordsLiteral}::text[]) kw
+        WHERE LOWER(cp.industry) LIKE '%' || kw || '%'
+      )
     )
     -- 3. State must match exactly
     AND (

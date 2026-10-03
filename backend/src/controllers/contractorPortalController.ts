@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { z } from 'zod';
 import { createNotification, notifyUsersByRole } from '../utils/notifications';
-import { requirementEligibilityCondition } from '../utils/opportunityMatching';
+import { requirementEligibilityCondition, extractIndustryKeywords } from '../utils/opportunityMatching';
 import type { AppError } from '../middlewares/errorHandler';
 
 // Validator for submitting an application
@@ -260,7 +260,20 @@ function scoreIndustryMatch(
   if (!requirementIndustry || !requirementIndustry.trim()) {
     return { weight: 10, score: 1.0, reasons: ['No industry constraint on requirement'] };
   }
-  if (contractorIndustry && normalize(contractorIndustry) === normalize(requirementIndustry)) {
+  if (!contractorIndustry || !contractorIndustry.trim()) {
+    return { weight: 10, score: 0.5, reasons: ['Industry not specified in contractor profile'] };
+  }
+  const normCon = normalize(contractorIndustry);
+  const normReq = normalize(requirementIndustry);
+  if (normCon === normReq || normCon.includes(normReq) || normReq.includes(normCon)) {
+    return { weight: 10, score: 1.0, reasons: [`Industry match: ${requirementIndustry}`] };
+  }
+  const conKeywords = extractIndustryKeywords(contractorIndustry);
+  const reqKeywords = extractIndustryKeywords(requirementIndustry);
+  const hasKeywordOverlap = conKeywords.some((ck) =>
+    reqKeywords.some((rk) => ck.includes(rk) || rk.includes(ck)),
+  );
+  if (hasKeywordOverlap) {
     return { weight: 10, score: 1.0, reasons: [`Industry match: ${requirementIndustry}`] };
   }
   return { weight: 10, score: 0, reasons: ['Industry does not match'] };
