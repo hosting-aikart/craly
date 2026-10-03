@@ -154,7 +154,32 @@ export default function StaffContractorsPage() {
                   <span className={`staff-status-tag staff-status-tag--${c.availability.toLowerCase()}`}>
                     {c.availability.replace(/_/g, ' ')}
                   </span>
-                  {c.is_unlisted ? (
+                  {c.verification_status === 'verified' ? (
+                    <span className="staff-verif-badge staff-verif-badge--verified">
+                      ✓ Verified
+                    </span>
+                  ) : c.verification_status === 'under_review' ? (
+                    <span className="staff-verif-badge staff-verif-badge--under_review">
+                      🔍 Under Review
+                    </span>
+                  ) : c.verification_status === 'needs_changes' ? (
+                    <span className="staff-verif-badge staff-verif-badge--needs_changes">
+                      ⚠️ Needs Changes
+                    </span>
+                  ) : c.verification_status === 'rejected' ? (
+                    <span className="staff-verif-badge staff-verif-badge--rejected">
+                      ✕ Rejected
+                    </span>
+                  ) : (
+                    <span className="staff-verif-badge staff-verif-badge--pending">
+                      ⏳ Pending Verification
+                    </span>
+                  )}
+                  {c.verification_status !== 'verified' ? (
+                    <span className="status-tag status-tag--not-verified" title="Contractor must complete KYC verification before appearing in public directory">
+                      🔒 Unverified (Hidden)
+                    </span>
+                  ) : c.is_unlisted ? (
                     <span className="status-tag status-tag--unlisted" title={c.unlisted_reason ? `Reason: ${c.unlisted_reason}` : 'Hidden from public directory'}>
                       🚫 Unlisted
                     </span>

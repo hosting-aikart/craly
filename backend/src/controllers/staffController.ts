@@ -208,19 +208,18 @@ export async function createContractor(req: Request, res: Response, next: NextFu
 
     // Creates a real login (users row) alongside the profile — a
     // Staff-added contractor must be able to sign in and use the
-    // Contractor Portal themselves (apply to opportunities, manage KYC),
+    // Contractor Portal themselves (complete their profile, manage KYC),
     // not just exist as a directory record Staff edits on their behalf.
     //
-    // verification_status is 'verified' immediately (not 'pending') —
-    // unlike a self-signup contractor, Staff manually entering this
-    // profile IS the review: there's no separate approval step to wait
-    // on, so this contractor is listed and gets full marketplace access
-    // (opportunities, applying) right away. Contrast with
-    // pfContractorController.createPfContractor, which creates a
-    // staff-managed record with no login and deliberately stays
-    // unverified/unlisted until a later explicit verification step —
-    // that path is for field-collected leads that still need vetting,
-    // not for an account Staff is provisioning as already-trusted.
+    // verification_status starts as 'pending' — creating a contractor
+    // account is NOT the same as verifying their KYC/documents. The
+    // contractor must go through the standard document submission and
+    // staff review/approval process before becoming 'verified'. This
+    // mirrors the self-signup flow and ensures no contractor gets
+    // marketplace access without proper document verification. Staff
+    // can verify them later via the existing verification endpoints
+    // (PATCH /api/staff/verification/contractors/:id/status or the
+    // per-document review at PATCH /api/staff/verification/documents/:id).
     const contractor = await sql.begin(async (tx) => {
       const [newUser] = await tx`
         INSERT INTO users (email, password_hash, role, is_active)
@@ -237,7 +236,7 @@ export async function createContractor(req: Request, res: Response, next: NextFu
         VALUES (
           ${newUser.id}, ${companyName}, ${phone || null}, ${null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
           ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
-          ${availability || 'AVAILABLE'}, ${notes || null}, 'verified', true, now(), ${req.user!.sub}
+          ${availability || 'AVAILABLE'}, ${notes || null}, 'pending', true, null, ${req.user!.sub}
         )
         RETURNING id, company_name, city, state, workforce_size, availability, created_at
       `;
@@ -255,7 +254,7 @@ export async function createContractor(req: Request, res: Response, next: NextFu
 
     res.status(201).json({
       data: contractor,
-      message: `Contractor profile created with a login for ${email}. Share the temporary password with them directly.`,
+      message: `Contractor profile created with a login for ${email}. Status is Pending Verification — documents must be submitted and approved before full marketplace access. Share the temporary password with them directly.`,
     });
   } catch (err) {
     next(err);
@@ -789,6 +788,7 @@ export async function reviewStaffDocument(req: Request, res: Response, next: Nex
         verification_status = ${overallStatus},
         verification_note = ${note ?? null},
         last_verified_at = CASE WHEN ${overallStatus} = 'verified' THEN now() ELSE last_verified_at END,
+        onboarding_complete = CASE WHEN ${overallStatus} = 'verified' THEN true ELSE onboarding_complete END,
         updated_at = now()
       WHERE id = ${contractorId}
     `;
@@ -862,6 +862,7 @@ export async function updateStaffContractorVerificationStatus(req: Request, res:
         verification_status = ${status},
         verification_note = ${note ?? null},
         last_verified_at = CASE WHEN ${status} = 'verified' THEN now() ELSE last_verified_at END,
+        onboarding_complete = CASE WHEN ${status} = 'verified' THEN true ELSE onboarding_complete END,
         updated_at = now()
       WHERE id = ${contractorId}
       RETURNING id, company_name, verification_status, verification_note
