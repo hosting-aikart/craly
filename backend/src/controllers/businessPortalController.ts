@@ -3,6 +3,7 @@ import sql from '../db/index';
 import { z } from 'zod';
 import { createNotification, notifyUsersByRole, notifyMatchingContractors } from '../utils/notifications';
 import { toPgTextArrayLiteral } from '../utils/pgArray';
+import { notifyApplicationEvent } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -599,7 +600,8 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
         mr.title AS requirement_title,
         mr.manufacturer_id,
         cp.company_name AS contractor_name,
-        cp.user_id AS contractor_user_id
+        cp.user_id AS contractor_user_id,
+        cp.phone AS contractor_phone
       FROM applications app
       JOIN manpower_requirements mr ON mr.id = app.requirement_id
       JOIN contractor_profiles cp ON cp.id = app.contractor_id
@@ -612,15 +614,38 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
       return next(err);
     }
 
-    // Update application status
+    // Update application status — only if it actually changes. The
+    // `status <> newStatus` guard makes this the single point that decides
+    // whether a transition happened (concurrent identical requests: only one
+    // matches), so re-sending the same status (e.g. SELECTED → SELECTED)
+    // can't repeat any notification, in-app or WhatsApp.
     const [updatedApp] = await sql`
       UPDATE applications
       SET status = ${newStatus}, updated_at = NOW()
-      WHERE id = ${id}
+      WHERE id = ${id} AND status <> ${newStatus}
       RETURNING id, requirement_id, status, updated_at
     `;
 
+    if (!updatedApp) {
+      const [currentApp] = await sql`
+        SELECT id, requirement_id, status, updated_at FROM applications WHERE id = ${id}
+      `;
+      res.json({
+        data: currentApp,
+        message: `Application is already ${newStatus.replace('_', ' ')}.`,
+      });
+      return;
+    }
+
     let responseMessage = `Application status updated to ${newStatus}.`;
+
+    const contractor = {
+      contractorId: appDetail.contractor_id,
+      userId: appDetail.contractor_user_id,
+      phone: appDetail.contractor_phone,
+      companyName: appDetail.contractor_name,
+    };
+    const applicationRef = { id: appDetail.id, requirementTitle: appDetail.requirement_title };
 
     // Notify the contractor that owns this application — every status
     // transition, not just SELECTED, so "My Applications" status changes
@@ -635,6 +660,12 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
       });
     }
 
+    // Explicit rejection by the manufacturer. (UNDER_REVIEW / SHORTLISTED
+    // have no WhatsApp template — in-app only.)
+    if (newStatus === 'REJECTED') {
+      await notifyApplicationEvent(contractor, 'application_rejected', applicationRef, updatedApp.updated_at);
+    }
+
     // If SELECTED: update requirement status, auto-reject the other
     // applicants for this same requirement, and notify Craly Staff.
     if (newStatus === 'SELECTED') {
@@ -646,22 +677,27 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
 
       responseMessage = 'Contractor selected. Craly Staff will coordinate the next step.';
 
+      await notifyApplicationEvent(contractor, 'application_selected', applicationRef, updatedApp.updated_at);
+
       // Only one contractor can be SELECTED per requirement — every other
       // application on it (including a previously-SELECTED one, if the
       // manufacturer changed their mind) moves to REJECTED, and each of
-      // those contractors is notified individually.
+      // those contractors is notified individually. A previously-selected
+      // contractor who already got application_selected on WhatsApp gets
+      // application_not_selected here, so their latest message matches
+      // their actual status.
       const otherApplicants = await sql`
         UPDATE applications
         SET status = 'REJECTED', updated_at = NOW()
         WHERE requirement_id = ${appDetail.requirement_id}
           AND id != ${appDetail.id}
           AND status != 'REJECTED'
-        RETURNING id, contractor_id
+        RETURNING id, contractor_id, updated_at
       `;
 
       for (const rejected of otherApplicants) {
         const [rejectedContractor] = await sql`
-          SELECT user_id FROM contractor_profiles WHERE id = ${rejected.contractor_id}
+          SELECT user_id, company_name, phone FROM contractor_profiles WHERE id = ${rejected.contractor_id}
         `;
         if (rejectedContractor?.user_id) {
           await createNotification({
@@ -671,6 +707,17 @@ export async function updateApplicationStatus(req: Request, res: Response, next:
             message: `Your application for "${appDetail.requirement_title}" was not selected. Another contractor was chosen for this requirement.`,
             referenceId: rejected.id,
           });
+          await notifyApplicationEvent(
+            {
+              contractorId: rejected.contractor_id,
+              userId: rejectedContractor.user_id,
+              phone: rejectedContractor.phone,
+              companyName: rejectedContractor.company_name,
+            },
+            'application_not_selected',
+            { id: rejected.id, requirementTitle: appDetail.requirement_title },
+            rejected.updated_at,
+          );
         }
       }
 

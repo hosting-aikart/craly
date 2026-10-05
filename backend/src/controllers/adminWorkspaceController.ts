@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { createNotification } from '../utils/notifications';
 import { emitToUser } from '../socket/emitter';
+import { notifyContractorVerificationChange } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
 function badRequest(msg: string): AppError {
@@ -254,13 +255,18 @@ export async function reviewVerification(req: Request, res: Response, next: Next
     // onboarding_complete) — see the matching comment in
     // pfContractorController.updatePfContractorVerification.
     const [updated] = await sql`
-      UPDATE contractor_profiles
+      WITH prev AS (
+        SELECT id, verification_status FROM contractor_profiles WHERE id = ${contractorId} FOR UPDATE
+      )
+      UPDATE contractor_profiles cp
       SET verification_status = ${status},
           verification_note = ${note ?? null},
-          onboarding_complete = CASE WHEN ${status} = 'verified' THEN true ELSE onboarding_complete END,
+          onboarding_complete = CASE WHEN ${status} = 'verified' THEN true ELSE cp.onboarding_complete END,
           updated_at = now()
-      WHERE id = ${contractorId}
-      RETURNING id, user_id, company_name, verification_status, onboarding_complete
+      FROM prev
+      WHERE cp.id = prev.id
+      RETURNING cp.id, cp.user_id, cp.company_name, cp.verification_status, cp.onboarding_complete,
+                cp.phone, cp.updated_at, prev.verification_status AS previous_status
     `;
 
     if (!updated) return next(notFound('Contractor profile not found'));
@@ -298,7 +304,15 @@ export async function reviewVerification(req: Request, res: Response, next: Next
       });
     }
 
-    res.json({ data: updated });
+    await notifyContractorVerificationChange(
+      { contractorId, userId: updated.user_id, phone: updated.phone, companyName: updated.company_name },
+      updated.previous_status,
+      status,
+      updated.updated_at,
+    );
+
+    const { phone: _phone, previous_status: _previousStatus, updated_at: _updatedAt, ...updatedData } = updated;
+    res.json({ data: updatedData });
   } catch (err) {
     next(err);
   }

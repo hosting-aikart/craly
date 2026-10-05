@@ -6,6 +6,7 @@ import { buildDocumentStorageKey, putObject, getSignedGetUrl, deleteObject } fro
 import { validateDocumentFile, sanitizeDisplayFileName, MAX_DOCUMENT_SIZE_BYTES } from '../utils/fileValidation';
 import { uploadDocumentSchema, reviewDocumentSchema, SENSITIVE_DOCUMENT_TYPES } from '../validators/documentValidators';
 import { logAudit } from '../utils/auditLog';
+import { notifyContractorVerificationChange, notifyKycDocumentReviewed } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
 function notFound(message: string): AppError {
@@ -88,15 +89,29 @@ export async function uploadMyDocument(req: Request, res: Response, next: NextFu
     `;
 
     // Reset status to pending if previously rejected or needs_changes
-    await sql`
-      UPDATE contractor_profiles
+    const [profile] = await sql`
+      WITH prev AS (
+        SELECT id, verification_status FROM contractor_profiles WHERE id = ${contractorId} FOR UPDATE
+      )
+      UPDATE contractor_profiles cp
       SET verification_status = CASE 
-        WHEN verification_status IN ('rejected', 'needs_changes') THEN 'pending'
-        ELSE verification_status 
+        WHEN cp.verification_status IN ('rejected', 'needs_changes') THEN 'pending'
+        ELSE cp.verification_status 
       END,
       updated_at = now()
-      WHERE id = ${contractorId}
+      FROM prev
+      WHERE cp.id = prev.id
+      RETURNING cp.user_id, cp.company_name, cp.phone, cp.verification_status, cp.updated_at, prev.verification_status AS previous_status
     `;
+    if (profile) {
+      // Resubmission after rejected/needs_changes → "under review" message.
+      await notifyContractorVerificationChange(
+        { contractorId, userId: profile.user_id, phone: profile.phone, companyName: profile.company_name },
+        profile.previous_status,
+        profile.verification_status,
+        profile.updated_at,
+      );
+    }
 
     await logAudit(req.user!.sub, 'document:upload', 'contractor_document', documentId, undefined, {
       contractorId,
@@ -302,16 +317,36 @@ export async function reviewDocument(req: Request, res: Response, next: NextFunc
     const { decision, note } = parsed.data;
 
     const [updated] = await sql`
-      UPDATE contractor_documents
+      WITH prev AS (
+        SELECT id, status FROM contractor_documents
+        WHERE id = ${documentId} AND contractor_id = ${contractorId}
+        FOR UPDATE
+      )
+      UPDATE contractor_documents d
       SET status = ${decision}, updated_at = now()
-      WHERE id = ${documentId} AND contractor_id = ${contractorId}
-      RETURNING id, document_type, status
+      FROM prev
+      WHERE d.id = prev.id
+      RETURNING d.id, d.document_type, d.status, d.updated_at, prev.status AS previous_status
     `;
     if (!updated) return next(notFound('Document not found'));
 
     await logAudit(req.user!.sub, `document:${decision}`, 'contractor_document', documentId, note, { contractorId });
 
-    res.json({ data: updated });
+    if (updated.previous_status !== decision) {
+      const [contractor] = await sql`
+        SELECT user_id, company_name, phone FROM contractor_profiles WHERE id = ${contractorId}
+      `;
+      if (contractor) {
+        await notifyKycDocumentReviewed(
+          { contractorId, userId: contractor.user_id, phone: contractor.phone, companyName: contractor.company_name },
+          { id: updated.id, documentType: updated.document_type },
+          decision,
+          updated.updated_at,
+        );
+      }
+    }
+
+    res.json({ data: { id: updated.id, document_type: updated.document_type, status: updated.status } });
   } catch (err) {
     next(err);
   }

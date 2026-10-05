@@ -7,6 +7,13 @@ import { toPgTextArrayLiteral } from '../utils/pgArray';
 import { createNotification } from '../utils/notifications';
 import { logAudit } from '../utils/auditLog';
 import { hashPassword } from '../utils/password';
+import {
+  notifyContractorWelcome,
+  notifyContractorListingChange,
+  notifyApplicationEvent,
+  notifyKycDocumentReviewed,
+  notifyContractorVerificationChange,
+} from '../utils/whatsappNotifications';
 
 // Schema for adding a new contractor profile. email + password are now
 // required — Staff sets a temporary password directly so the account is
@@ -239,7 +246,7 @@ export async function createContractor(req: Request, res: Response, next: NextFu
           ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
           ${availability || 'AVAILABLE'}, ${notes || null}, 'verified', true, now(), ${req.user!.sub}
         )
-        RETURNING id, company_name, city, state, workforce_size, availability, created_at
+        RETURNING id, user_id, company_name, phone, city, state, workforce_size, availability, created_at
       `;
 
       await tx`
@@ -253,8 +260,20 @@ export async function createContractor(req: Request, res: Response, next: NextFu
 
     await logAudit(req.user!.sub, 'contractor:created_with_login', 'contractor_profile', contractor.id, undefined, { email });
 
+    // After commit, so a failed/retried create never sends; a retry with the
+    // same email is rejected with 409 above before reaching this point.
+    await notifyContractorWelcome({
+      contractorId: contractor.id,
+      userId: contractor.user_id,
+      phone: contractor.phone,
+      companyName: contractor.company_name,
+    });
+
+    // user_id/phone were only returned for the WhatsApp welcome above — keep
+    // the response shape it had before.
+    const { user_id: _userId, phone: _phone, ...contractorData } = contractor;
     res.status(201).json({
-      data: contractor,
+      data: contractorData,
       message: `Contractor profile created with a login for ${email}. Share the temporary password with them directly.`,
     });
   } catch (err) {
@@ -388,7 +407,7 @@ export async function updateContractorListingStatus(req: Request, res: Response,
     const { isUnlisted, reason } = parsed.data;
 
     const [existing] = await sql`
-      SELECT id, user_id, company_name, is_unlisted, unlisted_reason
+      SELECT id, user_id, company_name, phone, is_unlisted, unlisted_reason
       FROM contractor_profiles
       WHERE id = ${id}
     `;
@@ -433,6 +452,17 @@ export async function updateContractorListingStatus(req: Request, res: Response,
           : 'Your contractor profile has been relisted and is now discoverable on the public directory.',
         referenceId: id,
       });
+    }
+
+    // WhatsApp only when listing state actually flipped — re-saving an
+    // already-unlisted contractor (e.g. to edit the reason) sends nothing.
+    if (existing.is_unlisted !== isUnlisted) {
+      await notifyContractorListingChange(
+        { contractorId: id, userId: existing.user_id, phone: existing.phone, companyName: existing.company_name },
+        isUnlisted,
+        reason,
+        updated.updated_at,
+      );
     }
 
     res.json({
@@ -530,18 +560,33 @@ export async function updateEngagementStatus(req: Request, res: Response, next: 
       return next(err);
     }
 
+    // `status <> ${status}` makes a repeated save of the same status a
+    // no-op, so CONFIRMED → CONFIRMED can't re-notify the contractor.
     const [updated] = await sql`
       UPDATE applications
       SET status = ${status}, updated_at = NOW()
-      WHERE id = ${id}
+      WHERE id = ${id} AND status <> ${status}
       RETURNING id, status, updated_at
     `;
+
+    if (!updated) {
+      res.json({
+        data: { id: existing.id, status: existing.status },
+        message: `Engagement is already ${status}`,
+      });
+      return;
+    }
 
     // Deal confirmed is a real milestone for the contractor — worth a
     // notification. The intermediate CONTACTING/IN_DISCUSSION steps are
     // Staff's own working states and don't need to ping either party.
     if (status === 'CONFIRMED') {
-      const [contractor] = await sql`SELECT user_id FROM contractor_profiles WHERE id = ${existing.contractor_id}`;
+      const [contractor] = await sql`
+        SELECT cp.user_id, cp.company_name, cp.phone, mr.title AS requirement_title
+        FROM contractor_profiles cp
+        JOIN manpower_requirements mr ON mr.id = ${existing.requirement_id}
+        WHERE cp.id = ${existing.contractor_id}
+      `;
       if (contractor?.user_id) {
         await createNotification({
           userId: contractor.user_id,
@@ -550,6 +595,12 @@ export async function updateEngagementStatus(req: Request, res: Response, next: 
           message: 'Craly Staff has confirmed your engagement. They will be in touch to finalize the details.',
           referenceId: id,
         });
+        await notifyApplicationEvent(
+          { contractorId: existing.contractor_id, userId: contractor.user_id, phone: contractor.phone, companyName: contractor.company_name },
+          'engagement_confirmed',
+          { id, requirementTitle: contractor.requirement_title },
+          updated.updated_at,
+        );
       }
     }
 
@@ -742,7 +793,7 @@ export async function reviewStaffDocument(req: Request, res: Response, next: Nex
     const { decision, note } = parsed.data;
 
     const [doc] = await sql`
-      SELECT id, contractor_id, document_type, file_name FROM contractor_documents
+      SELECT id, contractor_id, document_type, file_name, status FROM contractor_documents
       WHERE id = ${documentId} AND contractor_id = ${contractorId}
     `;
 
@@ -760,7 +811,7 @@ export async function reviewStaffDocument(req: Request, res: Response, next: Nex
         metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{reviewer_note}', to_jsonb(${note ?? ''}::text)),
         updated_at = now()
       WHERE id = ${documentId} AND contractor_id = ${contractorId}
-      RETURNING id, document_type, status
+      RETURNING id, document_type, status, updated_at
     `;
 
     // Log review in verification_reviews table
@@ -783,19 +834,21 @@ export async function reviewStaffDocument(req: Request, res: Response, next: Nex
       overallStatus = 'verified';
     }
 
-    await sql`
-      UPDATE contractor_profiles
+    // The `prev` CTE row-locks and returns the status from before this
+    // update, so WhatsApp only fires on a real overall-status transition.
+    const [contractor] = await sql`
+      WITH prev AS (
+        SELECT id, verification_status FROM contractor_profiles WHERE id = ${contractorId} FOR UPDATE
+      )
+      UPDATE contractor_profiles cp
       SET 
         verification_status = ${overallStatus},
         verification_note = ${note ?? null},
-        last_verified_at = CASE WHEN ${overallStatus} = 'verified' THEN now() ELSE last_verified_at END,
+        last_verified_at = CASE WHEN ${overallStatus} = 'verified' THEN now() ELSE cp.last_verified_at END,
         updated_at = now()
-      WHERE id = ${contractorId}
-    `;
-
-    // Send in-app notification to contractor user if bound
-    const [contractor] = await sql`
-      SELECT user_id FROM contractor_profiles WHERE id = ${contractorId}
+      FROM prev
+      WHERE cp.id = prev.id
+      RETURNING cp.user_id, cp.company_name, cp.phone, cp.updated_at, prev.verification_status AS previous_status
     `;
 
     if (contractor?.user_id) {
@@ -820,6 +873,15 @@ export async function reviewStaffDocument(req: Request, res: Response, next: Nex
         message,
         referenceId: documentId,
       });
+    }
+
+    if (contractor) {
+      const recipient = { contractorId, userId: contractor.user_id, phone: contractor.phone, companyName: contractor.company_name };
+      // Re-saving the same decision on the same document isn't a new review.
+      if (doc.status !== decision) {
+        await notifyKycDocumentReviewed(recipient, { id: documentId, documentType: doc.document_type }, decision, updatedDoc.updated_at);
+      }
+      await notifyContractorVerificationChange(recipient, contractor.previous_status, overallStatus, contractor.updated_at);
     }
 
     await logAudit(req.user!.sub, `document:${decision}`, 'contractor_document', documentId, note, { contractorId });
@@ -857,14 +919,19 @@ export async function updateStaffContractorVerificationStatus(req: Request, res:
     const { status, note } = parsed.data;
 
     const [updated] = await sql`
-      UPDATE contractor_profiles
+      WITH prev AS (
+        SELECT id, verification_status FROM contractor_profiles WHERE id = ${contractorId} FOR UPDATE
+      )
+      UPDATE contractor_profiles cp
       SET 
         verification_status = ${status},
         verification_note = ${note ?? null},
-        last_verified_at = CASE WHEN ${status} = 'verified' THEN now() ELSE last_verified_at END,
+        last_verified_at = CASE WHEN ${status} = 'verified' THEN now() ELSE cp.last_verified_at END,
         updated_at = now()
-      WHERE id = ${contractorId}
-      RETURNING id, company_name, verification_status, verification_note
+      FROM prev
+      WHERE cp.id = prev.id
+      RETURNING cp.id, cp.company_name, cp.verification_status, cp.verification_note,
+                cp.user_id, cp.phone, cp.updated_at, prev.verification_status AS previous_status
     `;
 
     if (!updated) {
@@ -892,9 +959,23 @@ export async function updateStaffContractorVerificationStatus(req: Request, res:
       });
     }
 
+    await notifyContractorVerificationChange(
+      { contractorId, userId: updated.user_id, phone: updated.phone, companyName: updated.company_name },
+      updated.previous_status,
+      status,
+      updated.updated_at,
+    );
+
     await logAudit(req.user!.sub, `verification:${status}`, 'contractor_profile', contractorId, note);
 
-    res.json({ data: updated });
+    res.json({
+      data: {
+        id: updated.id,
+        company_name: updated.company_name,
+        verification_status: updated.verification_status,
+        verification_note: updated.verification_note,
+      },
+    });
   } catch (err) {
     next(err);
   }

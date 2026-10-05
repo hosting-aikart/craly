@@ -3,6 +3,7 @@ import sql from '../db/index';
 import { z } from 'zod';
 import { createNotification, notifyUsersByRole } from '../utils/notifications';
 import { requirementEligibilityCondition } from '../utils/opportunityMatching';
+import { notifyApplicationEvent, notifyManufacturerNewApplication } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
 // Validator for submitting an application
@@ -17,6 +18,7 @@ const applySchema = z.object({
 export interface ContractorFullProfile {
   id: string;
   company_name: string;
+  phone: string | null;
   workforce_size: number | null;
   industry: string | null;
   years_experience: number | null;
@@ -34,7 +36,7 @@ export interface ContractorFullProfile {
  */
 async function getContractorFullProfile(userId: string): Promise<ContractorFullProfile> {
   const [profile] = await sql<ContractorFullProfile[]>`
-    SELECT id, company_name, workforce_size, industry, years_experience, city, state, service_areas, availability, onboarding_complete, verification_status, created_at
+    SELECT id, company_name, phone, workforce_size, industry, years_experience, city, state, service_areas, availability, onboarding_complete, verification_status, created_at
     FROM contractor_profiles
     WHERE user_id = ${userId}
   `;
@@ -391,7 +393,7 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
     });
 
     // Notify manufacturer user linked to manufacturer_id if available
-    const [mUser] = await sql`SELECT user_id FROM business_profiles WHERE id = ${eligibleReq.manufacturer_id}`;
+    const [mUser] = await sql`SELECT user_id, company_name, phone FROM business_profiles WHERE id = ${eligibleReq.manufacturer_id}`;
     if (mUser?.user_id) {
       await createNotification({
         userId: mUser.user_id,
@@ -400,6 +402,23 @@ export async function applyToOpportunity(req: Request, res: Response, next: Next
         message: `${cp.company_name} applied for your requirement "${eligibleReq.title}"`,
         referenceId: application.id,
       });
+    }
+
+    // WhatsApp: confirmation to the contractor, alert to the manufacturer.
+    // A repeat submit can't double-send — the duplicate check above (and
+    // applications_req_contractor_unique) rejects it with 409 first.
+    const applicationRef = { id: application.id, requirementTitle: eligibleReq.title };
+    await notifyApplicationEvent(
+      { contractorId: cp.id, userId: req.user!.sub, phone: cp.phone, companyName: cp.company_name },
+      'application_submitted',
+      applicationRef,
+      'submitted',
+    );
+    if (mUser) {
+      await notifyManufacturerNewApplication(
+        { userId: mUser.user_id, phone: mUser.phone, companyName: mUser.company_name },
+        applicationRef,
+      );
     }
 
     res.status(201).json({

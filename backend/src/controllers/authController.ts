@@ -6,6 +6,7 @@ import { signAuthToken } from '../utils/jwt';
 import { signupSchema, loginSchema, sendOtpSchema, verifyOtpSchema } from '../validators/authValidators';
 import { generateNumericOtp, hashOtp, verifyOtpHash } from '../utils/otp';
 import { sendOtpEmail } from '../utils/mailer';
+import { notifyContractorWelcome } from '../utils/whatsappNotifications';
 import { AUTH_COOKIE_NAME } from '../middlewares/auth';
 import type { AppError } from '../middlewares/errorHandler';
 
@@ -179,6 +180,7 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
 
     const passwordHash = await hashPassword(password);
 
+    let contractorProfileId: string | null = null;
     const user = await sql.begin(async (tx) => {
       // is_phone_verified stays false — phone number is collected but not
       // verified as part of signup (SMS/MSG91 is out of the active flow).
@@ -199,6 +201,7 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
           )
           RETURNING id
         `;
+        contractorProfileId = cProfile.id;
 
         await tx`
           INSERT INTO organization_members (user_id, contractor_profile_id, org_role, status)
@@ -224,6 +227,15 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
 
       return newUser;
     });
+
+    // Only after the transaction has committed — a failed signup never
+    // sends, and a retried signup for the same email is rejected with 409
+    // above, so this fires once per account (and the job's idempotency key
+    // makes a second enqueue a no-op). Only the job insert is awaited — the
+    // send happens in the worker, and a failure is logged, never surfaced.
+    if (contractorProfileId) {
+      await notifyContractorWelcome({ contractorId: contractorProfileId, userId: user.id, phone: mobile, companyName });
+    }
 
     const token = signAuthToken({ sub: user.id, role: user.role });
     setAuthCookie(res, token);

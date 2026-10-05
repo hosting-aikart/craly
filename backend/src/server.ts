@@ -4,6 +4,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import config from './config/index';
 import apiRouter from './routes/index';
+import whatsappWebhookRoutes from './routes/whatsappWebhookRoutes';
+import { stopWhatsAppProducer } from './queue/whatsappQueue';
 import { errorHandler } from './middlewares/errorHandler';
 import { initSocketServer } from './socket/index';
 import { healthCheck } from './controllers/healthController';
@@ -65,6 +67,10 @@ app.use((_req, res, next) => {
   next();
 });
 
+// WhatsApp webhook — before express.json(): Meta's X-Hub-Signature-256 is
+// an HMAC of the raw body, which express.json() would consume.
+app.use('/api/webhooks/whatsapp', whatsappWebhookRoutes);
+
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
@@ -125,7 +131,9 @@ function shutdown(signal: string): void {
   console.log(`[server] ${signal} received — shutting down gracefully`);
   server.close(() => {
     console.log('[server] Closed remaining connections');
-    process.exit(0);
+    // WhatsApp jobs are already committed to Postgres by the time a request
+    // returns; this only closes the producer's pg-boss connection pool.
+    stopWhatsAppProducer().finally(() => process.exit(0));
   });
 }
 
