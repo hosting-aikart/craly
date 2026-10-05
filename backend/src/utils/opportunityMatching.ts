@@ -17,10 +17,13 @@ import { toPgTextArrayLiteral } from './pgArray';
  *   4. AND contractor.city == requirement.city, OR requirement.city is one
  *      of contractor.service_areas (exact match, case/whitespace
  *      insensitive).
- *
- * Deliberately simple by request: workforce count, industry, and
- * location-or-coverage only. Experience and availability are NOT checked
- * here (they used to be) — this is intentional, not an oversight.
+ *   5. contractor.availability must NOT be 'NOT_AVAILABLE' or 'SUSPENDED'
+ *      — don't show jobs to contractors who can't take work right now.
+ *      'CURRENTLY_AT_CAPACITY' and 'PAUSED' are allowed (they may free up).
+ *   6. If the requirement specifies experience_required (> 0), the contractor
+ *      must have at least the required experience (contractor.years_experience
+ *      >= requirement.experience_required). Missing/null contractor experience
+ *      is rejected if experience is required.
  *
  * A NULL/blank requirement city or state is treated as "no constraint" —
  * this only matters for requirements published before the city/state
@@ -34,6 +37,8 @@ export interface MatchContractorProfile {
   city: string | null;
   state: string | null;
   service_areas: string[] | null;
+  availability: string | null;
+  years_experience: number | null;
 }
 
 export interface MatchRequirement {
@@ -41,6 +46,22 @@ export interface MatchRequirement {
   industry: string | null;
   city: string | null;
   state: string | null;
+  experience_required: number | null;
+}
+
+/**
+ * Splits an industry string into lowercase keywords, stripping common
+ * connective words and punctuation (e.g. "Construction & Infrastructure"
+ * -> ["construction", "infrastructure"]).
+ */
+export function extractIndustryKeywords(ind: string | null | undefined): string[] {
+  if (!ind) return [];
+  const stopWords = new Set(['and', '&', 'or', 'the', 'in', 'of', 'for', 'to', 'a', 'an']);
+  return ind
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 3 && !stopWords.has(w));
 }
 
 /**
@@ -55,6 +76,8 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   const industry = cp.industry || '';
   const city = cp.city || '';
   const state = cp.state || '';
+  const yearsExperience = cp.years_experience;
+  const hasExperience = yearsExperience !== null && yearsExperience !== undefined;
   // sql.array() is unreliable inside a dynamic query fragment like this one
   // (same issue documented on toPgTextArrayLiteral in pgArray.ts — it can
   // send the parameter as a plain comma-joined string instead of a proper
@@ -62,14 +85,21 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   // opportunities query throw for any contractor with service_areas set).
   // Building the literal ourselves and casting it explicitly sidesteps that.
   const serviceAreasLiteral = toPgTextArrayLiteral(cp.service_areas || []);
+  const industryKeywords = extractIndustryKeywords(cp.industry);
+  const industryKeywordsLiteral = toPgTextArrayLiteral(industryKeywords);
 
   return sql`(
     -- 1. Worker capacity
     (${workforce} >= mr.workers_required)
-    -- 2. Industry
+    -- 2. Industry: exact match or keyword overlap (e.g. "Construction & Infrastructure" matches "Infrastructure and construction")
     AND (
       mr.industry IS NULL OR TRIM(mr.industry) = ''
+      OR ${industryKeywords.length} = 0
       OR (${industry} != '' AND LOWER(TRIM(${industry})) = LOWER(TRIM(mr.industry)))
+      OR EXISTS (
+        SELECT 1 FROM unnest(${industryKeywordsLiteral}::text[]) kw
+        WHERE LOWER(mr.industry) LIKE '%' || kw || '%'
+      )
     )
     -- 3. State must match exactly
     AND (
@@ -84,6 +114,11 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
         SELECT 1 FROM unnest(${serviceAreasLiteral}::text[]) sa
         WHERE LOWER(TRIM(sa)) = LOWER(TRIM(mr.city))
       )
+    )
+    -- 5. Experience hard requirement: contractor must meet or exceed required experience
+    AND (
+      mr.experience_required IS NULL OR mr.experience_required <= 0
+      OR (${hasExperience} AND ${yearsExperience ?? 0} >= mr.experience_required)
     )
   )`;
 }
@@ -101,15 +136,23 @@ export function contractorEligibilityCondition(mr: MatchRequirement) {
   const industry = mr.industry || '';
   const city = mr.city || '';
   const state = mr.state || '';
+  const experienceRequired = mr.experience_required ?? 0;
+  const industryKeywords = extractIndustryKeywords(mr.industry);
+  const industryKeywordsLiteral = toPgTextArrayLiteral(industryKeywords);
 
   return sql`(
     -- 1. Worker capacity
     cp.workforce_size IS NOT NULL
     AND cp.workforce_size >= ${workersRequired}
-    -- 2. Industry
+    -- 2. Industry: exact match or keyword overlap
     AND (
-      ${industry} = ''
-      OR (cp.industry IS NOT NULL AND TRIM(cp.industry) != '' AND LOWER(TRIM(cp.industry)) = LOWER(TRIM(${industry})))
+      ${industryKeywords.length} = 0
+      OR (cp.industry IS NULL OR TRIM(cp.industry) = '')
+      OR (LOWER(TRIM(cp.industry)) = LOWER(TRIM(${industry})))
+      OR EXISTS (
+        SELECT 1 FROM unnest(${industryKeywordsLiteral}::text[]) kw
+        WHERE LOWER(cp.industry) LIKE '%' || kw || '%'
+      )
     )
     -- 3. State must match exactly
     AND (
@@ -124,6 +167,16 @@ export function contractorEligibilityCondition(mr: MatchRequirement) {
         SELECT 1 FROM unnest(COALESCE(cp.service_areas, ARRAY[]::text[])) sa
         WHERE LOWER(TRIM(sa)) = LOWER(TRIM(${city}))
       )
+    )
+    -- 5. Availability: don't match contractors who can't take work
+    AND (
+      cp.availability IS NULL
+      OR cp.availability NOT IN ('NOT_AVAILABLE', 'SUSPENDED')
+    )
+    -- 6. Experience hard requirement: contractor must meet or exceed required experience
+    AND (
+      ${experienceRequired} <= 0
+      OR (cp.years_experience IS NOT NULL AND cp.years_experience >= ${experienceRequired})
     )
   )`;
 }

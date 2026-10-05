@@ -160,7 +160,7 @@ export default function AddContractorPage() {
       <div className="staff-new-form-card">
         <div className="staff-new-form-card__header">
           <h2>Add New Contractor Profile</h2>
-          <p>Manually provision a contractor entity for platform operations, verified directory, and match-making.</p>
+          <p>Manually provision a contractor account. The contractor will start as Pending Verification and require KYC document review before marketplace access.</p>
         </div>
 
         {error && (

@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { getRoleDefaultDashboard } from '@/lib/util/roleRedirect';
 import LoadingState from '@/components/ui/LoadingState';
+import ForgotPasswordModal from '@/components/ForgotPasswordModal';
 import './login.css';
 import './login-mobile.css';
 
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -90,8 +92,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-page__wrap">
+    <>
+      <div className="login-page">
+        <div className="login-page__wrap">
 
         {/* ── Left: dark brand panel ────────────────────────────────── */}
         <div className="login-panel">
@@ -200,9 +203,13 @@ export default function LoginPage() {
               </div>
             </label>
 
-            <a href="mailto:hello@craly.com?subject=Forgot%20password" className="login-forgot">
+            <button
+              type="button"
+              className="login-forgot"
+              onClick={() => setForgotOpen(true)}
+            >
               {t.auth.forgotPassword}
-            </a>
+            </button>
 
             {error && <p className="login-error">{error}</p>}
 
@@ -231,8 +238,10 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
+
+      <ForgotPasswordModal open={forgotOpen} onClose={() => setForgotOpen(false)} />
+    </>
   );
 }

@@ -143,14 +143,37 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
             {contractor.availability.replace(/_/g, ' ')}
           </span>
           <span className="verification-label">
-            Verification: <strong>{contractor.verification_status.toUpperCase()}</strong>
+            Verification:{' '}
+            <strong style={{
+              color: contractor.verification_status === 'verified'
+                ? '#047857'
+                : contractor.verification_status === 'rejected'
+                ? '#b91c1c'
+                : '#b45309',
+            }}>
+              {contractor.verification_status === 'verified'
+                ? '✓ Verified'
+                : contractor.verification_status === 'under_review'
+                ? '🔍 Under Review'
+                : contractor.verification_status === 'needs_changes'
+                ? '⚠️ Needs Changes'
+                : contractor.verification_status === 'rejected'
+                ? '✕ Rejected'
+                : '⏳ Pending Verification'}
+            </strong>
           </span>
           <Link href={`/staff/verification/${contractor.id}`} className="review-link">
             Open Full Verification Review →
           </Link>
-          <span className={`listing-badge ${contractor.is_unlisted ? 'listing-badge--unlisted' : 'listing-badge--listed'}`}>
-            {contractor.is_unlisted ? '🚫 Unlisted' : '🌐 Publicly Listed'}
-          </span>
+          {contractor.verification_status !== 'verified' ? (
+            <span className="listing-badge listing-badge--not-verified" title="Contractor must complete KYC verification before appearing in the public directory">
+              🔒 Unverified (Hidden)
+            </span>
+          ) : (
+            <span className={`listing-badge ${contractor.is_unlisted ? 'listing-badge--unlisted' : 'listing-badge--listed'}`}>
+              {contractor.is_unlisted ? '🚫 Unlisted' : '🌐 Publicly Listed'}
+            </span>
+          )}
           <button
             type="button"
             onClick={() => setModalOpen(true)}

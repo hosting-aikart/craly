@@ -15,7 +15,7 @@ const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   resendApiKey: process.env.RESEND_API_KEY ?? '',
   contactEmailTo: process.env.CONTACT_EMAIL_TO ?? 'vishalsambare2004@gmail.com',
-  contactEmailFrom: process.env.CONTACT_EMAIL_FROM ?? 'Craly <onboarding@resend.dev>',
+  contactEmailFrom: process.env.CONTACT_EMAIL_FROM ?? 'Craly <noreply@craly.co>',
 
   // NOTE: no MSG91/SMS config here. Signup verification is email-only —
   // phone OTP/SMS is intentionally disconnected from the active auth flow

@@ -214,12 +214,14 @@ export default function OpportunityDetailPage({ params }: { params: Promise<{ id
               <span>Duration</span>
               <strong>{opportunity.duration}</strong>
             </div>
-            {opportunity.experience_required && (
-              <div className="side-detail-item">
-                <span>Experience Required</span>
-                <strong>{opportunity.experience_required} Years</strong>
-              </div>
-            )}
+            <div className="side-detail-item">
+              <span>Experience Required</span>
+              <strong>
+                {opportunity.experience_required && opportunity.experience_required > 0
+                  ? `Minimum Experience: ${opportunity.experience_required} ${opportunity.experience_required === 1 ? 'year' : 'years'}`
+                  : 'No experience requirement specified'}
+              </strong>
+            </div>
             {(opportunity.budget_min || opportunity.budget_max) && (
               <div className="side-detail-item">
                 <span>Budget / Rate</span>

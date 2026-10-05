@@ -7,6 +7,7 @@ import { computeProfileCompletion } from '@/lib/util/contractorProfileCompletion
 import LoadingState from '@/components/ui/LoadingState';
 import PhoneInput from '@/components/ui/PhoneInput';
 import ContractorDocumentsSection from '@/components/contractor/ContractorDocumentsSection';
+import WorksitePhotosSection from '@/components/contractor/WorksitePhotosSection';
 import {
   IconShield,
   IconBuilding,
@@ -773,6 +774,9 @@ export default function ContractorProfilePage() {
               </div>
             </div>
           )}
+
+          {/* Worksite Photos Showcase */}
+          <WorksitePhotosSection />
         </div>
       )}
 

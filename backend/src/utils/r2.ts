@@ -45,6 +45,10 @@ export function buildDocumentStorageKey(contractorId: string, documentId: string
   return `contractors/${contractorId}/verification/${documentId}/original`;
 }
 
+export function buildWorksitePhotoStorageKey(contractorId: string, photoId: string): string {
+  return `contractors/${contractorId}/worksite-photos/${photoId}/original`;
+}
+
 /** Uploads a buffer to the private bucket. Throws 503 if R2 isn't configured. */
 export async function putObject(key: string, body: Buffer, contentType: string): Promise<void> {
   const s3 = getClient();

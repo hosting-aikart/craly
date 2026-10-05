@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { z } from 'zod';
 import { createNotification, notifyUsersByRole } from '../utils/notifications';
-import { requirementEligibilityCondition } from '../utils/opportunityMatching';
+import { requirementEligibilityCondition, extractIndustryKeywords } from '../utils/opportunityMatching';
 import { notifyApplicationEvent, notifyManufacturerNewApplication } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
@@ -25,9 +25,14 @@ export interface ContractorFullProfile {
   city: string | null;
   state: string | null;
   service_areas: string[] | null;
+  skills: string[] | null;
   availability: string | null;
   onboarding_complete: boolean;
   verification_status: string;
+  overall_rating: number | null;
+  ghosting_count: number;
+  repeat_engagement_count: number;
+  certification_status: string;
   created_at: string;
 }
 
@@ -36,7 +41,11 @@ export interface ContractorFullProfile {
  */
 async function getContractorFullProfile(userId: string): Promise<ContractorFullProfile> {
   const [profile] = await sql<ContractorFullProfile[]>`
-    SELECT id, company_name, phone, workforce_size, industry, years_experience, city, state, service_areas, availability, onboarding_complete, verification_status, created_at
+    SELECT id, company_name, phone, workforce_size, industry, years_experience,
+           city, state, service_areas, skills, availability,
+           onboarding_complete, verification_status,
+           overall_rating, ghosting_count, repeat_engagement_count,
+           certification_status, created_at
     FROM contractor_profiles
     WHERE user_id = ${userId}
   `;
@@ -72,96 +81,270 @@ function forbiddenNotApproved(): AppError {
 }
 
 /**
- * Opportunity matching checks workforce capacity, industry, experience,
- * and location compatibility (Base City, State, or Coverage Areas / service_areas).
+ * Weighted opportunity match scoring (display-only, NOT the eligibility gate).
  *
- * NOTE: this is a *display-only* scoring/ranking function (match_score,
- * match_level, match_reasons for the UI) — it is NOT the eligibility gate.
- * The actual hard eligibility filter lives in
- * ../utils/opportunityMatching.ts (requirementEligibilityCondition) and is
- * applied identically in every function below. This function still uses
- * the freeform `location` text for its cosmetic "why this matched" copy,
- * which is unrelated to and unaffected by the eligibility rule.
+ * Six factors are independently scored 0.0–1.0 and combined using fixed
+ * weights that sum to 100.  The final score is a true percentage (0–100)
+ * where 0 means "barely eligible" and 100 means "perfect fit on every
+ * axis."  Each factor produces a human-readable reason string for the UI.
+ *
+ * The hard eligibility filter lives in ../utils/opportunityMatching.ts
+ * (requirementEligibilityCondition) — this function only runs on rows
+ * that already passed that gate.
+ *
+ * IMPORTANT: Uses the structured `city`/`state` columns for location
+ * scoring (not the freeform `location` text) so that scoring and
+ * eligibility always agree.
  */
-function calculateOpportunityMatch(op: any, contractor: ContractorFullProfile) {
-  let score = 70;
+
+interface MatchFactor {
+  weight: number;
+  score: number;      // 0.0 – 1.0
+  reasons: string[];
+}
+
+function normalize(s: string): string {
+  return s.toLowerCase().trim();
+}
+
+/**
+ * Skills matching: compares contractor.skills[] against
+ * requirement.required_skills[] using case-insensitive includes() for
+ * fuzzy tolerance (e.g. "MIG Welding" matches "MIG", "Electrical Wiring"
+ * matches "Electrical").  Returns a 0.0–1.0 score based on the fraction
+ * of required skills that were matched.
+ */
+function scoreSkillsOverlap(
+  contractorSkills: string[] | null,
+  requiredSkills: string[] | null,
+): MatchFactor {
   const reasons: string[] = [];
 
-  if (contractor.workforce_size && op.workers_required) {
-    if (contractor.workforce_size >= op.workers_required * 1.5) {
-      score += 15;
-      reasons.push('Ample workforce capacity');
-    } else {
-      score += 10;
-      reasons.push('Meets workforce requirements');
+  if (!requiredSkills || requiredSkills.length === 0) {
+    return { weight: 30, score: 1.0, reasons: ['No specific skills required'] };
+  }
+
+  if (!contractorSkills || contractorSkills.length === 0) {
+    reasons.push(`0 of ${requiredSkills.length} required skills matched`);
+    return { weight: 30, score: 0, reasons };
+  }
+
+  const normalizedContractor = contractorSkills.map(normalize);
+  const matched: string[] = [];
+
+  for (const reqSkill of requiredSkills) {
+    const reqNorm = normalize(reqSkill);
+    const found = normalizedContractor.some(
+      (cs) => cs.includes(reqNorm) || reqNorm.includes(cs),
+    );
+    if (found) matched.push(reqSkill);
+  }
+
+  const score = matched.length / requiredSkills.length;
+
+  if (matched.length === requiredSkills.length) {
+    reasons.push(`All ${matched.length} required skills matched (${matched.join(', ')})`);
+  } else if (matched.length > 0) {
+    reasons.push(`${matched.length} of ${requiredSkills.length} required skills matched (${matched.join(', ')})`);
+  } else {
+    reasons.push(`0 of ${requiredSkills.length} required skills matched`);
+  }
+
+  return { weight: 30, score, reasons };
+}
+
+function scoreWorkforceCapacity(
+  contractorSize: number | null,
+  workersRequired: number | null,
+): MatchFactor {
+  const reasons: string[] = [];
+
+  if (!workersRequired || workersRequired <= 0) {
+    return { weight: 20, score: 1.0, reasons: ['No workforce requirement specified'] };
+  }
+
+  const size = contractorSize ?? 0;
+  if (size >= workersRequired * 1.5) {
+    reasons.push(`Workforce: ${size} available vs ${workersRequired} needed — ample surplus capacity`);
+    return { weight: 20, score: 1.0, reasons };
+  }
+  if (size >= workersRequired) {
+    reasons.push(`Workforce: ${size} available vs ${workersRequired} needed — meets requirement`);
+    return { weight: 20, score: 1.0, reasons };
+  }
+  if (size >= workersRequired * 0.7) {
+    reasons.push(`Workforce: ${size} available vs ${workersRequired} needed — close to requirement`);
+    return { weight: 20, score: 0.5, reasons };
+  }
+
+  reasons.push(`Workforce: ${size} available vs ${workersRequired} needed — below requirement`);
+  return { weight: 20, score: 0, reasons };
+}
+
+function scoreLocationPrecision(
+  contractor: ContractorFullProfile,
+  opCity: string | null,
+  opState: string | null,
+): MatchFactor {
+  const reasons: string[] = [];
+
+  if ((!opCity || !opCity.trim()) && (!opState || !opState.trim())) {
+    return { weight: 20, score: 1.0, reasons: ['No location constraint on requirement'] };
+  }
+
+  const reqCity = opCity ? normalize(opCity) : '';
+  const reqState = opState ? normalize(opState) : '';
+  const conCity = contractor.city ? normalize(contractor.city) : '';
+  const conState = contractor.state ? normalize(contractor.state) : '';
+
+  // 1. Exact city match
+  if (reqCity && conCity && conCity === reqCity) {
+    reasons.push(`Exact city match: ${contractor.city}`);
+    return { weight: 20, score: 1.0, reasons };
+  }
+
+  // 2. City found in service_areas (coverage area match)
+  if (reqCity && contractor.service_areas && Array.isArray(contractor.service_areas)) {
+    const flatAreas = contractor.service_areas
+      .flatMap((sa) => String(sa).split(','))
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const matchedArea = flatAreas.find((sa) => normalize(sa) === reqCity);
+    if (matchedArea) {
+      reasons.push(`Coverage area match: ${matchedArea} in your service areas`);
+      return { weight: 20, score: 0.8, reasons };
     }
   }
 
-  if (contractor.industry && op.industry && contractor.industry.toLowerCase() === op.industry.toLowerCase()) {
-    score += 10;
-    reasons.push('Exact industry match');
+  // 3. State-only match (weaker)
+  if (reqState && conState && conState === reqState) {
+    reasons.push(`Same state: ${contractor.state}`);
+    return { weight: 20, score: 0.5, reasons };
   }
 
-  if (op.experience_required) {
-    const contractorExperience = contractor.years_experience || 0;
-    if (contractorExperience >= op.experience_required * 1.5) {
-      score += 15;
-      reasons.push('Highly experienced for this role');
-    } else if (contractorExperience >= op.experience_required) {
-      score += 10;
-      reasons.push('Meets experience requirement');
-    }
+  reasons.push('Location does not closely match');
+  return { weight: 20, score: 0, reasons };
+}
+
+function scoreExperienceFit(
+  contractorExperience: number | null,
+  experienceRequired: number | null,
+): MatchFactor {
+  const reasons: string[] = [];
+
+  if (!experienceRequired || experienceRequired <= 0) {
+    return { weight: 15, score: 1.0, reasons: ['No experience requirement specified'] };
   }
 
-  if (op.location) {
-    const locLower = op.location.toLowerCase();
-    let locationMatched = false;
+  const exp = contractorExperience ?? 0;
 
-    // 1. Base City Check
-    if (contractor.city) {
-      const cityLower = contractor.city.toLowerCase().trim();
-      if (cityLower && (locLower.includes(cityLower) || cityLower.includes(locLower))) {
-        score += 15;
-        reasons.push(`Location match (Base City: ${contractor.city})`);
-        locationMatched = true;
-      }
-    }
+  if (exp >= experienceRequired * 1.5) {
+    reasons.push(`Minimum Experience: ${experienceRequired} years (${exp} yrs available — highly experienced)`);
+    return { weight: 15, score: 1.0, reasons };
+  }
+  if (exp >= experienceRequired) {
+    reasons.push(`Minimum Experience: ${experienceRequired} years (${exp} yrs available — meets requirement)`);
+    return { weight: 15, score: 1.0, reasons };
+  }
+  reasons.push(`Minimum Experience: ${experienceRequired} years (${exp} yrs available — below requirement)`);
+  return { weight: 15, score: 0, reasons };
+}
 
-    // 2. Coverage Area (Service Areas) Check
-    if (contractor.service_areas && Array.isArray(contractor.service_areas)) {
-      const flatAreas = contractor.service_areas
-        .flatMap((sa) => String(sa).split(','))
-        .map((s) => s.trim())
-        .filter(Boolean);
+function scoreIndustryMatch(
+  contractorIndustry: string | null,
+  requirementIndustry: string | null,
+): MatchFactor {
+  if (!requirementIndustry || !requirementIndustry.trim()) {
+    return { weight: 10, score: 1.0, reasons: ['No industry constraint on requirement'] };
+  }
+  if (!contractorIndustry || !contractorIndustry.trim()) {
+    return { weight: 10, score: 0.5, reasons: ['Industry not specified in contractor profile'] };
+  }
+  const normCon = normalize(contractorIndustry);
+  const normReq = normalize(requirementIndustry);
+  if (normCon === normReq || normCon.includes(normReq) || normReq.includes(normCon)) {
+    return { weight: 10, score: 1.0, reasons: [`Industry match: ${requirementIndustry}`] };
+  }
+  const conKeywords = extractIndustryKeywords(contractorIndustry);
+  const reqKeywords = extractIndustryKeywords(requirementIndustry);
+  const hasKeywordOverlap = conKeywords.some((ck) =>
+    reqKeywords.some((rk) => ck.includes(rk) || rk.includes(ck)),
+  );
+  if (hasKeywordOverlap) {
+    return { weight: 10, score: 1.0, reasons: [`Industry match: ${requirementIndustry}`] };
+  }
+  return { weight: 10, score: 0, reasons: ['Industry does not match'] };
+}
 
-      const matchedArea = flatAreas.find((sa) => {
-        const saLower = sa.toLowerCase();
-        return locLower.includes(saLower) || saLower.includes(locLower);
-      });
+function scoreReliability(contractor: ContractorFullProfile): MatchFactor {
+  const reasons: string[] = [];
+  let score = 0.6; // Neutral default for contractors with no history
 
-      if (matchedArea) {
-        score += 15;
-        reasons.push(`Location match (Coverage Area: ${matchedArea})`);
-        locationMatched = true;
-      }
-    }
+  const hasHistory =
+    (contractor.overall_rating !== null && contractor.overall_rating > 0) ||
+    contractor.ghosting_count > 0 ||
+    contractor.repeat_engagement_count > 0;
 
-    // 3. Base State Check
-    if (!locationMatched && contractor.state) {
-      const stateLower = contractor.state.toLowerCase().trim();
-      if (stateLower && (locLower.includes(stateLower) || stateLower.includes(locLower))) {
-        score += 10;
-        reasons.push(`Location match (State: ${contractor.state})`);
-      }
-    }
+  if (!hasHistory) {
+    reasons.push('New contractor — no engagement history yet');
+    return { weight: 5, score, reasons };
   }
 
-  const match_score = Math.min(score, 100);
-  let match_level = 'GOOD';
-  if (match_score >= 90) match_level = 'EXCELLENT';
-  else if (match_score >= 80) match_level = 'GREAT';
+  // Rating contributes 0.0–0.5 of this factor's score
+  if (contractor.overall_rating !== null && contractor.overall_rating > 0) {
+    const ratingPortion = Math.min(contractor.overall_rating / 5.0, 1.0) * 0.5;
+    score = ratingPortion;
+    reasons.push(`Rating: ${contractor.overall_rating}/5`);
+  }
 
-  return { match_score, match_level, match_reasons: reasons };
+  // Ghosting penalizes
+  if (contractor.ghosting_count > 0) {
+    const penalty = Math.min(contractor.ghosting_count * 0.1, 0.3);
+    score = Math.max(score - penalty, 0);
+    reasons.push(`${contractor.ghosting_count} ghosting incident(s) recorded`);
+  }
+
+  // Repeat engagements reward
+  if (contractor.repeat_engagement_count > 0) {
+    const bonus = Math.min(contractor.repeat_engagement_count * 0.05, 0.2);
+    score = Math.min(score + bonus, 1.0);
+    reasons.push(`${contractor.repeat_engagement_count} repeat engagement(s)`);
+  }
+
+  // Certification bonus
+  if (contractor.certification_status === 'certified') {
+    score = Math.min(score + 0.15, 1.0);
+    reasons.push('Certified contractor');
+  }
+
+  return { weight: 5, score: Math.round(score * 100) / 100, reasons };
+}
+
+export function calculateOpportunityMatch(op: any, contractor: ContractorFullProfile) {
+  const factors: MatchFactor[] = [
+    scoreSkillsOverlap(contractor.skills, op.required_skills),
+    scoreWorkforceCapacity(contractor.workforce_size, op.workers_required),
+    scoreLocationPrecision(contractor, op.city, op.state),
+    scoreExperienceFit(contractor.years_experience, op.experience_required),
+    scoreIndustryMatch(contractor.industry, op.industry),
+    scoreReliability(contractor),
+  ];
+
+  const totalWeight = factors.reduce((sum, f) => sum + f.weight, 0);
+  const weightedSum = factors.reduce((sum, f) => sum + f.weight * f.score, 0);
+
+  const match_score = Math.round((weightedSum / totalWeight) * 100);
+
+  let match_level = 'FAIR';
+  if (match_score >= 85) match_level = 'EXCELLENT';
+  else if (match_score >= 70) match_level = 'GREAT';
+  else if (match_score >= 50) match_level = 'GOOD';
+
+  // Flatten all factor reasons into a single array for the UI
+  const match_reasons = factors.flatMap((f) => f.reasons);
+
+  return { match_score, match_level, match_reasons };
 }
 
 /**

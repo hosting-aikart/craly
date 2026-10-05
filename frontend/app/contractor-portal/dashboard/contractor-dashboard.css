@@ -555,6 +555,13 @@
   gap: 1px;
 }
 
+.contractor-op-meta-item--full {
+  grid-column: span 2;
+  border-top: 1px dashed var(--craly-border, #e2e9e7);
+  padding-top: 5px;
+  margin-top: 2px;
+}
+
 .contractor-op-meta-lbl {
   font-size: 9.5px;
   font-weight: 700;

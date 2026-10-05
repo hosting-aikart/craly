@@ -27,6 +27,7 @@ import {
   IconClock,
   IconSearch,
   IconSettings,
+  IconBriefcase,
 } from '@/components/ui/Icons';
 import './contractor-dashboard.css';
 
@@ -264,6 +265,15 @@ export default function ContractorDashboardPage() {
                     <span className="contractor-op-meta-lbl">JOB LENGTH</span>
                     <strong className="contractor-op-meta-val">
                       <IconClock size={13} /> {op.duration || 'Full-time'}
+                    </strong>
+                  </div>
+                  <div className="contractor-op-meta-item contractor-op-meta-item--full">
+                    <span className="contractor-op-meta-lbl">EXPERIENCE REQUIRED</span>
+                    <strong className="contractor-op-meta-val">
+                      <IconBriefcase size={13} />
+                      {op.experience_required && op.experience_required > 0
+                        ? `Minimum Experience: ${op.experience_required} ${op.experience_required === 1 ? 'year' : 'years'}`
+                        : 'No experience requirement specified'}
                     </strong>
                   </div>
                 </div>
