@@ -51,9 +51,8 @@ jobs:
             "commands": [
               "set -e",
               "cd /home/ec2-user/apps/craly",
-              "git config --global --add safe.directory /home/ec2-user/apps/craly",
-              "echo 'Fetching latest code...'",
-              "git fetch origin main",
+               "echo 'Fetching latest code...',
+              "git -c safe.directory=/home/ec2-user/apps/craly fetch origin main",
               "echo 'Updating production checkout...'",
               "git reset --hard origin/main",
               "echo 'Installing backend dependencies...'",
