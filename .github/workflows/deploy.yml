@@ -1,0 +1,82 @@
+name: Deploy Craly Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+
+      - name: Deploy to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/craly_deploy_key
+          chmod 600 ~/.ssh/craly_deploy_key
+
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/craly_deploy_key \
+            "$EC2_USER@$EC2_HOST" << 'EOF'
+
+          set -e
+
+          cd /home/ec2-user/apps/craly
+
+          echo "Fetching latest code..."
+          git fetch origin main
+
+          echo "Updating production checkout..."
+          git reset --hard origin/main
+
+          echo "Installing backend dependencies..."
+          cd backend
+          npm ci
+
+          echo "Building backend..."
+          NODE_OPTIONS="--max-old-space-size=1536" npm run build
+
+          echo "Restarting API..."
+          pm2 restart craly-api --update-env
+
+          echo "Restarting worker..."
+          pm2 restart craly-worker --update-env
+
+          echo "Checking PM2 status..."
+          pm2 list
+
+          echo "Checking API health..."
+          sleep 5
+          curl -fsS http://127.0.0.1:8080/health
+
+          echo
+          echo "Deployment successful."
+
+          EOF
