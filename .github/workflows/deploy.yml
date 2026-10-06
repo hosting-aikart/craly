@@ -46,18 +46,66 @@ jobs:
         run: |
           set -e
 
-          cat > /tmp/ssm-commands.json <<'JSON'
+          cat > /tmp/deploy.sh <<'SCRIPT'
+          set -Eeuo pipefail
+
+          export HOME=/home/ec2-user
+          export GIT_TERMINAL_PROMPT=0
+
+          export NVM_DIR="$HOME/.nvm"
+          if [ -s "$NVM_DIR/nvm.sh" ]; then
+            . "$NVM_DIR/nvm.sh"
+          fi
+
+          nvm use 22 >/dev/null
+
+          echo "Running deployment as: $(whoami)"
+          echo "Node: $(node --version)"
+          echo "NPM: $(npm --version)"
+
+          cd /home/ec2-user/apps/craly
+
+          echo "Configuring Git safe directory..."
+          if ! git config --global --get-all safe.directory | grep -Fxq "/home/ec2-user/apps/craly"; then
+            git config --global --add safe.directory /home/ec2-user/apps/craly
+          fi
+
+          echo "Fetching latest code..."
+          timeout 120 git fetch origin main
+
+          echo "Updating production checkout..."
+          git reset --hard origin/main
+
+          echo "Installing backend dependencies..."
+          cd /home/ec2-user/apps/craly/backend
+          timeout 600 npm ci
+
+          echo "Building backend..."
+          timeout 600 npm run build
+
+          echo "Restarting API..."
+          /usr/bin/pm2 restart craly-api --update-env
+
+          echo "Restarting worker..."
+          /usr/bin/pm2 restart craly-worker --update-env
+
+          echo "Checking PM2 status..."
+          /usr/bin/pm2 list
+
+          echo "Checking API health..."
+          sleep 5
+          curl -fsS http://127.0.0.1:8080/health
+
+          echo
+          echo "Deployment successful."
+          SCRIPT
+
+          ENCODED_SCRIPT=$(base64 -w 0 /tmp/deploy.sh)
+
+          cat > /tmp/ssm-commands.json <<JSON
           {
             "commands": [
-              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly; echo \"Fetching latest code...\"; git fetch origin main'",
-              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly; echo \"Updating production checkout...\"; git reset --hard origin/main'",
-              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly/backend; echo \"Installing backend dependencies...\"; npm ci'",
-              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly/backend; echo \"Building backend...\"; NODE_OPTIONS=\"--max-old-space-size=1536\" npm run build'",
-              "sudo -iu ec2-user bash -lc 'set -e; echo \"Restarting API...\"; pm2 restart craly-api --update-env'",
-              "sudo -iu ec2-user bash -lc 'set -e; echo \"Restarting worker...\"; pm2 restart craly-worker --update-env'",
-              "sudo -iu ec2-user bash -lc 'echo \"Checking PM2 status...\"; pm2 list'",
-              "sudo -iu ec2-user bash -lc 'echo \"Checking API health...\"; sleep 5; curl -fsS http://127.0.0.1:8080/health; echo'",
-              "echo 'Deployment successful.'"
+              "printf '%s' '$ENCODED_SCRIPT' | base64 -d | sudo -iu ec2-user bash"
             ]
           }
           JSON
@@ -68,15 +116,16 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
+            --timeout-seconds 1800 \
             --parameters file:///tmp/ssm-commands.json \
             --query 'Command.CommandId' \
             --output text)
 
           echo "SSM Command ID: $COMMAND_ID"
-
           echo "Waiting for deployment..."
 
-          for i in {1..60}; do
+          for i in {1..180}; do
+
             STATUS=$(aws ssm get-command-invocation \
               --region "$AWS_REGION" \
               --command-id "$COMMAND_ID" \
@@ -84,9 +133,18 @@ jobs:
               --query 'Status' \
               --output text)
 
+            STATUS_DETAILS=$(aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'StatusDetails' \
+              --output text)
+
             echo "SSM status: $STATUS"
+            echo "SSM status details: $STATUS_DETAILS"
 
             case "$STATUS" in
+
               Success)
                 echo "Deployment command completed successfully."
 
@@ -135,5 +193,6 @@ jobs:
             sleep 5
           done
 
-          echo "Deployment timed out."
+          echo "GitHub Actions polling timed out."
+          echo "SSM command may still be running. Command ID: $COMMAND_ID"
           exit 1
