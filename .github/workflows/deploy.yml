@@ -78,8 +78,11 @@ jobs:
             exit 1
           fi
 
+          # Run as ec2-user WITHOUT sudo -i: -i backslash-escapes the command,
+          # including newlines, which turns each multi-line block below into a
+          # single silent no-op (exit 0) — npm ci/build/pm2 restart never ran.
           echo "=== Installing dependencies ==="
-          sudo -iu ec2-user bash -lc "
+          sudo -u ec2-user -H bash -lc "
             set -e
             export HOME=/home/ec2-user
             export NVM_DIR=\$HOME/.nvm
@@ -90,7 +93,7 @@ jobs:
           "
 
           echo "=== Building backend ==="
-          sudo -iu ec2-user bash -lc "
+          sudo -u ec2-user -H bash -lc "
             set -e
             export HOME=/home/ec2-user
             export NVM_DIR=\$HOME/.nvm
@@ -101,19 +104,19 @@ jobs:
           "
 
           echo "=== Restarting API ==="
-          sudo -iu ec2-user bash -lc "
+          sudo -u ec2-user -H bash -lc "
             set -e
             /usr/bin/pm2 restart craly-api --update-env
           "
 
           echo "=== Restarting worker ==="
-          sudo -iu ec2-user bash -lc "
+          sudo -u ec2-user -H bash -lc "
             set -e
             /usr/bin/pm2 restart craly-worker --update-env
           "
 
           echo "=== PM2 status ==="
-          sudo -iu ec2-user bash -lc "
+          sudo -u ec2-user -H bash -lc "
             /usr/bin/pm2 list
           "
 
@@ -137,7 +140,7 @@ jobs:
 
           if [ "$HEALTH_OK" != "1" ]; then
             echo "=== HEALTH CHECK FAILED: recent craly-api logs ==="
-            sudo -iu ec2-user bash -lc "/usr/bin/pm2 logs craly-api --lines 60 --nostream" || true
+            sudo -u ec2-user -H bash -lc "/usr/bin/pm2 logs craly-api --lines 60 --nostream" || true
             exit 1
           fi
 
