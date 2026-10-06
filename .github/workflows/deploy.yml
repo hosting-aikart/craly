@@ -9,10 +9,17 @@ permissions:
   id-token: write
   contents: read
 
+# One production deploy at a time: two quick pushes must not run npm ci /
+# build in the same EC2 checkout concurrently. A queued run waits.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout repository
@@ -61,6 +68,16 @@ jobs:
           echo "=== Fixing repository ownership ==="
           chown -R ec2-user:ec2-user "$REPO"
 
+          # The API verifies RDS TLS against this CA bundle (src/db/index.ts).
+          # It's gitignored, so it must already be on the instance; checking
+          # here fails the deploy before the running API is restarted.
+          echo "=== Checking RDS CA bundle ==="
+          if [ ! -s "$BACKEND/global-bundle.pem" ]; then
+            echo "ERROR: $BACKEND/global-bundle.pem is missing or empty."
+            echo "Download https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem to that path."
+            exit 1
+          fi
+
           echo "=== Installing dependencies ==="
           sudo -iu ec2-user bash -lc "
             set -e
@@ -69,7 +86,7 @@ jobs:
             source \$NVM_DIR/nvm.sh
             nvm use 22 >/dev/null
             cd '$BACKEND'
-            npm ci
+            npm ci --no-audit --no-fund
           "
 
           echo "=== Building backend ==="
@@ -100,8 +117,30 @@ jobs:
             /usr/bin/pm2 list
           "
 
+          # Retry for up to ~60s (API start + first DB connection), and always
+          # print the response body so a 503 shows *why* (e.g. the db error).
           echo "=== Health check ==="
-          sleep 5
+          HEALTH_OK=0
+          HTTP_CODE=000
+          for attempt in $(seq 1 12); do
+            sleep 5
+            HTTP_CODE=$(curl -sS -o /tmp/craly-health.json -w '%{http_code}' --max-time 5 http://127.0.0.1:8080/health || true)
+            if [ "$HTTP_CODE" = "200" ]; then
+              HEALTH_OK=1
+              break
+            fi
+            echo "Health attempt $attempt/12: HTTP ${HTTP_CODE:-000}"
+          done
+          echo "Health response (HTTP ${HTTP_CODE:-000}):"
+          cat /tmp/craly-health.json 2>/dev/null || true
+          echo
+
+          if [ "$HEALTH_OK" != "1" ]; then
+            echo "=== HEALTH CHECK FAILED: recent craly-api logs ==="
+            sudo -iu ec2-user bash -lc "/usr/bin/pm2 logs craly-api --lines 60 --nostream" || true
+            exit 1
+          fi
+
           curl -fsS http://127.0.0.1:8080/health
 
           echo
@@ -110,11 +149,14 @@ jobs:
 
           ENCODED_SCRIPT=$(base64 -w 0 /tmp/deploy.sh)
 
+          # executionTimeout bounds the script on the instance (20 min), so a
+          # stuck npm/build can't leave the deploy hanging indefinitely.
           cat > /tmp/ssm-commands.json <<JSON
           {
             "commands": [
               "printf '%s' '$ENCODED_SCRIPT' | base64 -d | bash"
-            ]
+            ],
+            "executionTimeout": ["1200"]
           }
           JSON
 
@@ -124,7 +166,8 @@ jobs:
             --region "$AWS_REGION" \
             --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --timeout-seconds 1800 \
+            --comment "Craly deploy ${GITHUB_SHA::7}" \
+            --timeout-seconds 600 \
             --parameters file:///tmp/ssm-commands.json \
             --query 'Command.CommandId' \
             --output text)
@@ -132,60 +175,53 @@ jobs:
           echo "SSM Command ID: $COMMAND_ID"
           echo "Waiting for deployment..."
 
-          for i in {1..180}; do
+          # SSM caps returned output (stdout 24,000 / stderr 8,000 chars).
+          print_output() {
+            echo "----- STDOUT -----"
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'StandardOutputContent' \
+              --output text || true
+            echo "----- STDERR -----"
+            aws ssm get-command-invocation \
+              --region "$AWS_REGION" \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query 'StandardErrorContent' \
+              --output text || true
+          }
 
+          # 260 x 5s ≈ 21.5 min: just past the 20-min executionTimeout, so SSM
+          # always reaches a final status before this loop gives up.
+          for i in $(seq 1 260); do
+            # Right after send-command the invocation may not exist yet
+            # (InvocationDoesNotExist); treat that as Pending, don't abort.
             STATUS=$(aws ssm get-command-invocation \
               --region "$AWS_REGION" \
               --command-id "$COMMAND_ID" \
               --instance-id "$INSTANCE_ID" \
               --query 'Status' \
-              --output text)
+              --output text 2>/dev/null || echo "Pending")
 
             echo "SSM status: $STATUS"
 
             case "$STATUS" in
-
               Success)
                 echo "Deployment command completed successfully."
-
-                echo "----- STDOUT -----"
-                aws ssm get-command-invocation \
-                  --region "$AWS_REGION" \
-                  --command-id "$COMMAND_ID" \
-                  --instance-id "$INSTANCE_ID" \
-                  --query 'StandardOutputContent' \
-                  --output text
-
-                echo "----- STDERR -----"
-                aws ssm get-command-invocation \
-                  --region "$AWS_REGION" \
-                  --command-id "$COMMAND_ID" \
-                  --instance-id "$INSTANCE_ID" \
-                  --query 'StandardErrorContent' \
-                  --output text || true
-
+                print_output
                 exit 0
                 ;;
-
               Failed|Cancelled|TimedOut|Cancelling)
-                echo "Deployment command failed."
-
-                echo "----- STDOUT -----"
-                aws ssm get-command-invocation \
+                DETAILS=$(aws ssm get-command-invocation \
                   --region "$AWS_REGION" \
                   --command-id "$COMMAND_ID" \
                   --instance-id "$INSTANCE_ID" \
-                  --query 'StandardOutputContent' \
-                  --output text || true
-
-                echo "----- STDERR -----"
-                aws ssm get-command-invocation \
-                  --region "$AWS_REGION" \
-                  --command-id "$COMMAND_ID" \
-                  --instance-id "$INSTANCE_ID" \
-                  --query 'StandardErrorContent' \
-                  --output text || true
-
+                  --query 'StatusDetails' \
+                  --output text 2>/dev/null || echo "unknown")
+                echo "Deployment command failed: $STATUS ($DETAILS)."
+                print_output
                 exit 1
                 ;;
             esac
@@ -195,4 +231,5 @@ jobs:
 
           echo "GitHub Actions polling timed out."
           echo "SSM Command ID: $COMMAND_ID"
+          print_output
           exit 1
