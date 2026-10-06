@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import {
   WHATSAPP_TEMPLATES,
+  DEFAULT_LANGUAGE_CODE,
   WhatsAppTemplateName,
   WhatsAppError,
   fetchWhatsAppTemplates,
@@ -43,7 +44,9 @@ const SAMPLE_PARAMETERS: Record<WhatsAppTemplateName, string[]> = {
   new_application: ['Apex Manufacturing', 'Welders for Pune Plant'],
 };
 
-const LANGUAGE = 'en_US';
+// Same language the backend sends (DEFAULT_LANGUAGE_CODE) — compared strictly,
+// because Meta only delivers a template in the exact language it was approved in.
+const LANGUAGE = DEFAULT_LANGUAGE_CODE;
 
 function describeEnv(name: string, showValue: boolean): string {
   const v = process.env[name];

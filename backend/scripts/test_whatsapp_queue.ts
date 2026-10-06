@@ -76,7 +76,7 @@ async function main(): Promise<void> {
     const kA = await enqueue('basic', 'Vishal Contractor');
     let j = await job(kA);
     assert(j?.state === 'created', 'job stored in Postgres in state "created"', j?.state);
-    assert(j?.data?.template === 'application_selected' && j.data.to === '8793964438' && j.data.languageCode === 'en_US'
+    assert(j?.data?.template === 'application_selected' && j.data.to === '8793964438' && j.data.languageCode === 'en'
       && JSON.stringify(j.data.parameters) === '["Vishal Contractor","Queue Test Opportunity"]' && j.data.idempotencyKey === kA && j.data.context?.entityId,
       'payload has template, language, recipient, parameters, entity and idempotency key', j?.data);
 

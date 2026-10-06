@@ -112,7 +112,7 @@ globalThis.fetch = (async (input: any, init?: any) => {
 
 const sampleJob = (overrides: Partial<JobData> = {}): JobData => ({
   template: 'application_selected',
-  languageCode: 'en_US',
+  languageCode: 'en',
   to: '8793964438',
   parameters: ['Vishal Contractor', 'Welders for Pune Plant'],
   context: { entityType: 'application', entityId: '00000000-0000-0000-0000-000000000000', userId: null },
@@ -132,26 +132,26 @@ async function main(): Promise<void> {
   console.log('\n== Request construction (sendWhatsAppTemplate)');
   mode = 'ok';
   const start = captured.length;
-  const res = await wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'application_selected', languageCode: 'en_US', parameters: ['Vishal\nContractor', 'Welders for Pune Plant'] });
+  const res = await wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'application_selected', languageCode: 'en', parameters: ['Vishal\nContractor', 'Welders for Pune Plant'] });
   const req = captured[start];
   assert(req.url === 'https://graph.facebook.com/v25.0/111222333/messages', 'URL uses WHATSAPP_API_VERSION + WHATSAPP_PHONE_NUMBER_ID', req.url);
   assert(req.headers.Authorization === 'Bearer MOCK_SECRET_TOKEN_DO_NOT_LEAK', 'token sent only in Authorization header');
   assert(req.body.messaging_product === 'whatsapp' && req.body.type === 'template' && req.body.to === '918793964438', 'payload: messaging_product/type/to');
-  assert(req.body.template.name === 'application_selected' && req.body.template.language.code === 'en_US', 'payload: template name + language');
+  assert(req.body.template.name === 'application_selected' && req.body.template.language.code === 'en', 'payload: template name + language');
   assert(JSON.stringify(req.body.template.components) === JSON.stringify([{ type: 'body', parameters: [{ type: 'text', text: 'Vishal Contractor' }, { type: 'text', text: 'Welders for Pune Plant' }] }]), 'payload: body parameters in order, newline collapsed');
   assert(res.messages[0].id === `wamid.MOCK${start + 1}`, 'returns Meta message id');
 
   process.env.WHATSAPP_GRAPH_API_BASE_URL = 'http://evil.example';
   process.env.NODE_ENV = 'production';
-  await wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'contractor_welcome', languageCode: 'en_US', parameters: ['X'] });
+  await wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'contractor_welcome', languageCode: 'en', parameters: ['X'] });
   assert(captured[captured.length - 1].url.startsWith('https://graph.facebook.com/'), 'WHATSAPP_GRAPH_API_BASE_URL is ignored when NODE_ENV=production (token can only go to Meta)');
   process.env.NODE_ENV = 'test';
   delete process.env.WHATSAPP_GRAPH_API_BASE_URL;
 
   console.log('\n== Validation + error classification');
-  await rejects(() => wa.sendWhatsAppTemplate({ to: '12', templateName: 'application_selected', languageCode: 'en_US', parameters: ['a', 'b'] }), /phone number is missing or invalid/, 'invalid phone rejected before calling Meta');
-  await rejects(() => wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'application_selected', languageCode: 'en_US', parameters: ['only one'] }), /expects 2 parameter\(s\), got 1/, 'wrong parameter count rejected locally');
-  await rejects(() => wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'application_selected', languageCode: 'en_US', parameters: ['a', '   '] }), /parameter \{\{2\}\} is empty/, 'empty parameter rejected');
+  await rejects(() => wa.sendWhatsAppTemplate({ to: '12', templateName: 'application_selected', languageCode: 'en', parameters: ['a', 'b'] }), /phone number is missing or invalid/, 'invalid phone rejected before calling Meta');
+  await rejects(() => wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'application_selected', languageCode: 'en', parameters: ['only one'] }), /expects 2 parameter\(s\), got 1/, 'wrong parameter count rejected locally');
+  await rejects(() => wa.sendWhatsAppTemplate({ to: '8793964438', templateName: 'application_selected', languageCode: 'en', parameters: ['a', '   '] }), /parameter \{\{2\}\} is empty/, 'empty parameter rejected');
   const E = wa.WhatsAppError;
   const cases: [InstanceType<typeof E> | Error, boolean, string][] = [
     [new E('x', 'network'), true, 'network/timeout'],
@@ -217,7 +217,7 @@ async function main(): Promise<void> {
   let s = enqueued.length;
   await wa.queueWhatsAppTemplate({ to: '8793964438', template: 'contractor_welcome', parameters: ['A'], context: { entityType: 't', entityId: 'e1' }, idempotencyKey: 'k-producer-1' });
   const job = enqueued[s];
-  assert(job && job.template === 'contractor_welcome' && job.to === '8793964438' && job.languageCode === 'en_US' && JSON.stringify(job.parameters) === '["A"]'
+  assert(job && job.template === 'contractor_welcome' && job.to === '8793964438' && job.languageCode === 'en' && JSON.stringify(job.parameters) === '["A"]'
     && job.idempotencyKey === 'k-producer-1' && job.context.entityId === 'e1' && job.context.userId === null && !!job.queuedAt, 'job payload carries everything the worker needs', job);
   s = enqueued.length;
   process.env.WHATSAPP_ENABLED = 'false';

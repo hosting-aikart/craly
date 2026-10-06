@@ -102,7 +102,7 @@ async function runE2ETest() {
     try {
       templates = await fetchWhatsAppTemplates();
       appSelectedTemplate = templates.find(
-        (t) => t.name === 'application_selected' && t.language === 'en_US'
+        (t) => t.name === 'application_selected' && t.language === 'en'
       );
 
       if (!appSelectedTemplate) {
@@ -110,7 +110,7 @@ async function runE2ETest() {
           2,
           'Verify application_selected is APPROVED',
           false,
-          `Template "application_selected" (en_US) was not found on WABA account ${wabaId}`,
+          `Template "application_selected" (en) was not found on WABA account ${wabaId}`,
           'template issue'
         );
       } else if (appSelectedTemplate.status !== 'APPROVED') {
@@ -126,7 +126,7 @@ async function runE2ETest() {
           2,
           'Verify application_selected is APPROVED',
           true,
-          `Template "application_selected" (en_US) status is APPROVED (${appSelectedTemplate.category})`
+          `Template "application_selected" (en) status is APPROVED (${appSelectedTemplate.category})`
         );
       }
     } catch (err: any) {

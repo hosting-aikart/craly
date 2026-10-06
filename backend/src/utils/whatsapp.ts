@@ -17,7 +17,10 @@ import { enqueueWhatsAppJob, type WhatsAppJobData } from '../queue/whatsappQueue
 
 const DEFAULT_GRAPH_API_BASE_URL = 'https://graph.facebook.com';
 const REQUEST_TIMEOUT_MS = 10_000;
-export const DEFAULT_LANGUAGE_CODE = 'en_US';
+// Must equal the language the templates are approved in on the WABA — Meta
+// matches it exactly ("en" and "en_US" are different template languages;
+// a mismatch fails with error 132001).
+export const DEFAULT_LANGUAGE_CODE = 'en';
 
 /**
  * Every template Craly sends, with the number of body parameters the
@@ -53,7 +56,7 @@ export interface SendWhatsAppTemplateInput {
   to: string;
   /** Name of an approved template in WhatsApp Manager, e.g. "application_selected". */
   templateName: string;
-  /** Template language code, e.g. "en_US". Must match the approved template's language. */
+  /** Template language code, e.g. "en". Must match the approved template's language exactly. */
   languageCode: string;
   /** Values for the template body placeholders, in order: parameters[0] → {{1}}, parameters[1] → {{2}}, ... */
   parameters?: string[];
