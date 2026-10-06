@@ -49,27 +49,14 @@ jobs:
           cat > /tmp/ssm-commands.json <<'JSON'
           {
             "commands": [
-              "set -e",
-              "cd /home/ec2-user/apps/craly",
-               "echo 'Fetching latest code...'",
-              "git -c safe.directory=/home/ec2-user/apps/craly fetch origin main",
-              "echo 'Updating production checkout...'",
-              "git reset --hard origin/main",
-              "echo 'Installing backend dependencies...'",
-              "cd backend",
-              "npm ci",
-              "echo 'Building backend...'",
-              "NODE_OPTIONS=\"--max-old-space-size=1536\" npm run build",
-              "echo 'Restarting API...'",
-              "pm2 restart craly-api --update-env",
-              "echo 'Restarting worker...'",
-              "pm2 restart craly-worker --update-env",
-              "echo 'Checking PM2 status...'",
-              "pm2 list",
-              "echo 'Checking API health...'",
-              "sleep 5",
-              "curl -fsS http://127.0.0.1:8080/health",
-              "echo",
+              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly; echo \"Fetching latest code...\"; git fetch origin main'",
+              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly; echo \"Updating production checkout...\"; git reset --hard origin/main'",
+              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly/backend; echo \"Installing backend dependencies...\"; npm ci'",
+              "sudo -iu ec2-user bash -lc 'set -e; cd /home/ec2-user/apps/craly/backend; echo \"Building backend...\"; NODE_OPTIONS=\"--max-old-space-size=1536\" npm run build'",
+              "sudo -iu ec2-user bash -lc 'set -e; echo \"Restarting API...\"; pm2 restart craly-api --update-env'",
+              "sudo -iu ec2-user bash -lc 'set -e; echo \"Restarting worker...\"; pm2 restart craly-worker --update-env'",
+              "sudo -iu ec2-user bash -lc 'echo \"Checking PM2 status...\"; pm2 list'",
+              "sudo -iu ec2-user bash -lc 'echo \"Checking API health...\"; sleep 5; curl -fsS http://127.0.0.1:8080/health; echo'",
               "echo 'Deployment successful.'"
             ]
           }
@@ -110,6 +97,14 @@ jobs:
                   --instance-id "$INSTANCE_ID" \
                   --query 'StandardOutputContent' \
                   --output text
+
+                echo "----- STDERR -----"
+                aws ssm get-command-invocation \
+                  --region "$AWS_REGION" \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$INSTANCE_ID" \
+                  --query 'StandardErrorContent' \
+                  --output text || true
 
                 exit 0
                 ;;
