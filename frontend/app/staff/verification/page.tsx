@@ -114,20 +114,20 @@ export default function StaffVerificationPage() {
           <div className="staff-verif-table-wrapper">
             <table className="staff-verif-table">
               <colgroup>
-                <col style={{ width: '24%' }} />
-                <col style={{ width: '26%' }} />
-                <col style={{ width: '13%' }} />
-                <col style={{ width: '14%' }} />
-                <col style={{ width: '11%' }} />
+                <col style={{ width: '22%' }} />
+                <col style={{ width: '20%' }} />
                 <col style={{ width: '12%' }} />
+                <col style={{ width: '20%' }} />
+                <col style={{ width: '13%' }} />
+                <col style={{ width: '13%' }} />
               </colgroup>
               <thead>
                 <tr>
                   <th>Contractor / Company</th>
                   <th>Contact Email / Phone</th>
                   <th>Status</th>
+                  <th>Reviewed By (Staff)</th>
                   <th>Pending Docs</th>
-                  <th>Submitted</th>
                   <th style={{ textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
@@ -150,6 +150,23 @@ export default function StaffVerificationPage() {
                       </span>
                     </td>
                     <td>
+                      {c.last_reviewed_by_email ? (
+                        <div>
+                          <div className="staff-verif-text-main" style={{ fontSize: '12px', fontWeight: 600 }}>
+                            {c.last_reviewed_by_email}
+                          </div>
+                          <div className="staff-verif-text-sub" style={{ fontSize: '11px' }}>
+                            {c.last_reviewed_by_role ? `Role: ${c.last_reviewed_by_role}` : 'Staff'}
+                            {c.last_reviewed_at ? ` • ${new Date(c.last_reviewed_at).toLocaleDateString()}` : ''}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="staff-verif-text-sub" style={{ fontStyle: 'italic', opacity: 0.7 }}>
+                          Unassigned / Pending
+                        </span>
+                      )}
+                    </td>
+                    <td>
                       {c.pending_docs_count > 0 ? (
                         <span className="staff-verif-pending-tag">
                           <IconAlertTriangle size={11} style={{ marginRight: 3, verticalAlign: 'middle' }} />
@@ -160,13 +177,6 @@ export default function StaffVerificationPage() {
                           {c.total_docs_count} Total Doc{c.total_docs_count === 1 ? '' : 's'}
                         </span>
                       )}
-                    </td>
-                    <td>
-                      <span className="staff-verif-date-val">
-                        {c.last_submitted_at
-                          ? new Date(c.last_submitted_at).toLocaleDateString()
-                          : new Date(c.created_at).toLocaleDateString()}
-                      </span>
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <Link
