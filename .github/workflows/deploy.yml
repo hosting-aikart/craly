@@ -78,6 +78,41 @@ jobs:
             exit 1
           fi
 
+          # Nginx request-body limit for uploads (deploy/nginx/). Validated with
+          # nginx -t before reload and rolled back if invalid; a problem here is
+          # reported but never blocks the API deploy.
+          echo "=== Nginx upload limit ==="
+          NGINX_SNIPPET_SRC="$REPO/deploy/nginx/craly-upload-limits.conf"
+          NGINX_SNIPPET_DST="/etc/nginx/conf.d/craly-upload-limits.conf"
+          if command -v nginx >/dev/null 2>&1 && [ -d /etc/nginx/conf.d ] && [ -f "$NGINX_SNIPPET_SRC" ]; then
+            if cmp -s "$NGINX_SNIPPET_SRC" "$NGINX_SNIPPET_DST"; then
+              echo "Nginx upload limit already current."
+            else
+              NGINX_BACKUP=""
+              if [ -f "$NGINX_SNIPPET_DST" ]; then NGINX_BACKUP=$(mktemp); cp "$NGINX_SNIPPET_DST" "$NGINX_BACKUP"; fi
+              install -m 644 "$NGINX_SNIPPET_SRC" "$NGINX_SNIPPET_DST"
+              if nginx -t; then
+                systemctl reload nginx && echo "Nginx reloaded with the new upload limit."
+              else
+                echo "WARNING: nginx -t failed with the new snippet; restoring the previous config."
+                if [ -n "$NGINX_BACKUP" ]; then cp "$NGINX_BACKUP" "$NGINX_SNIPPET_DST"; else rm -f "$NGINX_SNIPPET_DST"; fi
+                nginx -t || true
+              fi
+            fi
+            echo "Effective client_max_body_size directives:"
+            nginx -T 2>/dev/null | grep -n "client_max_body_size" || echo "(none)"
+            # A 2 MB body must now reach Express (401: no auth), not stop at Nginx (413).
+            head -c 2097152 /dev/zero > /tmp/craly-2mb.bin
+            UPLOAD_PROBE=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 15 \
+              --resolve api.craly.co:443:127.0.0.1 -X POST \
+              -H 'Content-Type: application/octet-stream' --data-binary @/tmp/craly-2mb.bin \
+              https://api.craly.co/api/contractor-portal/documents || true)
+            rm -f /tmp/craly-2mb.bin
+            echo "2 MB upload probe through Nginx: HTTP ${UPLOAD_PROBE:-000} (expect 401; 413 = Nginx limit still too small)"
+          else
+            echo "Nginx or snippet not found; skipping."
+          fi
+
           # Run as ec2-user WITHOUT sudo -i: -i backslash-escapes the command,
           # including newlines, which turns each multi-line block below into a
           # single silent no-op (exit 0) — npm ci/build/pm2 restart never ran.
