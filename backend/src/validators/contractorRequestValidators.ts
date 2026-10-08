@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { phoneSchema } from './phoneValidator';
 
 // Public form — intentionally short (§3 of the onboarding-architecture spec).
 export const createContractorRequestSchema = z.object({
   companyName: z.string().trim().min(1, 'Company / contractor name is required').max(200),
   contactPerson: z.string().trim().min(1, 'Contact person is required').max(200),
-  phone: z.string().trim().min(1, 'Phone number is required').max(40),
+  phone: phoneSchema,
   email: z.string().trim().email().optional().or(z.literal('')),
   city: z.string().trim().min(1, 'City is required').max(100),
   industry: z.string().trim().min(1, 'Industry is required').max(150),

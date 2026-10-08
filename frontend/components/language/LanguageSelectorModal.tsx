@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ALL_LANGUAGES, POPULAR_LANGUAGES, type LanguageItem } from '@/lib/i18n/languages';
+import { ALL_LANGUAGES, normalizeLanguageCode, type SupportedLanguage } from '@/lib/i18n/languages';
 import { changeGoogleTranslateLanguage } from './GoogleTranslateScript';
 import { IconCheck } from '@/components/ui/Icons';
 import './LanguageSelectorModal.css';
@@ -10,7 +10,7 @@ interface LanguageSelectorModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentLanguage: string;
-  onSelectLanguage: (code: string) => void;
+  onSelectLanguage: (code: SupportedLanguage) => void;
 }
 
 export default function LanguageSelectorModal({
@@ -56,8 +56,9 @@ export default function LanguageSelectorModal({
   if (!isOpen) return null;
 
   const handleSelect = (code: string) => {
-    onSelectLanguage(code);
-    changeGoogleTranslateLanguage(code);
+    const target = normalizeLanguageCode(code);
+    onSelectLanguage(target);
+    changeGoogleTranslateLanguage(target);
     onClose();
   };
 
@@ -66,7 +67,7 @@ export default function LanguageSelectorModal({
       <div className="lsm-container" onClick={(e) => e.stopPropagation()}>
         <div className="lsm-header">
           <div className="lsm-header-text">
-            <span className="lsm-eyebrow">🌐 Global Translation (130+ Languages)</span>
+            <span className="lsm-eyebrow">🌐 Supported Languages</span>
             <h3 className="lsm-title">Select Language</h3>
           </div>
           <button type="button" className="lsm-close-btn" onClick={onClose} aria-label="Close">
@@ -81,7 +82,7 @@ export default function LanguageSelectorModal({
             ref={searchInputRef}
             type="text"
             className="lsm-search-input"
-            placeholder="Search language (e.g. Spanish, Hindi, French, Gujarati, Arabic)..."
+            placeholder="Search language (English, हिन्दी, मराठी)..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -92,34 +93,10 @@ export default function LanguageSelectorModal({
           )}
         </div>
 
-        {/* Popular Quick Chips (when not searching) */}
-        {!search.trim() && (
-          <div className="lsm-popular-section">
-            <span className="lsm-section-label">Popular Languages</span>
-            <div className="lsm-popular-grid">
-              {POPULAR_LANGUAGES.map((l) => {
-                const active = currentLanguage === l.code;
-                return (
-                  <button
-                    key={l.code}
-                    type="button"
-                    className={`lsm-popular-chip ${active ? 'lsm-popular-chip--active' : ''}`}
-                    onClick={() => handleSelect(l.code)}
-                  >
-                    <span className="lsm-chip-name">{l.name}</span>
-                    <span className="lsm-chip-native">{l.nativeName}</span>
-                    {active && <IconCheck size={14} className="lsm-check-icon" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Full Language Grid */}
         <div className="lsm-list-section">
           <span className="lsm-section-label">
-            {search.trim() ? `Search Results (${filteredLanguages.length})` : `All Languages (${ALL_LANGUAGES.length})`}
+            {search.trim() ? `Search Results (${filteredLanguages.length})` : `Supported Languages (${ALL_LANGUAGES.length})`}
           </span>
 
           {filteredLanguages.length === 0 ? (

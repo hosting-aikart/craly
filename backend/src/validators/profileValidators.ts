@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { optionalPhoneSchema } from './phoneValidator';
 
 export const contractorProfileSchema = z.object({
   companyName: z.string().min(1).max(200).optional(),
-  phone: z.string().max(50).optional(),
+  phone: optionalPhoneSchema,
   description: z.string().max(2000).optional(),
   city: z.string().max(100).optional(),
   state: z.string().max(100).optional(),
@@ -27,6 +28,6 @@ export const businessProfileSchema = z.object({
   industry: z.string().max(150).optional(),
   city: z.string().max(100).optional(),
   state: z.string().max(100).optional(),
-  phone: z.string().max(50).optional(),
+  phone: optionalPhoneSchema,
 });
 export type BusinessProfileInput = z.infer<typeof businessProfileSchema>;

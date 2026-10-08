@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
 import { COUNTRIES, DEFAULT_COUNTRY, type CountryOption } from '@/lib/util/countries';
+import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import DialCodeSelect from '@/components/ui/DialCodeSelect';
 import CountrySelect from '@/components/ui/CountrySelect';
 
@@ -84,8 +85,8 @@ function SignupForm() {
   const validateMobile = (value: string, country = selectedCountry) => {
     if (!value.trim()) { setMobileError('Phone number is required'); return; }
     const full = getFullMobile(value, country);
-    const cleaned = full.replace(/[\s\-().]/g, '');
-    setMobileError(PHONE_RE.test(cleaned) ? '' : 'Please enter a valid phone number (7-15 digits)');
+    const result = validatePhoneNumber(full, { required: true, dialCode: country.dialCode });
+    setMobileError(result.error || '');
   };
 
   useEffect(() => {
@@ -120,15 +121,12 @@ function SignupForm() {
       setEmailError('Please enter a valid email address');
       hasError = true;
     }
-    if (phoneNumber.trim()) {
-      const cleaned = fullMobile.replace(/[\s\-().]/g, '');
-      if (!PHONE_RE.test(cleaned)) {
-        setMobileError('Please enter a valid phone number (7-15 digits)');
-        hasError = true;
-      }
-    } else {
-      setMobileError('Phone number is required');
+    const phoneResult = validatePhoneNumber(fullMobile, { required: true, dialCode: selectedCountry.dialCode });
+    if (!phoneResult.isValid) {
+      setMobileError(phoneResult.error || 'Please enter a valid phone number');
       hasError = true;
+    } else {
+      setMobileError('');
     }
     if (!password || password.length < 8) {
       setError('Password must be at least 8 characters.');

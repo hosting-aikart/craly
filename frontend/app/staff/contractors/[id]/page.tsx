@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getStaffContractorById, updateStaffContractor, updateStaffContractorListingStatus, type StaffContractorDetail } from '@/lib/api/staff';
 import LoadingState from '@/components/ui/LoadingState';
 import PhoneInput from '@/components/ui/PhoneInput';
+import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import UnlistContractorModal from '@/components/staff/UnlistContractorModal';
 import StaffContractorDocumentsSection from '@/components/staff/StaffContractorDocumentsSection';
 import './staff-contractor-detail.css';
@@ -53,6 +54,13 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
 
   const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
+    if (phone.trim()) {
+      const pCheck = validatePhoneNumber(phone);
+      if (!pCheck.isValid) {
+        setError(pCheck.error || 'Please enter a valid phone number.');
+        return;
+      }
+    }
     setSaving(true);
     setError('');
     setSuccess('');

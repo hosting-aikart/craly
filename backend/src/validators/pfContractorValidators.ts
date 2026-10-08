@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { optionalPhoneSchema } from './phoneValidator';
 
 export const createPfContractorSchema = z.object({
   // contractor_profiles has one name field (`company_name`) — field staff
   // enter whatever the contractor operates under, individual or firm.
   companyName: z.string().trim().min(1, 'Name is required').max(200),
-  phone: z.string().trim().max(40).optional(),
+  phone: optionalPhoneSchema,
   city: z.string().trim().max(100).optional(),
   serviceAreas: z.array(z.string().trim().max(100)).optional(),
   yearsInBusiness: z.number().int().min(0).max(100).optional(),

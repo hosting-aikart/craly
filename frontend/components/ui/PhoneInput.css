@@ -249,3 +249,34 @@
     width: 100%;
   }
 }
+
+/* ── Error & Validation States ───────────────────────────────────────────── */
+.phone-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.phone-input--error .phone-input__number {
+  border-color: #ef4444 !important;
+  background: #fff5f5 !important;
+}
+
+.phone-input--error .phone-input__number:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14) !important;
+}
+
+.phone-input__error-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #dc2626;
+  margin-top: 2px;
+  padding-left: 2px;
+}
+

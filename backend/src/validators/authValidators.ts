@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { phoneSchema } from './phoneValidator';
 
 // NOTE: left as z.enum(['business', 'contractor']) — a concurrent, actively
 // developed effort (OTP-verified signup, organization_members, contractor
@@ -14,14 +15,7 @@ export const signupSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.enum(['business', 'contractor']),
   companyName: z.string().min(1, 'Company name is required'),
-  mobile: z
-    .string({ message: 'Phone number is required' })
-    .min(1, 'Phone number is required')
-    .transform((v) => v.replace(/[\s\-().]/g, ''))
-    .refine(
-      (v) => /^\+?[0-9]{7,15}$/.test(v),
-      { message: 'Please enter a valid phone number (7-15 digits with optional country code)' },
-    ),
+  mobile: phoneSchema,
   city: z.string().optional(),
   state: z.string().optional(),
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),

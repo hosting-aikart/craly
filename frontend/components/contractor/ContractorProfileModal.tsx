@@ -3,6 +3,7 @@
 import React, { useState, FormEvent } from 'react';
 import { updateMyProfile, type ContractorProfile } from '@/lib/api/profile';
 import PhoneInput from '@/components/ui/PhoneInput';
+import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import './ContractorProfileModal.css';
 
 interface ContractorProfileModalProps {
@@ -107,6 +108,13 @@ export default function ContractorProfileModal({
     if (!industry.trim()) {
       setError('Please select or enter your Industry');
       return;
+    }
+    if (phone.trim()) {
+      const pCheck = validatePhoneNumber(phone);
+      if (!pCheck.isValid) {
+        setError(pCheck.error || 'Please enter a valid contact phone number.');
+        return;
+      }
     }
 
     setSaving(true);

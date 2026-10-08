@@ -6,6 +6,7 @@ import { getMyProfile, updateMyProfile, type ContractorProfile } from '@/lib/api
 import { computeProfileCompletion } from '@/lib/util/contractorProfileCompletion';
 import LoadingState from '@/components/ui/LoadingState';
 import PhoneInput from '@/components/ui/PhoneInput';
+import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import ContractorDocumentsSection from '@/components/contractor/ContractorDocumentsSection';
 import WorksitePhotosSection from '@/components/contractor/WorksitePhotosSection';
 import {
@@ -187,6 +188,13 @@ export default function ContractorProfilePage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (phone.trim()) {
+      const pCheck = validatePhoneNumber(phone, { required: true });
+      if (!pCheck.isValid) {
+        setMessage({ type: 'error', text: pCheck.error || 'Please enter a valid phone number.' });
+        return;
+      }
+    }
     setSaving(true);
     setMessage(null);
 

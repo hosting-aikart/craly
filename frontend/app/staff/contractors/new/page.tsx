@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createStaffContractor, uploadStaffContractorDocument } from '@/lib/api/staff';
 import PhoneInput from '@/components/ui/PhoneInput';
+import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import CustomSelect, { type SelectOption } from '@/components/ui/CustomSelect';
 import { IconArrowLeft, IconCheck, IconAlertTriangle } from '@/components/ui/Icons';
 import './staff-new-contractor.css';
@@ -93,6 +94,13 @@ export default function AddContractorPage() {
     if (password.length < 8) {
       setError('Temporary password must be at least 8 characters.');
       return;
+    }
+    if (phone.trim()) {
+      const pCheck = validatePhoneNumber(phone);
+      if (!pCheck.isValid) {
+        setError(pCheck.error || 'Please enter a valid phone number.');
+        return;
+      }
     }
 
     setSubmitting(true);

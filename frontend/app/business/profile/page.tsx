@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
+import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import {
   IconBuilding,
   IconMapPin,
@@ -62,6 +63,13 @@ export default function BusinessProfilePage() {
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
+    if (phone.trim()) {
+      const pCheck = validatePhoneNumber(phone);
+      if (!pCheck.isValid) {
+        setError(pCheck.error || 'Please enter a valid phone number.');
+        return;
+      }
+    }
     setSaving(true);
     setError('');
     setSuccess('');

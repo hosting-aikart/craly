@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createContractorRequest } from '@/lib/api/contractorRequests';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
+import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import '@/components/AuthForm.css';
 import './list-your-company.css';
 
@@ -32,6 +33,11 @@ export default function ListYourCompanyPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const pCheck = validatePhoneNumber(phone, { required: true });
+    if (!pCheck.isValid) {
+      setError(pCheck.error || 'Please enter a valid phone number.');
+      return;
+    }
     setSubmitting(true);
     setError('');
 

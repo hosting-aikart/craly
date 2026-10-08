@@ -1925,5 +1925,28 @@ const mr: Translations = {
     close: 'बंद करा',
   },
 };
+function deepMergeFallback<T extends object>(target: T, fallback: T): T {
+  if (!target || typeof target !== 'object') {
+    return target !== undefined ? target : fallback;
+  }
+  if (Array.isArray(target)) {
+    return target;
+  }
+  const result: any = { ...fallback, ...target };
+  for (const key of Object.keys(fallback as object)) {
+    const fallbackVal = (fallback as any)[key];
+    const targetVal = (target as any)[key];
+    if (typeof fallbackVal === 'object' && fallbackVal !== null && !Array.isArray(fallbackVal)) {
+      result[key] = deepMergeFallback(targetVal, fallbackVal);
+    } else {
+      result[key] = (targetVal !== undefined && targetVal !== '') ? targetVal : fallbackVal;
+    }
+  }
+  return result;
+}
 
-export const translations: Record<Language, Translations> = { en, hi, mr };
+export const translations: Record<Language, Translations> = {
+  en,
+  hi: deepMergeFallback(hi, en),
+  mr: deepMergeFallback(mr, en),
+};

@@ -7,6 +7,7 @@ import { toPgTextArrayLiteral } from '../utils/pgArray';
 import { createNotification } from '../utils/notifications';
 import { logAudit } from '../utils/auditLog';
 import { hashPassword } from '../utils/password';
+import { optionalPhoneSchema } from '../validators/phoneValidator';
 import {
   notifyContractorWelcome,
   notifyContractorListingChange,
@@ -20,7 +21,7 @@ const createManufacturerSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
   email: z.string().email('A valid email is required to create a login'),
   password: z.string().min(8, 'Temporary password must be at least 8 characters'),
-  phone: z.string().optional(),
+  phone: optionalPhoneSchema,
   industry: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
@@ -36,7 +37,7 @@ const createContractorSchema = z.object({
   contactPerson: z.string().optional(),
   email: z.string().email('A valid email is required to create a login'),
   password: z.string().min(8, 'Temporary password must be at least 8 characters'),
-  phone: z.string().optional(),
+  phone: optionalPhoneSchema,
   industry: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
@@ -51,7 +52,7 @@ const createContractorSchema = z.object({
 // Schema for updating a contractor profile
 const updateContractorSchema = z.object({
   companyName: z.string().min(1).optional(),
-  phone: z.string().optional(),
+  phone: optionalPhoneSchema,
   city: z.string().optional(),
   state: z.string().optional(),
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
