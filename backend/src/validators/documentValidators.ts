@@ -30,6 +30,7 @@ const isoDate = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM
 
 export const uploadDocumentSchema = z.object({
   documentType: z.enum(DOCUMENT_TYPES),
+  customName: z.string().trim().max(100).optional(),
   issueDate: isoDate.optional(),
   expiryDate: isoDate.optional(),
   certificationAssessmentId: z.string().uuid().optional(),

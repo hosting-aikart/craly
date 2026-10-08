@@ -7,6 +7,7 @@ import {
   updateAvailabilitySchema,
 } from '../validators/pfContractorValidators';
 import type { AppError } from '../middlewares/errorHandler';
+import { notifyContractorVerificationChange } from '../utils/whatsappNotifications';
 
 function notFound(message: string): AppError {
   const err: AppError = new Error(message);
@@ -199,18 +200,38 @@ export async function updatePfContractorVerification(req: Request, res: Response
     // contractor in directory" step in the onboarding flow, done in one
     // action rather than a separate toggle staff could forget to flip.
     const [updated] = await sql`
-      UPDATE contractor_profiles SET
+      WITH prev AS (
+        SELECT id, verification_status FROM contractor_profiles WHERE id = ${id} FOR UPDATE
+      )
+      UPDATE contractor_profiles cp SET
         verification_status = ${status},
         verification_note = ${note ?? null},
-        onboarding_complete = CASE WHEN ${status} = 'verified' THEN true ELSE onboarding_complete END,
+        onboarding_complete = CASE WHEN ${status} = 'verified' THEN true ELSE cp.onboarding_complete END,
         updated_at = now()
-      WHERE id = ${id}
-      RETURNING id, verification_status, verification_note, onboarding_complete
+      FROM prev
+      WHERE cp.id = prev.id
+      RETURNING cp.id, cp.verification_status, cp.verification_note, cp.onboarding_complete,
+                cp.user_id, cp.company_name, cp.phone, cp.updated_at, prev.verification_status AS previous_status
     `;
     if (!updated) return next(notFound('Contractor not found'));
 
     await logAudit(req.user!.sub, `verification_status:${status}`, id, note);
-    res.json({ data: updated });
+
+    await notifyContractorVerificationChange(
+      { contractorId: id, userId: updated.user_id, phone: updated.phone, companyName: updated.company_name },
+      updated.previous_status,
+      status,
+      updated.updated_at,
+    );
+
+    res.json({
+      data: {
+        id: updated.id,
+        verification_status: updated.verification_status,
+        verification_note: updated.verification_note,
+        onboarding_complete: updated.onboarding_complete,
+      },
+    });
   } catch (err) {
     next(err);
   }

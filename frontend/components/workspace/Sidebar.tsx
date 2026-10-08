@@ -177,8 +177,7 @@ export default function Sidebar({ role, companyName, isVerified = true }: Sideba
     {
       group: 'COMPLIANCE',
       items: [
-        { label: 'Documents', href: '/contractor-portal/profile?tab=documents', icon: IconFile, locked: !isVerified },
-        { label: 'Verification', href: '/contractor-portal/profile?tab=verification', icon: IconShield, locked: !isVerified },
+        { label: 'Documents & Verification', href: '/contractor-portal/profile?tab=documents', icon: IconShield, locked: !isVerified },
       ],
     },
     {

@@ -31,7 +31,7 @@ router.patch('/contractors/:id/availability', updatePfContractorAvailability);
 // Verification is Ops Head only — layered on top of the router-wide gate.
 router.patch('/contractors/:id/verification', requireRole('ops_head'), updatePfContractorVerification);
 
-// Verification Documents (R2 Cloudflare storage)
+// Verification Documents (file storage — R2 or S3, see src/storage)
 router.post('/contractors/:id/documents', documentUpload, uploadDocument);
 router.get('/contractors/:id/documents', listDocuments);
 router.get('/contractors/:id/documents/:documentId/signed-url', getDocumentSignedUrl);

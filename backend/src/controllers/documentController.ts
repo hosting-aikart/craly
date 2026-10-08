@@ -2,10 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import multer from 'multer';
 import sql from '../db/index';
-import { buildDocumentStorageKey, putObject, getSignedGetUrl, deleteObject } from '../utils/r2';
+import { buildDocumentStorageKey, putObject, getSignedGetUrl, deleteObject } from '../storage';
 import { validateDocumentFile, sanitizeDisplayFileName, MAX_DOCUMENT_SIZE_BYTES } from '../utils/fileValidation';
 import { uploadDocumentSchema, reviewDocumentSchema, SENSITIVE_DOCUMENT_TYPES } from '../validators/documentValidators';
 import { logAudit } from '../utils/auditLog';
+import { notifyContractorVerificationChange, notifyKycDocumentReviewed } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
 function notFound(message: string): AppError {
@@ -24,7 +25,7 @@ function forbidden(message: string): AppError {
   return err;
 }
 
-// Memory storage only — the buffer goes straight to R2, never to disk or
+// Memory storage only — the buffer goes straight to file storage (R2/S3), never to disk or
 // Postgres. Single file, single field ("file"), hard size cap.
 export const documentUpload = multer({
   storage: multer.memoryStorage(),
@@ -52,7 +53,7 @@ function isSensitive(documentType: string): boolean {
 
 /**
  * POST /api/contractor-portal/documents
- * Logged-in contractor uploads a KYC/verification document directly to Cloudflare R2.
+ * Logged-in contractor uploads a KYC/verification document directly to file storage.
  */
 export async function uploadMyDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -65,38 +66,55 @@ export async function uploadMyDocument(req: Request, res: Response, next: NextFu
 
     const parsed = uploadDocumentSchema.safeParse(req.body);
     if (!parsed.success) return next(badRequest(parsed.error.issues[0]?.message ?? 'Invalid input'));
-    const { documentType, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
+    const { documentType, customName, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
 
     const documentId = randomUUID();
     const storageKey = buildDocumentStorageKey(contractorId, documentId);
 
-    // Upload file buffer directly to Cloudflare R2
+    // Upload file buffer directly to file storage
     await putObject(storageKey, req.file.buffer, validation.mimeType!);
 
     const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
+    const metadataJson = customName ? JSON.stringify({ custom_name: customName }) : '{}';
 
     const [row] = await sql`
       INSERT INTO contractor_documents (
         id, contractor_id, document_type, storage_key, file_name, mime_type, size_bytes,
-        uploaded_by, issue_date, expiry_date, certification_assessment_id, status
+        uploaded_by, issue_date, expiry_date, certification_assessment_id, status, metadata
       ) VALUES (
         ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
         ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
-        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending'
+        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending',
+        ${metadataJson}::jsonb
       )
-      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at
+      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at,
+                metadata->>'custom_name' AS custom_name
     `;
 
     // Reset status to pending if previously rejected or needs_changes
-    await sql`
-      UPDATE contractor_profiles
+    const [profile] = await sql`
+      WITH prev AS (
+        SELECT id, verification_status FROM contractor_profiles WHERE id = ${contractorId} FOR UPDATE
+      )
+      UPDATE contractor_profiles cp
       SET verification_status = CASE 
-        WHEN verification_status IN ('rejected', 'needs_changes') THEN 'pending'
-        ELSE verification_status 
+        WHEN cp.verification_status IN ('rejected', 'needs_changes') THEN 'pending'
+        ELSE cp.verification_status 
       END,
       updated_at = now()
-      WHERE id = ${contractorId}
+      FROM prev
+      WHERE cp.id = prev.id
+      RETURNING cp.user_id, cp.company_name, cp.phone, cp.verification_status, cp.updated_at, prev.verification_status AS previous_status
     `;
+    if (profile) {
+      // Resubmission after rejected/needs_changes → "under review" message.
+      await notifyContractorVerificationChange(
+        { contractorId, userId: profile.user_id, phone: profile.phone, companyName: profile.company_name },
+        profile.previous_status,
+        profile.verification_status,
+        profile.updated_at,
+      );
+    }
 
     await logAudit(req.user!.sub, 'document:upload', 'contractor_document', documentId, undefined, {
       contractorId,
@@ -119,7 +137,9 @@ export async function listMyDocuments(req: Request, res: Response, next: NextFun
 
     const rows = await sql`
       SELECT d.id, d.document_type, d.file_name, d.mime_type, d.size_bytes, d.status,
-             d.issue_date, d.expiry_date, d.created_at, d.updated_at
+             d.issue_date, d.expiry_date, d.created_at, d.updated_at,
+             d.metadata->>'custom_name' AS custom_name,
+             d.metadata->>'reviewer_note' AS reviewer_note
       FROM contractor_documents d
       WHERE d.contractor_id = ${contractorId}
       ORDER BY d.created_at DESC
@@ -133,7 +153,7 @@ export async function listMyDocuments(req: Request, res: Response, next: NextFun
 
 /**
  * GET /api/contractor-portal/documents/:documentId/signed-url
- * Logged-in contractor gets a short-lived (120s) signed R2 URL to view/download their document.
+ * Logged-in contractor gets a short-lived (120s) signed URL to view/download their document.
  */
 export async function getMyDocumentSignedUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -159,7 +179,7 @@ export async function getMyDocumentSignedUrl(req: Request, res: Response, next: 
 
 /**
  * DELETE /api/contractor-portal/documents/:documentId
- * Logged-in contractor deletes an uploaded document from R2 and DB.
+ * Logged-in contractor deletes an uploaded document from file storage and DB.
  */
 export async function deleteMyDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -202,7 +222,7 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
 
     const parsed = uploadDocumentSchema.safeParse(req.body);
     if (!parsed.success) return next(badRequest(parsed.error.issues[0]?.message ?? 'Invalid input'));
-    const { documentType, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
+    const { documentType, customName, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
 
     const documentId = randomUUID();
     const storageKey = buildDocumentStorageKey(contractorId, documentId);
@@ -210,17 +230,20 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
     await putObject(storageKey, req.file.buffer, validation.mimeType!);
 
     const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
+    const metadataJson = customName ? JSON.stringify({ custom_name: customName }) : '{}';
 
     const [row] = await sql`
       INSERT INTO contractor_documents (
         id, contractor_id, document_type, storage_key, file_name, mime_type, size_bytes,
-        uploaded_by, issue_date, expiry_date, certification_assessment_id, status
+        uploaded_by, issue_date, expiry_date, certification_assessment_id, status, metadata
       ) VALUES (
         ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
         ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
-        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending'
+        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending',
+        ${metadataJson}::jsonb
       )
-      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at
+      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at,
+                metadata->>'custom_name' AS custom_name
     `;
 
     await logAudit(req.user!.sub, 'document:upload', 'contractor_document', documentId, undefined, {
@@ -248,6 +271,7 @@ export async function listDocuments(req: Request, res: Response, next: NextFunct
     const rows = await sql`
       SELECT d.id, d.document_type, d.file_name, d.mime_type, d.size_bytes, d.status,
              d.issue_date, d.expiry_date, d.created_at, d.updated_at, d.certification_assessment_id,
+             d.metadata->>'custom_name' AS custom_name,
              u.email AS uploaded_by_email
       FROM contractor_documents d
       LEFT JOIN users u ON u.id = d.uploaded_by
@@ -264,7 +288,7 @@ export async function listDocuments(req: Request, res: Response, next: NextFunct
 
 /**
  * GET /api/internal/contractors/:id/documents/:documentId/signed-url?intent=view|download
- * Mints short-lived (120s) R2 signed URL for internal staff.
+ * Mints short-lived (120s) signed URL for internal staff.
  */
 export async function getDocumentSignedUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -302,16 +326,36 @@ export async function reviewDocument(req: Request, res: Response, next: NextFunc
     const { decision, note } = parsed.data;
 
     const [updated] = await sql`
-      UPDATE contractor_documents
+      WITH prev AS (
+        SELECT id, status FROM contractor_documents
+        WHERE id = ${documentId} AND contractor_id = ${contractorId}
+        FOR UPDATE
+      )
+      UPDATE contractor_documents d
       SET status = ${decision}, updated_at = now()
-      WHERE id = ${documentId} AND contractor_id = ${contractorId}
-      RETURNING id, document_type, status
+      FROM prev
+      WHERE d.id = prev.id
+      RETURNING d.id, d.document_type, d.status, d.updated_at, prev.status AS previous_status
     `;
     if (!updated) return next(notFound('Document not found'));
 
     await logAudit(req.user!.sub, `document:${decision}`, 'contractor_document', documentId, note, { contractorId });
 
-    res.json({ data: updated });
+    if (updated.previous_status !== decision) {
+      const [contractor] = await sql`
+        SELECT user_id, company_name, phone FROM contractor_profiles WHERE id = ${contractorId}
+      `;
+      if (contractor) {
+        await notifyKycDocumentReviewed(
+          { contractorId, userId: contractor.user_id, phone: contractor.phone, companyName: contractor.company_name },
+          { id: updated.id, documentType: updated.document_type },
+          decision,
+          updated.updated_at,
+        );
+      }
+    }
+
+    res.json({ data: { id: updated.id, document_type: updated.document_type, status: updated.status } });
   } catch (err) {
     next(err);
   }
@@ -319,7 +363,7 @@ export async function reviewDocument(req: Request, res: Response, next: NextFunc
 
 /**
  * DELETE /api/internal/contractors/:id/documents/:documentId
- * Ops Head only. Deletes R2 object and metadata row.
+ * Ops Head only. Deletes the stored file and metadata row.
  */
 export async function deleteDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

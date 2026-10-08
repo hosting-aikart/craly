@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { google } from 'googleapis';
+// Calendar API only: importing the `googleapis` root loads ~3.5M lines of
+// type definitions for every Google API (tsc needs >1.5 GB and can't build
+// on the production EC2 instance). This module exports the same `calendar()`
+// and `auth.OAuth2` used below.
+import * as google from 'googleapis/build/src/apis/calendar';
 import crypto from 'crypto';
 import sql from '../db/index';
 import { getOAuth2Client } from './googleController';

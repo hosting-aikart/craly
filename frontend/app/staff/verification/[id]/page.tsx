@@ -16,7 +16,7 @@ import {
   type StaffVerificationDocumentItem,
   type StaffVerificationMessageItem,
 } from '@/lib/api/staff';
-import { CONTRACTOR_DOCUMENT_TYPE_LABELS as DOC_TYPE_LABELS } from '@/components/contractor/ContractorDocumentsSection';
+import { CONTRACTOR_DOCUMENT_TYPE_LABELS as DOC_TYPE_LABELS, formatDocumentTypeDisplay } from '@/components/contractor/ContractorDocumentsSection';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
 import './staff-verification-detail.css';
@@ -77,6 +77,7 @@ export default function StaffVerificationDetailPage() {
   // Direct Document Upload by Staff State
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadDocType, setUploadDocType] = useState('gst');
+  const [uploadDocCustomName, setUploadDocCustomName] = useState('');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadIssueDate, setUploadIssueDate] = useState('');
   const [uploadExpiryDate, setUploadExpiryDate] = useState('');
@@ -167,6 +168,10 @@ export default function StaffVerificationDetailPage() {
       setUploadDocError('Please select a file to upload.');
       return;
     }
+    if ((uploadDocType === 'other' || uploadDocType === 'other_certificate') && !uploadDocCustomName.trim()) {
+      setUploadDocError('Please enter a custom document name.');
+      return;
+    }
 
     setUploadingDoc(true);
     setUploadDocError('');
@@ -175,12 +180,14 @@ export default function StaffVerificationDetailPage() {
       const formData = new FormData();
       formData.append('file', uploadFile);
       formData.append('documentType', uploadDocType);
+      if (uploadDocCustomName.trim()) formData.append('customName', uploadDocCustomName.trim());
       if (uploadIssueDate) formData.append('issueDate', uploadIssueDate);
       if (uploadExpiryDate) formData.append('expiryDate', uploadExpiryDate);
 
       await uploadStaffContractorDocument(contractorId, formData);
       setActionSuccess('Document uploaded successfully on behalf of contractor!');
       setUploadFile(null);
+      setUploadDocCustomName('');
       setUploadIssueDate('');
       setUploadExpiryDate('');
       setShowUploadForm(false);
@@ -328,6 +335,22 @@ export default function StaffVerificationDetailPage() {
                 </select>
               </div>
 
+              {(uploadDocType === 'other' || uploadDocType === 'other_certificate') && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
+                    Document Name / Title (Type Manually) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. ISO 9001 Certificate, Safety Audit Report, PF Undertaking"
+                    value={uploadDocCustomName}
+                    onChange={(e) => setUploadDocCustomName(e.target.value)}
+                    style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+              )}
+
               <div>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>File (PDF, PNG, JPG, WebP) *</label>
                 <input
@@ -405,7 +428,7 @@ export default function StaffVerificationDetailPage() {
                   <tr key={doc.id}>
                     <td>
                       <span className="staff-vd-type-tag">
-                        {DOC_TYPE_LABELS[doc.document_type] || doc.document_type}
+                        {formatDocumentTypeDisplay(doc)}
                       </span>
                     </td>
                     <td className="staff-vd-filename">{doc.file_name}</td>
@@ -461,8 +484,13 @@ export default function StaffVerificationDetailPage() {
 
       {/* Verification History Section */}
       <div className="staff-vd-card">
-        <div className="staff-vd-card-header">
+        <div className="staff-vd-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3>Verification Audit & Review History</h3>
+          {reviewHistory.length > 0 && reviewHistory[0].reviewer_email && (
+            <span style={{ fontSize: '12px', background: 'rgba(15, 118, 110, 0.08)', color: '#0f766e', padding: '4px 10px', borderRadius: '12px', fontWeight: 600 }}>
+              Last Action by: {reviewHistory[0].reviewer_email} {reviewHistory[0].reviewer_role ? `(${reviewHistory[0].reviewer_role})` : ''}
+            </span>
+          )}
         </div>
 
         {reviewHistory.length === 0 ? (
@@ -478,7 +506,7 @@ export default function StaffVerificationDetailPage() {
                       {h.status.replace('_', ' ').toUpperCase()}
                     </span>
                     <span className="staff-vd-timeline-time">
-                      {new Date(h.created_at).toLocaleString()} by {h.reviewer_email || 'Staff'}
+                      {new Date(h.created_at).toLocaleString()} by {h.reviewer_email || 'Staff'}{h.reviewer_role ? ` (${h.reviewer_role})` : ''}
                     </span>
                   </div>
                   {h.notes && <p className="staff-vd-timeline-note">Reason / Note: {h.notes}</p>}

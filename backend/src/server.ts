@@ -4,9 +4,12 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import config from './config/index';
 import apiRouter from './routes/index';
+import whatsappWebhookRoutes from './routes/whatsappWebhookRoutes';
+import { stopWhatsAppProducer } from './queue/whatsappQueue';
 import { errorHandler } from './middlewares/errorHandler';
 import { initSocketServer } from './socket/index';
 import { healthCheck } from './controllers/healthController';
+import { buildCorsOptions } from './utils/corsOrigin';
 
 const app = express();
 
@@ -16,46 +19,10 @@ app.set('trust proxy', 1);
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
-      if (!origin) return callback(null, true);
-
-      const cleanOrigin = origin.trim().replace(/\/$/, '');
-
-      // Universal wildcard support (* in ALLOWED_ORIGINS)
-      if (config.allowedOrigins.includes('*')) {
-        return callback(null, true);
-      }
-
-      // Natively allow craly.co & subdomains
-      if (cleanOrigin.endsWith('craly.co') || cleanOrigin.endsWith('.craly.co')) {
-        return callback(null, true);
-      }
-
-      const isAllowed = config.allowedOrigins.some((allowed) => {
-        const cleanAllowed = allowed.trim().replace(/\/$/, '');
-        if (!cleanAllowed) return false;
-        if (cleanAllowed === '*') return true;
-        if (cleanOrigin === cleanAllowed) return true;
-        // Allow Vercel preview deployment URLs if vercel.app is configured
-        if (cleanAllowed.includes('vercel.app') && cleanOrigin.endsWith('.vercel.app')) return true;
-        return false;
-      });
-
-      if (isAllowed) {
-        callback(null, true);
-      } else {
-        console.warn(`[cors] Blocked origin: ${origin}`);
-        callback(null, false);
-      }
-    },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-    credentials: true,
-  }),
-);
+// CORS: Craly's own HTTPS sites (craly.co, www.craly.co, …) plus
+// ALLOWED_ORIGINS, with credentials — see utils/corsOrigin.ts. Runs first,
+// so Express's own error responses (401/403/413/…) carry CORS headers too.
+app.use(cors(buildCorsOptions(config.allowedOrigins)));
 
 // Basic security headers (no extra dependency required)
 app.use((_req, res, next) => {
@@ -64,6 +31,10 @@ app.use((_req, res, next) => {
   res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
   next();
 });
+
+// WhatsApp webhook — before express.json(): Meta's X-Hub-Signature-256 is
+// an HMAC of the raw body, which express.json() would consume.
+app.use('/api/webhooks/whatsapp', whatsappWebhookRoutes);
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
@@ -125,7 +96,9 @@ function shutdown(signal: string): void {
   console.log(`[server] ${signal} received — shutting down gracefully`);
   server.close(() => {
     console.log('[server] Closed remaining connections');
-    process.exit(0);
+    // WhatsApp jobs are already committed to Postgres by the time a request
+    // returns; this only closes the producer's pg-boss connection pool.
+    stopWhatsAppProducer().finally(() => process.exit(0));
   });
 }
 

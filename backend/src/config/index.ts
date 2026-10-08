@@ -30,24 +30,26 @@ const config = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   googleRedirectUri: process.env.GOOGLE_REDIRECT_URI ?? 'http://localhost:8080/api/google/calendar/callback',
 
-  // Cloudflare R2 (S3-compatible) — private contractor document storage.
-  // All five must be set for uploads/signed URLs to work; see utils/r2.ts,
-  // which fails fast and clearly (503) instead of calling out to R2 with
-  // partial config.
+  // File storage (KYC documents, worksite photos) — see src/storage/.
+  // STORAGE_PROVIDER picks the backend: 'r2' = Cloudflare R2 (Render) or
+  // 's3' = AWS S3 (EC2). Unset or blank means 'r2', so existing deployments keep
+  // working unchanged. Only the selected provider's settings are required;
+  // src/storage/index.ts validates them and answers 503 until complete.
+  storageProvider: (process.env.STORAGE_PROVIDER?.trim() || 'r2').toLowerCase(),
+
+  // Cloudflare R2 — used only when STORAGE_PROVIDER=r2. All five required.
   r2AccountId: process.env.R2_ACCOUNT_ID ?? '',
   r2AccessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
   r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
   r2Bucket: process.env.R2_BUCKET_NAME ?? '',
   r2Endpoint: process.env.R2_ENDPOINT ?? '',
+
+  // AWS S3 — used only when STORAGE_PROVIDER=s3. No access keys here on
+  // purpose: the AWS SDK takes credentials from the EC2 instance IAM role
+  // (see src/storage/s3.ts).
+  s3Bucket: process.env.S3_BUCKET_NAME ?? '',
+  awsRegion: process.env.AWS_REGION ?? '',
 } as const;
-
-export const isR2Configured = Boolean(
-  config.r2AccountId && config.r2AccessKeyId && config.r2SecretAccessKey && config.r2Bucket && config.r2Endpoint,
-);
-
-if (!isR2Configured) {
-  console.warn('[config] R2_* env vars are not fully set — document upload/download will return 503 until configured.');
-}
 
 if (!config.databaseUrl) {
   console.warn('[config] DATABASE_URL is not set — DB calls will fail.');

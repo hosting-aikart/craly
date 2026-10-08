@@ -1,6 +1,7 @@
 import sql from '../db/index';
 import { emitToUser } from '../socket/emitter';
 import { contractorEligibilityCondition } from './opportunityMatching';
+import { notifyNewOpportunity } from './whatsappNotifications';
 
 export type NotificationType =
   | 'NEW_ENQUIRY'
@@ -64,6 +65,7 @@ export interface MatchableRequirement {
   workers_required: number;
   industry: string | null;
   experience_required: number | null;
+  published_at?: string | Date | null;
 }
 
 /**
@@ -83,8 +85,8 @@ export interface MatchableRequirement {
 export async function notifyMatchingContractors(requirement: MatchableRequirement): Promise<void> {
   const eligibility = contractorEligibilityCondition(requirement);
 
-  const matches = await sql<{ user_id: string }[]>`
-    SELECT u.id AS user_id
+  const matches = await sql<{ user_id: string; contractor_id: string; company_name: string; phone: string | null }[]>`
+    SELECT u.id AS user_id, cp.id AS contractor_id, cp.company_name, cp.phone
     FROM contractor_profiles cp
     JOIN users u ON u.id = cp.user_id
     WHERE u.is_active = true
@@ -99,7 +101,7 @@ export async function notifyMatchingContractors(requirement: MatchableRequiremen
     ? `"${requirement.title}" in ${requirement.location} needs ${requirement.workers_required} ${workerWord} — check if it fits your capacity.`
     : `"${requirement.title}" needs ${requirement.workers_required} ${workerWord} — check if it fits your capacity.`;
 
-  for (const { user_id: userId } of matches) {
+  for (const { user_id: userId, contractor_id: contractorId, company_name: companyName, phone } of matches) {
     await createNotification({
       userId,
       type: 'NEW_MATCHING_OPPORTUNITY',
@@ -113,5 +115,8 @@ export async function notifyMatchingContractors(requirement: MatchableRequiremen
       message,
       referenceId: requirement.id,
     });
+    // Same recipients as the in-app notification above — WhatsApp has no
+    // matching rule of its own.
+    await notifyNewOpportunity({ contractorId, userId, phone, companyName }, requirement);
   }
 }

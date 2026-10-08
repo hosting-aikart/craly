@@ -3,6 +3,7 @@ import sql from '../db/index';
 import { contractorProfileSchema, businessProfileSchema } from '../validators/profileValidators';
 import { sanitizeContactInfo } from '../utils/contactSanitizer';
 import { toPgTextArrayLiteral } from '../utils/pgArray';
+import { notifyContractorProfileSubmitted } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -113,6 +114,12 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
       const cleanDesc = description !== undefined ? (description ? sanitizeContactInfo(description) : null) : undefined;
 
       const profile = await sql.begin(async (tx) => {
+        // Locked read of the pre-update state, so "onboarding just became
+        // complete" is decided exactly once even under concurrent saves.
+        const [before] = await tx`
+          SELECT onboarding_complete FROM contractor_profiles WHERE user_id = ${userId} FOR UPDATE
+        `;
+
         const updateFields: Record<string, any> = {
           onboarding_complete: true,
           updated_at: sql`now()`,
@@ -139,7 +146,7 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
         const [updated] = await tx`
           UPDATE contractor_profiles SET ${sql(updateFields)}
           WHERE user_id = ${userId}
-          RETURNING id
+          RETURNING id, company_name, phone, verification_status
         `;
 
         if (!updated) {
@@ -159,8 +166,26 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
           }
         }
 
-        return updated;
+        return {
+          id: updated.id as string,
+          company_name: updated.company_name as string,
+          phone: updated.phone as string | null,
+          verification_status: updated.verification_status as string,
+          justCompletedOnboarding: before ? !before.onboarding_complete : false,
+        };
       });
+
+      // First onboarding save = the contractor's profile is now submitted
+      // for Staff review (the portal shows "Application Under Review" from
+      // here). Later profile edits don't re-send.
+      if (profile.justCompletedOnboarding && ['pending', 'under_review'].includes(profile.verification_status)) {
+        await notifyContractorProfileSubmitted({
+          contractorId: profile.id,
+          userId,
+          phone: profile.phone,
+          companyName: profile.company_name,
+        });
+      }
 
       res.json({ data: { id: profile.id } });
       return;
