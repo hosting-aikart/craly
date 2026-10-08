@@ -205,6 +205,8 @@ export default function Sidebar({ role, companyName, isVerified = true }: Sideba
         { label: 'KYC / Verification', href: '/staff/verification', icon: IconShield },
         { label: 'Contractors', href: '/staff/contractors', icon: IconBuilding },
         { label: 'Add Contractor', href: '/staff/contractors/new', icon: IconPlus },
+        { label: 'Manufacturers', href: '/staff/manufacturers', icon: IconBuilding },
+        { label: 'Add Manufacturer', href: '/staff/manufacturers/new', icon: IconPlus },
         { label: 'Engagements', href: '/staff/engagements', icon: IconHandshake },
         { label: 'Notifications', href: '/staff/notifications', icon: IconBell },
       ],

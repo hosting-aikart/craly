@@ -7,6 +7,9 @@ import {
   getContractorById,
   updateContractor,
   updateContractorListingStatus,
+  getManufacturers,
+  createManufacturer,
+  getManufacturerById,
   getStaffEngagements,
   updateEngagementStatus,
   getStaffNotifications,
@@ -28,8 +31,8 @@ import {
 
 const router = Router();
 
-// Staff workspace routes require authentication and 'staff' (or 'admin') role
-router.use(requireAuth, requireRole('staff', 'admin'));
+// Staff workspace routes require authentication and 'staff' (or 'admin', 'ops_head', 'field_staff') role
+router.use(requireAuth, requireRole('staff', 'admin', 'ops_head', 'field_staff'));
 
 // Dashboard stats
 router.get('/dashboard-stats', getStaffDashboardStats);
@@ -54,6 +57,11 @@ router.post('/contractors/:id/documents', documentUpload, uploadDocument);
 router.get('/contractors/:id/documents/:documentId/signed-url', getDocumentSignedUrl);
 router.delete('/contractors/:id/documents/:documentId', deleteDocument);
 
+// Manufacturer management
+router.get('/manufacturers', getManufacturers);
+router.post('/manufacturers', createManufacturer);
+router.get('/manufacturers/:id', getManufacturerById);
+
 // KYC Documents — reachable from Contractors → select contractor → KYC →
 // Documents, for BOTH newly-created and pre-existing contractors. Reuses
 // the exact same document storage/controller (R2, contractor_documents)
@@ -73,3 +81,4 @@ router.patch('/engagements/:id/status', updateEngagementStatus);
 router.get('/notifications', getStaffNotifications);
 
 export default router;
+

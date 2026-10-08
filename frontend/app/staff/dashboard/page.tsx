@@ -42,11 +42,17 @@ export default function StaffDashboardPage() {
           </p>
         </div>
         <div className="staff-dashboard__actions">
-          <Link href="/staff/contractors/new" className="btn-primary">
+          <Link href="/staff/manufacturers/new" className="btn-primary">
+            <IconPlus size={15} style={{ marginRight: 6 }} /> Create Manufacturer
+          </Link>
+          <Link href="/staff/contractors/new" className="btn-secondary">
             <IconPlus size={15} style={{ marginRight: 6 }} /> Add Contractor
           </Link>
+          <Link href="/staff/manufacturers" className="btn-secondary">
+            Manufacturers
+          </Link>
           <Link href="/staff/contractors" className="btn-secondary">
-            View Contractors
+            Contractors
           </Link>
         </div>
       </div>
@@ -65,11 +71,11 @@ export default function StaffDashboardPage() {
 
         <div className="staff-metric-card">
           <div className="staff-metric-icon staff-metric-icon--blue">
-            <IconClock size={22} />
+            <IconBuilding size={22} />
           </div>
           <div className="staff-metric-info">
-            <span className="staff-metric-val">{stats.recentlyAddedCount}</span>
-            <span className="staff-metric-lbl">Added Last 30 Days</span>
+            <span className="staff-metric-val">{stats.totalManufacturers ?? 0}</span>
+            <span className="staff-metric-lbl">Total Manufacturers</span>
           </div>
         </div>
 

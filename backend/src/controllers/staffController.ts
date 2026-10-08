@@ -8,6 +8,17 @@ import { createNotification } from '../utils/notifications';
 import { logAudit } from '../utils/auditLog';
 import { hashPassword } from '../utils/password';
 
+// Schema for adding a new manufacturer profile directly by Staff
+const createManufacturerSchema = z.object({
+  companyName: z.string().min(1, 'Company name is required'),
+  email: z.string().email('A valid email is required to create a login'),
+  password: z.string().min(8, 'Temporary password must be at least 8 characters'),
+  phone: z.string().optional(),
+  industry: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+});
+
 // Schema for adding a new contractor profile. email + password are now
 // required — Staff sets a temporary password directly so the account is
 // login-ready immediately (product decision: a contractor Staff adds must
@@ -64,6 +75,7 @@ const updateEngagementStatusSchema = z.object({
 export async function getStaffDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const [{ count: totalContractors }] = await sql`SELECT COUNT(*)::int FROM contractor_profiles`;
+    const [{ count: totalManufacturers }] = await sql`SELECT COUNT(*)::int FROM business_profiles`;
     const [{ count: recentlyAddedCount }] = await sql`
       SELECT COUNT(*)::int FROM contractor_profiles WHERE created_at >= NOW() - INTERVAL '30 days'
     `;
@@ -93,6 +105,7 @@ export async function getStaffDashboardStats(req: Request, res: Response, next: 
     res.json({
       data: {
         totalContractors,
+        totalManufacturers,
         recentlyAddedCount,
         pendingEngagementsCount,
         unreadNotificationsCount,
@@ -900,3 +913,198 @@ export async function updateStaffContractorVerificationStatus(req: Request, res:
     next(err);
   }
 }
+
+/**
+ * GET /api/staff/manufacturers
+ * Returns list of manufacturer/business profiles with search and filter support.
+ */
+export async function getManufacturers(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const q = (req.query.q as string) || '';
+    const city = (req.query.city as string) || '';
+    const industry = (req.query.industry as string) || '';
+    const page = parseInt((req.query.page as string) || '1', 10);
+    const limit = parseInt((req.query.limit as string) || '20', 10);
+    const offset = (page - 1) * limit;
+
+    const manufacturers = await sql`
+      SELECT 
+        bp.id,
+        bp.company_name,
+        bp.industry,
+        bp.phone,
+        bp.city,
+        bp.state,
+        bp.onboarding_complete,
+        bp.created_at,
+        bp.updated_at,
+        u.email,
+        u.is_active,
+        COALESCE(req_counts.total_reqs, 0)::int AS requirements_count
+      FROM business_profiles bp
+      JOIN users u ON u.id = bp.user_id
+      LEFT JOIN (
+        SELECT manufacturer_id, COUNT(*)::int AS total_reqs
+        FROM manpower_requirements
+        GROUP BY manufacturer_id
+      ) req_counts ON req_counts.manufacturer_id = bp.id
+      WHERE (${q} = '' OR bp.company_name ILIKE ${'%' + q + '%'} OR bp.city ILIKE ${'%' + q + '%'} OR u.email ILIKE ${'%' + q + '%'})
+        AND (${city} = '' OR bp.city ILIKE ${'%' + city + '%'})
+        AND (${industry} = '' OR bp.industry ILIKE ${'%' + industry + '%'})
+      ORDER BY bp.created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    const [{ count: total }] = await sql`
+      SELECT COUNT(*)::int
+      FROM business_profiles bp
+      JOIN users u ON u.id = bp.user_id
+      WHERE (${q} = '' OR bp.company_name ILIKE ${'%' + q + '%'} OR bp.city ILIKE ${'%' + q + '%'} OR u.email ILIKE ${'%' + q + '%'})
+        AND (${city} = '' OR bp.city ILIKE ${'%' + city + '%'})
+        AND (${industry} = '' OR bp.industry ILIKE ${'%' + industry + '%'})
+    `;
+
+    res.json({
+      data: manufacturers,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/staff/manufacturers
+ * Creates a new Manufacturer account with login credentials directly by Staff.
+ */
+export async function createManufacturer(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const parsed = createManufacturerSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const err: AppError = new Error(parsed.error.issues[0]?.message ?? 'Invalid manufacturer data');
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const { companyName, email, password, phone, industry, city, state } = parsed.data;
+
+    const existingUser = await sql`SELECT id FROM users WHERE email = ${email}`;
+    if (existingUser.length > 0) {
+      const err: AppError = new Error('An account with this email already exists');
+      err.statusCode = 409;
+      return next(err);
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    const manufacturer = await sql.begin(async (tx) => {
+      const [newUser] = await tx`
+        INSERT INTO users (email, password_hash, role, is_active, is_email_verified, is_phone_verified)
+        VALUES (${email}, ${passwordHash}, 'business', true, true, false)
+        RETURNING id, email, role
+      `;
+
+      const [profile] = await tx<{
+        id: string;
+        company_name: string;
+        industry: string | null;
+        city: string | null;
+        state: string | null;
+        phone: string | null;
+        created_at: string;
+      }[]>`
+        INSERT INTO business_profiles (
+          user_id, company_name, industry, city, state, phone, onboarding_complete
+        )
+        VALUES (
+          ${newUser.id}, ${companyName}, ${industry || null}, ${city || null}, ${state || null}, ${phone || null}, true
+        )
+        RETURNING id, company_name, industry, city, state, phone, created_at
+      `;
+
+      await tx`
+        INSERT INTO organization_members (user_id, business_profile_id, org_role, status)
+        VALUES (${newUser.id}, ${profile.id}, 'admin', 'active')
+        ON CONFLICT DO NOTHING
+      `;
+
+      return {
+        id: profile.id,
+        company_name: profile.company_name,
+        industry: profile.industry,
+        city: profile.city,
+        state: profile.state,
+        phone: profile.phone,
+        created_at: profile.created_at,
+        email: newUser.email,
+        user_id: newUser.id,
+      };
+    });
+
+    await logAudit(req.user!.sub, 'manufacturer:created_by_staff', 'business_profile', manufacturer.id, undefined, { email, companyName });
+
+    res.status(201).json({
+      data: manufacturer,
+      message: `Manufacturer account created successfully for ${email}. Share the temporary password with them directly.`,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/staff/manufacturers/:id
+ * Single manufacturer detail view.
+ */
+export async function getManufacturerById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    const [manufacturer] = await sql`
+      SELECT 
+        bp.id,
+        bp.company_name,
+        bp.industry,
+        bp.phone,
+        bp.city,
+        bp.state,
+        bp.onboarding_complete,
+        bp.created_at,
+        bp.updated_at,
+        u.id AS user_id,
+        u.email,
+        u.is_active
+      FROM business_profiles bp
+      JOIN users u ON u.id = bp.user_id
+      WHERE bp.id = ${id}
+    `;
+
+    if (!manufacturer) {
+      const err: AppError = new Error('Manufacturer not found');
+      err.statusCode = 404;
+      return next(err);
+    }
+
+    const requirements = await sql`
+      SELECT id, title, location, city, state, workers_required, status, created_at, published_at
+      FROM manpower_requirements
+      WHERE manufacturer_id = ${id}
+      ORDER BY created_at DESC
+    `;
+
+    res.json({
+      data: {
+        ...manufacturer,
+        requirements,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

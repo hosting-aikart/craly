@@ -10,7 +10,13 @@ async function seedStaffUser() {
   const existing = await sql`SELECT id, role FROM users WHERE email = ${email}`;
 
   if (existing.length > 0) {
-    console.log(`Staff user ${email} already exists (ID: ${existing[0].id}, Role: ${existing[0].role}).`);
+    const passwordHash = await hashPassword(password);
+    await sql`
+      UPDATE users 
+      SET password_hash = ${passwordHash}, is_active = true 
+      WHERE email = ${email}
+    `;
+    console.log(`Staff user ${email} updated with password ${password} (ID: ${existing[0].id}, Role: ${existing[0].role}).`);
   } else {
     const passwordHash = await hashPassword(password);
     const [user] = await sql`

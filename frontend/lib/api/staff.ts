@@ -2,6 +2,7 @@ import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '@/lib/api';
 
 export interface StaffDashboardStats {
   totalContractors: number;
+  totalManufacturers?: number;
   recentlyAddedCount: number;
   pendingEngagementsCount: number;
   unreadNotificationsCount: number;
@@ -22,6 +23,46 @@ export interface StaffDashboardStats {
     reference_id: string | null;
     is_read: boolean;
     created_at: string;
+  }>;
+}
+
+export interface StaffManufacturerItem {
+  id: string;
+  company_name: string;
+  industry: string | null;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
+  onboarding_complete: boolean;
+  created_at: string;
+  updated_at: string;
+  email: string;
+  is_active: boolean;
+  requirements_count?: number;
+}
+
+export interface CreateStaffManufacturerInput {
+  companyName: string;
+  email: string;
+  password: string;
+  phone?: string;
+  industry?: string;
+  city?: string;
+  state?: string;
+}
+
+export interface StaffManufacturerDetail extends StaffManufacturerItem {
+  user_id: string;
+  requirements?: Array<{
+    id: string;
+    title: string;
+    location?: string | null;
+    city?: string | null;
+    state?: string | null;
+    workers_required: number;
+    status: string;
+    created_at: string;
+    published_at?: string | null;
   }>;
 }
 
@@ -272,3 +313,24 @@ export const getStaffContractorDocumentSignedUrl = (contractorId: string, docume
 
 export const deleteStaffContractorDocument = (contractorId: string, documentId: string) =>
   apiDelete<{ data: { id: string; deleted: boolean } }>(`/staff/contractors/${contractorId}/documents/${documentId}`);
+
+// ─── Manufacturers Management ──────────────────────────────────────────────
+export const getStaffManufacturers = (params?: { q?: string; city?: string; industry?: string; page?: number; limit?: number }) => {
+  const query = new URLSearchParams();
+  if (params?.q) query.set('q', params.q);
+  if (params?.city) query.set('city', params.city);
+  if (params?.industry) query.set('industry', params.industry);
+  if (params?.page) query.set('page', params.page.toString());
+  if (params?.limit) query.set('limit', params.limit.toString());
+  const str = query.toString();
+  return apiGet<{ data: StaffManufacturerItem[]; pagination: { total: number; page: number; limit: number; totalPages: number } }>(
+    `/staff/manufacturers${str ? `?${str}` : ''}`,
+  );
+};
+
+export const createStaffManufacturer = (input: CreateStaffManufacturerInput) =>
+  apiPost<{ data: StaffManufacturerItem; message: string }>('/staff/manufacturers', input);
+
+export const getStaffManufacturerById = (id: string) =>
+  apiGet<{ data: StaffManufacturerDetail }>(`/staff/manufacturers/${id}`);
+
