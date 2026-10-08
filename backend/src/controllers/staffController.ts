@@ -819,7 +819,17 @@ export async function reviewStaffDocument(req: Request, res: Response, next: Nex
       UPDATE contractor_documents
       SET 
         status = ${decision},
-        metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{reviewer_note}', to_jsonb(${note ?? ''}::text)),
+        -- jsonb_set needs an object. Uploads made before the documentController
+        -- sql.json fix stored metadata as a JSON *string* ("{...}"); unwrap it
+        -- back to the object it contains (keeping custom_name) before adding
+        -- the note. Anything else non-object starts from {}.
+        metadata = jsonb_set(
+          CASE jsonb_typeof(metadata)
+            WHEN 'object' THEN metadata
+            WHEN 'string' THEN (metadata #>> '{}')::jsonb
+            ELSE '{}'::jsonb
+          END,
+          '{reviewer_note}', to_jsonb(${note ?? ''}::text)),
         updated_at = now()
       WHERE id = ${documentId} AND contractor_id = ${contractorId}
       RETURNING id, document_type, status, updated_at

@@ -75,7 +75,10 @@ export async function uploadMyDocument(req: Request, res: Response, next: NextFu
     await putObject(storageKey, req.file.buffer, validation.mimeType!);
 
     const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
-    const metadataJson = customName ? JSON.stringify({ custom_name: customName }) : '{}';
+    // Pass an object via sql.json(): a pre-stringified value bound as ::jsonb is
+    // JSON-encoded again by postgres.js and stored as a JSON *string*, which
+    // breaks metadata->>'custom_name' and the reviewer-note jsonb_set.
+    const metadata = customName ? { custom_name: customName } : {};
 
     const [row] = await sql`
       INSERT INTO contractor_documents (
@@ -85,7 +88,7 @@ export async function uploadMyDocument(req: Request, res: Response, next: NextFu
         ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
         ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
         ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending',
-        ${metadataJson}::jsonb
+        ${sql.json(metadata)}
       )
       RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at,
                 metadata->>'custom_name' AS custom_name
@@ -230,7 +233,10 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
     await putObject(storageKey, req.file.buffer, validation.mimeType!);
 
     const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
-    const metadataJson = customName ? JSON.stringify({ custom_name: customName }) : '{}';
+    // Pass an object via sql.json(): a pre-stringified value bound as ::jsonb is
+    // JSON-encoded again by postgres.js and stored as a JSON *string*, which
+    // breaks metadata->>'custom_name' and the reviewer-note jsonb_set.
+    const metadata = customName ? { custom_name: customName } : {};
 
     const [row] = await sql`
       INSERT INTO contractor_documents (
@@ -240,7 +246,7 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
         ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
         ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
         ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending',
-        ${metadataJson}::jsonb
+        ${sql.json(metadata)}
       )
       RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at,
                 metadata->>'custom_name' AS custom_name
