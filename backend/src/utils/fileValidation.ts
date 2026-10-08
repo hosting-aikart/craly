@@ -122,7 +122,7 @@ const CONTROL_CHARS_PATTERN = new RegExp('[' + String.fromCharCode(0) + '-' + St
 
 /**
  * A display-only filename — stripped of path separators and control
- * characters. Never used to build a storage path (see utils/r2.ts, which
+ * characters. Never used to build a storage path (see storage/keys.ts, which
  * generates the real key from a UUID), only shown back in the UI.
  */
 export function sanitizeDisplayFileName(name: string): string {

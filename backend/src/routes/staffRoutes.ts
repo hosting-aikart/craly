@@ -56,7 +56,7 @@ router.delete('/contractors/:id/documents/:documentId', deleteDocument);
 
 // KYC Documents — reachable from Contractors → select contractor → KYC →
 // Documents, for BOTH newly-created and pre-existing contractors. Reuses
-// the exact same document storage/controller (R2, contractor_documents)
+// the exact same document storage/controller (src/storage, contractor_documents)
 // as the internal (Ops Head/Field Staff) and contractor-portal
 // self-upload paths — see documentController.ts.
 router.get('/contractors/:id/documents', listDocuments);

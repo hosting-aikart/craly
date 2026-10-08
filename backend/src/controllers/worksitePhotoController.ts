@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import multer from 'multer';
 import sql from '../db/index';
-import { buildWorksitePhotoStorageKey, putObject, getSignedGetUrl, deleteObject } from '../utils/r2';
+import { buildWorksitePhotoStorageKey, putObject, getSignedGetUrl, deleteObject } from '../storage';
 import {
   validateWorksitePhotoFile,
   sanitizeDisplayFileName,
@@ -24,7 +24,7 @@ function notFound(message: string): AppError {
   return err;
 }
 
-// Multer memory storage — buffers stored in memory then streamed to Cloudflare R2
+// Multer memory storage — buffers stored in memory then sent to file storage (R2/S3)
 const uploadMiddleware = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -89,7 +89,7 @@ export async function getMyWorksitePhotos(req: Request, res: Response, next: Nex
         try {
           url = await getSignedGetUrl(row.storage_key, 3600);
         } catch (e) {
-          // If R2 generation fails for an individual item, log but continue
+          // If signed URL generation fails for an individual item, log but continue
           console.error(`Failed to generate signed URL for worksite photo ${row.id}:`, e);
         }
         return {
@@ -191,7 +191,7 @@ export async function uploadMyWorksitePhotos(req: Request, res: Response, next: 
       }
     }
 
-    // Upload validated files to Cloudflare R2 and insert metadata into DB
+    // Upload validated files to file storage and insert metadata into DB
     const uploadedPhotos = [];
     const captions: string[] = Array.isArray(req.body.captions)
       ? req.body.captions
@@ -208,7 +208,7 @@ export async function uploadMyWorksitePhotos(req: Request, res: Response, next: 
       const fileName = sanitizeDisplayFileName(file.originalname || `photo-${i + 1}.jpg`);
       const caption = captions[i] || (files.length === 1 && typeof req.body.caption === 'string' ? req.body.caption : null);
 
-      // Store in Cloudflare R2
+      // Store in file storage
       await putObject(storageKey, file.buffer, mimeType);
 
       // Insert into PostgreSQL
@@ -262,7 +262,7 @@ export async function uploadMyWorksitePhotos(req: Request, res: Response, next: 
 
 /**
  * DELETE /api/contractor-portal/worksite-photos/:photoId
- * Deletes a worksite photo from Cloudflare R2 and PostgreSQL database.
+ * Deletes a worksite photo from file storage and PostgreSQL database.
  */
 export async function deleteMyWorksitePhoto(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -278,11 +278,11 @@ export async function deleteMyWorksitePhoto(req: Request, res: Response, next: N
       return next(notFound('Worksite photo not found or does not belong to your company'));
     }
 
-    // Delete from Cloudflare R2
+    // Delete from file storage
     try {
       await deleteObject(photo.storage_key);
     } catch (e) {
-      console.warn(`Could not delete R2 object ${photo.storage_key}:`, e);
+      console.warn(`Could not delete stored object ${photo.storage_key}:`, e);
     }
 
     // Delete row from DB

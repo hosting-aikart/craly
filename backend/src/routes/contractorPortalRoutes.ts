@@ -40,13 +40,13 @@ router.post('/opportunities/:id/apply', applyToOpportunity);
 router.get('/applications', getMyApplications);
 router.get('/applications/:id', getApplicationById);
 
-// KYC & Verification Documents (R2 Cloudflare storage)
+// KYC & Verification Documents (file storage — R2 or S3, see src/storage)
 router.get('/documents', listMyDocuments);
 router.post('/documents', documentUpload, uploadMyDocument);
 router.get('/documents/:documentId/signed-url', getMyDocumentSignedUrl);
 router.delete('/documents/:documentId', deleteMyDocument);
 
-// Worksite Photos (R2 Cloudflare storage - max 10 photos, max 10MB each)
+// Worksite Photos (file storage — R2 or S3; max 10 photos, max 10MB each)
 router.get('/worksite-photos', getMyWorksitePhotos);
 router.post('/worksite-photos', worksitePhotoUpload, uploadMyWorksitePhotos);
 router.delete('/worksite-photos/:photoId', deleteMyWorksitePhoto);

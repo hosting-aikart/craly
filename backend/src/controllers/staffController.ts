@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { z } from 'zod';
 import type { AppError } from '../middlewares/errorHandler';
-import { getSignedGetUrl } from '../utils/r2';
+import { getSignedGetUrl } from '../storage';
 import { toPgTextArrayLiteral } from '../utils/pgArray';
 import { createNotification } from '../utils/notifications';
 import { logAudit } from '../utils/auditLog';
@@ -738,7 +738,7 @@ export async function getStaffVerificationContractorById(req: Request, res: Resp
 
 /**
  * GET /api/staff/verification/contractors/:id/documents/:documentId/signed-url
- * Mints temporary (120s) presigned R2 URL for Staff to view/download contractor document.
+ * Mints temporary (120s) presigned URL for Staff to view/download contractor document.
  */
 export async function getStaffDocumentSignedUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

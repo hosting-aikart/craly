@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import multer from 'multer';
 import sql from '../db/index';
-import { buildDocumentStorageKey, putObject, getSignedGetUrl, deleteObject } from '../utils/r2';
+import { buildDocumentStorageKey, putObject, getSignedGetUrl, deleteObject } from '../storage';
 import { validateDocumentFile, sanitizeDisplayFileName, MAX_DOCUMENT_SIZE_BYTES } from '../utils/fileValidation';
 import { uploadDocumentSchema, reviewDocumentSchema, SENSITIVE_DOCUMENT_TYPES } from '../validators/documentValidators';
 import { logAudit } from '../utils/auditLog';
@@ -25,7 +25,7 @@ function forbidden(message: string): AppError {
   return err;
 }
 
-// Memory storage only — the buffer goes straight to R2, never to disk or
+// Memory storage only — the buffer goes straight to file storage (R2/S3), never to disk or
 // Postgres. Single file, single field ("file"), hard size cap.
 export const documentUpload = multer({
   storage: multer.memoryStorage(),
@@ -53,7 +53,7 @@ function isSensitive(documentType: string): boolean {
 
 /**
  * POST /api/contractor-portal/documents
- * Logged-in contractor uploads a KYC/verification document directly to Cloudflare R2.
+ * Logged-in contractor uploads a KYC/verification document directly to file storage.
  */
 export async function uploadMyDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -71,7 +71,7 @@ export async function uploadMyDocument(req: Request, res: Response, next: NextFu
     const documentId = randomUUID();
     const storageKey = buildDocumentStorageKey(contractorId, documentId);
 
-    // Upload file buffer directly to Cloudflare R2
+    // Upload file buffer directly to file storage
     await putObject(storageKey, req.file.buffer, validation.mimeType!);
 
     const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
@@ -148,7 +148,7 @@ export async function listMyDocuments(req: Request, res: Response, next: NextFun
 
 /**
  * GET /api/contractor-portal/documents/:documentId/signed-url
- * Logged-in contractor gets a short-lived (120s) signed R2 URL to view/download their document.
+ * Logged-in contractor gets a short-lived (120s) signed URL to view/download their document.
  */
 export async function getMyDocumentSignedUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -174,7 +174,7 @@ export async function getMyDocumentSignedUrl(req: Request, res: Response, next: 
 
 /**
  * DELETE /api/contractor-portal/documents/:documentId
- * Logged-in contractor deletes an uploaded document from R2 and DB.
+ * Logged-in contractor deletes an uploaded document from file storage and DB.
  */
 export async function deleteMyDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -279,7 +279,7 @@ export async function listDocuments(req: Request, res: Response, next: NextFunct
 
 /**
  * GET /api/internal/contractors/:id/documents/:documentId/signed-url?intent=view|download
- * Mints short-lived (120s) R2 signed URL for internal staff.
+ * Mints short-lived (120s) signed URL for internal staff.
  */
 export async function getDocumentSignedUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -354,7 +354,7 @@ export async function reviewDocument(req: Request, res: Response, next: NextFunc
 
 /**
  * DELETE /api/internal/contractors/:id/documents/:documentId
- * Ops Head only. Deletes R2 object and metadata row.
+ * Ops Head only. Deletes the stored file and metadata row.
  */
 export async function deleteDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
