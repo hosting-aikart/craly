@@ -105,11 +105,15 @@ export interface StaffVerificationContractorItem {
   pending_docs_count: number;
   total_docs_count: number;
   last_submitted_at: string | null;
+  last_reviewed_by_email?: string | null;
+  last_reviewed_by_role?: string | null;
+  last_reviewed_at?: string | null;
 }
 
 export interface StaffVerificationDocumentItem {
   id: string;
   document_type: string;
+  custom_name?: string | null;
   file_name: string;
   mime_type: string;
   size_bytes: number;
@@ -147,7 +151,9 @@ export interface StaffVerificationDetail {
     status: string;
     notes: string | null;
     created_at: string;
+    reviewer_admin_id: string | null;
     reviewer_email: string | null;
+    reviewer_role: string | null;
   }>;
 }
 
@@ -247,6 +253,7 @@ export const sendStaffVerificationMessage = (contractorId: string, message: stri
 export interface StaffContractorDocumentItem {
   id: string;
   document_type: string;
+  custom_name?: string | null;
   file_name: string;
   mime_type: string;
   size_bytes: number;

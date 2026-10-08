@@ -653,7 +653,10 @@ export async function getStaffVerificationContractors(req: Request, res: Respons
         u.email AS user_email,
         COALESCE(doc_counts.pending_count, 0)::int AS pending_docs_count,
         COALESCE(doc_counts.total_count, 0)::int AS total_docs_count,
-        doc_counts.last_submitted_at
+        doc_counts.last_submitted_at,
+        last_rev.reviewer_email AS last_reviewed_by_email,
+        last_rev.reviewer_role AS last_reviewed_by_role,
+        last_rev.review_created_at AS last_reviewed_at
       FROM contractor_profiles cp
       LEFT JOIN users u ON u.id = cp.user_id
       LEFT JOIN (
@@ -665,6 +668,14 @@ export async function getStaffVerificationContractors(req: Request, res: Respons
         FROM contractor_documents
         GROUP BY contractor_id
       ) doc_counts ON doc_counts.contractor_id = cp.id
+      LEFT JOIN LATERAL (
+        SELECT ru.email AS reviewer_email, ru.role AS reviewer_role, vr.created_at AS review_created_at
+        FROM verification_reviews vr
+        LEFT JOIN users ru ON ru.id = vr.reviewer_admin_id
+        WHERE vr.contractor_id = cp.id
+        ORDER BY vr.created_at DESC
+        LIMIT 1
+      ) last_rev ON true
       WHERE (${statusFilter} = '' OR cp.verification_status = ${statusFilter})
       ORDER BY 
         CASE WHEN cp.verification_status IN ('pending', 'under_review') THEN 0 ELSE 1 END,
@@ -708,6 +719,7 @@ export async function getStaffVerificationContractorById(req: Request, res: Resp
       SELECT 
         d.id, d.document_type, d.file_name, d.mime_type, d.size_bytes, d.status,
         d.issue_date, d.expiry_date, d.created_at, d.updated_at,
+        d.metadata->>'custom_name' AS custom_name,
         d.metadata->>'reviewer_note' AS reviewer_note
       FROM contractor_documents d
       WHERE d.contractor_id = ${id}
@@ -716,8 +728,8 @@ export async function getStaffVerificationContractorById(req: Request, res: Resp
 
     const reviewHistory = await sql`
       SELECT 
-        vr.id, vr.status, vr.notes, vr.created_at,
-        u.email AS reviewer_email
+        vr.id, vr.status, vr.notes, vr.created_at, vr.reviewer_admin_id,
+        u.email AS reviewer_email, u.role AS reviewer_role
       FROM verification_reviews vr
       LEFT JOIN users u ON u.id = vr.reviewer_admin_id
       WHERE vr.contractor_id = ${id}
@@ -857,7 +869,7 @@ export async function reviewStaffDocument(req: Request, res: Response, next: Nex
 
       if (decision === 'approved') {
         title = 'KYC Document Approved';
-        message = `Your ${doc.document_type.replace('_', ' ')} document (${doc.file_name}) has been approved by Craly Staff.`;
+        message = `Your ${doc.document_type.replace('_', ' ')} document (${doc.file_name}) has been approved by Craly Operations.`;
       } else if (decision === 'rejected') {
         title = 'KYC Document Rejected';
         message = `Your ${doc.document_type.replace('_', ' ')} document (${doc.file_name}) was rejected. Reason: ${note}`;

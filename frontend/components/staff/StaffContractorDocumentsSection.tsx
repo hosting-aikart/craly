@@ -8,7 +8,7 @@ import {
   getStaffDocumentSignedUrl,
   type StaffContractorDocumentItem,
 } from '@/lib/api/staff';
-import { CONTRACTOR_DOCUMENT_TYPE_LABELS } from '@/components/contractor/ContractorDocumentsSection';
+import { CONTRACTOR_DOCUMENT_TYPE_LABELS, formatDocumentTypeDisplay } from '@/components/contractor/ContractorDocumentsSection';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
 import './StaffContractorDocumentsSection.css';
@@ -27,6 +27,7 @@ export default function StaffContractorDocumentsSection({
 
   // Upload Form State
   const [documentType, setDocumentType] = useState('gst');
+  const [customName, setCustomName] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [issueDate, setIssueDate] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -54,6 +55,10 @@ export default function StaffContractorDocumentsSection({
       setError('Please select a file to upload');
       return;
     }
+    if ((documentType === 'other' || documentType === 'other_certificate') && !customName.trim()) {
+      setError('Please enter a custom document name');
+      return;
+    }
 
     setUploading(true);
     setError('');
@@ -63,12 +68,14 @@ export default function StaffContractorDocumentsSection({
       const formData = new FormData();
       formData.append('file', file);
       formData.append('documentType', documentType);
+      if (customName.trim()) formData.append('customName', customName.trim());
       if (issueDate) formData.append('issueDate', issueDate);
       if (expiryDate) formData.append('expiryDate', expiryDate);
 
       await uploadStaffContractorDocument(contractorId, formData);
       setSuccessMsg('Document uploaded successfully to Cloudflare R2 on behalf of contractor!');
       setFile(null);
+      setCustomName('');
       setIssueDate('');
       setExpiryDate('');
       setShowUploadForm(false);
@@ -153,6 +160,19 @@ export default function StaffContractorDocumentsSection({
                 </select>
               </div>
 
+              {(documentType === 'other' || documentType === 'other_certificate') && (
+                <div className="staff-docs-field" style={{ gridColumn: '1 / -1' }}>
+                  <label>Document Name / Title (Type Manually) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. ISO 9001 Certificate, Safety Audit Report, PF Undertaking"
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                  />
+                </div>
+              )}
+
               <div className="staff-docs-field">
                 <label>Select File (PDF, PNG, JPG, WebP) *</label>
                 <input
@@ -224,7 +244,7 @@ export default function StaffContractorDocumentsSection({
                   <tr key={doc.id}>
                     <td>
                       <span className="staff-docs-type-badge">
-                        {CONTRACTOR_DOCUMENT_TYPE_LABELS[doc.document_type] || doc.document_type}
+                        {formatDocumentTypeDisplay(doc)}
                       </span>
                     </td>
                     <td className="staff-docs-filename">{doc.file_name}</td>

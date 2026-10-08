@@ -41,6 +41,15 @@ export const CONTRACTOR_DOCUMENT_TYPE_LABELS: Record<string, string> = {
   other: 'Other Supporting Document',
 };
 
+export function formatDocumentTypeDisplay(doc: { document_type: string; custom_name?: string | null }): string {
+  const customName = doc.custom_name?.trim();
+  if (doc.document_type === 'other' || doc.document_type === 'other_certificate') {
+    return customName ? `Others - ${customName}` : 'Others';
+  }
+  const baseLabel = CONTRACTOR_DOCUMENT_TYPE_LABELS[doc.document_type] || doc.document_type;
+  return customName ? `${baseLabel} - ${customName}` : baseLabel;
+}
+
 const DOCUMENT_OPTIONS = [
   {
     value: 'gst',
@@ -165,6 +174,7 @@ export default function ContractorDocumentsSection({
 
   // Upload Form state
   const [documentType, setDocumentType] = useState('business_registration');
+  const [customName, setCustomName] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -208,6 +218,10 @@ export default function ContractorDocumentsSection({
       setError('Please select a document file to upload');
       return;
     }
+    if ((documentType === 'other' || documentType === 'other_certificate') && !customName.trim()) {
+      setError('Please enter a custom document name for this file');
+      return;
+    }
 
     setUploading(true);
     setError('');
@@ -217,12 +231,14 @@ export default function ContractorDocumentsSection({
       const formData = new FormData();
       formData.append('file', file);
       formData.append('documentType', documentType);
+      if (customName.trim()) formData.append('customName', customName.trim());
       if (issueDate) formData.append('issueDate', issueDate);
       if (expiryDate) formData.append('expiryDate', expiryDate);
 
       await uploadMyDocument(formData);
       setSuccessMsg('Document uploaded successfully and queued for verification!');
       setFile(null);
+      setCustomName('');
       setIssueDate('');
       setExpiryDate('');
       fetchDocs();
@@ -444,6 +460,32 @@ export default function ContractorDocumentsSection({
               </div>
             </div>
 
+            {(documentType === 'other' || documentType === 'other_certificate') && (
+              <div className="cp-docs-field" style={{ gridColumn: '1 / -1' }}>
+                <label>Document Name / Title (Type Manually) *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. ISO 9001 Certificate, Safety Audit Report, PF Undertaking"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '14px',
+                    background: '#ffffff',
+                    color: '#0f172a',
+                    outline: 'none',
+                  }}
+                />
+                <span style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                  Enter the specific title of this supporting document.
+                </span>
+              </div>
+            )}
+
             <div className="cp-docs-field">
               <label>Document File (PDF, PNG, JPG, WebP - max 10MB) *</label>
               <div className="cp-docs-file-dropzone">
@@ -554,11 +596,12 @@ export default function ContractorDocumentsSection({
                     label: CONTRACTOR_DOCUMENT_TYPE_LABELS[doc.document_type] || doc.document_type,
                     category: 'Document',
                   };
+                  const displayLabel = formatDocumentTypeDisplay(doc);
                   return (
                     <tr key={doc.id}>
                       <td>
                         <div className="cp-docs-type-cell">
-                          <span className="cp-docs-type-badge">{typeMeta.label}</span>
+                          <span className="cp-docs-type-badge">{displayLabel}</span>
                           <span className="cp-docs-type-category">{typeMeta.category}</span>
                         </div>
                       </td>

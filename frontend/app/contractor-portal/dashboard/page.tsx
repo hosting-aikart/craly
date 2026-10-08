@@ -165,7 +165,7 @@ export default function ContractorDashboardPage() {
           </div>
         </Link>
 
-        <Link href="/contractor-portal/profile?tab=verification" className="contractor-metric-card contractor-metric-card--link">
+        <Link href="/contractor-portal/profile?tab=documents" className="contractor-metric-card contractor-metric-card--link">
           <div className="contractor-metric-body">
             <span className="contractor-metric-lbl">Account Status</span>
             <div className="contractor-metric-val contractor-metric-val--status">
@@ -506,7 +506,7 @@ export default function ContractorDashboardPage() {
             <IconArrowRight size={15} className="contractor-action-tile__arrow" />
           </Link>
 
-          <Link href="/contractor-portal/profile?tab=verification" className="contractor-action-tile">
+          <Link href="/contractor-portal/profile?tab=documents" className="contractor-action-tile">
             <div className="contractor-action-tile__icon contractor-action-tile__icon--emerald">
               <IconShield size={18} />
             </div>

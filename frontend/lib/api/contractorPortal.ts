@@ -80,7 +80,8 @@ export const getDashboardStats = () =>
 
 export interface ContractorDocumentItem {
   id: string;
-  document_type: 'aadhaar' | 'pan' | 'business_registration' | 'industry_license' | 'safety_certification' | 'other_certificate';
+  document_type: string;
+  custom_name?: string | null;
   file_name: string;
   mime_type: string;
   size_bytes: number;

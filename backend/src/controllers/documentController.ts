@@ -66,7 +66,7 @@ export async function uploadMyDocument(req: Request, res: Response, next: NextFu
 
     const parsed = uploadDocumentSchema.safeParse(req.body);
     if (!parsed.success) return next(badRequest(parsed.error.issues[0]?.message ?? 'Invalid input'));
-    const { documentType, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
+    const { documentType, customName, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
 
     const documentId = randomUUID();
     const storageKey = buildDocumentStorageKey(contractorId, documentId);
@@ -75,17 +75,20 @@ export async function uploadMyDocument(req: Request, res: Response, next: NextFu
     await putObject(storageKey, req.file.buffer, validation.mimeType!);
 
     const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
+    const metadataJson = customName ? JSON.stringify({ custom_name: customName }) : '{}';
 
     const [row] = await sql`
       INSERT INTO contractor_documents (
         id, contractor_id, document_type, storage_key, file_name, mime_type, size_bytes,
-        uploaded_by, issue_date, expiry_date, certification_assessment_id, status
+        uploaded_by, issue_date, expiry_date, certification_assessment_id, status, metadata
       ) VALUES (
         ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
         ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
-        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending'
+        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending',
+        ${metadataJson}::jsonb
       )
-      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at
+      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at,
+                metadata->>'custom_name' AS custom_name
     `;
 
     // Reset status to pending if previously rejected or needs_changes
@@ -134,7 +137,9 @@ export async function listMyDocuments(req: Request, res: Response, next: NextFun
 
     const rows = await sql`
       SELECT d.id, d.document_type, d.file_name, d.mime_type, d.size_bytes, d.status,
-             d.issue_date, d.expiry_date, d.created_at, d.updated_at
+             d.issue_date, d.expiry_date, d.created_at, d.updated_at,
+             d.metadata->>'custom_name' AS custom_name,
+             d.metadata->>'reviewer_note' AS reviewer_note
       FROM contractor_documents d
       WHERE d.contractor_id = ${contractorId}
       ORDER BY d.created_at DESC
@@ -217,7 +222,7 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
 
     const parsed = uploadDocumentSchema.safeParse(req.body);
     if (!parsed.success) return next(badRequest(parsed.error.issues[0]?.message ?? 'Invalid input'));
-    const { documentType, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
+    const { documentType, customName, issueDate, expiryDate, certificationAssessmentId } = parsed.data;
 
     const documentId = randomUUID();
     const storageKey = buildDocumentStorageKey(contractorId, documentId);
@@ -225,17 +230,20 @@ export async function uploadDocument(req: Request, res: Response, next: NextFunc
     await putObject(storageKey, req.file.buffer, validation.mimeType!);
 
     const fileName = sanitizeDisplayFileName(req.file.originalname || 'document');
+    const metadataJson = customName ? JSON.stringify({ custom_name: customName }) : '{}';
 
     const [row] = await sql`
       INSERT INTO contractor_documents (
         id, contractor_id, document_type, storage_key, file_name, mime_type, size_bytes,
-        uploaded_by, issue_date, expiry_date, certification_assessment_id, status
+        uploaded_by, issue_date, expiry_date, certification_assessment_id, status, metadata
       ) VALUES (
         ${documentId}, ${contractorId}, ${documentType}, ${storageKey}, ${fileName},
         ${validation.mimeType ?? null}, ${req.file.size}, ${req.user!.sub},
-        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending'
+        ${issueDate ?? null}, ${expiryDate ?? null}, ${certificationAssessmentId ?? null}, 'pending',
+        ${metadataJson}::jsonb
       )
-      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at
+      RETURNING id, document_type, file_name, mime_type, size_bytes, status, issue_date, expiry_date, created_at,
+                metadata->>'custom_name' AS custom_name
     `;
 
     await logAudit(req.user!.sub, 'document:upload', 'contractor_document', documentId, undefined, {
@@ -263,6 +271,7 @@ export async function listDocuments(req: Request, res: Response, next: NextFunct
     const rows = await sql`
       SELECT d.id, d.document_type, d.file_name, d.mime_type, d.size_bytes, d.status,
              d.issue_date, d.expiry_date, d.created_at, d.updated_at, d.certification_assessment_id,
+             d.metadata->>'custom_name' AS custom_name,
              u.email AS uploaded_by_email
       FROM contractor_documents d
       LEFT JOIN users u ON u.id = d.uploaded_by
