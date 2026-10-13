@@ -258,8 +258,25 @@
 
 .signup-location-row {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.signup-location-row .craly-state-select__trigger {
+  min-height: 48px;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: var(--radius-full, 9999px);
+  background: #f8fafc;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.signup-location-row .craly-state-select__trigger:hover,
+.signup-location-row .craly-state-select__trigger:focus,
+.signup-location-row .craly-state-select__trigger.craly-state-select__trigger--open {
+  background: #ffffff;
+  border-color: var(--craly-teal, #0f766e);
 }
 
 .signup-role-toggle {

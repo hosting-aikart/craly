@@ -6,6 +6,8 @@ import { getStaffContractorById, updateStaffContractor, updateStaffContractorLis
 import LoadingState from '@/components/ui/LoadingState';
 import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import UnlistContractorModal from '@/components/staff/UnlistContractorModal';
 import StaffContractorDocumentsSection from '@/components/staff/StaffContractorDocumentsSection';
 import './staff-contractor-detail.css';
@@ -26,6 +28,7 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [skills, setSkills] = useState<string[]>([]);
   const [workforceSize, setWorkforceSize] = useState<number | ''>('');
   const [yearsExperience, setYearsExperience] = useState<number | ''>('');
   const [description, setDescription] = useState('');
@@ -41,6 +44,7 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
         setPhone(data.phone || '');
         setCity(data.city || '');
         setState(data.state || '');
+        setSkills(Array.isArray(data.skills) ? data.skills : []);
         setWorkforceSize(data.workforce_size || '');
         setYearsExperience(data.years_experience || '');
         setDescription(data.description || '');
@@ -73,6 +77,7 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
         phone,
         city,
         state,
+        skills,
         workforceSize: workforceSize === '' ? undefined : Number(workforceSize),
         yearsExperience: yearsExperience === '' ? undefined : Number(yearsExperience),
         description,
@@ -226,10 +231,10 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
 
             <div className="form-group">
               <label>State</label>
-              <input
-                type="text"
+              <IndianStateSelect
                 value={state}
-                onChange={(e) => setState(e.target.value)}
+                onChange={setState}
+                placeholder="Select State"
               />
             </div>
 
@@ -273,6 +278,15 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group col-span-2">
+              <label>Skills & Trades</label>
+              <SkillMultiSelect
+                value={skills}
+                onChange={setSkills}
+                placeholder="Search & select trade skills…"
               />
             </div>
 

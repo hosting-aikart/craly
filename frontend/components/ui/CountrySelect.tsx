@@ -10,6 +10,7 @@ interface CountrySelectProps {
   onChange: (country: CountryOption) => void;
   placeholder?: string;
   id?: string;
+  disabled?: boolean;
 }
 
 export default function CountrySelect({
@@ -17,6 +18,7 @@ export default function CountrySelect({
   onChange,
   placeholder = 'Select Country / Region',
   id,
+  disabled = false,
 }: CountrySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,12 +69,13 @@ export default function CountrySelect({
   };
 
   return (
-    <div className="custom-country-select" ref={dropdownRef}>
+    <div className={`custom-country-select ${disabled ? 'disabled' : ''}`} ref={dropdownRef}>
       <button
         id={id}
         type="button"
+        disabled={disabled}
         className={`custom-country-select__trigger ${isOpen ? 'open' : ''}`}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => !disabled && setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >

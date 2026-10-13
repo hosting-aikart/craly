@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { WorkspacePageHeader } from '@/components/workspace/WorkspaceHeaderContext';
 import { createBusinessRequirement, updateBusinessRequirement, type CreateRequirementInput } from '@/lib/api/businessPortal';
 import Button from '@/components/ui/Button';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import {
   IconBriefcase,
   IconTarget,
@@ -187,14 +189,12 @@ export default function CreateRequirementPage() {
 
             <div className="req-field">
               <label>Required Trade Skills</label>
-              <input
-                type="text"
-                name="requiredSkills"
-                value={typeof formData.requiredSkills === 'string' ? formData.requiredSkills : formData.requiredSkills?.join(', ')}
-                onChange={handleChange}
-                placeholder="e.g. MIG Welding, CNC Operation, Assembly"
+              <SkillMultiSelect
+                value={formData.requiredSkills || []}
+                onChange={(skills) => setFormData((prev) => ({ ...prev, requiredSkills: skills }))}
+                placeholder="Select required trade skills…"
               />
-              <span className="req-field-hint">Comma separated specific trades or certifications</span>
+              <span className="req-field-hint">Select specific trades or certifications</span>
             </div>
           </div>
 
@@ -254,12 +254,10 @@ export default function CreateRequirementPage() {
 
             <div className="req-field">
               <label>State *</label>
-              <input
-                type="text"
-                name="state"
+              <IndianStateSelect
                 value={formData.state}
-                onChange={handleChange}
-                placeholder="e.g. Maharashtra"
+                onChange={(state) => setFormData((prev) => ({ ...prev, state }))}
+                placeholder="Select State"
                 required
               />
               <span className="req-field-hint">State jurisdiction for statutory wage & ESIC compliance</span>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createContractorRequest } from '@/lib/api/contractorRequests';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
+import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import '@/components/AuthForm.css';
 import './list-your-company.css';
@@ -23,7 +24,7 @@ export default function ListYourCompanyPage() {
   const [city, setCity] = useState('');
   const [industry, setIndustry] = useState('');
   const [workforceCount, setWorkforceCount] = useState('');
-  const [skills, setSkills] = useState('');
+  const [skills, setSkills] = useState<string[]>([]);
   const [yearsExperience, setYearsExperience] = useState('');
   const [message, setMessage] = useState('');
 
@@ -50,7 +51,7 @@ export default function ListYourCompanyPage() {
         city,
         industry,
         workforceCount: workforceCount ? Number(workforceCount) : undefined,
-        skills: skills || undefined,
+        skills: skills.length > 0 ? skills.join(', ') : undefined,
         yearsExperience: yearsExperience ? Number(yearsExperience) : undefined,
         message: message || undefined,
       });
@@ -131,10 +132,15 @@ export default function ListYourCompanyPage() {
             </label>
           </div>
 
-          <label className="auth-field">
-            <span>Skills / Services</span>
-            <input type="text" value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="e.g. Welding, electrical, general labour" />
-          </label>
+          <div style={{ marginBottom: 16 }}>
+            <SkillMultiSelect
+              value={skills}
+              onChange={setSkills}
+              label="Skills / Services"
+              placeholder="Search and select skills / services..."
+              popularSkills={['Welding', 'Fabrication', 'Electrical', 'Assembly', 'General Labor', 'CNC Machining']}
+            />
+          </div>
 
           <label className="auth-field">
             <span>Additional Message</span>

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { createStaffManufacturer } from '@/lib/api/staff';
 import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import { IconArrowLeft, IconCheck, IconAlertTriangle } from '@/components/ui/Icons';
 import '@/app/staff/contractors/new/staff-new-contractor.css';
 
@@ -210,11 +211,10 @@ export default function AddManufacturerPage() {
 
               <div className="staff-new-form-group">
                 <label>State / Region</label>
-                <input
-                  type="text"
+                <IndianStateSelect
                   value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="e.g. Maharashtra, Tamil Nadu, Gujarat"
+                  onChange={setState}
+                  placeholder="Select State"
                 />
               </div>
             </div>

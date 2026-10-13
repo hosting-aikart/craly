@@ -13,6 +13,7 @@ import { COUNTRIES, DEFAULT_COUNTRY, type CountryOption } from '@/lib/util/count
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import DialCodeSelect from '@/components/ui/DialCodeSelect';
 import CountrySelect from '@/components/ui/CountrySelect';
+import StateSelect from '@/components/ui/StateSelect';
 
 /**
  * Manufacturer + Contractor sign-up. Contractors self-register, complete
@@ -39,6 +40,7 @@ function SignupForm() {
   const [email, setEmail] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(DEFAULT_COUNTRY);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [state, setState] = useState('');
   const [city, setCity] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -161,7 +163,16 @@ function SignupForm() {
 
     try {
       await verifySignupOtp({ email, emailOtp });
-      await signup({ email, password, role, companyName, mobile: fullMobile, city: fullLocation });
+      await signup({
+        email,
+        password,
+        role,
+        companyName,
+        mobile: fullMobile,
+        country: selectedCountry.name,
+        city: city.trim() || undefined,
+        state: state.trim() || undefined,
+      });
       await refresh();
       router.push(role === 'contractor' ? '/contractor-portal/dashboard' : '/business/dashboard');
     } catch (err) {
@@ -353,23 +364,35 @@ function SignupForm() {
                   value={selectedCountry}
                   onChange={(c) => {
                     setSelectedCountry(c);
+                    setState('');
                     if (mobileError) validateMobile(phoneNumber, c);
                   }}
                 />
               </div>
 
-              <label className="signup-field signup-location-col">
-                <span>City / State</span>
-                <div className="signup-field__input">
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="e.g. New York, London, Mumbai"
-                  />
-                </div>
-              </label>
+              <div className="signup-field signup-location-col">
+                <span>State / Province</span>
+                <StateSelect
+                  countryCode={selectedCountry.code}
+                  value={state}
+                  onChange={setState}
+                  placeholder="Select state"
+                  clearable
+                />
+              </div>
             </div>
+
+            <label className="signup-field">
+              <span>City</span>
+              <div className="signup-field__input">
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="e.g. Mumbai, New York, London"
+                />
+              </div>
+            </label>
 
             <label className="signup-field">
               <span>{t.auth.passwordLabel}</span>

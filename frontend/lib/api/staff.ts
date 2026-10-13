@@ -106,6 +106,7 @@ export interface CreateStaffContractorInput {
 
 export interface StaffContractorDetail extends StaffContractorItem {
   description: string | null;
+  skills?: string[] | null;
   service_areas: string[] | null;
   verification_note: string | null;
   overall_rating: number | null;

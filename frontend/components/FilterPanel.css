@@ -39,8 +39,14 @@
   color: var(--craly-teal-dark);
 }
 
+.filter-panel__state-wrapper {
+  min-width: 170px;
+  flex: 1;
+}
+
 @media (max-width: 640px) {
-  .filter-panel__field {
+  .filter-panel__field,
+  .filter-panel__state-wrapper {
     flex: 1 1 100%;
   }
 }

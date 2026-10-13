@@ -9,6 +9,8 @@ import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import ContractorDocumentsSection from '@/components/contractor/ContractorDocumentsSection';
 import WorksitePhotosSection from '@/components/contractor/WorksitePhotosSection';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import {
   IconShield,
   IconBuilding,
@@ -119,7 +121,6 @@ export default function ContractorProfilePage() {
   const [phone, setPhone] = useState('');
   const [industry, setIndustry] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
-  const [skillToAdd, setSkillToAdd] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [serviceAreas, setServiceAreas] = useState('');
@@ -331,11 +332,10 @@ export default function ContractorProfilePage() {
 
                 <div className="contractor-field">
                   <label>State</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Maharashtra"
+                  <IndianStateSelect
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
+                    onChange={setState}
+                    placeholder="Select State"
                   />
                   <span className="contractor-field-hint">State jurisdiction for statutory compliance</span>
                 </div>
@@ -607,68 +607,11 @@ export default function ContractorProfilePage() {
                 </div>
                 <div className="contractor-field contractor-field--full">
                   <label>Skills & Specializations (Opportunity Matching)</label>
-                  <div className="contractor-custom-cluster-input-wrap">
-                    <select
-                      className="contractor-custom-cluster-input"
-                      value={skillToAdd}
-                      onChange={(e) => setSkillToAdd(e.target.value)}
-                    >
-                      <option value="">Select a skill to add…</option>
-                      {COMMON_SKILLS.filter((s) => !skills.includes(s)).map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      className="contractor-custom-cluster-btn"
-                      disabled={!skillToAdd}
-                      onClick={() => {
-                        if (skillToAdd && !skills.includes(skillToAdd)) {
-                          setSkills((prev) => [...prev, skillToAdd]);
-                        }
-                        setSkillToAdd('');
-                      }}
-                    >
-                      + Add
-                    </button>
-                  </div>
-                  
-                  {/* Preset Quick Add Skill Chips */}
-                  <div style={{ marginTop: '10px' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                      Popular Skills (Click to add):
-                    </span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
-                      {COMMON_SKILLS.filter((s) => !skills.includes(s)).slice(0, 14).map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          className="cp-preset-chip"
-                          onClick={() => setSkills((prev) => [...prev, s])}
-                        >
-                          <span className="cp-plus-icon">+</span> {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {skills.length > 0 ? (
-                    <div className="contractor-cluster-pill-grid" style={{ marginTop: '12px' }}>
-                      {skills.map((s) => (
-                        <span key={s} className="contractor-cluster-pill-tag contractor-cluster-pill-tag--custom">
-                          <span>{s}</span>
-                          <span
-                            className="contractor-cluster-pill-remove"
-                            onClick={() => setSkills((prev) => prev.filter((x) => x !== s))}
-                          >
-                            ×
-                          </span>
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="contractor-card-sub" style={{ marginTop: '8px' }}>No skills selected yet pick from the dropdown or quick chips above.</p>
-                  )}
+                  <SkillMultiSelect
+                    value={skills}
+                    onChange={setSkills}
+                    placeholder="Search & select trade skills…"
+                  />
                 </div>
               </div>
               <div className="contractor-field contractor-field--full" style={{ marginTop: '14px' }}>

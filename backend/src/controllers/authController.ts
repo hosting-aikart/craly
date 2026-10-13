@@ -268,7 +268,11 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     }
     const { email, password } = parsed.data;
 
-    const [user] = await sql`SELECT id, email, role, password_hash, is_active FROM users WHERE email = ${email}`;
+    const [user] = await sql`
+      SELECT id, email, role, password_hash, is_active
+      FROM users
+      WHERE LOWER(TRIM(email)) = LOWER(TRIM(${email}))
+    `;
     if (!user || !(await comparePassword(password, user.password_hash))) {
       const err: AppError = new Error('Invalid email or password');
       err.statusCode = 401;

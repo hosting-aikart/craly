@@ -1,0 +1,27 @@
+/* ==========================================================================
+   CRALY COORDINATED COUNTRY & STATE SELECT
+   ========================================================================== */
+
+.craly-country-state-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.craly-country-state-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .craly-country-state-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}

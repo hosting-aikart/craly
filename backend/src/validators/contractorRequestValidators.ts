@@ -10,7 +10,13 @@ export const createContractorRequestSchema = z.object({
   city: z.string().trim().min(1, 'City is required').max(100),
   industry: z.string().trim().min(1, 'Industry is required').max(150),
   workforceCount: z.number().int().min(0).max(100000).optional(),
-  skills: z.string().trim().max(500).optional(),
+  skills: z
+    .union([z.string(), z.array(z.string())])
+    .transform((val) => {
+      if (Array.isArray(val)) return val.join(', ');
+      return val.trim();
+    })
+    .optional(),
   yearsExperience: z.number().int().min(0).max(100).optional(),
   message: z.string().trim().max(2000).optional(),
 });

@@ -21,6 +21,7 @@ export interface SignupInput {
   companyName: string;
   mobile?: string;
   city?: string;
+  country?: string;
   state?: string;
   workforceSize?: number;
   yearsExperience?: number;

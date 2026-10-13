@@ -1,5 +1,6 @@
 import type { Category } from '@/lib/api/profile';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import './FilterPanel.css';
 
 interface FilterPanelProps {
@@ -50,13 +51,15 @@ export default function FilterPanel({
 
   return (
     <div className="filter-panel">
-      <input
-        type="text"
-        className="filter-panel__field"
-        placeholder={t.contractors.filterState}
-        value={city}
-        onChange={(e) => onCityChange(e.target.value)}
-      />
+      <div className="filter-panel__state-wrapper">
+        <IndianStateSelect
+          label=""
+          placeholder={t.contractors.filterState}
+          value={city}
+          onChange={onCityChange}
+          clearable
+        />
+      </div>
 
       <select
         className="filter-panel__field"

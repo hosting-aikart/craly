@@ -4,6 +4,8 @@ import React, { useState, FormEvent } from 'react';
 import { updateMyProfile, type ContractorProfile } from '@/lib/api/profile';
 import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import './ContractorProfileModal.css';
 
 interface ContractorProfileModalProps {
@@ -22,24 +24,6 @@ const PRESET_INDUSTRIES = [
   'Pipeline & Process Engineering',
   'Facility & Plant Management',
   'Logistics & Warehousing',
-];
-
-const PRESET_SKILLS = [
-  'Welding (Arc/MIG/TIG)',
-  'CNC / Machine Operator',
-  'Electrician',
-  'Fabrication Fitter',
-  'Pipe Fitter & Plumber',
-  'Scaffolder',
-  'Crane & Forklift Operator',
-  'Assembly Operator',
-  'Helper / General Labour',
-  'Masonry & Civil',
-  'Quality Control (QC)',
-  'Safety Officer & Supervisor',
-  'Hydraulic Technician',
-  'Instrumentation Tech',
-  'Painter & Blaster',
 ];
 
 export default function ContractorProfileModal({
@@ -64,7 +48,6 @@ export default function ContractorProfileModal({
     }
     return [];
   });
-  const [customSkillInput, setCustomSkillInput] = useState('');
 
   const [city, setCity] = useState(initialProfile?.city || '');
   const [state, setState] = useState(initialProfile?.state || '');
@@ -81,19 +64,6 @@ export default function ContractorProfileModal({
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  const addSkill = (skillToAdd: string) => {
-    const trimmed = skillToAdd.trim();
-    if (!trimmed) return;
-    if (!skillsList.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
-      setSkillsList((prev) => [...prev, trimmed]);
-    }
-    setCustomSkillInput('');
-  };
-
-  const removeSkill = (skillToRemove: string) => {
-    setSkillsList((prev) => prev.filter((s) => s !== skillToRemove));
-  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -256,73 +226,12 @@ export default function ContractorProfileModal({
 
             {/* ── Skills & Specializations Picker ─────────────────── */}
             <div className="cp-modal-field cp-modal-field--full">
-              <label>Skills & Specializations (Add multiple skills)</label>
-              
-              {/* Selected Skills Chips */}
-              <div className="cp-selected-skills-box">
-                {skillsList.length > 0 ? (
-                  <div className="cp-chips-list">
-                    {skillsList.map((skill) => (
-                      <span key={skill} className="cp-skill-chip">
-                        <span>{skill}</span>
-                        <button
-                          type="button"
-                          className="cp-skill-remove-btn"
-                          onClick={() => removeSkill(skill)}
-                          title="Remove skill"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="cp-skills-placeholder">
-                    No skills added yet. Select from presets below or add custom skills.
-                  </p>
-                )}
-              </div>
-
-              {/* Add Custom Skill Input Row */}
-              <div className="cp-skill-input-row">
-                <input
-                  type="text"
-                  value={customSkillInput}
-                  onChange={(e) => setCustomSkillInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addSkill(customSkillInput);
-                    }
-                  }}
-                  placeholder="Type a skill and press Enter or click '+'..."
-                />
-                <button
-                  type="button"
-                  className="cp-add-skill-btn"
-                  onClick={() => addSkill(customSkillInput)}
-                  disabled={!customSkillInput.trim()}
-                >
-                  + Add
-                </button>
-              </div>
-
-              {/* Quick Add Preset Skills Chips with '+' icons */}
-              <div className="cp-presets-container">
-                <span className="cp-presets-label">Popular Skills (Click '+' to add):</span>
-                <div className="cp-preset-chips">
-                  {PRESET_SKILLS.filter((s) => !skillsList.some((added) => added.toLowerCase() === s.toLowerCase())).map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      className="cp-preset-chip"
-                      onClick={() => addSkill(preset)}
-                    >
-                      <span className="cp-plus-icon">+</span> {preset}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <label>Skills & Specializations (Select multiple)</label>
+              <SkillMultiSelect
+                value={skillsList}
+                onChange={setSkillsList}
+                placeholder="Search & select trade skills…"
+              />
             </div>
 
             <div className="cp-modal-field">
@@ -337,11 +246,10 @@ export default function ContractorProfileModal({
 
             <div className="cp-modal-field">
               <label>State</label>
-              <input
-                type="text"
+              <IndianStateSelect
                 value={state}
-                onChange={(e) => setState(e.target.value)}
-                placeholder="e.g. Maharashtra"
+                onChange={setState}
+                placeholder="Select State"
               />
             </div>
 

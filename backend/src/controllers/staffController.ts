@@ -16,6 +16,8 @@ import {
   notifyContractorVerificationChange,
 } from '../utils/whatsappNotifications';
 
+import { optionalIndianStateSchema, optionalSkillsArraySchema } from '../validators/geoAndSkillsValidators';
+
 // Schema for adding a new manufacturer profile directly by Staff
 const createManufacturerSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
@@ -24,7 +26,7 @@ const createManufacturerSchema = z.object({
   phone: optionalPhoneSchema,
   industry: z.string().optional(),
   city: z.string().optional(),
-  state: z.string().optional(),
+  state: optionalIndianStateSchema,
 });
 
 // Schema for adding a new contractor profile. email + password are now
@@ -40,10 +42,10 @@ const createContractorSchema = z.object({
   phone: optionalPhoneSchema,
   industry: z.string().optional(),
   city: z.string().optional(),
-  state: z.string().optional(),
+  state: optionalIndianStateSchema,
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
   yearsExperience: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
-  skills: z.array(z.string()).optional(),
+  skills: optionalSkillsArraySchema,
   serviceAreas: z.array(z.string()).optional(),
   availability: z.enum(['AVAILABLE', 'CURRENTLY_AT_CAPACITY', 'NOT_AVAILABLE', 'PAUSED', 'SUSPENDED']).optional(),
   notes: z.string().optional(),
@@ -54,9 +56,10 @@ const updateContractorSchema = z.object({
   companyName: z.string().min(1).optional(),
   phone: optionalPhoneSchema,
   city: z.string().optional(),
-  state: z.string().optional(),
+  state: optionalIndianStateSchema,
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
   yearsExperience: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
+  skills: optionalSkillsArraySchema,
   description: z.string().optional(),
   availability: z.enum(['AVAILABLE', 'CURRENTLY_AT_CAPACITY', 'NOT_AVAILABLE', 'PAUSED', 'SUSPENDED']).optional(),
   availabilityNote: z.string().optional(),
@@ -307,6 +310,7 @@ export async function getContractorById(req: Request, res: Response, next: NextF
         cp.id,
         cp.company_name,
         cp.description,
+        cp.skills,
         cp.phone,
         cp.city,
         cp.state,
@@ -369,6 +373,7 @@ export async function updateContractor(req: Request, res: Response, next: NextFu
       state,
       workforceSize,
       yearsExperience,
+      skills,
       description,
       availability,
       availabilityNote,
@@ -385,6 +390,10 @@ export async function updateContractor(req: Request, res: Response, next: NextFu
         state = COALESCE(${state ?? null}, state),
         workforce_size = COALESCE(${workforceSize ?? null}, workforce_size),
         years_experience = COALESCE(${yearsExperience ?? null}, years_experience),
+        skills = CASE
+          WHEN ${skills !== undefined} THEN ${toPgTextArrayLiteral(skills || [])}::text[]
+          ELSE skills
+        END,
         description = COALESCE(${description ?? null}, description),
         availability = COALESCE(${availability ?? null}, availability),
         availability_note = COALESCE(${availabilityNote ?? notes ?? null}, availability_note),

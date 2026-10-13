@@ -1,13 +1,16 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
+import config from '../config/index';
 import { signup, login, logout, me, forgotPassword, resetPassword, sendSignupOtp, verifySignupOtp } from '../controllers/authController';
 import { requireAuth } from '../middlewares/auth';
 
 const router = Router();
+const isDev = config.nodeEnv === 'development';
 
 const otpRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 10, // 10 OTP requests per 15 min per IP
+  skip: () => isDev,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many verification code requests. Please wait a few minutes before trying again.' } },
@@ -16,6 +19,7 @@ const otpRateLimit = rateLimit({
 const loginRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 10, // 10 login attempts per 15 min per IP
+  skip: () => isDev,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many login attempts. Please try again in 15 minutes.' } },
@@ -24,6 +28,7 @@ const loginRateLimit = rateLimit({
 const signupRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   limit: 10, // 10 signups per hour per IP
+  skip: () => isDev,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many accounts created from this IP. Please try again later.' } },

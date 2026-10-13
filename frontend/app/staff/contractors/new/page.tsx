@@ -7,6 +7,8 @@ import { createStaffContractor, uploadStaffContractorDocument } from '@/lib/api/
 import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import CustomSelect, { type SelectOption } from '@/components/ui/CustomSelect';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import { IconArrowLeft, IconCheck, IconAlertTriangle } from '@/components/ui/Icons';
 import './staff-new-contractor.css';
 
@@ -64,7 +66,7 @@ export default function AddContractorPage() {
   const [state, setState] = useState('');
   const [workforceSize, setWorkforceSize] = useState<number | ''>('');
   const [yearsExperience, setYearsExperience] = useState<number | ''>('');
-  const [skillsInput, setSkillsInput] = useState('');
+  const [skills, setSkills] = useState<string[]>([]);
   const [serviceAreasInput, setServiceAreasInput] = useState('');
   const [availability, setAvailability] = useState<'AVAILABLE' | 'CURRENTLY_AT_CAPACITY' | 'NOT_AVAILABLE' | 'PAUSED' | 'SUSPENDED'>('AVAILABLE');
   const [notes, setNotes] = useState('');
@@ -107,7 +109,6 @@ export default function AddContractorPage() {
     setError('');
 
     try {
-      const skills = skillsInput.split(',').map((s) => s.trim()).filter(Boolean);
       const serviceAreas = serviceAreasInput.split(',').map((s) => s.trim()).filter(Boolean);
 
       const res = await createStaffContractor({
@@ -291,11 +292,10 @@ export default function AddContractorPage() {
 
               <div className="staff-new-form-group">
                 <label>State / Region</label>
-                <input
-                  type="text"
+                <IndianStateSelect
                   value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="e.g. Maharashtra"
+                  onChange={setState}
+                  placeholder="Select State"
                 />
               </div>
 
@@ -331,12 +331,11 @@ export default function AddContractorPage() {
               </div>
 
               <div className="staff-new-form-group staff-new-col-span-2">
-                <label>Skills & Trades (Comma separated)</label>
-                <input
-                  type="text"
-                  value={skillsInput}
-                  onChange={(e) => setSkillsInput(e.target.value)}
-                  placeholder="e.g. MIG Welding, CNC Milling, Assembly Fitting, Quality Inspection"
+                <label>Skills & Trades</label>
+                <SkillMultiSelect
+                  value={skills}
+                  onChange={setSkills}
+                  placeholder="Search & select trade skills…"
                 />
               </div>
 

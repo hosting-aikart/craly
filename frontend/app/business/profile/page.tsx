@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import {
   IconBuilding,
@@ -236,12 +237,10 @@ export default function BusinessProfilePage() {
                     <label className="bp-form__label">
                       <IconMapPin size={14} /> State / Province
                     </label>
-                    <input
-                      type="text"
+                    <IndianStateSelect
                       value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      placeholder="e.g. Maharashtra, Gujarat"
-                      className="bp-form__input"
+                      onChange={setState}
+                      placeholder="Select State"
                     />
                   </div>
                 </div>

@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import { getMyProfile, updateMyProfile, type Category } from '@/lib/api/profile';
 import { listCategories } from '@/lib/api/contractors';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import IndianStateSelect from '@/components/ui/IndianStateSelect';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -152,7 +153,7 @@ export default function OnboardingPage() {
 
         <div className="auth-row">
           <label className="auth-field">
-            <span>{t.contractors.filterState}</span>
+            <span>City</span>
             <input
               type="text"
               value={city}
@@ -161,15 +162,15 @@ export default function OnboardingPage() {
             />
           </label>
 
-          <label className="auth-field">
-            <span>{t.contractors.filterState}</span>
-            <input
-              type="text"
+          <div className="auth-field">
+            <IndianStateSelect
               value={state}
-              onChange={(e) => setState(e.target.value)}
-              placeholder="e.g. Maharashtra"
+              onChange={setState}
+              label={t.contractors.filterState || 'State'}
+              placeholder="Select state"
+              clearable
             />
-          </label>
+          </div>
         </div>
 
         {isContractor && (

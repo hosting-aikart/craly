@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { phoneSchema } from './phoneValidator';
 
+import { optionalCountryStateSchema } from './geoAndSkillsValidators';
+
 // NOTE: left as z.enum(['business', 'contractor']) — a concurrent, actively
 // developed effort (OTP-verified signup, organization_members, contractor
 // profile creation — see authController.signup) depends on 'contractor'
@@ -17,7 +19,8 @@ export const signupSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
   mobile: phoneSchema,
   city: z.string().optional(),
-  state: z.string().optional(),
+  country: z.string().optional(),
+  state: optionalCountryStateSchema,
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
   yearsExperience: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
 });
@@ -41,7 +44,7 @@ export const verifyOtpSchema = z.object({
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 
 export const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 export type LoginInput = z.infer<typeof loginSchema>;

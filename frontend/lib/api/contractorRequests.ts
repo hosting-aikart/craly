@@ -51,7 +51,7 @@ export interface CreateContractorRequestInput {
   city: string;
   industry: string;
   workforceCount?: number;
-  skills?: string;
+  skills?: string | string[];
   yearsExperience?: number;
   message?: string;
 }

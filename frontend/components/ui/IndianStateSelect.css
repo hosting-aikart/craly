@@ -1,0 +1,255 @@
+/* ==========================================================================
+   CRALY INDIAN STATE SELECT COMPONENT
+   Clean, accessible popover select styled for Craly design system
+   ========================================================================== */
+
+.craly-state-select {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.craly-select-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--craly-text-muted, #475569);
+  margin-bottom: 6px;
+}
+
+.craly-state-select__trigger {
+  width: 100%;
+  min-height: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: var(--radius-md, 10px);
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.craly-state-select__trigger:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.craly-state-select__trigger--open {
+  border-color: var(--craly-teal, #0f8b82) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(15, 139, 130, 0.12);
+}
+
+.craly-state-select--disabled .craly-state-select__trigger {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.craly-state-select--error .craly-state-select__trigger {
+  border-color: #ef4444;
+}
+
+.craly-state-select__value {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #0f172a;
+}
+
+.craly-state-select__placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.craly-state-select__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.craly-state-select__clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.craly-state-select__clear-btn:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.craly-state-select__chevron {
+  color: #64748b;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.craly-state-select__chevron--open {
+  transform: rotate(180deg);
+  color: var(--craly-teal, #0f8b82);
+}
+
+/* ── Popover Menu ─────────────────────────────────────────────────── */
+.craly-state-select__popover {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.15), 0 4px 12px rgba(0, 0, 0, 0.04);
+  padding: 8px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: statePopoverIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+@keyframes statePopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.craly-state-select__search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.craly-state-select__search-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.craly-state-select__search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: #0f172a;
+  padding: 0;
+}
+
+.craly-state-select__search-input::placeholder {
+  color: #94a3b8;
+}
+
+.craly-state-select__search-clear {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.craly-state-select__search-clear:hover {
+  color: #334155;
+}
+
+.craly-state-select__list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 2px;
+}
+
+.craly-state-select__list::-webkit-scrollbar {
+  width: 5px;
+}
+.craly-state-select__list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.craly-state-select__option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  box-sizing: border-box;
+}
+
+.craly-state-select__option:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.craly-state-select__option--selected {
+  background: rgba(15, 139, 130, 0.09) !important;
+  color: var(--craly-teal, #0f8b82) !important;
+  font-weight: 600;
+}
+
+.craly-state-select__option-name {
+  flex: 1;
+}
+
+.craly-state-select__option-check {
+  color: var(--craly-teal, #0f8b82);
+  flex-shrink: 0;
+}
+
+.craly-state-select__empty {
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+.craly-state-select__error-msg {
+  display: block;
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+  font-weight: 500;
+}

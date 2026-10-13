@@ -1,19 +1,17 @@
 import { z } from 'zod';
 import { optionalPhoneSchema } from './phoneValidator';
+import { optionalIndianStateSchema, optionalSkillsArraySchema } from './geoAndSkillsValidators';
 
 export const contractorProfileSchema = z.object({
   companyName: z.string().min(1).max(200).optional(),
   phone: optionalPhoneSchema,
   description: z.string().max(2000).optional(),
   city: z.string().max(100).optional(),
-  state: z.string().max(100).optional(),
+  state: optionalIndianStateSchema,
   yearsExperience: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).pipe(z.number().int().min(0).max(100)).optional(),
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).pipe(z.number().int().min(0).max(100000)).optional(),
   industry: z.string().max(150).optional(),
-  skills: z.union([
-    z.array(z.string()),
-    z.string().transform((str) => str.split(',').map((s) => s.trim()).filter(Boolean)),
-  ]).optional(),
+  skills: optionalSkillsArraySchema,
   serviceAreas: z.union([
     z.array(z.string()),
     z.string().transform((str) => str.split(',').map((s) => s.trim()).filter(Boolean)),
@@ -27,7 +25,7 @@ export const businessProfileSchema = z.object({
   companyName: z.string().min(1).max(200).optional(),
   industry: z.string().max(150).optional(),
   city: z.string().max(100).optional(),
-  state: z.string().max(100).optional(),
+  state: optionalIndianStateSchema,
   phone: optionalPhoneSchema,
 });
 export type BusinessProfileInput = z.infer<typeof businessProfileSchema>;

@@ -5,6 +5,7 @@ import { createNotification, notifyUsersByRole, notifyMatchingContractors } from
 import { toPgTextArrayLiteral } from '../utils/pgArray';
 import { notifyApplicationEvent } from '../utils/whatsappNotifications';
 import { calculateOpportunityMatch, type ContractorFullProfile } from './contractorPortalController';
+import { indianStateSchema, optionalSkillsArraySchema } from '../validators/geoAndSkillsValidators';
 import type { AppError } from '../middlewares/errorHandler';
 
 /**
@@ -33,13 +34,9 @@ const createRequirementSchema = z.object({
   // display purposes; these are what the matching rule actually compares
   // against a contractor's city/state.
   city: z.string().min(1, 'City is required'),
-  state: z.string().min(1, 'State is required'),
+  state: indianStateSchema,
   workersRequired: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).pipe(z.number().positive('Workers required must be at least 1')),
-  requiredSkills: z.union([z.array(z.string()), z.string()]).transform((val) => {
-    if (Array.isArray(val)) return val;
-    if (!val) return [];
-    return val.split(',').map((s) => s.trim()).filter(Boolean);
-  }),
+  requiredSkills: optionalSkillsArraySchema.default([]),
   startDate: z.string().min(1, 'Start date is required'),
   duration: z.string().min(1, 'Duration is required'),
   experienceRequired: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional().nullable(),
