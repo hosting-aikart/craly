@@ -6,6 +6,8 @@ import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
+import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
 import './ContractorProfileModal.css';
 
 interface ContractorProfileModalProps {
@@ -13,18 +15,6 @@ interface ContractorProfileModalProps {
   onComplete: () => void;
   allowClose?: boolean;
 }
-
-const PRESET_INDUSTRIES = [
-  'Construction & Infrastructure',
-  'Manufacturing & Industrial',
-  'Automotive & Ancillary',
-  'Electrical & Power',
-  'PEB & Steel Structures',
-  'Mechanical & HVAC',
-  'Pipeline & Process Engineering',
-  'Facility & Plant Management',
-  'Logistics & Warehousing',
-];
 
 export default function ContractorProfileModal({
   initialProfile,
@@ -174,43 +164,21 @@ export default function ContractorProfileModal({
 
             <div className="cp-modal-field">
               <label>Industry *</label>
-              <select
-                value={PRESET_INDUSTRIES.includes(industry) ? industry : (industry ? 'CUSTOM' : '')}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val !== 'CUSTOM') {
-                    setIndustry(val);
-                  }
-                }}
-              >
-                <option value="">-- Select Industry --</option>
-                {PRESET_INDUSTRIES.map((ind) => (
-                  <option key={ind} value={ind}>
-                    {ind}
-                  </option>
-                ))}
-                <option value="CUSTOM">Other / Custom Industry</option>
-              </select>
-              {(!PRESET_INDUSTRIES.includes(industry) || industry === 'CUSTOM') && (
-                <input
-                  type="text"
-                  required
-                  style={{ marginTop: '6px' }}
-                  value={industry}
-                  onChange={(e) => setIndustry(e.target.value)}
-                  placeholder="Enter custom industry name"
-                />
-              )}
+              <IndustrySelect
+                value={industry}
+                onChange={setIndustry}
+                placeholder="Select or search industry sector"
+                required
+              />
             </div>
 
             <div className="cp-modal-field">
               <label>Availability *</label>
-              <select value={availability} onChange={(e) => setAvailability(e.target.value)}>
-                <option value="AVAILABLE">AVAILABLE (Open for work)</option>
-                <option value="CURRENTLY_AT_CAPACITY">CURRENTLY AT CAPACITY</option>
-                <option value="NOT_AVAILABLE">NOT AVAILABLE</option>
-                <option value="PAUSED">PAUSED</option>
-              </select>
+              <AvailabilitySelect
+                value={availability}
+                onChange={setAvailability}
+                required
+              />
             </div>
 
             <div className="cp-modal-field">

@@ -1,6 +1,7 @@
 import type { Category } from '@/lib/api/profile';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import CustomSelect from '@/components/ui/CustomSelect';
 import './FilterPanel.css';
 
 interface FilterPanelProps {
@@ -49,6 +50,11 @@ export default function FilterPanel({
     { value: '250', label: '250+ workers' },
   ];
 
+  const categoryOptions = [
+    { value: '', label: t.contractors.filterCategory },
+    ...categories.map((c) => ({ value: c.slug, label: c.name })),
+  ];
+
   return (
     <div className="filter-panel">
       <div className="filter-panel__state-wrapper">
@@ -61,36 +67,35 @@ export default function FilterPanel({
         />
       </div>
 
-      <select
-        className="filter-panel__field"
-        value={category}
-        onChange={(e) => onCategoryChange(e.target.value)}
-      >
-        <option value="">{t.contractors.filterCategory}</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.slug}>{c.name}</option>
-        ))}
-      </select>
+      <div className="filter-panel__select-wrapper">
+        <CustomSelect
+          className="filter-panel__custom-select"
+          options={categoryOptions}
+          value={category}
+          onChange={onCategoryChange}
+          placeholder={t.contractors.filterCategory}
+        />
+      </div>
 
-      <select
-        className="filter-panel__field"
-        value={minExperience}
-        onChange={(e) => onMinExperienceChange(e.target.value)}
-      >
-        {experienceOptions.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
+      <div className="filter-panel__select-wrapper">
+        <CustomSelect
+          className="filter-panel__custom-select"
+          options={experienceOptions}
+          value={minExperience}
+          onChange={onMinExperienceChange}
+          placeholder={t.contractors.anyExperience}
+        />
+      </div>
 
-      <select
-        className="filter-panel__field"
-        value={minWorkforce}
-        onChange={(e) => onMinWorkforceChange(e.target.value)}
-      >
-        {workforceOptions.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
+      <div className="filter-panel__select-wrapper">
+        <CustomSelect
+          className="filter-panel__custom-select"
+          options={workforceOptions}
+          value={minWorkforce}
+          onChange={onMinWorkforceChange}
+          placeholder={t.contractors.anyWorkforce}
+        />
+      </div>
 
       {hasActiveFilters && (
         <button type="button" className="filter-panel__clear" onClick={onClear}>

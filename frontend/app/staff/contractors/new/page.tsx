@@ -6,28 +6,13 @@ import { useRouter } from 'next/navigation';
 import { createStaffContractor, uploadStaffContractorDocument } from '@/lib/api/staff';
 import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
-import CustomSelect, { type SelectOption } from '@/components/ui/CustomSelect';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
+import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
+import DocumentTypeSelect from '@/components/ui/DocumentTypeSelect';
 import { IconArrowLeft, IconCheck, IconAlertTriangle } from '@/components/ui/Icons';
 import './staff-new-contractor.css';
-
-const AVAILABILITY_OPTIONS: SelectOption[] = [
-  { value: 'AVAILABLE', label: 'AVAILABLE' },
-  { value: 'CURRENTLY_AT_CAPACITY', label: 'CURRENTLY AT CAPACITY' },
-  { value: 'NOT_AVAILABLE', label: 'NOT AVAILABLE' },
-  { value: 'PAUSED', label: 'PAUSED' },
-  { value: 'SUSPENDED', label: 'SUSPENDED' },
-];
-
-const DOCUMENT_TYPE_OPTIONS: SelectOption[] = [
-  { value: 'business_registration', label: 'Business Registration / GST' },
-  { value: 'industry_license', label: 'Industry / Trade License' },
-  { value: 'safety_certification', label: 'Safety / ISO Certification' },
-  { value: 'pan', label: 'PAN Card (Tax Registration)' },
-  { value: 'aadhaar', label: 'Aadhaar Card (Identity)' },
-  { value: 'other_certificate', label: 'Other Certificate' },
-];
 
 function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
@@ -272,11 +257,10 @@ export default function AddContractorPage() {
 
               <div className="staff-new-form-group">
                 <label>Primary Industry / Trade Domain</label>
-                <input
-                  type="text"
+                <IndustrySelect
                   value={industry}
-                  onChange={(e) => setIndustry(e.target.value)}
-                  placeholder="e.g. Heavy Manufacturing, Fabrication, CNC"
+                  onChange={setIndustry}
+                  placeholder="Select or search industry sector…"
                 />
               </div>
 
@@ -323,8 +307,7 @@ export default function AddContractorPage() {
 
               <div className="staff-new-form-group">
                 <label>Initial Availability Status</label>
-                <CustomSelect
-                  options={AVAILABILITY_OPTIONS}
+                <AvailabilitySelect
                   value={availability}
                   onChange={(val) => setAvailability(val as any)}
                 />
@@ -369,9 +352,8 @@ export default function AddContractorPage() {
               {docRows.map((row) => (
                 <div className="staff-new-doc-row" key={row.key}>
                   <div className="staff-new-form-group">
-                    <label>Document Type</label>
-                    <CustomSelect
-                      options={DOCUMENT_TYPE_OPTIONS}
+                    <DocumentTypeSelect
+                      label="Document Type"
                       value={row.documentType}
                       onChange={(val) => updateDocRow(row.key, { documentType: val })}
                     />

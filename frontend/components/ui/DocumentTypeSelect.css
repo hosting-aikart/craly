@@ -1,0 +1,268 @@
+/* Craly Document Type Select Styles */
+
+.craly-doc-select-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.craly-doc-select-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.craly-doc-select-required {
+  color: #ef4444;
+}
+
+.craly-doc-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1e293b;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.craly-doc-select-trigger--sm {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.craly-doc-select-trigger--md {
+  padding: 10px 14px;
+  font-size: 14px;
+  min-height: 42px;
+}
+
+.craly-doc-select-trigger--lg {
+  padding: 12px 16px;
+  font-size: 15px;
+  min-height: 46px;
+}
+
+.craly-doc-select-trigger:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.craly-doc-select-trigger--open {
+  border-color: var(--craly-teal, #0f8b82) !important;
+  box-shadow: 0 0 0 3px rgba(15, 139, 130, 0.15);
+  background: #ffffff !important;
+}
+
+.craly-doc-select-trigger--error {
+  border-color: #ef4444 !important;
+}
+
+.craly-doc-select-trigger:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.craly-doc-select-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.craly-doc-selected-view {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.craly-doc-selected-name {
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.craly-doc-category-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.craly-doc-placeholder {
+  color: #94a3b8;
+}
+
+.craly-doc-chevron {
+  color: #64748b;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.craly-doc-chevron--rotated {
+  transform: rotate(180deg);
+  color: var(--craly-teal, #0f8b82);
+}
+
+.craly-doc-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  z-index: 110;
+  animation: docFadeIn 0.15s ease-out;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes docFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.craly-doc-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.craly-doc-search-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.craly-doc-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.craly-doc-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.craly-doc-clear-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+}
+
+.craly-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+.craly-doc-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.craly-doc-option:hover {
+  background: #f1f5f9;
+}
+
+.craly-doc-option--selected {
+  background: #f0fdfa !important;
+}
+
+.craly-doc-option-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.craly-doc-option-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.craly-doc-badge-pill {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.craly-doc-check {
+  color: var(--craly-teal, #0f8b82);
+  flex-shrink: 0;
+}
+
+.craly-doc-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.craly-doc-error-msg {
+  font-size: 12px;
+  color: #ef4444;
+  margin: 0;
+}

@@ -9,6 +9,7 @@ import { getMyProfile, updateMyProfile, type Category } from '@/lib/api/profile'
 import { listCategories } from '@/lib/api/contractors';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -140,15 +141,14 @@ export default function OnboardingPage() {
         )}
 
         {!isContractor && (
-          <label className="auth-field">
-            <span>Industry</span>
-            <input
-              type="text"
+          <div className="auth-field" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--craly-navy, #0f172a)' }}>Industry</span>
+            <IndustrySelect
               value={industry}
-              onChange={(e) => setIndustry(e.target.value)}
-              placeholder="e.g. Manufacturing, Construction, Logistics"
+              onChange={setIndustry}
+              placeholder="Select or search industry…"
             />
-          </label>
+          </div>
         )}
 
         <div className="auth-row">

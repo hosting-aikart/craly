@@ -44,9 +44,25 @@
   flex: 1;
 }
 
+.filter-panel__select-wrapper {
+  min-width: 160px;
+  flex: 1;
+}
+
+.filter-panel__custom-select {
+  width: 100%;
+}
+
+.filter-panel__custom-select .custom-select__trigger {
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  min-height: 42px;
+}
+
 @media (max-width: 640px) {
   .filter-panel__field,
-  .filter-panel__state-wrapper {
+  .filter-panel__state-wrapper,
+  .filter-panel__select-wrapper {
     flex: 1 1 100%;
   }
 }

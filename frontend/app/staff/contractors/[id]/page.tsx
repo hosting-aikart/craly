@@ -8,6 +8,7 @@ import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
+import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
 import UnlistContractorModal from '@/components/staff/UnlistContractorModal';
 import StaffContractorDocumentsSection from '@/components/staff/StaffContractorDocumentsSection';
 import './staff-contractor-detail.css';
@@ -260,16 +261,10 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
 
             <div className="form-group">
               <label>Availability Status</label>
-              <select
+              <AvailabilitySelect
                 value={availability}
-                onChange={(e) => setAvailability(e.target.value as any)}
-              >
-                <option value="AVAILABLE">AVAILABLE</option>
-                <option value="CURRENTLY_AT_CAPACITY">CURRENTLY AT CAPACITY</option>
-                <option value="NOT_AVAILABLE">NOT AVAILABLE</option>
-                <option value="PAUSED">PAUSED</option>
-                <option value="SUSPENDED">SUSPENDED</option>
-              </select>
+                onChange={(val) => setAvailability(val as any)}
+              />
             </div>
 
             <div className="form-group col-span-2">

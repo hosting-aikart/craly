@@ -19,6 +19,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
+import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
 import '../../field-staff.css';
 import '../contractor-form.css';
 
@@ -344,14 +345,13 @@ export default function ContractorFormPage() {
 
       {step === 3 && (
         <div className="pf-field-group">
-          <div className="pf-field">
-            <label htmlFor="availability">{ft.availability}</label>
-            <select id="availability" value={form.availability} onChange={(e) => update('availability', e.target.value as ContractorAvailability)}>
-              <option value="AVAILABLE">Available</option>
-              <option value="CURRENTLY_AT_CAPACITY">At Capacity</option>
-              <option value="NOT_AVAILABLE">Not Available</option>
-              <option value="PAUSED">Paused</option>
-            </select>
+          <div className="pf-field pf-field--full">
+            <AvailabilitySelect
+              id="availability"
+              label={ft.availability}
+              value={form.availability}
+              onChange={(val) => update('availability', val as ContractorAvailability)}
+            />
           </div>
           <div className="pf-field pf-field--full">
             <label htmlFor="notes">{ft.notes}</label>

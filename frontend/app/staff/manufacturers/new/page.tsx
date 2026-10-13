@@ -7,6 +7,7 @@ import { createStaffManufacturer } from '@/lib/api/staff';
 import PhoneInput from '@/components/ui/PhoneInput';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
 import { IconArrowLeft, IconCheck, IconAlertTriangle } from '@/components/ui/Icons';
 import '@/app/staff/contractors/new/staff-new-contractor.css';
 
@@ -191,11 +192,10 @@ export default function AddManufacturerPage() {
 
               <div className="staff-new-form-group">
                 <label>Industry / Manufacturing Sector</label>
-                <input
-                  type="text"
+                <IndustrySelect
                   value={industry}
-                  onChange={(e) => setIndustry(e.target.value)}
-                  placeholder="e.g. Automotive, Heavy Machinery, Textiles, Electronics"
+                  onChange={setIndustry}
+                  placeholder="Select or search industry sector…"
                 />
               </div>
 

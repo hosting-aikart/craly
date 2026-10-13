@@ -6,6 +6,7 @@ import { createContractorRequest } from '@/lib/api/contractorRequests';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import '@/components/AuthForm.css';
 import './list-your-company.css';
@@ -115,10 +116,15 @@ export default function ListYourCompanyPage() {
               <span>City *</span>
               <input type="text" required value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Nagpur" />
             </label>
-            <label className="auth-field">
-              <span>Industry *</span>
-              <input type="text" required value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Industrial Labour" />
-            </label>
+            <div className="auth-field" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600 }}>Industry *</span>
+              <IndustrySelect
+                value={industry}
+                onChange={setIndustry}
+                placeholder="Select or search industry…"
+                required
+              />
+            </div>
           </div>
 
           <div className="auth-row">

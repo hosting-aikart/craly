@@ -19,6 +19,8 @@ import {
 import { CONTRACTOR_DOCUMENT_TYPE_LABELS as DOC_TYPE_LABELS, formatDocumentTypeDisplay } from '@/components/contractor/ContractorDocumentsSection';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
+import DocumentTypeSelect from '@/components/ui/DocumentTypeSelect';
+import VerificationStatusSelect from '@/components/ui/VerificationStatusSelect';
 import './staff-verification-detail.css';
 
 export default function StaffVerificationDetailPage() {
@@ -313,26 +315,12 @@ export default function StaffVerificationDetailPage() {
             )}
             <form onSubmit={handleStaffDocUpload} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Document Type *</label>
-                <select
+                <DocumentTypeSelect
+                  label="Document Type"
+                  required
                   value={uploadDocType}
-                  onChange={(e) => setUploadDocType(e.target.value)}
-                  style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', background: '#ffffff' }}
-                >
-                  <option value="gst">GST Registration Certificate</option>
-                  <option value="business_registration">Business / Company Registration</option>
-                  <option value="pan">PAN Card (Tax Identification)</option>
-                  <option value="aadhaar">Aadhaar Card (Authorized Signatory)</option>
-                  <option value="labor_license">Labour License / Contract Labour Act</option>
-                  <option value="msme">MSME / Udyam Registration</option>
-                  <option value="pf_registration">EPF Registration Certificate</option>
-                  <option value="esic_registration">ESIC Registration Certificate</option>
-                  <option value="industry_license">Industry / Trade License</option>
-                  <option value="safety_certification">Safety / ISO / Quality Certification</option>
-                  <option value="compliance_certificate">Statutory Compliance Certificate</option>
-                  <option value="other_certificate">Other Certificate</option>
-                  <option value="other">Other Supporting Document</option>
-                </select>
+                  onChange={setUploadDocType}
+                />
               </div>
 
               {(uploadDocType === 'other' || uploadDocType === 'other_certificate') && (
@@ -624,14 +612,11 @@ export default function StaffVerificationDetailPage() {
             <h3>Update Overall Contractor Verification Status</h3>
             <form onSubmit={submitOverallStatusUpdate}>
               <div className="staff-vd-field">
-                <label>Verification Status</label>
-                <select value={overallStatus} onChange={(e) => setOverallStatus(e.target.value)}>
-                  <option value="pending">PENDING</option>
-                  <option value="under_review">UNDER REVIEW</option>
-                  <option value="verified">VERIFIED</option>
-                  <option value="needs_changes">NEEDS CHANGES</option>
-                  <option value="rejected">REJECTED</option>
-                </select>
+                <VerificationStatusSelect
+                  label="Verification Status"
+                  value={overallStatus}
+                  onChange={setOverallStatus}
+                />
               </div>
 
               <div className="staff-vd-field">

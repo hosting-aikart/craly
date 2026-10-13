@@ -396,3 +396,111 @@ export function isSkillValid(val?: string | null): boolean {
   const clean = val.trim().toLowerCase();
   return SKILLS.some((s) => s.toLowerCase() === clean);
 }
+
+/**
+ * Canonical Industries and Manufacturing Verticals supported across Craly.
+ */
+export const INDUSTRIES = [
+  'Aerospace & Defence Manufacturing',
+  'Automotive & Auto Components',
+  'Cement & Building Materials',
+  'Chemicals & Petrochemicals',
+  'Construction & Infrastructure',
+  'Consumer Durables & Electronics',
+  'Electrical Equipment & Power Systems',
+  'EPC (Engineering, Procurement & Construction)',
+  'Fabrication, Machining & Heavy Engineering',
+  'Facility & Industrial Plant Maintenance',
+  'Food Processing & Agro Industries',
+  'Foundry, Forging & Metal Casting',
+  'Glass, Ceramics & Refractory',
+  'Mining, Minerals & Metals',
+  'Oil & Gas / Refinery Operations',
+  'Packaging & Printing Industry',
+  'Paper, Pulp & Allied Products',
+  'PEB & Pre-Engineered Steel Structures',
+  'Pharmaceuticals & Healthcare Manufacturing',
+  'Plastic, Polymers & Rubber',
+  'Renewable Energy & Solar Infrastructure',
+  'Steel, Iron & Metallurgy',
+  'Textiles, Apparel & Garments',
+  'Warehousing, Logistics & Cold Storage',
+  'Water Treatment & Environmental Engineering',
+] as const;
+
+export type Industry = (typeof INDUSTRIES)[number];
+
+export const POPULAR_INDUSTRIES: Industry[] = [
+  'Automotive & Auto Components',
+  'Fabrication, Machining & Heavy Engineering',
+  'EPC (Engineering, Procurement & Construction)',
+  'Construction & Infrastructure',
+  'Warehousing, Logistics & Cold Storage',
+  'Electrical Equipment & Power Systems',
+  'Chemicals & Petrochemicals',
+  'Pharmaceuticals & Healthcare Manufacturing',
+  'Steel, Iron & Metallurgy',
+  'Renewable Energy & Solar Infrastructure',
+];
+
+/**
+ * Canonical Availability Status options for contractors.
+ */
+export const AVAILABILITY_STATUS_OPTIONS = [
+  { value: 'AVAILABLE', label: 'AVAILABLE (Open for work)', color: '#059669', badgeBg: '#ecfdf5', dotColor: '#10b981' },
+  { value: 'CURRENTLY_AT_CAPACITY', label: 'CURRENTLY AT CAPACITY', color: '#d97706', badgeBg: '#fffbeb', dotColor: '#f59e0b' },
+  { value: 'NOT_AVAILABLE', label: 'NOT AVAILABLE', color: '#dc2626', badgeBg: '#fef2f2', dotColor: '#ef4444' },
+  { value: 'PAUSED', label: 'PAUSED (Temporarily inactive)', color: '#64748b', badgeBg: '#f8fafc', dotColor: '#94a3b8' },
+  { value: 'SUSPENDED', label: 'SUSPENDED (Internal hold)', color: '#991b1b', badgeBg: '#fef2f2', dotColor: '#b91c1c' },
+] as const;
+
+export type ContractorAvailabilityStatus = (typeof AVAILABILITY_STATUS_OPTIONS)[number]['value'];
+
+/**
+ * Canonical Document Types for contractor compliance and KYC verification.
+ */
+export const DOCUMENT_TYPE_OPTIONS = [
+  { value: 'gst', label: 'GST Registration Certificate', category: 'Statutory', badgeType: 'required' },
+  { value: 'business_registration', label: 'Business / Company Registration Certificate', category: 'Statutory', badgeType: 'required' },
+  { value: 'pan', label: 'PAN Card (Tax Identification)', category: 'Tax ID', badgeType: 'required' },
+  { value: 'aadhaar', label: 'Aadhaar Card (Authorized Signatory)', category: 'Identity', badgeType: 'required' },
+  { value: 'labor_license', label: 'Labour License (Contract Labour Act)', category: 'Licensing', badgeType: 'recommended' },
+  { value: 'msme', label: 'MSME / Udyam Registration', category: 'Statutory', badgeType: 'optional' },
+  { value: 'pf_registration', label: 'EPF Registration Certificate', category: 'Compliance', badgeType: 'recommended' },
+  { value: 'esic_registration', label: 'ESIC Registration Certificate', category: 'Compliance', badgeType: 'recommended' },
+  { value: 'industry_license', label: 'Factory / Trade / Industry License', category: 'Licensing', badgeType: 'optional' },
+  { value: 'safety_certification', label: 'Safety / ISO / Quality Certification', category: 'Certifications', badgeType: 'optional' },
+  { value: 'compliance_certificate', label: 'Statutory Compliance Certificate', category: 'Compliance', badgeType: 'optional' },
+  { value: 'compliance_report', label: 'Statutory Compliance Audit Report', category: 'Compliance', badgeType: 'optional' },
+  { value: 'other_certificate', label: 'Other Trade / Technical Certificate', category: 'Certifications', badgeType: 'optional' },
+  { value: 'verification_evidence', label: 'Site Verification Evidence / Audit Note', category: 'Internal', badgeType: 'optional' },
+  { value: 'other', label: 'Other Supporting Document', category: 'Supporting', badgeType: 'optional' },
+] as const;
+
+export type DocumentTypeOption = (typeof DOCUMENT_TYPE_OPTIONS)[number];
+
+/**
+ * Canonical Verification Statuses for Contractor Profiles.
+ */
+export const VERIFICATION_STATUS_OPTIONS = [
+  { value: 'pending', label: 'Pending Review', color: '#d97706', badgeBg: '#fffbeb', dotColor: '#f59e0b' },
+  { value: 'under_review', label: 'Under Review', color: '#2563eb', badgeBg: '#eff6ff', dotColor: '#3b82f6' },
+  { value: 'verified', label: 'Verified', color: '#059669', badgeBg: '#ecfdf5', dotColor: '#10b981' },
+  { value: 'needs_changes', label: 'Needs Changes', color: '#c026d3', badgeBg: '#fdf4ff', dotColor: '#d946ef' },
+  { value: 'rejected', label: 'Rejected', color: '#dc2626', badgeBg: '#fef2f2', dotColor: '#ef4444' },
+] as const;
+
+/**
+ * Standard Project / Manpower Requirement Durations.
+ */
+export const ENGAGEMENT_DURATIONS = [
+  '1 Month',
+  '2 Months',
+  '3 Months',
+  '6 Months',
+  '9 Months',
+  '12 Months (1 Year)',
+  'Long-term / Ongoing',
+  'Custom Duration',
+] as const;
+

@@ -11,6 +11,8 @@ import ContractorDocumentsSection from '@/components/contractor/ContractorDocume
 import WorksitePhotosSection from '@/components/contractor/WorksitePhotosSection';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
+import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
 import {
   IconShield,
   IconBuilding,
@@ -586,7 +588,11 @@ export default function ContractorProfilePage() {
                 </div>
                 <div className="contractor-field">
                   <label>Industry</label>
-                  <input type="text" value={industry} onChange={(e) => setIndustry(e.target.value)} />
+                  <IndustrySelect
+                    value={industry}
+                    onChange={setIndustry}
+                    placeholder="Select or search industry sector…"
+                  />
                 </div>
                 <div className="contractor-field">
                   <label>Workforce Size (Headcount)</label>
@@ -598,12 +604,10 @@ export default function ContractorProfilePage() {
                 </div>
                 <div className="contractor-field">
                   <label>Availability Status</label>
-                  <select value={availability} onChange={(e) => setAvailability(e.target.value)}>
-                    <option value="AVAILABLE">AVAILABLE</option>
-                    <option value="CURRENTLY_AT_CAPACITY">CURRENTLY AT CAPACITY</option>
-                    <option value="NOT_AVAILABLE">NOT AVAILABLE</option>
-                    <option value="PAUSED">PAUSED</option>
-                  </select>
+                  <AvailabilitySelect
+                    value={availability}
+                    onChange={setAvailability}
+                  />
                 </div>
                 <div className="contractor-field contractor-field--full">
                   <label>Skills & Specializations (Opportunity Matching)</label>

@@ -9,6 +9,7 @@ import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import {
   IconBuilding,
@@ -20,16 +21,6 @@ import {
 } from '@/components/ui/Icons';
 import './business-profile.css';
 
-const INDUSTRY_SUGGESTIONS = [
-  'EPC Construction',
-  'Automotive Manufacturing',
-  'Heavy Industrial',
-  'Warehousing & Logistics',
-  'Solar & Power Infrastructure',
-  'Food & Beverages Processing',
-  'Textile & Garments',
-  'Chemicals & Pharmaceuticals',
-];
 
 export default function BusinessProfilePage() {
   const { user } = useAuth();
@@ -192,30 +183,17 @@ export default function BusinessProfilePage() {
               </div>
 
               <form onSubmit={handleSave} className="bp-form">
-                {/* Industry Field with Quick Select Chips */}
+                {/* Industry Field with Searchable Dropdown */}
                 <div className="bp-form__field">
                   <label className="bp-form__label">
                     <IconTarget size={14} /> Industry / Trade Sector
                   </label>
-                  <input
-                    type="text"
+                  <IndustrySelect
                     value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                    placeholder="e.g. EPC Construction, Manufacturing, Logistics"
-                    className="bp-form__input"
+                    onChange={setIndustry}
+                    showPopularChips
+                    placeholder="Select or search industry sector"
                   />
-                  <div className="bp-chips-wrap">
-                    {INDUSTRY_SUGGESTIONS.map((sug) => (
-                      <button
-                        key={sug}
-                        type="button"
-                        className={`bp-chip ${industry === sug ? 'bp-chip--active' : ''}`}
-                        onClick={() => setIndustry(sug)}
-                      >
-                        {sug}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 {/* City & State Row */}

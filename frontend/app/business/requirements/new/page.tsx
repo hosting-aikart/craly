@@ -8,6 +8,8 @@ import { createBusinessRequirement, updateBusinessRequirement, type CreateRequir
 import Button from '@/components/ui/Button';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
+import IndustrySelect from '@/components/ui/IndustrySelect';
+import DurationSelect from '@/components/ui/DurationSelect';
 import {
   IconBriefcase,
   IconTarget,
@@ -177,12 +179,10 @@ export default function CreateRequirementPage() {
           <div className="req-grid req-grid--2col" style={{ marginTop: '16px' }}>
             <div className="req-field">
               <label>Industry / Domain</label>
-              <input
-                type="text"
-                name="industry"
-                value={formData.industry}
-                onChange={handleChange}
-                placeholder="e.g. Automotive, Manufacturing, EPC"
+              <IndustrySelect
+                value={formData.industry || ''}
+                onChange={(ind) => setFormData((prev) => ({ ...prev, industry: ind }))}
+                placeholder="Select or search industry sector…"
               />
               <span className="req-field-hint">Primary industrial sector for category filtering</span>
             </div>
@@ -321,12 +321,10 @@ export default function CreateRequirementPage() {
 
             <div className="req-field">
               <label>Engagement Duration *</label>
-              <input
-                type="text"
-                name="duration"
+              <DurationSelect
                 value={formData.duration}
-                onChange={handleChange}
-                placeholder="e.g. 3 Months, 6 Months, Long-term"
+                onChange={(duration) => setFormData((prev) => ({ ...prev, duration }))}
+                placeholder="Select engagement duration…"
                 required
               />
               <span className="req-field-hint">Estimated project duration or contract period</span>

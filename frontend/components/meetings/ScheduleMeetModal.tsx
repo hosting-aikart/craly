@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getApiUrl } from '@/lib/api';
 import Button from '@/components/ui/Button';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { IconLink, IconVideo } from '@/components/ui/Icons';
 import './ScheduleMeetModal.css';
 
@@ -149,12 +150,16 @@ export default function ScheduleMeetModal({ enquiryId, onClose, onSuccess }: Sch
 
           <div className="meet-modal__field">
             <label>Duration</label>
-            <select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
-              <option value={15}>15 minutes</option>
-              <option value={30}>30 minutes</option>
-              <option value={45}>45 minutes</option>
-              <option value={60}>60 minutes</option>
-            </select>
+            <CustomSelect
+              options={[
+                { value: '15', label: '15 minutes' },
+                { value: '30', label: '30 minutes' },
+                { value: '45', label: '45 minutes' },
+                { value: '60', label: '60 minutes' },
+              ]}
+              value={String(duration)}
+              onChange={(val) => setDuration(Number(val))}
+            />
           </div>
 
           <div className="meet-modal__actions">

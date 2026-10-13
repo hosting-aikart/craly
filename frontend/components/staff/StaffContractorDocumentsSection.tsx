@@ -11,6 +11,7 @@ import {
 import { CONTRACTOR_DOCUMENT_TYPE_LABELS, formatDocumentTypeDisplay } from '@/components/contractor/ContractorDocumentsSection';
 import LoadingState from '@/components/ui/LoadingState';
 import EmptyState from '@/components/ui/EmptyState';
+import DocumentTypeSelect from '@/components/ui/DocumentTypeSelect';
 import './StaffContractorDocumentsSection.css';
 
 interface StaffContractorDocumentsSectionProps {
@@ -142,22 +143,12 @@ export default function StaffContractorDocumentsSection({
           <form onSubmit={handleUpload} className="staff-docs-form">
             <div className="staff-docs-form-grid">
               <div className="staff-docs-field">
-                <label>Document Category *</label>
-                <select value={documentType} onChange={(e) => setDocumentType(e.target.value)}>
-                  <option value="gst">GST Registration Certificate</option>
-                  <option value="business_registration">Business / Company Registration</option>
-                  <option value="pan">PAN Card (Tax Identification)</option>
-                  <option value="aadhaar">Aadhaar Card (Authorized Signatory)</option>
-                  <option value="labor_license">Labour License / Contract Labour Act</option>
-                  <option value="msme">MSME / Udyam Registration</option>
-                  <option value="pf_registration">EPF Registration Certificate</option>
-                  <option value="esic_registration">ESIC Registration Certificate</option>
-                  <option value="industry_license">Industry / Trade License</option>
-                  <option value="safety_certification">Safety / ISO / Quality Certification</option>
-                  <option value="compliance_certificate">Statutory Compliance Certificate</option>
-                  <option value="other_certificate">Other Certificate</option>
-                  <option value="other">Other Supporting Document</option>
-                </select>
+                <DocumentTypeSelect
+                  label="Document Category"
+                  required
+                  value={documentType}
+                  onChange={setDocumentType}
+                />
               </div>
 
               {(documentType === 'other' || documentType === 'other_certificate') && (
