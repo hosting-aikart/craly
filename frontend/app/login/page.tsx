@@ -96,150 +96,149 @@ export default function LoginPage() {
       <div className="login-page">
         <div className="login-page__wrap">
 
-        {/* ── Left: dark brand panel ────────────────────────────────── */}
-        <div className="login-panel">
-          <div>
-            <div className="login-panel__brand">
+          {/* ── Left: dark brand panel ────────────────────────────────── */}
+          <div className="login-panel">
+            <div>
+              <div className="login-panel__brand">
+                <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '78px', width: 'auto' }} />
+              </div>
+
+              <p className="login-panel__eyebrow">{t.auth.networkEyebrow}</p>
+              <h2 className="login-panel__heading">{t.auth.loginHeading}</h2>
+
+              <div className="login-panel__roles">
+                <div className="login-panel__role-card" style={{ borderRadius: '50px' }}>
+                  <div className="login-panel__role-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 18a7 7 0 0 1 14 0" />
+                      <path d="M9 18v-2" />
+                      <path d="M12 6v2" />
+                      <rect x="2" y="17" width="20" height="3" rx="1" />
+                    </svg>
+                  </div>
+                  <span>{t.auth.contractorRoleTitle}</span>
+                </div>
+                <div className="login-panel__role-card" style={{ borderRadius: '50px' }}>
+                  <div className="login-panel__role-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="4" y="3" width="16" height="18" rx="1" />
+                      <path d="M9 8h1M14 8h1M9 12h1M14 12h1" />
+                      <path d="M10 21v-4h4v4" />
+                    </svg>
+                  </div>
+                  <span>{t.auth.businessRoleTitle}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="login-panel__security">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+              {t.auth.securityBadge}
+            </div>
+          </div>
+
+          {/* ── Right: white form panel ───────────────────────────────── */}
+          <div className="login-form-panel">
+            <div className="login-mobile-brand">
               <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '78px', width: 'auto' }} />
             </div>
-
-            <p className="login-panel__eyebrow">{t.auth.networkEyebrow}</p>
-            <h2 className="login-panel__heading">{t.auth.loginHeading}</h2>
-
-            <div className="login-panel__roles">
-              <div className="login-panel__role-card" style={{ borderRadius: '50px' }}>
-                <div className="login-panel__role-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 18a7 7 0 0 1 14 0" />
-                    <path d="M9 18v-2" />
-                    <path d="M12 6v2" />
-                    <rect x="2" y="17" width="20" height="3" rx="1" />
+            <p className="login-form-panel__eyebrow">{t.auth.welcomeBackEyebrow}</p>
+            <h1 className="login-form-panel__heading">{t.auth.logInTitle}</h1>
+            <form className="login-fields" onSubmit={handleSubmit}>
+              <label className="login-field">
+                <span>{t.auth.emailLabel}</span>
+                <div className="login-field__input">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <path d="M3 7l9 6 9-6" />
                   </svg>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t.auth.emailPlaceholder}
+                  />
                 </div>
-                <span>{t.auth.contractorRoleTitle}</span>
-              </div>
-              <div className="login-panel__role-card" style={{ borderRadius: '50px' }}>
-                <div className="login-panel__role-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="4" y="3" width="16" height="18" rx="1" />
-                    <path d="M9 8h1M14 8h1M9 12h1M14 12h1" />
-                    <path d="M10 21v-4h4v4" />
+              </label>
+
+              <label className="login-field">
+                <span>{t.auth.passwordLabel}</span>
+                <div className="login-field__input">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="5" y="11" width="14" height="9" rx="2" />
+                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                   </svg>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={t.auth.passwordPlaceholder}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                        <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
-                <span>{t.auth.businessRoleTitle}</span>
+              </label>
+
+              <button
+                type="button"
+                className="login-forgot"
+                onClick={() => setForgotOpen(true)}
+              >
+                {t.auth.forgotPassword}
+              </button>
+
+              {error && <p className="login-error">{error}</p>}
+
+              <button type="submit" className="login-submit" disabled={submitting}>
+                {submitting ? t.auth.loggingIn : t.auth.logInBtn}
+              </button>
+            </form>
+
+            <div className="login-new">
+              <p>{t.auth.newToCraly}</p>
+              <div className="login-new__grid">
+                <Link href="/signup?role=business" className="login-new__chip">
+                  {t.auth.joinAsBusiness}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14" />
+                    <path d="M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+                <Link href="/signup?role=contractor" className="login-new__chip">
+                  {t.auth.joinAsContractor}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14" />
+                    <path d="M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
               </div>
-            </div>
-          </div>
-
-          <div className="login-panel__security">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z" />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-            {t.auth.securityBadge}
-          </div>
-        </div>
-
-        {/* ── Right: white form panel ───────────────────────────────── */}
-        <div className="login-form-panel">
-          <div className="login-mobile-brand">
-            <img src="/assets/craly-logo.png" alt="Craly" style={{ height: '78px', width: 'auto' }} />
-          </div>
-          <p className="login-form-panel__eyebrow">{t.auth.welcomeBackEyebrow}</p>
-          <h1 className="login-form-panel__heading">{t.auth.logInTitle}</h1>
-
-          <form className="login-fields" onSubmit={handleSubmit}>
-            <label className="login-field">
-              <span>{t.auth.emailLabel}</span>
-              <div className="login-field__input">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="M3 7l9 6 9-6" />
-                </svg>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t.auth.emailPlaceholder}
-                />
-              </div>
-            </label>
-
-            <label className="login-field">
-              <span>{t.auth.passwordLabel}</span>
-              <div className="login-field__input">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="5" y="11" width="14" height="9" rx="2" />
-                  <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                </svg>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t.auth.passwordPlaceholder}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </label>
-
-            <button
-              type="button"
-              className="login-forgot"
-              onClick={() => setForgotOpen(true)}
-            >
-              {t.auth.forgotPassword}
-            </button>
-
-            {error && <p className="login-error">{error}</p>}
-
-            <button type="submit" className="login-submit" disabled={submitting}>
-              {submitting ? t.auth.loggingIn : t.auth.logInBtn}
-            </button>
-          </form>
-
-          <div className="login-new">
-            <p>{t.auth.newToCraly}</p>
-            <div className="login-new__grid">
-              <Link href="/signup?role=business" className="login-new__chip">
-                {t.auth.joinAsBusiness}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14" />
-                  <path d="M13 6l6 6-6 6" />
-                </svg>
-              </Link>
-              <Link href="/signup?role=contractor" className="login-new__chip">
-                {t.auth.joinAsContractor}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14" />
-                  <path d="M13 6l6 6-6 6" />
-                </svg>
-              </Link>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
       <ForgotPasswordModal open={forgotOpen} onClose={() => setForgotOpen(false)} />
     </>
