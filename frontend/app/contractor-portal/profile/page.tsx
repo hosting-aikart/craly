@@ -13,6 +13,8 @@ import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import IndustrySelect from '@/components/ui/IndustrySelect';
 import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
+import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
+import { type ContractorClass } from '@/lib/constants/contractorClass';
 import {
   IconShield,
   IconBuilding,
@@ -130,6 +132,7 @@ export default function ContractorProfilePage() {
   const [workforceSize, setWorkforceSize] = useState<number | ''>('');
   const [availability, setAvailability] = useState('AVAILABLE');
   const [description, setDescription] = useState('');
+  const [contractorClass, setContractorClass] = useState<string>('');
   const [profilePicture, setProfilePicture] = useState<string>('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -179,6 +182,7 @@ export default function ContractorProfilePage() {
           setWorkforceSize(cp.workforce_size ?? '');
           setAvailability(cp.availability || 'AVAILABLE');
           setDescription(cp.description || '');
+          setContractorClass(cp.contractor_class || '');
         }
       })
       .catch(() => {})
@@ -214,6 +218,7 @@ export default function ContractorProfilePage() {
         workforceSize: workforceSize === '' ? undefined : Number(workforceSize),
         availability,
         description: description || undefined,
+        contractorClass: contractorClass || undefined,
       });
 
       setMessage({ type: 'success', text: 'Profile changes saved successfully!' });
@@ -301,6 +306,14 @@ export default function ContractorProfilePage() {
                     onChange={(e) => setCompanyName(e.target.value)}
                   />
                   <span className="contractor-field-hint">Registered legal name as per government records</span>
+                </div>
+
+                <div className="contractor-field" style={{ gridColumn: '1 / -1' }}>
+                  <ContractorClassSelect
+                    value={contractorClass}
+                    onChange={(cls: ContractorClass) => setContractorClass(cls)}
+                    showEligibilityTable={true}
+                  />
                 </div>
 
                 <div className="contractor-field">
@@ -391,6 +404,12 @@ export default function ContractorProfilePage() {
                   <div className="contractor-kv-pill">
                     <span className="contractor-kv-pill__label">Company Name</span>
                     <span className="contractor-kv-pill__val">{profile.company_name}</span>
+                  </div>
+                  <div className="contractor-kv-pill">
+                    <span className="contractor-kv-pill__label">Contractor Class</span>
+                    <span className="contractor-kv-pill__val" style={{ fontWeight: 600, color: profile.contractor_class ? 'var(--craly-teal, #0f8b82)' : '#64748b' }}>
+                      {profile.contractor_class ? `🏛️ ${profile.contractor_class}` : 'Unclassified'}
+                    </span>
                   </div>
                   <div className="contractor-kv-pill">
                     <span className="contractor-kv-pill__label">Industry</span>

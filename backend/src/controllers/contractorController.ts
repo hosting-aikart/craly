@@ -23,7 +23,7 @@ export async function listContractors(req: Request, res: Response, next: NextFun
     const minWorkforce = parseInt(String(req.query.minWorkforce ?? ''), 10);
 
     const rows = await sql`
-      SELECT cp.id, cp.company_name, cp.description, cp.city, cp.state,
+      SELECT cp.id, cp.company_name, cp.contractor_class, cp.description, cp.city, cp.state,
              cp.years_experience, cp.workforce_size,
              COALESCE(
                (SELECT json_agg(json_build_object('id', sc.id, 'name', sc.name, 'slug', sc.slug))
@@ -83,7 +83,7 @@ export async function getContractor(req: Request, res: Response, next: NextFunct
   try {
     const { id } = req.params;
     const [row] = await sql`
-      SELECT cp.id, cp.company_name, cp.description, cp.city, cp.state,
+      SELECT cp.id, cp.company_name, cp.contractor_class, cp.description, cp.city, cp.state,
              cp.years_experience, cp.workforce_size
       FROM contractor_profiles cp WHERE cp.id = ${id} AND ${PUBLICLY_DISCOVERABLE_CONDITION}
     `;

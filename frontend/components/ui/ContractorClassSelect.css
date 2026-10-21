@@ -1,0 +1,337 @@
+/* ContractorClassSelect Component Styling */
+
+.contractor-class-select-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.contractor-class-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.contractor-class-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--craly-navy, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contractor-class-toggle-info-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--craly-teal, #0d9488);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.contractor-class-toggle-info-btn:hover {
+  background: rgba(13, 148, 136, 0.08);
+  color: #0f766e;
+}
+
+/* Custom Dropdown Trigger */
+.contractor-class-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.contractor-class-trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #0f172a;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.contractor-class-trigger:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.contractor-class-trigger:focus,
+.contractor-class-dropdown--open .contractor-class-trigger {
+  border-color: var(--craly-teal, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.contractor-class-trigger--error {
+  border-color: #ef4444 !important;
+}
+
+.contractor-class-trigger:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.contractor-class-trigger-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contractor-class-trigger-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.contractor-class-trigger-text {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.contractor-class-trigger-hint {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.contractor-class-placeholder {
+  color: #94a3b8;
+}
+
+.contractor-class-chevron {
+  color: #64748b;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.contractor-class-chevron--rotated {
+  transform: rotate(180deg);
+}
+
+/* Popover Menu */
+.contractor-class-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contractor-class-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+  width: 100%;
+  font-family: inherit;
+}
+
+.contractor-class-option:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.contractor-class-option--selected {
+  background: rgba(13, 148, 136, 0.08);
+  border-color: rgba(13, 148, 136, 0.25);
+}
+
+.contractor-class-option-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contractor-class-option-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.contractor-class-option-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.contractor-class-check {
+  color: var(--craly-teal, #0d9488);
+  flex-shrink: 0;
+}
+
+/* Eligibility Information Panel */
+.contractor-class-panel {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease;
+}
+
+.contractor-class-panel-header {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.contractor-class-panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contractor-class-panel-sub {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Eligibility Comparison Table */
+.contractor-class-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.contractor-class-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+.contractor-class-table th,
+.contractor-class-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.contractor-class-table th {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #475569;
+  font-size: 12px;
+}
+
+.contractor-class-table th.col-req {
+  width: 22%;
+  color: #0f172a;
+}
+
+.contractor-class-table th.col-class {
+  width: 19.5%;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.contractor-class-table th.col-class:hover {
+  background: #f1f5f9;
+}
+
+.contractor-class-th-header {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.contractor-class-table td.col-class {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.contractor-class-table td.col-class:hover {
+  background: rgba(13, 148, 136, 0.03);
+}
+
+.contractor-class-table .req-label {
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Highlighted Column for Selected Class */
+.contractor-class-table th.col-class--active,
+.contractor-class-table td.col-class--active {
+  background: rgba(13, 148, 136, 0.07) !important;
+  border-left: 2px solid var(--craly-teal, #0d9488);
+  border-right: 2px solid var(--craly-teal, #0d9488);
+}
+
+.contractor-class-table th.col-class--active {
+  border-top: 2px solid var(--craly-teal, #0d9488);
+}
+
+.contractor-class-table tr:last-child td.col-class--active {
+  border-bottom: 2px solid var(--craly-teal, #0d9488);
+}
+
+.contractor-class-badge-selected {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--craly-teal, #0d9488);
+  background: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.contractor-class-error-text {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .contractor-class-table {
+    min-width: 620px;
+  }
+}

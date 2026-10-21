@@ -25,6 +25,7 @@ export interface SignupInput {
   state?: string;
   workforceSize?: number;
   yearsExperience?: number;
+  contractorClass?: string;
 }
 
 export const signup = (input: SignupInput) =>

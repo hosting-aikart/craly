@@ -11,6 +11,8 @@ import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import IndustrySelect from '@/components/ui/IndustrySelect';
 import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
 import DocumentTypeSelect from '@/components/ui/DocumentTypeSelect';
+import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
+import { type ContractorClass } from '@/lib/constants/contractorClass';
 import { IconArrowLeft, IconCheck, IconAlertTriangle } from '@/components/ui/Icons';
 import './staff-new-contractor.css';
 
@@ -54,6 +56,7 @@ export default function AddContractorPage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [serviceAreasInput, setServiceAreasInput] = useState('');
   const [availability, setAvailability] = useState<'AVAILABLE' | 'CURRENTLY_AT_CAPACITY' | 'NOT_AVAILABLE' | 'PAUSED' | 'SUSPENDED'>('AVAILABLE');
+  const [contractorClass, setContractorClass] = useState<string>('');
   const [notes, setNotes] = useState('');
 
   // Documents are entirely optional — see docRows below. Files are held in
@@ -110,6 +113,7 @@ export default function AddContractorPage() {
         skills: skills.length > 0 ? skills : undefined,
         serviceAreas: serviceAreas.length > 0 ? serviceAreas : undefined,
         availability,
+        contractorClass: contractorClass || undefined,
         notes: notes || undefined,
       });
 
@@ -203,6 +207,14 @@ export default function AddContractorPage() {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="e.g. Apex Industrial Workforce Solutions Pvt Ltd"
+                />
+              </div>
+
+              <div className="staff-new-form-group staff-new-col-span-2">
+                <ContractorClassSelect
+                  value={contractorClass}
+                  onChange={(cls: ContractorClass) => setContractorClass(cls)}
+                  showEligibilityTable={true}
                 />
               </div>
 

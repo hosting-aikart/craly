@@ -135,7 +135,14 @@ export default function StaffVerificationPage() {
                 {contractors.map((c) => (
                   <tr key={c.id}>
                     <td>
-                      <div className="staff-verif-company-name">{c.company_name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div className="staff-verif-company-name">{c.company_name}</div>
+                        {c.contractor_class && (
+                          <span className="staff-class-badge" style={{ fontSize: '10px', padding: '2px 7px' }}>
+                            {c.contractor_class}
+                          </span>
+                        )}
+                      </div>
                       <div className="staff-verif-company-sub">
                         {[c.city, c.state].filter(Boolean).join(', ') || 'Location unmapped'}
                       </div>

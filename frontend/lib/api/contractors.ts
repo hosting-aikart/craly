@@ -5,6 +5,7 @@ export type { Category };
 export interface ContractorListing {
   id: string;
   company_name: string;
+  contractor_class?: string | null;
   description: string | null;
   city: string | null;
   state: string | null;

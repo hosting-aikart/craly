@@ -10,6 +10,8 @@ import { listCategories } from '@/lib/api/contractors';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import IndianStateSelect from '@/components/ui/IndianStateSelect';
 import IndustrySelect from '@/components/ui/IndustrySelect';
+import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
+import { type ContractorClass } from '@/lib/constants/contractorClass';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -28,6 +30,7 @@ export default function OnboardingPage() {
   const [workforceSize, setWorkforceSize] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [contractorClass, setContractorClass] = useState<string>('Class IV');
 
   // Business fields
   const [industry, setIndustry] = useState('');
@@ -59,6 +62,7 @@ export default function OnboardingPage() {
             setYearsExperience(profile.years_experience?.toString() ?? '');
             setWorkforceSize(profile.workforce_size?.toString() ?? '');
             setSelectedCategoryIds(profile.categories.map((c) => c.id));
+            if (profile.contractor_class) setContractorClass(profile.contractor_class);
           }
         } else if (user.role === 'business') {
           const { data: profile } = await getMyProfile();
@@ -96,6 +100,7 @@ export default function OnboardingPage() {
           yearsExperience: yearsExperience ? parseInt(yearsExperience, 10) : undefined,
           workforceSize: workforceSize ? parseInt(workforceSize, 10) : undefined,
           categoryIds: selectedCategoryIds,
+          contractorClass: contractorClass || undefined,
         });
         router.push('/contractor-portal/dashboard');
       } else {
@@ -129,15 +134,25 @@ export default function OnboardingPage() {
     >
       <form className="auth-form" onSubmit={handleSubmit}>
         {isContractor && (
-          <label className="auth-field">
-            <span>{t.contractorDetail.companyInfoTitle}</span>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What kind of work do you do, and what makes your team reliable?"
-            />
-          </label>
+          <>
+            <div className="auth-field">
+              <ContractorClassSelect
+                value={contractorClass}
+                onChange={(cls: ContractorClass) => setContractorClass(cls)}
+                showEligibilityTable={true}
+              />
+            </div>
+
+            <label className="auth-field">
+              <span>{t.contractorDetail.companyInfoTitle}</span>
+              <textarea
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What kind of work do you do, and what makes your team reliable?"
+              />
+            </label>
+          </>
         )}
 
         {!isContractor && (

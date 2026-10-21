@@ -39,7 +39,14 @@ export default function ContractorProfileCard({ contractor, backHref, backLabel,
           <div className="profile-card__header">
             <div className="profile-card__avatar">{contractor.company_name.charAt(0).toUpperCase()}</div>
             <div>
-              <ListedBadge />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <ListedBadge />
+                {contractor.contractor_class && (
+                  <span className="profile-card__tag" style={{ background: '#f0fdfa', color: '#0f766e', borderColor: '#99f6e4', fontWeight: 600 }}>
+                    🏛️ {contractor.contractor_class}
+                  </span>
+                )}
+              </div>
               <h1 className="profile-card__name">{contractor.company_name}</h1>
               {location && <p className="profile-card__location"><IconMapPin size={13} className="inline-icon" /> {location}</p>}
             </div>

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { phoneSchema } from './phoneValidator';
 
 import { optionalCountryStateSchema } from './geoAndSkillsValidators';
+import { optionalContractorClassSchema } from './contractorClassValidator';
 
 // NOTE: left as z.enum(['business', 'contractor']) — a concurrent, actively
 // developed effort (OTP-verified signup, organization_members, contractor
@@ -23,6 +24,7 @@ export const signupSchema = z.object({
   state: optionalCountryStateSchema,
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
   yearsExperience: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
+  contractorClass: optionalContractorClassSchema,
 });
 export type SignupInput = z.infer<typeof signupSchema>;
 

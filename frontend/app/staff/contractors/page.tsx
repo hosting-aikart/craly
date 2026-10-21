@@ -151,6 +151,15 @@ export default function StaffContractorsPage() {
               <div className="staff-contractor-card__main">
                 <div className="staff-contractor-card__top">
                   <h3 className="staff-contractor-name">{c.company_name}</h3>
+                  {c.contractor_class ? (
+                    <span className="staff-class-badge" title={`Classification: ${c.contractor_class}`}>
+                      🏛️ {c.contractor_class}
+                    </span>
+                  ) : (
+                    <span className="staff-class-badge staff-class-badge--unassigned" title="No class assigned yet">
+                      Unclassified
+                    </span>
+                  )}
                   <span className={`staff-status-tag staff-status-tag--${c.availability.toLowerCase()}`}>
                     {c.availability.replace(/_/g, ' ')}
                   </span>

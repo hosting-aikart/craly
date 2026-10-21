@@ -17,7 +17,7 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
 
     if (role === 'contractor') {
       const [profile] = await sql`
-        SELECT cp.id, cp.company_name, cp.phone, cp.description, cp.city, cp.state, cp.years_experience,
+        SELECT cp.id, cp.company_name, cp.contractor_class, cp.phone, cp.description, cp.city, cp.state, cp.years_experience,
                cp.workforce_size, cp.industry, cp.skills, cp.service_areas, cp.availability,
                cp.verification_status, cp.verification_note, cp.onboarding_complete,
                cp.last_verified_at, cp.updated_at, cp.created_at, u.email AS user_email
@@ -109,6 +109,7 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
         serviceAreas,
         availability,
         categoryIds,
+        contractorClass,
       } = parsed.data;
 
       const cleanDesc = description !== undefined ? (description ? sanitizeContactInfo(description) : null) : undefined;
@@ -142,6 +143,7 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
           updateFields.service_areas = sql`${lit}::text[]`;
         }
         if (availability !== undefined) updateFields.availability = availability;
+        if (contractorClass !== undefined) updateFields.contractor_class = contractorClass;
 
         const [updated] = await tx`
           UPDATE contractor_profiles SET ${sql(updateFields)}

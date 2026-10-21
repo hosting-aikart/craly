@@ -10,6 +10,7 @@ export type ContractorAvailability = 'AVAILABLE' | 'CURRENTLY_AT_CAPACITY' | 'NO
 export interface InternalContractor {
   id: string;
   company_name: string;
+  contractor_class?: string | null;
   phone: string | null;
   city: string | null;
   state: string | null;
@@ -49,6 +50,7 @@ export interface UpsertInternalContractorInput {
   description?: string;
   notes?: string;
   categoryIds?: number[];
+  contractorClass?: string;
 }
 
 // Walk-in / directly-met contractors with no prior onboarding request —

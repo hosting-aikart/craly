@@ -69,6 +69,7 @@ export interface StaffManufacturerDetail extends StaffManufacturerItem {
 export interface StaffContractorItem {
   id: string;
   company_name: string;
+  contractor_class?: string | null;
   phone: string | null;
   city: string | null;
   state: string | null;
@@ -102,6 +103,7 @@ export interface CreateStaffContractorInput {
   availability?: 'AVAILABLE' | 'CURRENTLY_AT_CAPACITY' | 'NOT_AVAILABLE' | 'PAUSED' | 'SUSPENDED';
   availabilityNote?: string;
   notes?: string;
+  contractorClass?: string;
 }
 
 export interface StaffContractorDetail extends StaffContractorItem {
@@ -136,6 +138,7 @@ export interface StaffEngagementItem {
 export interface StaffVerificationContractorItem {
   id: string;
   company_name: string;
+  contractor_class?: string | null;
   city: string | null;
   state: string | null;
   phone: string | null;
@@ -171,6 +174,7 @@ export interface StaffVerificationDetail {
   contractor: {
     id: string;
     company_name: string;
+    contractor_class?: string | null;
     phone: string | null;
     city: string | null;
     state: string | null;

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { optionalPhoneSchema } from './phoneValidator';
+import { optionalContractorClassSchema } from './contractorClassValidator';
 
 export const createPfContractorSchema = z.object({
   // contractor_profiles has one name field (`company_name`) — field staff
@@ -16,6 +17,7 @@ export const createPfContractorSchema = z.object({
   // directory, distinct from `description` (spec §6).
   notes: z.string().trim().max(2000).optional(),
   categoryIds: z.array(z.number().int()).optional(),
+  contractorClass: optionalContractorClassSchema,
 });
 export type CreatePfContractorInput = z.infer<typeof createPfContractorSchema>;
 

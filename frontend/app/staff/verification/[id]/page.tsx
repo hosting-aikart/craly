@@ -257,6 +257,12 @@ export default function StaffVerificationDetailPage() {
 
         <div className="staff-vd-info-grid">
           <div className="staff-vd-info-item">
+            <label>Contractor Class</label>
+            <span style={{ fontWeight: 600, color: contractor.contractor_class ? '#0f766e' : '#64748b' }}>
+              {contractor.contractor_class ? `🏛️ ${contractor.contractor_class}` : 'Unclassified'}
+            </span>
+          </div>
+          <div className="staff-vd-info-item">
             <label>Industry</label>
             <span>{contractor.industry || 'Not specified'}</span>
           </div>

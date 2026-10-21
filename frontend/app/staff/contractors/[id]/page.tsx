@@ -11,6 +11,8 @@ import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
 import UnlistContractorModal from '@/components/staff/UnlistContractorModal';
 import StaffContractorDocumentsSection from '@/components/staff/StaffContractorDocumentsSection';
+import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
+import { type ContractorClass } from '@/lib/constants/contractorClass';
 import './staff-contractor-detail.css';
 
 export default function StaffContractorDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +38,7 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
   const [availability, setAvailability] = useState<'AVAILABLE' | 'CURRENTLY_AT_CAPACITY' | 'NOT_AVAILABLE' | 'PAUSED' | 'SUSPENDED'>('AVAILABLE');
   const [availabilityNote, setAvailabilityNote] = useState('');
   const [serviceAreasInput, setServiceAreasInput] = useState('');
+  const [contractorClass, setContractorClass] = useState<string>('');
 
   useEffect(() => {
     getStaffContractorById(resolvedParams.id)
@@ -52,6 +55,7 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
         setAvailability((data.availability as any) || 'AVAILABLE');
         setAvailabilityNote(data.availability_note || '');
         setServiceAreasInput((data.service_areas || []).join(', '));
+        setContractorClass(data.contractor_class || '');
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Contractor not found'))
       .finally(() => setLoading(false));
@@ -85,6 +89,7 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
         availability,
         availabilityNote,
         serviceAreas,
+        contractorClass: contractorClass || undefined,
       });
 
       setContractor(res.data);
@@ -156,6 +161,12 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
           <span className={`status-pill status-pill--${contractor.availability.toLowerCase()}`}>
             {contractor.availability.replace(/_/g, ' ')}
           </span>
+          <span className="verification-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            Class:{' '}
+            <strong style={{ color: contractor.contractor_class ? '#0f766e' : '#64748b' }}>
+              {contractor.contractor_class ? `🏛️ ${contractor.contractor_class}` : 'Unclassified'}
+            </strong>
+          </span>
           <span className="verification-label">
             Verification:{' '}
             <strong style={{
@@ -213,6 +224,14 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
                 required
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group col-span-2">
+              <ContractorClassSelect
+                value={contractorClass}
+                onChange={(cls: ContractorClass) => setContractorClass(cls)}
+                showEligibilityTable={true}
               />
             </div>
 

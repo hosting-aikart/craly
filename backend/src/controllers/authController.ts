@@ -160,7 +160,7 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
       err.statusCode = 400;
       return next(err);
     }
-    const { email, password, role, companyName, mobile, city, state, workforceSize, yearsExperience } = parsed.data;
+    const { email, password, role, companyName, mobile, city, state, workforceSize, yearsExperience, contractorClass } = parsed.data;
 
     // Check if user already exists
     const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
@@ -202,10 +202,10 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
       if (role === 'contractor') {
         const [cProfile] = await tx`
           INSERT INTO contractor_profiles (
-            user_id, company_name, phone, city, state, workforce_size, years_experience, verification_status
+            user_id, company_name, contractor_class, phone, city, state, workforce_size, years_experience, verification_status
           )
           VALUES (
-            ${newUser.id}, ${companyName}, ${mobile ?? null}, ${city ?? null}, ${state ?? null},
+            ${newUser.id}, ${companyName}, ${contractorClass || null}, ${mobile ?? null}, ${city ?? null}, ${state ?? null},
             ${workforceSize ?? null}, ${yearsExperience ?? null}, 'pending'
           )
           RETURNING id

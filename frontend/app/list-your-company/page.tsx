@@ -7,6 +7,8 @@ import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
 import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import IndustrySelect from '@/components/ui/IndustrySelect';
+import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
+import type { ContractorClass } from '@/lib/constants/contractorClass';
 import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import '@/components/AuthForm.css';
 import './list-your-company.css';
@@ -27,6 +29,7 @@ export default function ListYourCompanyPage() {
   const [workforceCount, setWorkforceCount] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
   const [yearsExperience, setYearsExperience] = useState('');
+  const [contractorClass, setContractorClass] = useState<string>('Class IV');
   const [message, setMessage] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
@@ -54,7 +57,7 @@ export default function ListYourCompanyPage() {
         workforceCount: workforceCount ? Number(workforceCount) : undefined,
         skills: skills.length > 0 ? skills.join(', ') : undefined,
         yearsExperience: yearsExperience ? Number(yearsExperience) : undefined,
-        message: message || undefined,
+        message: message ? `${message} (Class: ${contractorClass})` : `Class: ${contractorClass}`,
       });
       setSubmitted(true);
     } catch (err) {
@@ -145,6 +148,15 @@ export default function ListYourCompanyPage() {
               label="Skills / Services"
               placeholder="Search and select skills / services..."
               popularSkills={['Welding', 'Fabrication', 'Electrical', 'Assembly', 'General Labor', 'CNC Machining']}
+            />
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <ContractorClassSelect
+              label="Class"
+              value={contractorClass}
+              onChange={(cls: ContractorClass) => setContractorClass(cls)}
+              showEligibilityTable={true}
             />
           </div>
 
