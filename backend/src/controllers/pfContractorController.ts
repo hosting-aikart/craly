@@ -63,7 +63,7 @@ export async function createPfContractor(req: Request, res: Response, next: Next
   try {
     const parsed = createPfContractorSchema.safeParse(req.body);
     if (!parsed.success) return next(badRequest(parsed.error.issues[0]?.message ?? 'Invalid input'));
-    const { companyName, phone, city, serviceAreas, yearsInBusiness, workforceCount, overseasInterest, description, notes, categoryIds } = parsed.data;
+    const { companyName, phone, city, serviceAreas, yearsInBusiness, workforceCount, overseasInterest, description, notes, categoryIds, contractorClass } = parsed.data;
 
     // onboarding_complete starts false — a freshly staff-created profile
     // isn't published to the public directory until Ops Head verifies it
@@ -72,10 +72,10 @@ export async function createPfContractor(req: Request, res: Response, next: Next
     const contractor = await sql.begin(async (tx) => {
       const [row] = await tx`
         INSERT INTO contractor_profiles (
-          company_name, phone, city, service_areas, years_experience,
+          company_name, contractor_class, phone, city, service_areas, years_experience,
           workforce_size, overseas_interest, description, notes, created_by, onboarding_complete
         ) VALUES (
-          ${companyName}, ${phone ?? null}, ${city ?? null},
+          ${companyName}, ${contractorClass ?? null}, ${phone ?? null}, ${city ?? null},
           ${serviceAreas ?? null}, ${yearsInBusiness ?? null}, ${workforceCount ?? null},
           ${overseasInterest ?? false}, ${description ?? null}, ${notes ?? null}, ${req.user!.sub}, false
         )
@@ -139,12 +139,16 @@ export async function updatePfContractor(req: Request, res: Response, next: Next
     const { id } = req.params;
     const parsed = updatePfContractorSchema.safeParse(req.body);
     if (!parsed.success) return next(badRequest(parsed.error.issues[0]?.message ?? 'Invalid input'));
-    const { companyName, phone, city, serviceAreas, yearsInBusiness, workforceCount, overseasInterest, description, notes, categoryIds } = parsed.data;
+    const { companyName, phone, city, serviceAreas, yearsInBusiness, workforceCount, overseasInterest, description, notes, categoryIds, contractorClass } = parsed.data;
 
     const updated = await sql.begin(async (tx) => {
       const [row] = await tx`
         UPDATE contractor_profiles SET
           company_name = COALESCE(${companyName ?? null}, company_name),
+          contractor_class = CASE
+            WHEN ${contractorClass !== undefined} THEN ${contractorClass || null}
+            ELSE contractor_class
+          END,
           phone = COALESCE(${phone ?? null}, phone),
           city = COALESCE(${city ?? null}, city),
           service_areas = COALESCE(${serviceAreas ?? null}, service_areas),

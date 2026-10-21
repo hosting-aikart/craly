@@ -10,6 +10,7 @@ export interface ContractorProfile {
   role: 'contractor';
   id: string;
   company_name: string;
+  contractor_class?: 'Class I' | 'Class II' | 'Class III' | 'Class IV' | null;
   phone?: string | null;
   description: string | null;
   city: string | null;
@@ -69,6 +70,7 @@ export interface ContractorProfileUpdate {
   availability?: string;
   notes?: string;
   categoryIds?: number[];
+  contractorClass?: string;
 }
 
 export interface BusinessProfileUpdate {

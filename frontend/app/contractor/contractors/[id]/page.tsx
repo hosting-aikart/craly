@@ -20,6 +20,8 @@ import LoadingState from '@/components/ui/LoadingState';
 import Button from '@/components/ui/Button';
 import PhoneInput from '@/components/ui/PhoneInput';
 import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
+import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
+import type { ContractorClass } from '@/lib/constants/contractorClass';
 import '../../field-staff.css';
 import '../contractor-form.css';
 
@@ -35,6 +37,7 @@ interface FormState {
   availability: ContractorAvailability;
   notes: string;
   description: string;
+  contractorClass: string;
 }
 
 type RequiredKey = 'phone' | 'city' | 'yearsInBusiness' | 'workforceCount' | 'serviceAreas' | 'categories';
@@ -53,6 +56,7 @@ function toFormState(c: InternalContractor): FormState {
     availability: c.availability,
     notes: c.notes ?? '',
     description: c.description ?? '',
+    contractorClass: c.contractor_class ?? '',
   };
 }
 
@@ -110,6 +114,7 @@ export default function ContractorFormPage() {
       categoryIds: data.categoryIds,
       notes: data.notes || undefined,
       description: data.description || undefined,
+      contractorClass: data.contractorClass || undefined,
     };
     await updateInternalContractor(id, input);
     // Tracked against the last value WE synced, not the original page-load
@@ -254,6 +259,11 @@ export default function ContractorFormPage() {
           <span className={`fs-status-badge ${contractor.onboarding_complete ? 'fs-status-badge--positive' : ''}`}>
             {ft.publicationStatus}: {contractor.onboarding_complete ? ft.published : ft.notPublished}
           </span>
+          {contractor.contractor_class && (
+            <span className="fs-status-badge fs-status-badge--positive">
+              🏛️ {contractor.contractor_class}
+            </span>
+          )}
         </div>
       </div>
 
@@ -277,6 +287,13 @@ export default function ContractorFormPage() {
           <div className="pf-field">
             <label htmlFor="city">{ft.city}</label>
             <input id="city" type="text" value={form.city} onChange={(e) => update('city', e.target.value)} />
+          </div>
+          <div className="pf-field pf-field--full">
+            <ContractorClassSelect
+              value={form.contractorClass}
+              onChange={(cls: ContractorClass) => update('contractorClass', cls)}
+              showEligibilityTable={false}
+            />
           </div>
         </div>
       )}

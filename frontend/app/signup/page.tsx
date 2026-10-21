@@ -14,6 +14,8 @@ import { validatePhoneNumber } from '@/lib/util/phoneValidation';
 import DialCodeSelect from '@/components/ui/DialCodeSelect';
 import CountrySelect from '@/components/ui/CountrySelect';
 import StateSelect from '@/components/ui/StateSelect';
+import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
+import type { ContractorClass } from '@/lib/constants/contractorClass';
 
 /**
  * Manufacturer + Contractor sign-up. Contractors self-register, complete
@@ -44,6 +46,7 @@ function SignupForm() {
   const [city, setCity] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [contractorClass, setContractorClass] = useState<string>('Class IV');
   const [consent, setConsent] = useState(true);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -172,6 +175,7 @@ function SignupForm() {
         country: selectedCountry.name,
         city: city.trim() || undefined,
         state: state.trim() || undefined,
+        contractorClass: role === 'contractor' ? contractorClass : undefined,
       });
       await refresh();
       router.push(role === 'contractor' ? '/contractor-portal/dashboard' : '/business/dashboard');
@@ -308,6 +312,16 @@ function SignupForm() {
                 />
               </div>
             </label>
+
+            {role === 'contractor' && (
+              <div style={{ marginTop: '4px', marginBottom: '8px' }}>
+                <ContractorClassSelect
+                  value={contractorClass}
+                  onChange={(cls: ContractorClass) => setContractorClass(cls)}
+                  showEligibilityTable={true}
+                />
+              </div>
+            )}
 
             <label className="signup-field">
               <span>{t.auth.emailLabel}</span>

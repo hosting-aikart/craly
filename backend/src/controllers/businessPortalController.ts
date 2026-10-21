@@ -440,6 +440,7 @@ export async function getRequirementApplications(req: Request, res: Response, ne
         app.created_at AS submitted_at,
         app.updated_at AS last_updated_at,
         cp.company_name AS contractor_name,
+        cp.contractor_class AS contractor_class,
         cp.city AS contractor_city,
         cp.state AS contractor_state,
         -- Comparison fields only — deliberately no cp.phone and no contractor
@@ -466,6 +467,7 @@ export async function getRequirementApplications(req: Request, res: Response, ne
       const contractorForScoring: ContractorFullProfile = {
         id: app.contractor_id,
         company_name: app.contractor_name,
+        contractor_class: app.contractor_class ?? null,
         phone: null,
         workforce_size: app.contractor_workforce_size,
         industry: app.contractor_industry,
@@ -528,6 +530,7 @@ export async function getAllApplications(req: Request, res: Response, next: Next
         mr.workers_required AS requirement_workers_required,
         mr.status AS requirement_status,
         cp.company_name AS contractor_name,
+        cp.contractor_class AS contractor_class,
         cp.city AS contractor_city,
         cp.state AS contractor_state,
         -- Comparison fields only — no contact details (see getRequirementApplications).
@@ -582,6 +585,7 @@ export async function getApplicationById(req: Request, res: Response, next: Next
         mr.duration AS requirement_duration,
         mr.status AS requirement_status,
         cp.company_name AS contractor_name,
+        cp.contractor_class AS contractor_class,
         cp.city AS contractor_city,
         cp.state AS contractor_state,
         -- Comparison fields only — no contact details (see getRequirementApplications).

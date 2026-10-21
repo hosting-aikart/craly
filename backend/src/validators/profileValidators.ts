@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { optionalPhoneSchema } from './phoneValidator';
 import { optionalIndianStateSchema, optionalSkillsArraySchema } from './geoAndSkillsValidators';
+import { optionalContractorClassSchema } from './contractorClassValidator';
 
 export const contractorProfileSchema = z.object({
   companyName: z.string().min(1).max(200).optional(),
@@ -18,6 +19,7 @@ export const contractorProfileSchema = z.object({
   ]).optional(),
   availability: z.enum(['AVAILABLE', 'CURRENTLY_AT_CAPACITY', 'NOT_AVAILABLE', 'PAUSED', 'SUSPENDED']).optional(),
   categoryIds: z.array(z.number().int()).optional(),
+  contractorClass: optionalContractorClassSchema,
 });
 export type ContractorProfileInput = z.infer<typeof contractorProfileSchema>;
 

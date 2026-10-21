@@ -18,6 +18,7 @@ const applySchema = z.object({
 export interface ContractorFullProfile {
   id: string;
   company_name: string;
+  contractor_class: string | null;
   phone: string | null;
   workforce_size: number | null;
   industry: string | null;
@@ -41,7 +42,7 @@ export interface ContractorFullProfile {
  */
 async function getContractorFullProfile(userId: string): Promise<ContractorFullProfile> {
   const [profile] = await sql<ContractorFullProfile[]>`
-    SELECT id, company_name, phone, workforce_size, industry, years_experience,
+    SELECT id, company_name, contractor_class, phone, workforce_size, industry, years_experience,
            city, state, service_areas, skills, availability,
            onboarding_complete, verification_status,
            overall_rating, ghosting_count, repeat_engagement_count,

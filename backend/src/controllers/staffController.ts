@@ -17,6 +17,7 @@ import {
 } from '../utils/whatsappNotifications';
 
 import { optionalIndianStateSchema, optionalSkillsArraySchema } from '../validators/geoAndSkillsValidators';
+import { contractorClassSchema, optionalContractorClassSchema } from '../validators/contractorClassValidator';
 
 // Schema for adding a new manufacturer profile directly by Staff
 const createManufacturerSchema = z.object({
@@ -49,6 +50,7 @@ const createContractorSchema = z.object({
   serviceAreas: z.array(z.string()).optional(),
   availability: z.enum(['AVAILABLE', 'CURRENTLY_AT_CAPACITY', 'NOT_AVAILABLE', 'PAUSED', 'SUSPENDED']).optional(),
   notes: z.string().optional(),
+  contractorClass: optionalContractorClassSchema,
 });
 
 // Schema for updating a contractor profile
@@ -66,6 +68,7 @@ const updateContractorSchema = z.object({
   serviceAreas: z.array(z.string()).optional(),
   notes: z.string().optional(),
   verificationStatus: z.enum(['unverified', 'pending', 'verified']).optional(),
+  contractorClass: optionalContractorClassSchema,
 });
 
 // Schema for unlisting / relisting a contractor
@@ -147,6 +150,7 @@ export async function getContractors(req: Request, res: Response, next: NextFunc
       SELECT 
         cp.id,
         cp.company_name,
+        cp.contractor_class,
         cp.phone,
         cp.city,
         cp.state,
@@ -219,6 +223,7 @@ export async function createContractor(req: Request, res: Response, next: NextFu
       serviceAreas,
       availability,
       notes,
+      contractorClass,
     } = parsed.data;
 
     const existingUser = await sql`SELECT id FROM users WHERE email = ${email}`;
@@ -253,16 +258,16 @@ export async function createContractor(req: Request, res: Response, next: NextFu
 
       const [profile] = await tx`
         INSERT INTO contractor_profiles (
-          user_id, company_name, phone, description, industry, skills, city, state, workforce_size,
+          user_id, company_name, contractor_class, phone, description, industry, skills, city, state, workforce_size,
           years_experience, service_areas, availability, notes,
           verification_status, onboarding_complete, last_verified_at, created_by
         )
         VALUES (
-          ${newUser.id}, ${companyName}, ${phone || null}, ${null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
+          ${newUser.id}, ${companyName}, ${contractorClass || null}, ${phone || null}, ${null}, ${industry || null}, ${toPgTextArrayLiteral(skills || [])}::text[], ${city || null}, ${state || null},
           ${workforceSize || null}, ${yearsExperience || null}, ${serviceAreas || null},
           ${availability || 'AVAILABLE'}, ${notes || null}, 'pending', true, null, ${req.user!.sub}
         )
-        RETURNING id, user_id, company_name, phone, city, state, workforce_size, availability, created_at
+        RETURNING id, user_id, company_name, contractor_class, phone, city, state, workforce_size, availability, created_at
       `;
 
       await tx`
@@ -309,6 +314,7 @@ export async function getContractorById(req: Request, res: Response, next: NextF
       SELECT 
         cp.id,
         cp.company_name,
+        cp.contractor_class,
         cp.description,
         cp.skills,
         cp.phone,
@@ -379,6 +385,7 @@ export async function updateContractor(req: Request, res: Response, next: NextFu
       availabilityNote,
       serviceAreas,
       notes,
+      contractorClass,
     } = parsed.data;
 
     const [updated] = await sql`
@@ -398,6 +405,10 @@ export async function updateContractor(req: Request, res: Response, next: NextFu
         availability = COALESCE(${availability ?? null}, availability),
         availability_note = COALESCE(${availabilityNote ?? notes ?? null}, availability_note),
         service_areas = COALESCE(${serviceAreas ?? null}, service_areas),
+        contractor_class = CASE
+          WHEN ${contractorClass !== undefined} THEN ${contractorClass || null}
+          ELSE contractor_class
+        END,
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
@@ -666,6 +677,7 @@ export async function getStaffVerificationContractors(req: Request, res: Respons
       SELECT 
         cp.id,
         cp.company_name,
+        cp.contractor_class,
         cp.city,
         cp.state,
         cp.phone,
@@ -722,7 +734,7 @@ export async function getStaffVerificationContractorById(req: Request, res: Resp
 
     const [contractor] = await sql`
       SELECT 
-        cp.id, cp.company_name, cp.phone, cp.city, cp.state, cp.industry,
+        cp.id, cp.company_name, cp.contractor_class, cp.phone, cp.city, cp.state, cp.industry,
         cp.workforce_size, cp.years_experience, cp.verification_status,
         cp.verification_note, cp.last_verified_at, cp.created_at, cp.user_id,
         cp.description, cp.skills, cp.service_areas,
