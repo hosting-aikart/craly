@@ -5,6 +5,8 @@ import {
   getWorksitePhotos,
   uploadWorksitePhotos,
   deleteWorksitePhoto,
+  getStaffWorksitePhotos,
+  deleteStaffWorksitePhoto,
   type WorksitePhotoItem,
 } from '@/lib/api/worksitePhotos';
 import LoadingState from '@/components/ui/LoadingState';
@@ -24,7 +26,16 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-export default function WorksitePhotosSection() {
+interface WorksitePhotosSectionProps {
+  /**
+   * Set by the staff contractor page: shows that contractor's photos through
+   * the staff endpoints, view + delete only (uploading stays with the contractor).
+   */
+  staffContractorId?: string;
+}
+
+export default function WorksitePhotosSection({ staffContractorId }: WorksitePhotosSectionProps = {}) {
+  const isStaffView = Boolean(staffContractorId);
   const [photos, setPhotos] = useState<WorksitePhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -46,7 +57,9 @@ export default function WorksitePhotosSection() {
 
   const fetchPhotos = async () => {
     try {
-      const res = await getWorksitePhotos();
+      const res = staffContractorId
+        ? await getStaffWorksitePhotos(staffContractorId)
+        : await getWorksitePhotos();
       setPhotos(res.data || []);
     } catch (err) {
       console.error('Failed to load worksite photos:', err);
@@ -57,7 +70,7 @@ export default function WorksitePhotosSection() {
 
   useEffect(() => {
     fetchPhotos();
-  }, []);
+  }, [staffContractorId]);
 
   // Cleanup object URLs for staged files to prevent memory leaks
   useEffect(() => {
@@ -194,7 +207,11 @@ export default function WorksitePhotosSection() {
     setSuccessMsg('');
 
     try {
-      await deleteWorksitePhoto(photoId);
+      if (staffContractorId) {
+        await deleteStaffWorksitePhoto(staffContractorId, photoId);
+      } else {
+        await deleteWorksitePhoto(photoId);
+      }
       setSuccessMsg('Worksite photo deleted successfully.');
       setConfirmDeletePhoto(null);
       await fetchPhotos();
@@ -223,7 +240,9 @@ export default function WorksitePhotosSection() {
             <div>
               <h3 className="worksite-photos-title">Worksite Photos</h3>
               <p className="worksite-photos-subtitle">
-                Showcase active and completed industrial project worksites to build manufacturer trust
+                {isStaffView
+                  ? 'Photos this contractor uploaded to their profile. Remove any that are inappropriate or misleading.'
+                  : 'Showcase active and completed industrial project worksites to build manufacturer trust'}
               </p>
             </div>
           </div>
@@ -271,8 +290,8 @@ export default function WorksitePhotosSection() {
             </div>
           )}
 
-          {/* Upload Section: disabled or hidden if 10/10 reached */}
-          {isLimitReached ? (
+          {/* Upload Section: disabled or hidden if 10/10 reached; staff never upload */}
+          {isStaffView ? null : isLimitReached ? (
             <div className="worksite-alert worksite-alert--warning" style={{ margin: 0 }}>
               <IconAlertTriangle size={18} />
               <div>
@@ -395,7 +414,11 @@ export default function WorksitePhotosSection() {
             <EmptyState
               icon={<IconFolder size={32} />}
               title="No Worksite Photos Uploaded"
-              subtitle="Upload up to 10 photos of your active fabrication shops, plant installations, or project work to demonstrate operational scale."
+              subtitle={
+                isStaffView
+                  ? 'This contractor has not uploaded any worksite photos yet.'
+                  : 'Upload up to 10 photos of your active fabrication shops, plant installations, or project work to demonstrate operational scale.'
+              }
             />
           ) : (
             <div>
@@ -528,8 +551,9 @@ export default function WorksitePhotosSection() {
             <h4 className="worksite-confirm-title">Delete Worksite Photo?</h4>
             <p className="worksite-confirm-text">
               Are you sure you want to delete <strong>&ldquo;{confirmDeletePhoto.fileName}&rdquo;</strong>?
-              This image will be permanently removed from your profile and Cloudflare R2 vault.
-              A slot will be freed up for a new upload.
+              {isStaffView
+                ? "This image will be permanently removed from the contractor's profile and file storage. This cannot be undone."
+                : 'This image will be permanently removed from your profile and Cloudflare R2 vault. A slot will be freed up for a new upload.'}
             </p>
             <div className="worksite-confirm-actions">
               <button

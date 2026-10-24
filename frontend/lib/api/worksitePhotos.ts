@@ -33,3 +33,13 @@ export const deleteWorksitePhoto = (photoId: string) =>
     data: { id: string; deleted: boolean };
     meta: { count: number; max: number; remaining: number };
   }>(`/contractor-portal/worksite-photos/${photoId}`);
+
+// Staff view of a contractor's worksite photos — view + delete only.
+export const getStaffWorksitePhotos = (contractorId: string) =>
+  apiGet<WorksitePhotosResponse>(`/staff/contractors/${contractorId}/worksite-photos`);
+
+export const deleteStaffWorksitePhoto = (contractorId: string, photoId: string) =>
+  apiDelete<{
+    data: { id: string; deleted: boolean };
+    meta: { count: number; max: number; remaining: number };
+  }>(`/staff/contractors/${contractorId}/worksite-photos/${photoId}`);

@@ -11,6 +11,7 @@ import SkillMultiSelect from '@/components/ui/SkillMultiSelect';
 import AvailabilitySelect from '@/components/ui/AvailabilitySelect';
 import UnlistContractorModal from '@/components/staff/UnlistContractorModal';
 import StaffContractorDocumentsSection from '@/components/staff/StaffContractorDocumentsSection';
+import WorksitePhotosSection from '@/components/contractor/WorksitePhotosSection';
 import ContractorClassSelect from '@/components/ui/ContractorClassSelect';
 import { type ContractorClass } from '@/lib/constants/contractorClass';
 import './staff-contractor-detail.css';
@@ -335,6 +336,8 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
         contractorId={contractor.id}
         contractorName={contractor.company_name}
       />
+
+      <WorksitePhotosSection staffContractorId={contractor.id} />
 
       <UnlistContractorModal
         isOpen={modalOpen}

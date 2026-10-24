@@ -67,55 +67,105 @@ async function getContractorIdFromUserId(userId: string): Promise<string> {
 }
 
 /**
+ * Lists a contractor's worksite photos with signed URLs. Shared by the
+ * contractor's own portal and the staff contractor view.
+ */
+async function listWorksitePhotos(contractorId: string) {
+  const rows = await sql`
+    SELECT id, contractor_id, storage_key, file_name, mime_type, size_bytes,
+           caption, display_order, created_at, updated_at
+    FROM contractor_worksite_photos
+    WHERE contractor_id = ${contractorId}
+    ORDER BY display_order ASC, created_at ASC
+  `;
+
+  // Mint signed URLs for all photos (valid for 1 hour for smooth browsing)
+  const photosWithUrls = await Promise.all(
+    rows.map(async (row) => {
+      let url = '';
+      try {
+        url = await getSignedGetUrl(row.storage_key, 3600);
+      } catch (e) {
+        // If signed URL generation fails for an individual item, log but continue
+        console.error(`Failed to generate signed URL for worksite photo ${row.id}:`, e);
+      }
+      return {
+        id: row.id,
+        contractorId: row.contractor_id,
+        fileName: row.file_name,
+        mimeType: row.mime_type,
+        sizeBytes: row.size_bytes,
+        caption: row.caption,
+        displayOrder: row.display_order,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        url,
+      };
+    })
+  );
+
+  const count = photosWithUrls.length;
+  return {
+    data: photosWithUrls,
+    meta: {
+      count,
+      max: MAX_WORKSITE_PHOTOS_COUNT,
+      remaining: Math.max(0, MAX_WORKSITE_PHOTOS_COUNT - count),
+    },
+  };
+}
+
+/**
+ * Deletes one worksite photo (storage object + row) belonging to the given
+ * contractor and records who did it. Returns null if the photo isn't theirs.
+ */
+async function removeWorksitePhoto(contractorId: string, photoId: string, actorId: string, auditAction: string) {
+  const [photo] = await sql`
+    SELECT id, storage_key, file_name FROM contractor_worksite_photos
+    WHERE id = ${photoId} AND contractor_id = ${contractorId}
+  `;
+  if (!photo) return null;
+
+  // Delete from file storage
+  try {
+    await deleteObject(photo.storage_key);
+  } catch (e) {
+    console.warn(`Could not delete stored object ${photo.storage_key}:`, e);
+  }
+
+  // Delete row from DB
+  await sql`DELETE FROM contractor_worksite_photos WHERE id = ${photoId} AND contractor_id = ${contractorId}`;
+
+  // Get updated count
+  const [{ count }] = await sql`
+    SELECT count(*)::int AS count
+    FROM contractor_worksite_photos
+    WHERE contractor_id = ${contractorId}
+  `;
+
+  await logAudit(actorId, auditAction, 'contractor_worksite_photo', photoId, undefined, {
+    contractorId,
+    fileName: photo.file_name,
+  });
+
+  return {
+    data: { id: photoId, deleted: true },
+    meta: {
+      count,
+      max: MAX_WORKSITE_PHOTOS_COUNT,
+      remaining: Math.max(0, MAX_WORKSITE_PHOTOS_COUNT - count),
+    },
+  };
+}
+
+/**
  * GET /api/contractor-portal/worksite-photos
  * Returns all worksite photos for the authenticated contractor with signed URLs.
  */
 export async function getMyWorksitePhotos(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const contractorId = await getContractorIdFromUserId(req.user!.sub);
-
-    const rows = await sql`
-      SELECT id, contractor_id, storage_key, file_name, mime_type, size_bytes,
-             caption, display_order, created_at, updated_at
-      FROM contractor_worksite_photos
-      WHERE contractor_id = ${contractorId}
-      ORDER BY display_order ASC, created_at ASC
-    `;
-
-    // Mint signed URLs for all photos (valid for 1 hour for smooth browsing)
-    const photosWithUrls = await Promise.all(
-      rows.map(async (row) => {
-        let url = '';
-        try {
-          url = await getSignedGetUrl(row.storage_key, 3600);
-        } catch (e) {
-          // If signed URL generation fails for an individual item, log but continue
-          console.error(`Failed to generate signed URL for worksite photo ${row.id}:`, e);
-        }
-        return {
-          id: row.id,
-          contractorId: row.contractor_id,
-          fileName: row.file_name,
-          mimeType: row.mime_type,
-          sizeBytes: row.size_bytes,
-          caption: row.caption,
-          displayOrder: row.display_order,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
-          url,
-        };
-      })
-    );
-
-    const count = photosWithUrls.length;
-    res.json({
-      data: photosWithUrls,
-      meta: {
-        count,
-        max: MAX_WORKSITE_PHOTOS_COUNT,
-        remaining: Math.max(0, MAX_WORKSITE_PHOTOS_COUNT - count),
-      },
-    });
+    res.json(await listWorksitePhotos(contractorId));
   } catch (err) {
     next(err);
   }
@@ -267,47 +317,45 @@ export async function uploadMyWorksitePhotos(req: Request, res: Response, next: 
 export async function deleteMyWorksitePhoto(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const contractorId = await getContractorIdFromUserId(req.user!.sub);
-    const { photoId } = req.params;
-
-    const [photo] = await sql`
-      SELECT id, storage_key, file_name FROM contractor_worksite_photos
-      WHERE id = ${photoId} AND contractor_id = ${contractorId}
-    `;
-
-    if (!photo) {
+    const result = await removeWorksitePhoto(contractorId, req.params.photoId, req.user!.sub, 'worksite_photo:delete');
+    if (!result) {
       return next(notFound('Worksite photo not found or does not belong to your company'));
     }
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
 
-    // Delete from file storage
-    try {
-      await deleteObject(photo.storage_key);
-    } catch (e) {
-      console.warn(`Could not delete stored object ${photo.storage_key}:`, e);
+async function assertContractorExists(contractorId: string): Promise<void> {
+  const [row] = await sql`SELECT id FROM contractor_profiles WHERE id = ${contractorId}`;
+  if (!row) throw notFound('Contractor not found');
+}
+
+/**
+ * GET /api/staff/contractors/:id/worksite-photos
+ * Staff view of a contractor's worksite photos.
+ */
+export async function getStaffContractorWorksitePhotos(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    await assertContractorExists(req.params.id);
+    res.json(await listWorksitePhotos(req.params.id));
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/staff/contractors/:id/worksite-photos/:photoId
+ * Staff removal of a contractor's worksite photo (e.g. inappropriate or misleading content).
+ */
+export async function deleteStaffContractorWorksitePhoto(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const result = await removeWorksitePhoto(req.params.id, req.params.photoId, req.user!.sub, 'worksite_photo:staff_delete');
+    if (!result) {
+      return next(notFound('Worksite photo not found for this contractor'));
     }
-
-    // Delete row from DB
-    await sql`DELETE FROM contractor_worksite_photos WHERE id = ${photoId} AND contractor_id = ${contractorId}`;
-
-    // Get updated count
-    const [{ count }] = await sql`
-      SELECT count(*)::int AS count
-      FROM contractor_worksite_photos
-      WHERE contractor_id = ${contractorId}
-    `;
-
-    await logAudit(req.user!.sub, 'worksite_photo:delete', 'contractor_worksite_photo', photoId, undefined, {
-      contractorId,
-      fileName: photo.file_name,
-    });
-
-    res.json({
-      data: { id: photoId, deleted: true },
-      meta: {
-        count,
-        max: MAX_WORKSITE_PHOTOS_COUNT,
-        remaining: Math.max(0, MAX_WORKSITE_PHOTOS_COUNT - count),
-      },
-    });
+    res.json(result);
   } catch (err) {
     next(err);
   }

@@ -28,6 +28,10 @@ import {
   deleteDocument,
   documentUpload,
 } from '../controllers/documentController';
+import {
+  getStaffContractorWorksitePhotos,
+  deleteStaffContractorWorksitePhoto,
+} from '../controllers/worksitePhotoController';
 
 const router = Router();
 
@@ -56,6 +60,8 @@ router.get('/contractors/:id/documents', listDocuments);
 router.post('/contractors/:id/documents', documentUpload, uploadDocument);
 router.get('/contractors/:id/documents/:documentId/signed-url', getDocumentSignedUrl);
 router.delete('/contractors/:id/documents/:documentId', deleteDocument);
+router.get('/contractors/:id/worksite-photos', getStaffContractorWorksitePhotos);
+router.delete('/contractors/:id/worksite-photos/:photoId', deleteStaffContractorWorksitePhoto);
 
 // Manufacturer management
 router.get('/manufacturers', getManufacturers);
