@@ -68,4 +68,6 @@ export const optionalPhoneSchema = z
     {
       message: 'Please enter a valid phone number (e.g. +91 98765 43210 or 10-digit mobile number)',
     }
-  );
+  )
+  // Zod 4: needed for an omitted key to pass (see contractorClassValidator).
+  .optional();

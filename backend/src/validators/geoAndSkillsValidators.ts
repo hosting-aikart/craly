@@ -55,7 +55,9 @@ export const optionalIndianStateSchema = z
       return val.trim();
     }
     return norm;
-  });
+  })
+  // Zod 4: needed for an omitted key to pass (see contractorClassValidator).
+  .optional();
 
 /**
  * Country-aware state validator for multi-country signup and profiles.
@@ -70,7 +72,8 @@ export const optionalCountryStateSchema = z
     const indianNorm = normalizeIndianState(clean);
     if (indianNorm) return indianNorm;
     return clean;
-  });
+  })
+  .optional();
 
 /**
  * Single skill validator.
@@ -152,4 +155,5 @@ export const optionalSkillsArraySchema = z
       }
     }
     return cleaned;
-  });
+  })
+  .optional();

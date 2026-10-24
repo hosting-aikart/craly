@@ -25,6 +25,15 @@ export const signupSchema = z.object({
   workforceSize: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
   yearsExperience: z.union([z.number(), z.string().transform((v) => parseInt(v, 10))]).optional(),
   contractorClass: optionalContractorClassSchema,
+}).superRefine((val, ctx) => {
+  // Class applies to contractors only; manufacturers (role 'business') never send it.
+  if (val.role === 'contractor' && !val.contractorClass) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['contractorClass'],
+      message: 'Please select a contractor class',
+    });
+  }
 });
 export type SignupInput = z.infer<typeof signupSchema>;
 
