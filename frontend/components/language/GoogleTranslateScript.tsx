@@ -13,20 +13,50 @@ declare global {
 
 const COOKIE_NAME = 'googtrans';
 
+/**
+ * Every domain a googtrans cookie may live on for this page: host-only, plus
+ * the host and each parent domain with a leading dot. Google's element.js
+ * writes its own cookie on the root domain (e.g. `.craly.co`) while the page
+ * may be served from `www.craly.co` — if we only touch the exact hostname, that
+ * root-domain cookie survives every switch and the page snaps back to it.
+ * Browsers silently ignore invalid domains (public suffixes, `.localhost`).
+ */
+function cookieDomains(): (string | null)[] {
+  const labels = window.location.hostname.split('.');
+  const domains: (string | null)[] = [null];
+  // Stop before the bare TLD ("co", "com", "in").
+  for (let i = 0; i < labels.length - 1; i++) {
+    const domain = labels.slice(i).join('.');
+    domains.push(domain, `.${domain}`);
+  }
+  return domains;
+}
+
+function writeGoogTransCookie(value: string): void {
+  for (const domain of cookieDomains()) {
+    const domainAttr = domain ? `; domain=${domain}` : '';
+    document.cookie = `${COOKIE_NAME}=${value}${domainAttr}; path=/; max-age=31536000; SameSite=Lax`;
+  }
+}
+
+/** Removes googtrans everywhere — the only reliable way back to the untranslated page. */
+function clearGoogTransCookie(): void {
+  for (const domain of cookieDomains()) {
+    const domainAttr = domain ? `; domain=${domain}` : '';
+    document.cookie = `${COOKIE_NAME}=${domainAttr}; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+  }
+}
+
 export function cleanupUnsupportedCookies(): void {
   if (typeof window === 'undefined') return;
 
-  const domain = window.location.hostname;
   const match = document.cookie.match(new RegExp('(^|; )' + COOKIE_NAME + '=([^;]+)'));
   if (match && match[2]) {
     const parts = decodeURIComponent(match[2]).split('/');
     const code = parts[parts.length - 1];
     if (code && code !== 'auto' && !isSupportedLanguage(code)) {
-      // Clear unsupported cookie or reset to /auto/en
-      const fallbackCookie = '/auto/en';
-      document.cookie = `${COOKIE_NAME}=${fallbackCookie}; path=/; max-age=31536000; SameSite=Lax`;
-      document.cookie = `${COOKIE_NAME}=${fallbackCookie}; domain=.${domain}; path=/; max-age=31536000; SameSite=Lax`;
-      document.cookie = `${COOKIE_NAME}=${fallbackCookie}; domain=${domain}; path=/; max-age=31536000; SameSite=Lax`;
+      // Unsupported language left over from an older setup — back to the original page.
+      clearGoogTransCookie();
     }
   }
 }
@@ -71,15 +101,19 @@ export function changeGoogleTranslateLanguage(langCode: string): void {
   // 1. Store in localStorage
   localStorage.setItem('craly_lang', targetCode);
 
-  // 2. Set cookies across all domains/paths
-  const domain = window.location.hostname;
-  const cookieValue = `/auto/${targetCode}`;
+  // 2. English is the page's own language: drop the cookie on every domain and
+  // reload. Selecting "en" in Google's dropdown doesn't reliably undo a
+  // translation, and a leftover cookie would re-translate on the next load.
+  if (targetCode === 'en') {
+    clearGoogTransCookie();
+    window.location.reload();
+    return;
+  }
 
-  document.cookie = `${COOKIE_NAME}=${cookieValue}; path=/; max-age=31536000; SameSite=Lax`;
-  document.cookie = `${COOKIE_NAME}=${cookieValue}; domain=.${domain}; path=/; max-age=31536000; SameSite=Lax`;
-  document.cookie = `${COOKIE_NAME}=${cookieValue}; domain=${domain}; path=/; max-age=31536000; SameSite=Lax`;
+  // 3. Set the cookie on every domain so no stale copy can override it
+  writeGoogTransCookie(`/en/${targetCode}`);
 
-  // 3. Dispatch change event to the hidden Google Translate dropdown if loaded
+  // 4. Dispatch change event to the hidden Google Translate dropdown if loaded
   const selectElem = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
   if (selectElem) {
     selectElem.value = targetCode;
