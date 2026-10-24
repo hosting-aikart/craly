@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import sql from '../db/index';
 import { z } from 'zod';
 import { createNotification, notifyUsersByRole } from '../utils/notifications';
-import { requirementEligibilityCondition, extractIndustryKeywords } from '../utils/opportunityMatching';
+import { requirementEligibilityCondition, extractIndustryKeywords, normalizeMatchText } from '../utils/opportunityMatching';
 import { notifyApplicationEvent, notifyManufacturerNewApplication } from '../utils/whatsappNotifications';
 import type { AppError } from '../middlewares/errorHandler';
 
@@ -193,13 +193,16 @@ function scoreLocationPrecision(
     return { weight: 20, score: 1.0, reasons: ['No location constraint on requirement'] };
   }
 
-  const reqCity = opCity ? normalize(opCity) : '';
-  const reqState = opState ? normalize(opState) : '';
-  const conCity = contractor.city ? normalize(contractor.city) : '';
-  const conState = contractor.state ? normalize(contractor.state) : '';
+  // Same normalisation + whole-word city rule as the eligibility filter
+  // (opportunityMatching.ts), so "Mumbai, India" scores as a Mumbai match.
+  const reqCity = normalizeMatchText(opCity);
+  const reqState = normalizeMatchText(opState);
+  const conCity = normalizeMatchText(contractor.city);
+  const conState = normalizeMatchText(contractor.state);
+  const containsWord = (haystack: string, needle: string) => ` ${haystack} `.includes(` ${needle} `);
 
-  // 1. Exact city match
-  if (reqCity && conCity && conCity === reqCity) {
+  // 1. City match
+  if (reqCity && conCity && (containsWord(conCity, reqCity) || containsWord(reqCity, conCity))) {
     reasons.push(`Exact city match: ${contractor.city}`);
     return { weight: 20, score: 1.0, reasons };
   }
@@ -211,7 +214,7 @@ function scoreLocationPrecision(
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const matchedArea = flatAreas.find((sa) => normalize(sa) === reqCity);
+    const matchedArea = flatAreas.find((sa) => normalizeMatchText(sa) === reqCity);
     if (matchedArea) {
       reasons.push(`Coverage area match: ${matchedArea} in your service areas`);
       return { weight: 20, score: 0.8, reasons };

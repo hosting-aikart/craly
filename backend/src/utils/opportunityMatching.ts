@@ -9,27 +9,55 @@ import { toPgTextArrayLiteral } from './pgArray';
  * to, dashboard counts always agree with the list, and notifications never
  * drift from what's actually shown.
  *
- * Eligibility requires ALL of:
- *   1. contractor.workforce_size >= requirement.workers_required
- *   2. industry matches (blank requirement industry = no constraint)
- *   3. contractor.state == requirement.state (exact match, case/whitespace
- *      insensitive) — state alone is never sufficient on its own.
- *   4. AND contractor.city == requirement.city, OR requirement.city is one
- *      of contractor.service_areas (exact match, case/whitespace
- *      insensitive).
- *   5. contractor.availability must NOT be 'NOT_AVAILABLE' or 'SUSPENDED'
- *      — don't show jobs to contractors who can't take work right now.
- *      'CURRENTLY_AT_CAPACITY' and 'PAUSED' are allowed (they may free up).
- *   6. If the requirement specifies experience_required (> 0), the contractor
- *      must have at least the required experience (contractor.years_experience
- *      >= requirement.experience_required). Missing/null contractor experience
- *      is rejected if experience is required.
+ * These are deliberately loose hard filters — they only rule out clear
+ * non-fits. How good a fit is (skills, exact vs nearby location, industry,
+ * full vs partial capacity) is expressed by the match score in
+ * contractorPortalController (calculateOpportunityMatch), not by hiding
+ * the requirement.
  *
- * A NULL/blank requirement city or state is treated as "no constraint" —
- * this only matters for requirements published before the city/state
- * columns existed (see migration 1788800000000) so old records don't
- * silently become permanently unmatchable.
+ * Eligibility requires ALL of:
+ *   1. contractor.workforce_size >= MIN_WORKFORCE_COVERAGE (70%) of
+ *      requirement.workers_required — the same "close to requirement"
+ *      threshold the score uses; a requirement can be filled by more than
+ *      one contractor.
+ *   2. Location — ANY of:
+ *        - contractor city and requirement city match as whole words
+ *          ("Mumbai, India" ~ "mumbai", "Pune." ~ "Pune")
+ *        - requirement city is one of contractor.service_areas
+ *        - contractor.state == requirement.state
+ *      Text is compared after lowercasing and collapsing punctuation /
+ *      whitespace (see normSql).
+ *   3. contractor.availability must NOT be 'NOT_AVAILABLE' or 'SUSPENDED'
+ *      (contractor -> requirements direction only checks this on the
+ *      notifications side, matching previous behaviour).
+ *   4. If the requirement specifies experience_required (> 0), the contractor
+ *      must have at least that much experience. Missing contractor
+ *      experience is rejected if experience is required.
+ *
+ * Industry is NOT a hard filter: manpower contractors routinely supply
+ * workers across industries, so an industry mismatch only lowers the score.
+ *
+ * A NULL/blank requirement city AND state is treated as "no location
+ * constraint" — this only matters for requirements published before the
+ * city/state columns existed (see migration 1788800000000).
  */
+
+/** Minimum share of requirement.workers_required a contractor must be able to supply. */
+export const MIN_WORKFORCE_COVERAGE = 0.7;
+
+/**
+ * SQL expression normalising free text for comparison: lowercase, every run
+ * of non-alphanumerics collapsed to one space, trimmed.
+ * "  Mumbai, India " -> "mumbai india", "pune." -> "pune".
+ */
+function normSql(expr: ReturnType<typeof sql>) {
+  return sql`TRIM(REGEXP_REPLACE(LOWER(COALESCE(${expr}, '')), '[^a-z0-9]+', ' ', 'g'))`;
+}
+
+/** Same normalisation as normSql, for JS values. */
+export function normalizeMatchText(val: string | null | undefined): string {
+  return (val || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
 
 export interface MatchContractorProfile {
   workforce_size: number | null;
@@ -73,9 +101,8 @@ export function extractIndustryKeywords(ind: string | null | undefined): string[
  */
 export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   const workforce = cp.workforce_size ?? 0;
-  const industry = cp.industry || '';
-  const city = cp.city || '';
-  const state = cp.state || '';
+  const city = normalizeMatchText(cp.city);
+  const state = normalizeMatchText(cp.state);
   const yearsExperience = cp.years_experience;
   const hasExperience = yearsExperience !== null && yearsExperience !== undefined;
   // sql.array() is unreliable inside a dynamic query fragment like this one
@@ -84,38 +111,26 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
   // text[], producing "malformed array literal" and making the whole
   // opportunities query throw for any contractor with service_areas set).
   // Building the literal ourselves and casting it explicitly sidesteps that.
-  const serviceAreasLiteral = toPgTextArrayLiteral(cp.service_areas || []);
-  const industryKeywords = extractIndustryKeywords(cp.industry);
-  const industryKeywordsLiteral = toPgTextArrayLiteral(industryKeywords);
+  const serviceAreasLiteral = toPgTextArrayLiteral(
+    (cp.service_areas || []).flatMap((sa) => String(sa).split(',')).map(normalizeMatchText).filter(Boolean),
+  );
+  const reqCity = normSql(sql`mr.city`);
+  const reqState = normSql(sql`mr.state`);
 
   return sql`(
-    -- 1. Worker capacity
-    (${workforce} >= mr.workers_required)
-    -- 2. Industry: exact match or keyword overlap (e.g. "Construction & Infrastructure" matches "Infrastructure and construction")
+    -- 1. Worker capacity: can supply at least MIN_WORKFORCE_COVERAGE of the headcount
+    (${workforce}::numeric >= mr.workers_required * ${MIN_WORKFORCE_COVERAGE}::numeric)
+    -- 2. Location: city (whole-word), service area, or same state
     AND (
-      mr.industry IS NULL OR TRIM(mr.industry) = ''
-      OR ${industryKeywords.length} = 0
-      OR (${industry} != '' AND LOWER(TRIM(${industry})) = LOWER(TRIM(mr.industry)))
-      OR EXISTS (
-        SELECT 1 FROM unnest(${industryKeywordsLiteral}::text[]) kw
-        WHERE LOWER(mr.industry) LIKE '%' || kw || '%'
-      )
+      (${reqCity} = '' AND ${reqState} = '')
+      OR (${reqCity} != '' AND ${city}::text != '' AND (
+        (' ' || ${city}::text || ' ') LIKE ('% ' || ${reqCity} || ' %')
+        OR (' ' || ${reqCity} || ' ') LIKE ('% ' || ${city}::text || ' %')
+      ))
+      OR (${reqCity} != '' AND ${reqCity} = ANY(${serviceAreasLiteral}::text[]))
+      OR (${reqState} != '' AND ${state}::text != '' AND ${reqState} = ${state}::text)
     )
-    -- 3. State must match exactly
-    AND (
-      mr.state IS NULL OR TRIM(mr.state) = ''
-      OR (${state} != '' AND LOWER(TRIM(${state})) = LOWER(TRIM(mr.state)))
-    )
-    -- 4. City must match exactly, OR requirement city is a covered service area
-    AND (
-      mr.city IS NULL OR TRIM(mr.city) = ''
-      OR (${city} != '' AND LOWER(TRIM(${city})) = LOWER(TRIM(mr.city)))
-      OR EXISTS (
-        SELECT 1 FROM unnest(${serviceAreasLiteral}::text[]) sa
-        WHERE LOWER(TRIM(sa)) = LOWER(TRIM(mr.city))
-      )
-    )
-    -- 5. Experience hard requirement: contractor must meet or exceed required experience
+    -- 3. Experience hard requirement: contractor must meet or exceed required experience
     AND (
       mr.experience_required IS NULL OR mr.experience_required <= 0
       OR (${hasExperience} AND ${yearsExperience ?? 0} >= mr.experience_required)
@@ -133,47 +148,37 @@ export function requirementEligibilityCondition(cp: MatchContractorProfile) {
  */
 export function contractorEligibilityCondition(mr: MatchRequirement) {
   const workersRequired = mr.workers_required;
-  const industry = mr.industry || '';
-  const city = mr.city || '';
-  const state = mr.state || '';
+  const city = normalizeMatchText(mr.city);
+  const state = normalizeMatchText(mr.state);
   const experienceRequired = mr.experience_required ?? 0;
-  const industryKeywords = extractIndustryKeywords(mr.industry);
-  const industryKeywordsLiteral = toPgTextArrayLiteral(industryKeywords);
+  const conCity = normSql(sql`cp.city`);
+  const conState = normSql(sql`cp.state`);
 
   return sql`(
-    -- 1. Worker capacity
+    -- 1. Worker capacity: can supply at least MIN_WORKFORCE_COVERAGE of the headcount
     cp.workforce_size IS NOT NULL
-    AND cp.workforce_size >= ${workersRequired}
-    -- 2. Industry: exact match or keyword overlap
+    AND cp.workforce_size >= ${workersRequired}::numeric * ${MIN_WORKFORCE_COVERAGE}::numeric
+    -- 2. Location: city (whole-word), service area, or same state
     AND (
-      ${industryKeywords.length} = 0
-      OR (cp.industry IS NULL OR TRIM(cp.industry) = '')
-      OR (LOWER(TRIM(cp.industry)) = LOWER(TRIM(${industry})))
-      OR EXISTS (
-        SELECT 1 FROM unnest(${industryKeywordsLiteral}::text[]) kw
-        WHERE LOWER(cp.industry) LIKE '%' || kw || '%'
-      )
+      (${city}::text = '' AND ${state}::text = '')
+      OR (${city}::text != '' AND ${conCity} != '' AND (
+        (' ' || ${conCity} || ' ') LIKE ('% ' || ${city}::text || ' %')
+        OR (' ' || ${city}::text || ' ') LIKE ('% ' || ${conCity} || ' %')
+      ))
+      OR (${city}::text != '' AND EXISTS (
+        SELECT 1
+        FROM unnest(COALESCE(cp.service_areas, ARRAY[]::text[])) sa_raw,
+             unnest(string_to_array(sa_raw, ',')) sa
+        WHERE ${normSql(sql`sa`)} = ${city}::text
+      ))
+      OR (${state}::text != '' AND ${conState} != '' AND ${conState} = ${state}::text)
     )
-    -- 3. State must match exactly
-    AND (
-      ${state} = ''
-      OR (cp.state IS NOT NULL AND TRIM(cp.state) != '' AND LOWER(TRIM(cp.state)) = LOWER(TRIM(${state})))
-    )
-    -- 4. City must match exactly, OR requirement city is a covered service area
-    AND (
-      ${city} = ''
-      OR (cp.city IS NOT NULL AND TRIM(cp.city) != '' AND LOWER(TRIM(cp.city)) = LOWER(TRIM(${city})))
-      OR EXISTS (
-        SELECT 1 FROM unnest(COALESCE(cp.service_areas, ARRAY[]::text[])) sa
-        WHERE LOWER(TRIM(sa)) = LOWER(TRIM(${city}))
-      )
-    )
-    -- 5. Availability: don't match contractors who can't take work
+    -- 3. Availability: don't match contractors who can't take work
     AND (
       cp.availability IS NULL
       OR cp.availability NOT IN ('NOT_AVAILABLE', 'SUSPENDED')
     )
-    -- 6. Experience hard requirement: contractor must meet or exceed required experience
+    -- 4. Experience hard requirement: contractor must meet or exceed required experience
     AND (
       ${experienceRequired} <= 0
       OR (cp.years_experience IS NOT NULL AND cp.years_experience >= ${experienceRequired})
