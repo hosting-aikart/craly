@@ -54,7 +54,7 @@ export default function StaffContractorsPage() {
       listingStatus: listingStatus || undefined,
     })
       .then(({ data }) => setContractors(data))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   };
 
@@ -78,11 +78,11 @@ export default function StaffContractorsPage() {
       prev.map((item) =>
         item.id === selectedContractor.id
           ? {
-              ...item,
-              is_unlisted: isUnlisted,
-              unlisted_reason: isUnlisted ? (reason || null) : null,
-              unlisted_at: isUnlisted ? new Date().toISOString() : null,
-            }
+            ...item,
+            is_unlisted: isUnlisted,
+            unlisted_reason: isUnlisted ? (reason || null) : null,
+            unlisted_at: isUnlisted ? new Date().toISOString() : null,
+          }
           : item,
       ),
     );

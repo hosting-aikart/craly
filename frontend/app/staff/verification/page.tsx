@@ -60,7 +60,7 @@ export default function StaffVerificationPage() {
     setLoading(true);
     getStaffVerificationContractors(statusFilter)
       .then(({ data }) => setContractors(data || []))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   };
 

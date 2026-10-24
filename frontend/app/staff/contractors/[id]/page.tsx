@@ -209,9 +209,6 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
         </div>
       </div>
 
-      {error && <div className="form-alert form-alert--error">{error}</div>}
-      {success && <div className="form-alert form-alert--success">{success}</div>}
-
       <div className="profile-edit-card">
         <h3 className="section-title">Edit Contractor Profile</h3>
 
@@ -324,6 +321,9 @@ export default function StaffContractorDetailPage({ params }: { params: Promise<
           </div>
 
           <div className="form-actions">
+            {/* Next to Save so a rejected update (e.g. an invalid legacy state or phone) is visible where the user clicked. */}
+            {error && <div className="form-alert form-alert--error" role="alert">{error}</div>}
+            {success && <div className="form-alert form-alert--success" role="status">{success}</div>}
             <button type="submit" className="btn-save" disabled={saving}>
               {saving ? 'Saving Changes…' : 'Save Changes'}
             </button>
